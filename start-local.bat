@@ -1,9 +1,9 @@
 @echo off
-title All4You Homepage v2 lokal starten
+title All4You Homepage lokal starten
 cd /d "%~dp0"
 
 echo.
-echo Starte lokalen Server fuer All4You Homepage v2...
+echo Starte lokalen Server fuer All4You Homepage...
 echo.
 echo URL:
 echo http://localhost:8080/

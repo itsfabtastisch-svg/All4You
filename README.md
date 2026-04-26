@@ -1,6 +1,6 @@
 # All4You Service München — Homepage v2 Router
 
-DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
 
 ## Was ist neu?
 
@@ -70,7 +70,7 @@ http://localhost:8080/
 - Header kompakter
 - Hero/Page-Header ruhiger
 - Karten, Abstände und Buttons kompakter
-- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
 
 
 ## v2.3 Anhängervermietung
@@ -80,7 +80,7 @@ http://localhost:8080/
 - Typische Einsätze, Voraussetzungen, Zubehör, Ablauf und FAQ ergänzt
 - Aktuell öffnet die Anhänger-Anfrage optional eine E-Mail
 - Später soll dieselbe Anfrage über Backend/Datenbank gespeichert und im Mitarbeiterportal angezeigt werden
-- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
 
 
 ## v2.4 Besenreine Räumungen
@@ -90,7 +90,7 @@ http://localhost:8080/
 - Typische Einsätze, Bedeutung von „besenrein“, Einschätzungsdaten, Zusatzleistungen, Ablauf und FAQ ergänzt
 - Aktuell öffnet die Räumungs-Anfrage optional eine E-Mail
 - Später soll dieselbe Anfrage über Backend/Datenbank gespeichert und im Mitarbeiterportal angezeigt werden
-- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
 
 
 ## v2.4.1 Halteverbot / Ladezone
@@ -98,7 +98,7 @@ http://localhost:8080/
 - Räumungs-Anfrage-Assistent ergänzt um: `Halteverbot / Ladezone benötigt?`
 - Räumungsseite ergänzt um Hinweis zur Organisation / Beantragung einer temporären Halteverbotszone
 - Einschätzungsdaten und E-Mail-Vorschau enthalten jetzt die Halteverbot-/Ladezonen-Angabe
-- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
 
 
 ## v2.4.2 Leistungen-Dropdown
@@ -111,7 +111,7 @@ http://localhost:8080/
   - Besenreine Räumungen
   - Reinigungsservice
 - Mobile Navigation zeigt die vier Leistungen ebenfalls im Menü an
-- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
 
 
 ## v2.5 Reinigungsservice
@@ -121,4 +121,28 @@ http://localhost:8080/
 - Typische Einsätze, Objektarten, Reinigung nach Räumung, Ablauf und FAQ ergänzt
 - Aktuell öffnet die Reinigungs-Anfrage optional eine E-Mail
 - Später soll dieselbe Anfrage über Backend/Datenbank gespeichert und im Mitarbeiterportal angezeigt werden
-- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5-REINIGUNG`
+- sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
+
+
+## v2.5.1 Cloudflare Workers Fix
+
+- `_redirects` entfernt, weil der aktuelle Wrangler/Workers-Deploy die SPA-Regel `/* /index.html 200` als Infinite Loop blockiert.
+- `wrangler.toml` ergänzt:
+  - `assets.directory = "."`
+  - `assets.not_found_handling = "single-page-application"`
+- `.assetsignore` ergänzt, damit `.git`, lokale Dateien und Wrangler-Konfiguration nicht als öffentliche Assets hochgeladen werden.
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX`
+
+## Deploy per Wrangler
+
+```cmd
+cd C:\Users\EPIC\Downloads\all4you_homepage_v2_5_1_cloudflare_workers_fix
+wrangler deploy
+```
+
+Falls `wrangler` nicht global verfügbar ist:
+
+```cmd
+cd C:\Users\EPIC\Downloads\all4you_homepage_v2_5_1_cloudflare_workers_fix
+npx wrangler deploy
+```

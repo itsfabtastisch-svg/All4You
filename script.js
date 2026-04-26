@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.5-REINIGUNG
+// DBG: ALL4YOU-ROUTER-V2.5.1-CF-WORKERS-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

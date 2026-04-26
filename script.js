@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+// DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1397,27 +1397,152 @@ function pageAbout() {
   return `
     <section class="page page-head">
       <div class="breadcrumb"><a href="/" data-link>Startseite</a><span>›</span><span>Über uns</span></div>
-      <p class="eyebrow">Über uns</p>
-      <h1>Regional, zuverlässig und unkompliziert.</h1>
-      <p class="lead">All4You Service München verbindet mehrere praktische Dienstleistungen unter einem Ansprechpartner.</p>
+      <p class="eyebrow">Über All4You</p>
+      <h1>Ein Ansprechpartner für praktische Services in München.</h1>
+      <p class="lead">
+        All4You Service München steht für unkomplizierte Hilfe, klare Absprachen und zuverlässige Umsetzung –
+        vom Rollertransport über Anhängervermietung bis hin zu Räumung und Reinigung.
+      </p>
+      <div class="inline-actions">
+        <a class="btn primary" href="/kontakt" data-link>Anfrage starten <span>›</span></a>
+        <a class="btn ghost" href="/leistungen" data-link>Leistungen ansehen <span>›</span></a>
+      </div>
     </section>
+
+    ${featureBand()}
+
+    <section class="section-pad about-hero-grid">
+      <div class="info-card">
+        <p class="eyebrow">Wofür All4You steht</p>
+        <h2>Alltag erleichtern, Wege verkürzen, Probleme lösen.</h2>
+        <p class="lead">
+          Viele Aufgaben sind für Kunden nicht kompliziert, aber lästig: ein defekter Roller muss zur Werkstatt,
+          ein Anhänger wird kurzfristig gebraucht, ein Keller soll endlich frei werden oder eine Wohnung muss sauber übergeben werden.
+          Genau hier setzt All4You an.
+        </p>
+        <p class="about-text">
+          Statt für jede Kleinigkeit einen anderen Ansprechpartner zu suchen, bündelt All4You mehrere praktische Dienstleistungen
+          unter einem Dach. Das macht Anfragen einfacher, Abläufe klarer und sorgt dafür, dass Kunden schneller eine passende Lösung bekommen.
+        </p>
+      </div>
+
+      <aside class="about-highlight">
+        <span>All4You</span>
+        <strong>Alles aus einer Hand.</strong>
+        <p>Regional, direkt und lösungsorientiert für München und Umgebung.</p>
+      </aside>
+    </section>
+
+    <section class="section-pad">
+      <p class="eyebrow">Unsere Haltung</p>
+      <h2>Was Kunden erwarten dürfen.</h2>
+      <div class="about-values-grid">
+        <article class="about-value-card">
+          <div class="value-number">01</div>
+          <h3>Klare Kommunikation</h3>
+          <p>Keine unnötigen Umwege. Kunden sollen schnell verstehen, was möglich ist und welche Angaben benötigt werden.</p>
+        </article>
+
+        <article class="about-value-card">
+          <div class="value-number">02</div>
+          <h3>Zuverlässige Umsetzung</h3>
+          <p>Termine, Absprachen und Rückmeldungen sollen nachvollziehbar bleiben – vom ersten Kontakt bis zur Erledigung.</p>
+        </article>
+
+        <article class="about-value-card">
+          <div class="value-number">03</div>
+          <h3>Faire Einschätzung</h3>
+          <p>Jede Anfrage wird nach Aufwand, Umfang und Situation geprüft, damit Kunden eine passende Rückmeldung erhalten.</p>
+        </article>
+
+        <article class="about-value-card">
+          <div class="value-number">04</div>
+          <h3>Praktische Lösungen</h3>
+          <p>Ob Transport, Räumung, Reinigung oder Vermietung: Ziel ist eine einfache Lösung, die im Alltag wirklich hilft.</p>
+        </article>
+      </div>
+    </section>
+
     <section class="section-pad two-col">
       <div class="info-card">
-        <h2>Alles aus einer Hand.</h2>
-        <p class="lead">Ob Transport, Vermietung, Räumung oder Reinigung: Die Seite soll Kunden schnell erklären, was möglich ist, und Anfragen so vollständig wie möglich vorbereiten.</p>
-      </div>
-      <aside class="check-card">
-        <p class="eyebrow">Wichtig</p>
+        <p class="eyebrow">Warum mehrere Services?</p>
+        <h2>Viele Anliegen hängen zusammen.</h2>
+        <p class="lead">
+          Gerade bei Räumungen, Transporten oder Übergaben reicht oft nicht nur eine einzelne Leistung.
+          Ein Bereich wird geräumt, danach gereinigt, Gegenstände müssen transportiert werden oder vor dem Objekt wird Platz zum Beladen gebraucht.
+        </p>
         <ul class="list">
-          <li>klare Kommunikation</li>
-          <li>faire Einschätzung</li>
-          <li>schnelle Rückmeldung</li>
-          <li>saubere Umsetzung</li>
+          <li>Räumung und anschließende Reinigung kombinieren</li>
+          <li>Transport oder Anhänger bei Bedarf mitdenken</li>
+          <li>bei größeren Räumungen eine Ladezone oder Halteverbotszone prüfen</li>
+          <li>alle wichtigen Angaben direkt über die Anfrage-Assistenten sammeln</li>
         </ul>
+      </div>
+
+      <aside class="check-card">
+        <p class="eyebrow">Leistungen im Überblick</p>
+        <div class="about-service-list">
+          <a href="/leistungen/rollertransport" data-link>
+            <strong>Rollertransport</strong>
+            <span>Roller, Mopeds & Zweiräder sicher transportieren lassen.</span>
+          </a>
+          <a href="/leistungen/anhaenger" data-link>
+            <strong>Anhängervermietung</strong>
+            <span>Flexibel mieten für Umzug, Material oder kurzfristige Transporte.</span>
+          </a>
+          <a href="/leistungen/raeumungen" data-link>
+            <strong>Besenreine Räumungen</strong>
+            <span>Räume frei bekommen und auf Wunsch besenrein übergeben.</span>
+          </a>
+          <a href="/leistungen/reinigung" data-link>
+            <strong>Reinigungsservice</strong>
+            <span>Reinigung für private und gewerbliche Objekte.</span>
+          </a>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section-pad">
+      <div class="about-process-panel">
+        <div>
+          <p class="eyebrow">Unser Ziel</p>
+          <h2>Eine Anfrage soll nicht im Chaos landen.</h2>
+          <p class="lead">
+            Deshalb ist die Webseite so aufgebaut, dass Kunden nicht nur eine Nachricht schreiben, sondern direkt die wichtigen Angaben
+            zum jeweiligen Anliegen machen können. Das spart Rückfragen und hilft All4You, schneller passend zu reagieren.
+          </p>
+        </div>
+
+        <div class="about-process-points">
+          <div><strong>1</strong><span>Leistung auswählen</span></div>
+          <div><strong>2</strong><span>Angaben eintragen</span></div>
+          <div><strong>3</strong><span>Rückmeldung erhalten</span></div>
+          <div><strong>4</strong><span>Auftrag abstimmen</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad two-col">
+      <div class="notice-box">
+        <p class="eyebrow">Ausblick</p>
+        <h2>Später mit Anfrage- und Kundenportal.</h2>
+        <p>
+          Die Formulare sind bereits so gedacht, dass Anfragen später nicht nur per E-Mail verschickt werden,
+          sondern zusätzlich in einem geschützten Mitarbeiterportal sichtbar sind. Kunden sollen außerdem eine Zusammenfassung
+          per E-Mail erhalten und optional den Status ihrer Anfrage online verfolgen können.
+        </p>
+      </div>
+
+      <aside class="cta-panel compact-cta">
+        <p class="eyebrow">Jetzt starten</p>
+        <h2>Sie haben ein Anliegen?</h2>
+        <p class="lead">Wählen Sie die passende Leistung oder senden Sie eine Kurzanfrage.</p>
+        <a class="btn primary" href="/kontakt" data-link>Kontakt aufnehmen <span>›</span></a>
       </aside>
     </section>
   `;
 }
+
 
 function legalPage(type) {
   const title = type === "impressum" ? "Impressum" : "Datenschutz";

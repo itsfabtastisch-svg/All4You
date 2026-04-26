@@ -1,6 +1,6 @@
 # All4You Service München — Homepage
 
-DBG-Version: `ALL4YOU-ROUTER-V2.6-KONTAKT`
+DBG-Version: `ALL4YOU-ROUTER-V2.7-UEBERUNS`
 
 ## Inhalt
 
@@ -88,4 +88,14 @@ http://localhost:8080/
   - Reinigungsservice
 - Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
 - Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.6-KONTAKT`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.7-UEBERUNS`
+
+
+## v2.7 Über-uns-Seite
+
+- Über-uns-Seite vollständig ausgearbeitet
+- Vertrauens-/Wertebereich ergänzt
+- Erklärung, warum All4You mehrere Services bündelt
+- Leistungsübersicht mit Links ergänzt
+- Hinweis auf späteres Anfrage-, Mitarbeiter- und Kundenportal ergänzt
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.7-UEBERUNS`

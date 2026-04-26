@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Besenreine Räumungen Detailseite
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1945,5 +1945,237 @@ label {
   .contact-choice-card {
     min-height: auto;
     padding: 20px;
+  }
+}
+
+/* ==========================================================================
+   Über-uns-Seite
+   DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
+   ========================================================================== */
+
+.about-hero-grid {
+  display: grid;
+  grid-template-columns: 1.3fr .7fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+.about-text {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.58;
+  font-weight: 650;
+  margin-bottom: 0;
+}
+
+.about-highlight {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  gap: 12px;
+  padding: 28px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 78% 22%, rgba(10, 169, 155, .28), transparent 18rem),
+    linear-gradient(135deg, var(--navy), #071829);
+  color: #fff;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+.about-highlight::before {
+  content: "4";
+  position: absolute;
+  right: -18px;
+  top: -58px;
+  color: rgba(255,255,255,.08);
+  font-size: 260px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.about-highlight span {
+  position: relative;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: .17em;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.about-highlight strong {
+  position: relative;
+  display: block;
+  font-size: clamp(30px, 3vw, 50px);
+  line-height: .98;
+  letter-spacing: -.05em;
+}
+
+.about-highlight p {
+  position: relative;
+  margin: 0;
+  color: rgba(255,255,255,.78);
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.about-values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.about-value-card {
+  min-height: 225px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.value-number {
+  width: 45px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.about-value-card:nth-child(even) .value-number {
+  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+}
+
+.about-value-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.48;
+  font-weight: 650;
+}
+
+.about-service-list {
+  display: grid;
+  gap: 12px;
+}
+
+.about-service-list a {
+  display: grid;
+  gap: 5px;
+  padding: 16px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+  background: rgba(238, 246, 250, .72);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.about-service-list a:hover {
+  transform: translateX(4px);
+  background: linear-gradient(135deg, rgba(10,169,155,.11), rgba(11,78,145,.07));
+  border-color: rgba(10,169,155,.28);
+}
+
+.about-service-list strong {
+  color: var(--navy);
+  font-size: 17px;
+}
+
+.about-service-list span {
+  color: var(--muted);
+  line-height: 1.38;
+  font-weight: 650;
+}
+
+.about-process-panel {
+  display: grid;
+  grid-template-columns: 1fr .95fr;
+  gap: 28px;
+  align-items: center;
+  padding: 30px;
+  border-radius: 22px;
+  border: 1px solid rgba(10,169,155,.22);
+  background:
+    radial-gradient(circle at 82% 20%, rgba(10,169,155,.15), transparent 22rem),
+    linear-gradient(135deg, rgba(238,246,250,.96), rgba(255,255,255,.9));
+  box-shadow: var(--shadow);
+}
+
+.about-process-points {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.about-process-points div {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.72);
+  border: 1px solid var(--line);
+}
+
+.about-process-points strong {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+  font-weight: 950;
+}
+
+.about-process-points div:nth-child(even) strong {
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+}
+
+.about-process-points span {
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.compact-cta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.compact-cta .btn {
+  width: fit-content;
+}
+
+@media (max-width: 1320px) {
+  .about-hero-grid,
+  .about-process-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .about-values-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .about-values-grid,
+  .about-process-points {
+    grid-template-columns: 1fr;
+  }
+
+  .about-highlight,
+  .about-process-panel {
+    padding: 22px;
+  }
+
+  .compact-cta .btn {
+    width: 100%;
   }
 }

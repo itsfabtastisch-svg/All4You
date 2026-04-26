@@ -1,6 +1,0 @@
-name = "all4you"
-compatibility_date = "2026-04-27"
-
-[assets]
-directory = "."
-not_found_handling = "single-page-application"

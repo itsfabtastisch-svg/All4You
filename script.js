@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN
+// DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1286,32 +1286,111 @@ function contactForm(buttonText = "Anfrage vorbereiten", defaultService = "Rolle
 }
 
 function pageContact() {
-  document.title = "Kontakt | All4You Service München";
+  document.title = "Kontakt & Anfrage | All4You Service München";
   return `
     <section class="page page-head">
       <div class="breadcrumb"><a href="/" data-link>Startseite</a><span>›</span><span>Kontakt</span></div>
-      <p class="eyebrow">Kontakt</p>
-      <h1>Unverbindlich anfragen.</h1>
-      <p class="lead">Senden Sie kurz Ihr Anliegen. All4You meldet sich schnellstmöglich zurück und bespricht alles Weitere persönlich.</p>
+      <p class="eyebrow">Kontakt & Anfrage</p>
+      <h1>Ihre Anfrage schnell beim richtigen Service.</h1>
+      <p class="lead">
+        Wählen Sie einfach aus, worum es geht. So landen Sie direkt beim passenden Anfrage-Assistenten
+        oder können eine allgemeine Kurzanfrage an All4You senden.
+      </p>
     </section>
 
-    <section class="section-pad contact-layout">
+    <section class="section-pad contact-intro-grid">
       <div class="info-card">
         <p class="eyebrow">Direktkontakt</p>
         <h2>All4You Service München</h2>
-        <p class="lead">Für Rollertransport, Anhängervermietung, Räumungen und Reinigung in München und Umgebung.</p>
+        <p class="lead">
+          Für Rollertransport, Anhängervermietung, besenreine Räumungen und Reinigungsservice in München und Umgebung.
+        </p>
         <div class="contact-list">
           <a href="tel:+498912345678">☎ 089 123 456 78</a>
           <a href="mailto:info@all4you-muenchen.de">✉ info@all4you-muenchen.de</a>
           <span>⌖ München und Umgebung</span>
         </div>
       </div>
+
+      <aside class="notice-box">
+        <p class="eyebrow">So geht es weiter</p>
+        <h2>Auswahl treffen, Daten senden, Rückmeldung erhalten.</h2>
+        <p>
+          Die passenden Leistungsseiten fragen genau die Informationen ab, die All4You für eine schnelle Einschätzung braucht.
+          Später werden Anfragen zusätzlich im Mitarbeiterportal gespeichert und der Kunde erhält eine Zusammenfassung per E-Mail.
+        </p>
+      </aside>
+    </section>
+
+    <section class="section-pad">
+      <p class="eyebrow">Anfrage starten</p>
+      <h2>Welche Leistung benötigen Sie?</h2>
+
+      <div class="contact-choice-grid">
+        <article class="contact-choice-card">
+          <div class="service-icon blue">${serviceIconTruck}</div>
+          <h3>Rollertransport</h3>
+          <p>Roller, Mopeds, E-Roller oder kleine Motorräder sicher transportieren lassen – auch bei Defekt.</p>
+          <a class="btn primary" href="/leistungen/rollertransport" data-link>Zum Rollertransport <span>›</span></a>
+        </article>
+
+        <article class="contact-choice-card">
+          <div class="service-icon">${serviceIconTrailer}</div>
+          <h3>Anhängervermietung</h3>
+          <p>Zeitraum, Transportgut, Zugfahrzeug und Zubehör direkt passend anfragen.</p>
+          <a class="btn primary" href="/leistungen/anhaenger" data-link>Zur Anhängervermietung <span>›</span></a>
+        </article>
+
+        <article class="contact-choice-card">
+          <div class="service-icon">${serviceIconClearance}</div>
+          <h3>Besenreine Räumungen</h3>
+          <p>Wohnung, Keller, Garage oder einzelne Bereiche räumen und auf Wunsch besenrein übergeben.</p>
+          <a class="btn primary" href="/leistungen/raeumungen" data-link>Zur Räumung <span>›</span></a>
+        </article>
+
+        <article class="contact-choice-card">
+          <div class="service-icon dark">${serviceIconCleaning}</div>
+          <h3>Reinigungsservice</h3>
+          <p>Reinigung für Wohnung, Haus, Büro, Treppenhaus oder nach einer Räumung anfragen.</p>
+          <a class="btn primary" href="/leistungen/reinigung" data-link>Zur Reinigung <span>›</span></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-pad contact-layout" id="kurzanfrage">
+      <div class="info-card">
+        <p class="eyebrow">Mehrere Leistungen oder unsicher?</p>
+        <h2>Kurzanfrage senden.</h2>
+        <p class="lead">
+          Wenn mehrere Leistungen zusammenpassen oder Sie noch nicht genau wissen, welcher Service richtig ist,
+          können Sie hier eine allgemeine Anfrage vorbereiten.
+        </p>
+        <ul class="list">
+          <li>ideal bei mehreren Anliegen</li>
+          <li>praktisch für Rückfragen</li>
+          <li>schneller Einstieg ohne Detailformular</li>
+          <li>später ebenfalls fürs Portal vorgesehen</li>
+        </ul>
+      </div>
+
       <div class="form-card">
-        ${contactForm("Anfrage vorbereiten", "Rollertransport")}
+        ${contactForm("Kurzanfrage vorbereiten", "Mehrere Leistungen")}
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="cta-panel">
+        <p class="eyebrow">Wichtig fürs spätere System</p>
+        <h2>Die Formulare sind schon portal-tauglich gedacht.</h2>
+        <p class="lead">
+          Aktuell öffnen die Formulare noch eine E-Mail. Später werden dieselben Daten automatisch gespeichert,
+          per E-Mail an Kunde und Firma gesendet und im Mitarbeiterportal sichtbar gemacht.
+        </p>
       </div>
     </section>
   `;
 }
+
 
 function pageAbout() {
   document.title = "Über uns | All4You Service München";

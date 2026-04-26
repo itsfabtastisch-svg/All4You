@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Besenreine Räumungen Detailseite
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
    ========================================================================== */
 
 .cleaning-tool {
@@ -1869,4 +1869,81 @@ label {
 
 .cleaning-tool .distance-result {
   margin-top: 2px;
+}
+
+/* ==========================================================================
+   Kontaktseite Anfrage-Auswahl
+   DBG: ALL4YOU-ROUTER-V2.6-KONTAKT
+   ========================================================================== */
+
+.contact-intro-grid {
+  display: grid;
+  grid-template-columns: .92fr 1.08fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+.contact-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.contact-choice-card {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.contact-choice-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 64px rgba(16, 38, 60, .15);
+  border-color: rgba(10, 169, 155, .3);
+}
+
+.contact-choice-card .service-icon {
+  width: 84px;
+  height: 64px;
+}
+
+.contact-choice-card p {
+  color: var(--muted);
+  line-height: 1.48;
+  font-weight: 650;
+  margin-bottom: 0;
+}
+
+.contact-choice-card .btn {
+  margin-top: auto;
+  width: 100%;
+}
+
+#kurzanfrage {
+  padding-top: 22px;
+}
+
+@media (max-width: 1320px) {
+  .contact-intro-grid,
+  .contact-choice-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .contact-intro-grid,
+  .contact-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-choice-card {
+    min-height: auto;
+    padding: 20px;
+  }
 }

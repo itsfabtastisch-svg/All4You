@@ -1,6 +1,6 @@
 # All4You Service München — Homepage
 
-DBG-Version: `ALL4YOU-ROUTER-V2.5.2-PAGES-CLEAN`
+DBG-Version: `ALL4YOU-ROUTER-V2.6-KONTAKT`
 
 ## Inhalt
 
@@ -76,3 +76,16 @@ Dann öffnen:
 ```text
 http://localhost:8080/
 ```
+
+
+## v2.6 Kontaktseite
+
+- Kontaktseite zu zentraler Anfrage-Auswahl ausgebaut
+- Leistungskarten für:
+  - Rollertransport
+  - Anhängervermietung
+  - Besenreine Räumungen
+  - Reinigungsservice
+- Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
+- Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.6-KONTAKT`

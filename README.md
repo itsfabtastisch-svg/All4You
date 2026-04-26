@@ -1,6 +1,6 @@
 # All4You Service München — Homepage
 
-DBG-Version: `ALL4YOU-ROUTER-V2.7-UEBERUNS`
+DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
 
 ## Inhalt
 
@@ -88,7 +88,7 @@ http://localhost:8080/
   - Reinigungsservice
 - Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
 - Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.7-UEBERUNS`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
 
 
 ## v2.7 Über-uns-Seite
@@ -98,4 +98,17 @@ http://localhost:8080/
 - Erklärung, warum All4You mehrere Services bündelt
 - Leistungsübersicht mit Links ergänzt
 - Hinweis auf späteres Anfrage-, Mitarbeiter- und Kundenportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.7-UEBERUNS`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
+
+
+## v2.8 Rechtliches
+
+- Impressum mit bekannten Daten vorbereitet:
+  - Anhänger Werkzeug Verleih München
+  - Inhaberin Silvija Vardijan
+  - Schönstraße 23, 81543 München
+  - Einzelunternehmen
+- Platzhalter für Telefon, E-Mail, Website, USt-ID und weitere Angaben ergänzt
+- Datenschutzerklärung als Platzhalterstruktur vorbereitet
+- Hinweise zu Cloudflare Pages, Kontaktaufnahme, späterem Kundenkonto/Mitarbeiterportal ergänzt
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`

@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.7-UEBERUNS
+// DBG: ALL4YOU-ROUTER-V2.8-RECHTLICHES
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1545,23 +1545,218 @@ function pageAbout() {
 
 
 function legalPage(type) {
-  const title = type === "impressum" ? "Impressum" : "Datenschutz";
+  const isImpressum = type === "impressum";
+  const title = isImpressum ? "Impressum" : "Datenschutz";
   document.title = `${title} | All4You Service München`;
+
+  if (isImpressum) {
+    return `
+      <section class="page page-head">
+        <div class="breadcrumb"><a href="/" data-link>Startseite</a><span>›</span><span>Impressum</span></div>
+        <p class="eyebrow">Rechtliches</p>
+        <h1>Impressum</h1>
+        <p class="lead">
+          Die folgenden Angaben sind als sauberer Zwischenstand vorbereitet. Fehlende Kontaktdaten und rechtliche Details
+          müssen vor der endgültigen Veröffentlichung noch ergänzt und geprüft werden.
+        </p>
+      </section>
+
+      <section class="section-pad legal-layout">
+        <div class="legal-main">
+          <article class="legal-card">
+            <p class="eyebrow">Anbieter / Verantwortlich</p>
+            <h2>Angaben gemäß § 5 DDG</h2>
+            <div class="legal-data">
+              <p><strong>Anhänger Werkzeug Verleih München</strong></p>
+              <p>Inhaberin: Silvija Vardijan</p>
+              <p>Einzelunternehmen</p>
+              <p>Schönstraße 23<br>81543 München<br>Deutschland</p>
+            </div>
+          </article>
+
+          <article class="legal-card">
+            <p class="eyebrow">Kontakt</p>
+            <h2>Kontaktangaben</h2>
+            <div class="legal-placeholder-list">
+              <p><strong>Telefon:</strong> <span>[bitte ergänzen]</span></p>
+              <p><strong>E-Mail:</strong> <span>[bitte ergänzen]</span></p>
+              <p><strong>Website:</strong> <span>[bitte ergänzen]</span></p>
+            </div>
+          </article>
+
+          <article class="legal-card">
+            <p class="eyebrow">Steuer / Register</p>
+            <h2>Weitere Angaben</h2>
+            <div class="legal-placeholder-list">
+              <p><strong>Umsatzsteuer-ID:</strong> <span>[falls vorhanden bitte ergänzen]</span></p>
+              <p><strong>Steuernummer:</strong> <span>[nicht zwingend öffentlich eintragen, vorher prüfen]</span></p>
+              <p><strong>Registereintrag:</strong> <span>[falls vorhanden bitte ergänzen]</span></p>
+            </div>
+          </article>
+
+          <article class="legal-card">
+            <p class="eyebrow">Inhaltlich verantwortlich</p>
+            <h2>Verantwortung für Inhalte</h2>
+            <p>
+              Verantwortlich für die Inhalte dieser Webseite ist, soweit rechtlich erforderlich:
+              Silvija Vardijan, Anschrift wie oben.
+            </p>
+            <p class="legal-note">
+              Bitte vor Veröffentlichung prüfen, ob weitere Pflichtangaben, berufsrechtliche Angaben,
+              Streitbeilegungshinweise oder zusätzliche Informationen erforderlich sind.
+            </p>
+          </article>
+
+          <article class="legal-card">
+            <p class="eyebrow">Hinweis</p>
+            <h2>Platzhalterstatus</h2>
+            <p>
+              Dieses Impressum ist noch kein final geprüfter Rechtstext. Es enthält die aktuell bekannten Angaben
+              und Platzhalter für fehlende Daten.
+            </p>
+          </article>
+        </div>
+
+        <aside class="legal-sidebar">
+          <div class="check-card">
+            <p class="eyebrow">Noch ergänzen</p>
+            <ul class="list">
+              <li>Telefonnummer</li>
+              <li>E-Mail-Adresse</li>
+              <li>finale Website-Domain</li>
+              <li>USt-ID, falls vorhanden</li>
+              <li>ggf. weitere Pflichtangaben prüfen</li>
+              <li>Datenschutz final prüfen lassen</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+    `;
+  }
+
   return `
     <section class="page page-head">
-      <div class="breadcrumb"><a href="/" data-link>Startseite</a><span>›</span><span>${title}</span></div>
+      <div class="breadcrumb"><a href="/" data-link>Startseite</a><span>›</span><span>Datenschutz</span></div>
       <p class="eyebrow">Rechtliches</p>
-      <h1>${title}</h1>
-      <p class="lead">Platzhalterseite. Die finalen rechtlichen Angaben müssen vor Veröffentlichung sauber ergänzt werden.</p>
+      <h1>Datenschutzerklärung</h1>
+      <p class="lead">
+        Diese Datenschutzerklärung ist als vorbereiteter Platzhalter aufgebaut. Sie muss vor der endgültigen Veröffentlichung
+        mit den tatsächlichen Funktionen, Anbietern und Kontaktdaten abgeglichen werden.
+      </p>
     </section>
-    <section class="section-pad">
-      <div class="info-card">
-        <h2>${title} ergänzen</h2>
-        <p class="lead">Hier müssen später die echten Daten des Verantwortlichen, Kontaktdaten und rechtlich notwendigen Angaben eingetragen werden.</p>
+
+    <section class="section-pad legal-layout">
+      <div class="legal-main">
+        <article class="legal-card">
+          <p class="eyebrow">1. Verantwortliche Stelle</p>
+          <h2>Verantwortlich für diese Webseite</h2>
+          <div class="legal-data">
+            <p><strong>Anhänger Werkzeug Verleih München</strong></p>
+            <p>Inhaberin: Silvija Vardijan</p>
+            <p>Schönstraße 23<br>81543 München<br>Deutschland</p>
+            <p><strong>E-Mail:</strong> <span>[bitte ergänzen]</span></p>
+            <p><strong>Telefon:</strong> <span>[bitte ergänzen]</span></p>
+          </div>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">2. Hosting</p>
+          <h2>Bereitstellung der Webseite</h2>
+          <p>
+            Diese Webseite wird aktuell über Cloudflare Pages bereitgestellt. Beim Aufruf der Webseite können technisch notwendige
+            Zugriffsdaten verarbeitet werden, zum Beispiel IP-Adresse, Zeitpunkt des Aufrufs, angeforderte Dateien,
+            Browserinformationen und technische Protokolldaten.
+          </p>
+          <p class="legal-note">
+            Zweck der Verarbeitung ist die sichere und stabile Bereitstellung der Webseite. Die genaue rechtliche und technische
+            Ausgestaltung muss vor Veröffentlichung final geprüft werden.
+          </p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">3. Kontaktaufnahme</p>
+          <h2>Anfragen per E-Mail oder Formular</h2>
+          <p>
+            Wenn Sie Kontakt aufnehmen oder eine Anfrage vorbereiten, werden die von Ihnen angegebenen Daten verarbeitet,
+            zum Beispiel Name, Kontaktdaten, ausgewählte Leistung, Nachricht und die jeweils eingegebenen Auftragsdetails.
+          </p>
+          <p>
+            Aktuell öffnen die Formulare eine E-Mail-Vorlage. Später ist geplant, Anfragen zusätzlich in einer Datenbank
+            zu speichern und in einem geschützten Mitarbeiterportal sichtbar zu machen.
+          </p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">4. Geplante Funktionen</p>
+          <h2>Kundenkonto, Statusportal und Mitarbeiterportal</h2>
+          <p>
+            Für eine spätere Ausbaustufe ist vorgesehen, dass Kunden nach Absenden einer Anfrage eine Zusammenfassung per E-Mail
+            erhalten und optional über einen sicheren Aktivierungslink ein Kundenkonto einrichten können, um den Status der Anfrage einzusehen.
+          </p>
+          <p class="legal-note">
+            Sobald diese Funktionen aktiv genutzt werden, muss diese Datenschutzerklärung um die tatsächlichen Datenarten,
+            Speicherdauer, Empfänger, Rechtsgrundlagen und technischen Anbieter ergänzt werden.
+          </p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">5. Speicherdauer</p>
+          <h2>Dauer der Speicherung</h2>
+          <p>
+            Personenbezogene Daten werden nur so lange gespeichert, wie es für die Bearbeitung der Anfrage, gesetzliche Pflichten
+            oder berechtigte Nachweise erforderlich ist. Die konkreten Fristen werden vor Aktivierung des Anfrage- und Portalsystems ergänzt.
+          </p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">6. Ihre Rechte</p>
+          <h2>Betroffenenrechte</h2>
+          <p>
+            Betroffene Personen haben nach Maßgabe der gesetzlichen Vorschriften insbesondere Rechte auf Auskunft, Berichtigung,
+            Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch.
+          </p>
+          <p>
+            Außerdem besteht das Recht, sich bei einer zuständigen Datenschutzaufsichtsbehörde zu beschweren.
+          </p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">7. Cookies und externe Dienste</p>
+          <h2>Aktueller Stand</h2>
+          <p>
+            Nach aktuellem Stand werden keine Marketing-Cookies, Tracking-Pixel oder Analyse-Dienste aktiv eingebunden.
+            Sollte dies später geändert werden, muss diese Datenschutzerklärung entsprechend ergänzt werden.
+          </p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Hinweis</p>
+          <h2>Platzhalterstatus</h2>
+          <p>
+            Diese Datenschutzerklärung ist ein vorbereiteter Arbeitsstand und ersetzt keine rechtliche Prüfung.
+            Vor der finalen Veröffentlichung müssen alle tatsächlichen Funktionen und Anbieter abgeglichen werden.
+          </p>
+        </article>
       </div>
+
+      <aside class="legal-sidebar">
+        <div class="check-card">
+          <p class="eyebrow">Vor Live-Betrieb prüfen</p>
+          <ul class="list">
+            <li>finale Kontakt-E-Mail ergänzen</li>
+            <li>Telefonnummer ergänzen</li>
+            <li>Hosting/Cloudflare-Angaben prüfen</li>
+            <li>spätere Datenbank/Backend-Anbieter ergänzen</li>
+            <li>E-Mail-Versand-Anbieter ergänzen</li>
+            <li>Kundenkonto-/Portal-Funktionen ergänzen</li>
+            <li>Google Maps erst aufnehmen, wenn aktiv</li>
+          </ul>
+        </div>
+      </aside>
     </section>
   `;
 }
+
 
 function pageNotFound() {
   document.title = "Seite nicht gefunden | All4You Service München";

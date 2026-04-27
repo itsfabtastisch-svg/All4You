@@ -1105,7 +1105,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
+// DBG: ALL4YOU-ROUTER-V4.1.1-NOTE-BADGE-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

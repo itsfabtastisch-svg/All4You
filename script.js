@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
+// DBG: ALL4YOU-ROUTER-V2.9.2-ROLLER-DATEN
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -45,11 +45,11 @@ const serviceIconCleaning = `
 const services = [
   {
     slug: "rollertransport",
-    title: "Rollertransport",
-    sub: "Roller, Mopeds & Zweiräder",
+    title: "Rollerabholservice",
+    sub: "Alle Roller · auch defekt",
     icon: serviceIconTruck,
     color: "blue",
-    text: "Sicherer Transport von Roller, Moped, E-Roller oder kleinem Motorrad von A nach B – auch bei Defekt."
+    text: "Abholung und Transport aller Roller in München und Umgebung – auch defekt oder zur Werkstatt."
   },
   {
     slug: "anhaenger",
@@ -145,7 +145,7 @@ function pageHome() {
         <p class="eyebrow">Service aus München</p>
         <h1>Alles aus einer Hand <span>in München</span></h1>
         <p class="lead">
-          All4You unterstützt bei Rollertransport, Anhängervermietung,
+          All4You unterstützt bei Rollerabholservice, Anhängervermietung,
           Entrümpelung und Reinigungsservice – zuverlässig, regional und unkompliziert.
         </p>
         <div class="hero-actions">
@@ -205,19 +205,19 @@ function pageServices() {
 }
 
 function rollerPage() {
-  document.title = "Rollertransport in München | All4You Service München";
+  document.title = "Rollerabholservice in München | All4You Service München";
   return `
     <section class="page page-head">
       <div class="breadcrumb">
         <a href="/" data-link>Startseite</a><span>›</span>
         <a href="/leistungen" data-link>Leistungen</a><span>›</span>
-        <span>Rollertransport</span>
+        <span>Rollerabholservice</span>
       </div>
-      <p class="eyebrow">Rollertransport München</p>
-      <h1>Rollertransport in München – sicher abgeholt, zuverlässig geliefert.</h1>
+      <p class="eyebrow">Rollerabholservice München</p>
+      <h1>Rollerabholservice in München – auch bei Defekt oder Werkstattfahrt.</h1>
       <p class="lead">
-        All4You transportiert Roller, Mopeds, E-Roller und kleine Motorräder sicher zum gewünschten Ziel –
-        auch wenn das Fahrzeug defekt oder nicht fahrbereit ist.
+        All4You holt Roller in München und Umgebung ab und bringt sie zuverlässig zum gewünschten Ziel –
+        zum Beispiel nach Hause, zur Werkstatt oder zu einem anderen Standort. Auch defekte Roller sind möglich.
       </p>
       <div class="inline-actions">
         <a class="btn primary" href="#strecke">Transportstrecke prüfen <span>›</span></a>
@@ -229,29 +229,30 @@ function rollerPage() {
 
     <section class="section-pad two-col">
       <div class="info-card">
-        <p class="eyebrow">Was ist damit gemeint?</p>
-        <h2>Transport für alles rund ums Zweirad.</h2>
+        <p class="eyebrow">Was wird abgeholt?</p>
+        <h2>Alle Roller, auch wenn sie nicht mehr fahren.</h2>
         <p class="lead">
-          Der Service ist für Roller, Mopeds, Mokicks, E-Roller, kleine Motorräder und andere transportfähige Zweiräder gedacht.
-          Das Fahrzeug muss nicht zwingend fahrbereit sein.
+          Der Rollerabholservice ist für alle Roller gedacht – egal ob fahrbereit, defekt oder nicht angemeldet.
+          Besonders praktisch ist der Service, wenn ein Roller zur Werkstatt gebracht werden muss oder ohne eigenes Fahrzeug
+          nicht transportiert werden kann.
         </p>
         <div class="info-grid">
-          <div class="mini-card"><h3>Werkstattfahrt</h3><p>Der Roller springt nicht an oder muss zur Reparatur.</p></div>
-          <div class="mini-card"><h3>Kauf & Verkauf</h3><p>Ein gekauftes Zweirad soll abgeholt oder geliefert werden.</p></div>
-          <div class="mini-card"><h3>Umzug & Standortwechsel</h3><p>Das Fahrzeug muss von einer Adresse zur nächsten.</p></div>
-          <div class="mini-card"><h3>Panne oder Defekt</h3><p>Auch defekte Fahrzeuge sind möglich, sofern sie zugänglich und transportfähig sind.</p></div>
+          <div class="mini-card"><h3>Alle Roller</h3><p>Abholung und Transport von Rollern in München und Umgebung.</p></div>
+          <div class="mini-card"><h3>Auch defekt</h3><p>Defekte Roller können angefragt werden, sofern sie zugänglich und transportfähig sind.</p></div>
+          <div class="mini-card"><h3>Werkstattfahrten</h3><p>All4You bringt den Roller auf Wunsch direkt zur Werkstatt.</p></div>
+          <div class="mini-card"><h3>München & Umgebung</h3><p>Der Service ist für München, MUC und die nähere Umgebung geplant.</p></div>
         </div>
       </div>
 
       <aside class="check-card">
         <p class="eyebrow">Geeignet für</p>
         <ul class="list">
-          <li>Roller und Motorroller</li>
-          <li>Moped, Mokick und kleine Motorräder</li>
-          <li>E-Roller und Elektro-Zweiräder</li>
-          <li>defekte oder nicht fahrbereite Fahrzeuge</li>
-          <li>Fahrzeuge ohne Anmeldung oder Versicherung</li>
-          <li>Werkstatt-, Privat- und Übergabefahrten</li>
+          <li>alle Roller und Motorroller</li>
+          <li>defekte oder nicht fahrbereite Roller</li>
+          <li>Werkstattfahrten</li>
+          <li>Abholung nach Kauf oder Verkauf</li>
+          <li>Standortwechsel innerhalb München und Umgebung</li>
+          <li>Roller ohne eigene Transportmöglichkeit</li>
         </ul>
       </aside>
     </section>
@@ -259,36 +260,37 @@ function rollerPage() {
     <section class="section-pad two-col">
       <div class="info-card">
         <p class="eyebrow">Typische Einsätze</p>
-        <h2>Wenn das Zweirad bewegt werden muss.</h2>
+        <h2>Wenn der Roller bewegt werden muss.</h2>
         <ul class="list">
           <li>Roller springt nicht mehr an und muss zur Werkstatt</li>
           <li>Roller wurde gekauft und soll nach Hause geliefert werden</li>
-          <li>Fahrzeug muss von einer alten Adresse zur neuen Adresse gebracht werden</li>
-          <li>Defekter Roller steht auf Privatgrundstück, in Garage, Tiefgarage oder Hof</li>
-          <li>Zweirad soll verkauft und zum Käufer transportiert werden</li>
-          <li>Transport ohne eigenes Auto oder eigenen Anhänger</li>
+          <li>Roller soll verkauft und zum Käufer transportiert werden</li>
+          <li>defekter Roller steht auf Privatgrundstück, in Garage, Tiefgarage oder Hof</li>
+          <li>Roller muss von einer alten Adresse zur neuen Adresse gebracht werden</li>
+          <li>Transport ohne eigenes Auto, Anhänger oder Transporter</li>
+          <li>Roller soll sicher untergestellt oder an einen geschützten Ort gebracht werden</li>
         </ul>
       </div>
 
       <aside class="notice-box">
-        <p class="eyebrow">Saison- & Wintertransport</p>
-        <h3>Geschützt durch die kalte Jahreszeit.</h3>
+        <p class="eyebrow">Preis & Aufwand</p>
+        <h2>Individuell nach Strecke und Situation.</h2>
         <p>
-          Ob vor dem Winter, nach der Saison oder zum Start ins Frühjahr: All4You bringt Ihren Roller,
-          Ihr Moped oder Motorrad sicher dorthin, wo es stehen soll – zum Beispiel in die Garage,
-          Werkstatt, Halle oder an einen geschützten Unterstellplatz.
+          Der Preis wird individuell festgelegt und richtet sich unter anderem nach Entfernung, Zustand des Rollers,
+          Zugänglichkeit und Aufwand beim Verladen. Nach Ihrer Anfrage erhalten Sie eine passende Rückmeldung.
         </p>
       </aside>
     </section>
 
     <section class="section-pad">
       <p class="eyebrow">Ablauf</p>
-      <h2>So läuft der Rollertransport ab.</h2>
-      <div class="steps">
-        <article class="step"><span>1</span><h3>Abholort eintragen</h3><p>Sie geben an, wo das Fahrzeug steht.</p></article>
-        <article class="step"><span>2</span><h3>Zielort eintragen</h3><p>Sie geben an, wohin das Zweirad transportiert werden soll.</p></article>
-        <article class="step"><span>3</span><h3>Fahrzeugdaten ergänzen</h3><p>Art, Zustand, Rollbarkeit und Zugang helfen bei der Einschätzung.</p></article>
-        <article class="step"><span>4</span><h3>Anfrage senden</h3><p>Das Team sieht Strecke, Daten und Nachricht direkt gesammelt.</p></article>
+      <h2>So läuft der Rollerabholservice ab.</h2>
+      <div class="steps five-steps">
+        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie geben Abholort, Zielort und Zustand des Rollers an.</p></article>
+        <article class="step"><span>2</span><h3>Aufwand prüfen</h3><p>All4You prüft Strecke, Zugänglichkeit und Transportmöglichkeit.</p></article>
+        <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie erhalten eine Einschätzung zum Ablauf und Preis.</p></article>
+        <article class="step"><span>4</span><h3>Termin abstimmen</h3><p>Der passende Abholtermin wird gemeinsam vereinbart.</p></article>
+        <article class="step"><span>5</span><h3>Roller transportieren</h3><p>Der Roller wird abgeholt und zuverlässig zum Ziel gebracht.</p></article>
       </div>
     </section>
 
@@ -297,8 +299,8 @@ function rollerPage() {
         <p class="eyebrow">Transportstrecke prüfen</p>
         <h2>Abholort und Zielort eintragen.</h2>
         <p class="lead">
-          Die Distanz dient nur zur besseren Einschätzung der Anfrage. Der endgültige Preis wird individuell nach Fahrzeug,
-          Aufwand und Zugänglichkeit bestätigt.
+          Die Distanz dient nur zur besseren Einschätzung der Anfrage. Der endgültige Preis wird individuell nach Strecke,
+          Zustand, Aufwand und Zugänglichkeit bestätigt.
         </p>
 
         <form class="route-tool" id="routeForm">
@@ -312,9 +314,8 @@ function rollerPage() {
             <label>Fahrzeugart
               <select name="vehicle">
                 <option>Roller / Motorroller</option>
+                <option>E-Roller / Elektro-Roller</option>
                 <option>Moped / Mokick</option>
-                <option>E-Roller / Elektro-Zweirad</option>
-                <option>Kleines Motorrad</option>
                 <option>Anderes Zweirad</option>
               </select>
             </label>
@@ -343,18 +344,17 @@ function rollerPage() {
             <textarea name="message" rows="4" placeholder="z. B. Schlüssel vorhanden, Lenkschloss aktiv, Roller steht im Hof..."></textarea>
           </label>
 
-          <button class="btn primary" type="submit">Distanzdaten für Anfrage vorbereiten <span>›</span></button>
+          <button class="btn primary" type="submit">Roller-Anfrage vorbereiten <span>›</span></button>
 
           <div class="distance-result" id="distanceResult">
-            <strong>Distanzberechnung vorbereitet</strong>
+            <strong>Roller-Anfrage vorbereitet</strong>
             <p>
-              Die Felder sind jetzt als Anfrage-Assistent vorbereitet. Die echte Kilometer- und Fahrzeitberechnung wird später über Google Maps / Routes API angebunden.
-              Danach sehen Kunde und All4You-Team direkt die berechnete Strecke.
+              Die Felder sind als Anfrage-Assistent vorbereitet. Die echte Kilometer- und Fahrzeitberechnung kann später über Google Maps / Routes API angebunden werden.
             </p>
           </div>
 
           <p class="form-note">
-            Technischer Hinweis: In dieser Version ist die URL- und Formularstruktur bereits sauber vorbereitet. Die echte Google-Distanzberechnung braucht später einen API-Key und eine kleine Backend-/API-Anbindung.
+            Technischer Hinweis: Die echte Distanzberechnung ist für später geplant. Aktuell wird die Anfrage als strukturierte E-Mail vorbereitet.
           </p>
         </form>
       </div>
@@ -363,26 +363,31 @@ function rollerPage() {
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
           <article class="faq-item">
-            <h3>Transportiert ihr auch defekte Roller?</h3>
-            <p>Ja, auch defekte oder nicht fahrbereite Roller können transportiert werden, solange das Fahrzeug zugänglich und transportfähig ist.</p>
+            <h3>Holt ihr auch defekte Roller ab?</h3>
+            <p>Ja, auch defekte Roller können angefragt werden, sofern sie zugänglich und transportfähig sind.</p>
           </article>
           <article class="faq-item">
-            <h3>Muss der Roller angemeldet sein?</h3>
-            <p>Nein, für den Transport muss der Roller nicht zwingend angemeldet oder versichert sein.</p>
+            <h3>Bringt ihr Roller zur Werkstatt?</h3>
+            <p>Ja, Werkstattfahrten sind ausdrücklich möglich.</p>
           </article>
           <article class="faq-item">
-            <h3>Könnt ihr den Roller zur Werkstatt bringen?</h3>
-            <p>Ja, Werkstattfahrten gehören zu den typischen Einsätzen.</p>
+            <h3>Welche Roller holt ihr ab?</h3>
+            <p>Grundsätzlich können alle Roller angefragt werden. Wichtig sind Standort, Zustand und Zugänglichkeit.</p>
           </article>
           <article class="faq-item">
-            <h3>Was kostet der Transport?</h3>
-            <p>Der Preis hängt von Strecke, Aufwand, Zustand und Zugänglichkeit ab. Nach der Anfrage wird ein passendes Angebot erstellt.</p>
+            <h3>Was kostet die Abholung?</h3>
+            <p>Der Preis wird individuell festgelegt und hängt von Strecke, Zustand, Zugänglichkeit und Aufwand ab.</p>
+          </article>
+          <article class="faq-item">
+            <h3>In welchem Gebiet fährt All4You?</h3>
+            <p>Der Service ist für München, MUC und Umgebung vorgesehen.</p>
           </article>
         </div>
       </aside>
     </section>
   `;
 }
+
 
 
 function trailerPage() {
@@ -1320,7 +1325,7 @@ function pageContact() {
         <p class="eyebrow">Direktkontakt</p>
         <h2>All4You Service München</h2>
         <p class="lead">
-          Für Rollertransport, Anhängervermietung, Entrümpelung und Reinigungsservice in München und Umgebung.
+          Für Rollerabholservice, Anhängervermietung, Entrümpelung und Reinigungsservice in München und Umgebung.
         </p>
         <div class="contact-list">
           <a href="tel:+498912345678">☎ 089 123 456 78</a>
@@ -1346,9 +1351,9 @@ function pageContact() {
       <div class="contact-choice-grid">
         <article class="contact-choice-card">
           <div class="service-icon blue">${serviceIconTruck}</div>
-          <h3>Rollertransport</h3>
+          <h3>Rollerabholservice</h3>
           <p>Roller, Mopeds, E-Roller oder kleine Motorräder sicher transportieren lassen – auch bei Defekt.</p>
-          <a class="btn primary" href="/leistungen/rollertransport" data-link>Zum Rollertransport <span>›</span></a>
+          <a class="btn primary" href="/leistungen/rollerabholservice" data-link>Zum Rollerabholservice <span>›</span></a>
         </article>
 
         <article class="contact-choice-card">
@@ -1499,8 +1504,8 @@ function pageAbout() {
       <aside class="check-card">
         <p class="eyebrow">Leistungen im Überblick</p>
         <div class="about-service-list">
-          <a href="/leistungen/rollertransport" data-link>
-            <strong>Rollertransport</strong>
+          <a href="/leistungen/rollerabholservice" data-link>
+            <strong>Rollerabholservice</strong>
             <span>Roller, Mopeds & Zweiräder sicher transportieren lassen.</span>
           </a>
           <a href="/leistungen/anhaenger" data-link>
@@ -1795,7 +1800,7 @@ function renderRoute() {
 
   if (path === "/") html = pageHome();
   else if (path === "/leistungen") html = pageServices();
-  else if (path === "/leistungen/rollertransport") html = rollerPage();
+  else if (path === "/leistungen/rollertransport" || path === "/leistungen/rollerabholservice") html = rollerPage();
   else if (path === "/leistungen/anhaenger") html = trailerPage();
   else if (path === "/leistungen/raeumungen" || path === "/leistungen/entruempelung") html = clearancePage();
   else if (path === "/leistungen/reinigung") html = cleaningPage();

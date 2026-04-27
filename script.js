@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+// DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -54,10 +54,10 @@ const services = [
   {
     slug: "anhaenger",
     title: "Anhängervermietung",
-    sub: "Flexibel mieten",
+    sub: "Wörmann Multicase 750 kg",
     icon: serviceIconTrailer,
     color: "",
-    text: "Anhänger für private oder gewerbliche Transporte flexibel mieten und unkompliziert nutzen."
+    text: "Plywood-Kofferanhänger flexibel mieten – mit Hecktür, Innenbeleuchtung und Zurrösen."
   },
   {
     slug: "raeumungen",
@@ -397,12 +397,12 @@ function trailerPage() {
       <p class="eyebrow">Anhängervermietung München</p>
       <h1>Anhänger mieten in München – flexibel, unkompliziert und passend für Ihren Transport.</h1>
       <p class="lead">
-        Ob Umzug, Möbeltransport, Baumarkt-Einkauf, Gartenabfälle oder kurzfristiger Transport:
-        Mit der Anhängervermietung von All4You bekommen Sie schnell und unkompliziert die passende Unterstützung für Ihr Vorhaben.
+        Mieten Sie einen Wörmann Multicase 7525/136 Plywood-Kofferanhänger für Umzug, Möbeltransport,
+        Baumarkt-Einkäufe, Material oder private Transporte in München und Umgebung.
       </p>
       <div class="inline-actions">
         <a class="btn primary" href="#anhaenger-anfrage">Anhänger anfragen <span>›</span></a>
-        <a class="btn ghost" href="#ablauf">Ablauf ansehen <span>›</span></a>
+        <a class="btn ghost" href="#preise">Preise ansehen <span>›</span></a>
       </div>
     </section>
 
@@ -410,33 +410,83 @@ function trailerPage() {
 
     <section class="section-pad two-col">
       <div class="info-card">
-        <p class="eyebrow">Was ist damit gemeint?</p>
-        <h2>Eine einfache Lösung für größere Transporte.</h2>
+        <p class="eyebrow">Der Anhänger</p>
+        <h2>Wörmann Multicase 7525/136.</h2>
         <p class="lead">
-          Nicht jeder Transport lohnt sich mit einem eigenen Transporter. Manchmal reicht ein passender Anhänger vollkommen aus.
-          All4You unterstützt Sie mit einer unkomplizierten Anhängervermietung für private und gewerbliche Transporte in München und Umgebung.
+          Der angebotene Anhänger ist ein 1-Achs-Plywood-Kofferanhänger mit 750 kg zulässigem Gesamtgewicht.
+          Durch den geschlossenen Aufbau eignet er sich besonders für Transporte, bei denen das Ladegut geschützt stehen soll.
         </p>
         <div class="info-grid">
-          <div class="mini-card"><h3>Umzug & Möbel</h3><p>Für kleinere Umzüge, Möbelstücke, Kartons oder Haushaltsgegenstände.</p></div>
-          <div class="mini-card"><h3>Baumarkt & Material</h3><p>Ideal für größere Einkäufe, Baumaterial, Geräte oder sperrige Gegenstände.</p></div>
-          <div class="mini-card"><h3>Garten & Entsorgung</h3><p>Für Grünschnitt, Gartenabfälle, Erde, Holz oder sonstige Transportmengen.</p></div>
-          <div class="mini-card"><h3>Kurzfristige Transporte</h3><p>Wenn schnell eine einfache Transportlösung gebraucht wird.</p></div>
+          <div class="mini-card"><h3>750 kg Gesamtgewicht</h3><p>Zulässiges Gesamtgewicht: 750 kg. Leergewicht ca. 385 kg.</p></div>
+          <div class="mini-card"><h3>Kofferaufbau</h3><p>1-Achs-Plywood-Kofferanhänger mit Hecktür für geschützten Transport.</p></div>
+          <div class="mini-card"><h3>Innenmaß ca.</h3><p>Maße ca. 2510 × 1320 × 1500 mm.</p></div>
+          <div class="mini-card"><h3>Sicherung</h3><p>Innenbeleuchtung und 6 verschiebbare Zurrösen für die Ladungssicherung.</p></div>
         </div>
       </div>
 
       <aside class="check-card">
+        <p class="eyebrow">Gut zu wissen</p>
+        <ul class="list">
+          <li>Führerscheinklasse B ausreichend</li>
+          <li>Versicherung vorhanden</li>
+          <li>Mietvertrag vorhanden</li>
+          <li>Kaution je nach Mietdauer und Absprache</li>
+          <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München</li>
+          <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
+          <li>Abholung nach Absprache gegen Aufpreis möglich</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="section-pad two-col">
+      <div class="info-card">
         <p class="eyebrow">Typische Einsätze</p>
+        <h2>Für viele Transporte schnell die passende Lösung.</h2>
         <ul class="list">
           <li>kleiner Umzug innerhalb München oder Umgebung</li>
           <li>Möbeltransport von Wohnung, Lager oder Möbelhaus</li>
           <li>Baumarkt- oder Materialabholung</li>
           <li>Gartenabfälle, Grünschnitt oder Holz transportieren</li>
           <li>Sperrgut oder größere Gegenstände bewegen</li>
-          <li>Transport nach einer Räumung oder Entrümpelung</li>
+          <li>Transport nach einer Entrümpelung</li>
           <li>private Transporte ohne eigenen Anhänger</li>
           <li>gewerbliche Transporte nach Absprache</li>
         </ul>
+      </div>
+
+      <aside class="notice-box">
+        <p class="eyebrow">Bring- & Abholservice</p>
+        <h2>Auf Wunsch direkt zum Einsatzort.</h2>
+        <p>
+          Standardmäßig erfolgt die Abholung und Rückgabe in der Sachsenstraße Höhe 25, 81543 München.
+          Auf Wunsch kann All4You den Anhänger gegen Aufpreis direkt zu Ihrem Wunschort bringen und nach Absprache
+          auch wieder bequem abholen.
+        </p>
       </aside>
+    </section>
+
+    <section class="section-pad" id="preise">
+      <p class="eyebrow">Mietpreise</p>
+      <h2>Transparente Preise nach Mietdauer.</h2>
+      <div class="price-table-card">
+        <div class="price-grid">
+          <div><strong>1 Tag</strong><span>29 €</span></div>
+          <div><strong>2 Tage</strong><span>56 €</span></div>
+          <div><strong>3 Tage</strong><span>75 €</span></div>
+          <div><strong>4 Tage</strong><span>88 €</span></div>
+          <div><strong>5 Tage</strong><span>100 €</span></div>
+          <div><strong>6 Tage</strong><span>114 €</span></div>
+          <div><strong>7 Tage</strong><span>126 €</span></div>
+          <div><strong>8 Tage</strong><span>136 €</span></div>
+          <div><strong>9 Tage</strong><span>144 €</span></div>
+          <div><strong>10–13 Tage</strong><span>200 €</span></div>
+          <div><strong>14–21 Tage</strong><span>250 €</span></div>
+          <div><strong>22–31 Tage</strong><span>300 €</span></div>
+        </div>
+        <p class="form-note">
+          Kaution je nach Mietdauer und Absprache. Lieferung oder Abholung zum Wunschort ist gegen Aufpreis möglich.
+        </p>
+      </div>
     </section>
 
     <section class="section-pad two-col" id="anhaenger-anfrage">
@@ -498,8 +548,9 @@ function trailerPage() {
             </label>
             <label>Wunschübergabe
               <select name="handover">
-                <option>Abholung durch Kunde</option>
-                <option>Übergabe nach Absprache</option>
+                <option>Abholung Sachsenstraße Höhe 25</option>
+                <option>Lieferung zum Wunschort gegen Aufpreis</option>
+                <option>Lieferung & Abholung gegen Aufpreis</option>
                 <option>All4You soll Rücksprache halten</option>
               </select>
             </label>
@@ -534,8 +585,7 @@ function trailerPage() {
           </div>
 
           <p class="form-note">
-            Die Anfrage ist unverbindlich. Verfügbarkeit und endgültiger Preis werden nach Prüfung des Zeitraums,
-            Anhängertyps und gewünschten Zubehörs bestätigt.
+            Die Anfrage ist unverbindlich. Verfügbarkeit, Kaution und eventuelle Liefer-/Abholkosten werden nach Prüfung bestätigt.
           </p>
         </form>
       </div>
@@ -551,43 +601,10 @@ function trailerPage() {
           <li>Hat Ihr Fahrzeug eine Anhängerkupplung?</li>
           <li>Ist die zulässige Anhängelast ausreichend?</li>
           <li>Welcher Steckeranschluss ist vorhanden: 7-polig oder 13-polig?</li>
-          <li>Passt Ihre Fahrerlaubnis zum geplanten Transport?</li>
+          <li>Führerscheinklasse B ist ausreichend</li>
           <li>Ist das Transportgut sicher verladbar?</li>
           <li>Wird Zubehör wie Spanngurte oder Plane benötigt?</li>
         </ul>
-      </aside>
-    </section>
-
-    <section class="section-pad two-col">
-      <div class="notice-box">
-        <p class="eyebrow">Zubehör & Extras</p>
-        <h2>Zubehör nach Verfügbarkeit.</h2>
-        <p>
-          Je nach Verfügbarkeit kann passendes Zubehör für den Transport angefragt werden. Dazu gehören zum Beispiel
-          Spanngurte, Adapter, Plane, Schloss oder weitere Hilfsmittel. Geben Sie einfach in der Anfrage an, was Sie benötigen.
-        </p>
-        <div class="pill-list">
-          <span>Spanngurte</span>
-          <span>Adapter 7/13-polig</span>
-          <span>Anhängerschloss</span>
-          <span>Plane</span>
-          <span>Auffahrrampe</span>
-          <span>Sackkarre</span>
-          <span>Umzugsdecken</span>
-        </div>
-      </div>
-
-      <aside class="info-card">
-        <p class="eyebrow">Preis & Verfügbarkeit</p>
-        <h2>Individuell nach Mietdauer und Bedarf.</h2>
-        <p class="lead">
-          Der Preis richtet sich nach Mietdauer, Anhängertyp, gewünschtem Zubehör und Aufwand bei Übergabe oder Rückgabe.
-          Nach Ihrer Anfrage erhalten Sie ein passendes und unverbindliches Angebot.
-        </p>
-        <div class="mini-card">
-          <h3>Später möglich</h3>
-          <p>Kurzzeitmiete, Tagesmiete, Wochenendmiete und Langzeitmiete können später als eigene Preis-/Anfragekarten ergänzt werden.</p>
-        </div>
       </aside>
     </section>
 
@@ -596,9 +613,9 @@ function trailerPage() {
       <h2>So läuft die Anhängervermietung ab.</h2>
       <div class="steps five-steps">
         <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie geben Zeitraum, Transportgut und Fahrzeugdaten an.</p></article>
-        <article class="step"><span>2</span><h3>Verfügbarkeit prüfen</h3><p>All4You prüft, ob ein passender Anhänger verfügbar ist.</p></article>
-        <article class="step"><span>3</span><h3>Angebot erhalten</h3><p>Sie erhalten Rückmeldung zu Verfügbarkeit, Preis und Abholung.</p></article>
-        <article class="step"><span>4</span><h3>Anhänger nutzen</h3><p>Sie holen den Anhänger ab oder stimmen die Übergabe individuell ab.</p></article>
+        <article class="step"><span>2</span><h3>Verfügbarkeit prüfen</h3><p>All4You prüft, ob der Anhänger verfügbar ist.</p></article>
+        <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie erhalten Informationen zu Preis, Kaution und Übergabe.</p></article>
+        <article class="step"><span>4</span><h3>Anhänger nutzen</h3><p>Sie holen den Anhänger ab oder stimmen Lieferung/Abholung individuell ab.</p></article>
         <article class="step"><span>5</span><h3>Rückgabe</h3><p>Nach Nutzung erfolgt die Rückgabe zum vereinbarten Zeitpunkt.</p></article>
       </div>
     </section>
@@ -607,20 +624,20 @@ function trailerPage() {
       <div class="faq-card">
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Kann ich den Anhänger nur für ein paar Stunden mieten?</h3><p>Ja, je nach Verfügbarkeit sind auch kurze Mietzeiträume möglich.</p></article>
-          <article class="faq-item"><h3>Brauche ich ein eigenes Zugfahrzeug?</h3><p>In der Regel ja. Falls Sie kein eigenes Zugfahrzeug haben, kann alternativ geprüft werden, ob All4You den Transport komplett übernimmt.</p></article>
-          <article class="faq-item"><h3>Welche Anhängerkupplung brauche ich?</h3><p>Ihr Fahrzeug benötigt eine passende Anhängerkupplung. Wichtig sind außerdem Anhängelast und Steckeranschluss.</p></article>
-          <article class="faq-item"><h3>Was ist, wenn ich nicht weiß, ob mein Auto geeignet ist?</h3><p>Kein Problem. Geben Sie die wichtigsten Fahrzeugdaten an oder schreiben Sie es in die Nachricht. All4You prüft die Angaben mit Ihnen.</p></article>
+          <article class="faq-item"><h3>Welcher Anhänger wird vermietet?</h3><p>Vermietet wird ein Wörmann Multicase 7525/136, 1-Achs-Plywood-Kofferanhänger mit 750 kg zulässigem Gesamtgewicht.</p></article>
+          <article class="faq-item"><h3>Welche Führerscheinklasse brauche ich?</h3><p>Für diesen Anhänger ist Führerscheinklasse B ausreichend.</p></article>
+          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt in der Sachsenstraße Höhe 25, 81543 München.</p></article>
+          <article class="faq-item"><h3>Kann der Anhänger geliefert werden?</h3><p>Ja, auf Wunsch kann der Anhänger gegen Aufpreis direkt zum Wunschort gebracht und nach Absprache wieder abgeholt werden.</p></article>
         </div>
       </div>
 
       <aside class="faq-card">
         <p class="eyebrow">Weitere Fragen</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Gibt es Zubehör dazu?</h3><p>Je nach Verfügbarkeit kann Zubehör wie Spanngurte, Adapter, Plane oder Schloss angefragt werden.</p></article>
-          <article class="faq-item"><h3>Kann ich den Anhänger am Wochenende mieten?</h3><p>Wochenendmieten können nach Verfügbarkeit angefragt werden.</p></article>
-          <article class="faq-item"><h3>Muss eine Kaution hinterlegt werden?</h3><p>Das kann je nach Mietdauer und Anhängertyp erforderlich sein und wird vorab mitgeteilt.</p></article>
-          <article class="faq-item"><h3>Kann All4You den Transport auch komplett übernehmen?</h3><p>Ja, je nach Auftrag kann geprüft werden, ob All4You den Transport selbst übernimmt, statt nur den Anhänger zu vermieten.</p></article>
+          <article class="faq-item"><h3>Gibt es eine Kaution?</h3><p>Eine Kaution kann je nach Mietdauer und Absprache erforderlich sein.</p></article>
+          <article class="faq-item"><h3>Ist der Anhänger versichert?</h3><p>Ja, eine Versicherung ist vorhanden.</p></article>
+          <article class="faq-item"><h3>Gibt es einen Mietvertrag?</h3><p>Ja, ein Mietvertrag ist vorhanden.</p></article>
+          <article class="faq-item"><h3>Gibt es Zurrmöglichkeiten?</h3><p>Ja, der Anhänger verfügt über 6 verschiebbare Zurrösen.</p></article>
         </div>
       </aside>
     </section>

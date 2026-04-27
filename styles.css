@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
    ========================================================================== */
 
 .site-header {
@@ -2331,5 +2331,66 @@ label {
   .brand-card {
     width: 218px;
     height: 58px;
+  }
+}
+
+/* ==========================================================================
+   Anhänger-Daten und Preistabelle
+   DBG: ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN
+   ========================================================================== */
+
+.price-table-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.price-grid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(19,35,58,.12);
+  background: rgba(238,246,250,.72);
+}
+
+.price-grid strong {
+  color: var(--navy);
+  font-size: 15px;
+}
+
+.price-grid span {
+  color: var(--teal-2);
+  font-size: 21px;
+  font-weight: 950;
+}
+
+@media (max-width: 1320px) {
+  .price-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .price-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .price-grid {
+    grid-template-columns: 1fr;
   }
 }

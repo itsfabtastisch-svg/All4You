@@ -1,6 +1,6 @@
 # All4You Service München — Homepage
 
-DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
 
 ## Inhalt
 
@@ -88,7 +88,7 @@ http://localhost:8080/
   - Reinigungsservice
 - Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
 - Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
 
 
 ## v2.7 Über-uns-Seite
@@ -98,7 +98,7 @@ http://localhost:8080/
 - Erklärung, warum All4You mehrere Services bündelt
 - Leistungsübersicht mit Links ergänzt
 - Hinweis auf späteres Anfrage-, Mitarbeiter- und Kundenportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
 
 
 ## v2.8 Rechtliches
@@ -111,14 +111,14 @@ http://localhost:8080/
 - Platzhalter für Telefon, E-Mail, Website, USt-ID und weitere Angaben ergänzt
 - Datenschutzerklärung als Platzhalterstruktur vorbereitet
 - Hinweise zu Cloudflare Pages, Kontaktaufnahme, späterem Kundenkonto/Mitarbeiterportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
 
 
 ## v2.8.1 Logo Update
 
 - `assets/logo-all4you.jpeg` gegen das neue bereitgestellte Logo ausgetauscht.
 - Header, Footer und alle weiteren Logo-Stellen nutzen dadurch automatisch das neue Logo.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
 
 
 ## v2.8.2 Wide Logo
@@ -126,7 +126,7 @@ http://localhost:8080/
 - `assets/logo-all4you.jpeg` gegen das breite Logo ausgetauscht.
 - Header links verbreitert, damit das Logo vollständig sichtbar ist.
 - Footer-Logo ebenfalls auf das breite Logo angepasst.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
 
 
 ## v2.8.3 Entrümpelung
@@ -135,4 +135,16 @@ http://localhost:8080/
 - Menü, Leistungsbereiche, Kontaktseite, Über-uns-Seite, Detailseite, Footer und Texte angepasst.
 - Neue sprechende URL ergänzt: `/leistungen/entruempelung`
 - Alte URL `/leistungen/raeumungen` bleibt als Alias weiterhin funktional.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`
+
+
+## v2.9.1 Anhängerdaten
+
+- Anhängervermietung mit echten Anhängerdaten aktualisiert.
+- Wörmann Multicase 7525/136 ergänzt.
+- Technische Daten ergänzt: 750 kg zGG, ca. 385 kg Leergewicht, ca. 2510 × 1320 × 1500 mm, Hecktür, Innenbeleuchtung, 6 verschiebbare Zurrösen.
+- Mietpreise als Preistabelle ergänzt.
+- Abholung/Rückgabe Sachsenstraße Höhe 25, 81543 München ergänzt.
+- Lieferung/Abholung zum Wunschort gegen Aufpreis ergänzt.
+- Führerscheinklasse B, Versicherung und Mietvertrag ergänzt.
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.1-ANHAENGER-DATEN`

@@ -993,7 +993,7 @@ function appendTeamNotificationNote(result, notificationResult) {
   const note = document.createElement("p");
   note.className = `form-note email-notification-note ${notificationResult?.success ? "success" : "warning"}`;
   note.innerHTML = notificationResult?.success
-    ? `Team-Benachrichtigung wurde an <b>${escapeHtml(TEAM_NOTIFICATION_EMAIL)}</b> gesendet.`
+    ? `Team-Benachrichtigung wurde an <b>${escapeHtml(TEAM_NOTIFICATION_EMAIL)}</b> gesendet.${notificationResult?.status_url ? `<br>Statuslink: <a href="${escapeHtml(notificationResult.status_url)}" data-link>Status prüfen</a>` : ""}`
     : `Anfrage wurde gespeichert. Team-E-Mail noch nicht gesendet: ${escapeHtml(notificationResult?.message || "Edge Function noch nicht aktiv.")}`;
   result.appendChild(note);
 }
@@ -1372,7 +1372,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.3.1-CONTACT-PARSER-FIX
+// DBG: ALL4YOU-ROUTER-V4.4-EMAIL-STATUS-LINK
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

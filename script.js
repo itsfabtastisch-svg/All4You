@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.9.3-ENTRUEMPELUNG-DATEN
+// DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -70,10 +70,10 @@ const services = [
   {
     slug: "reinigung",
     title: "Reinigungsservice",
-    sub: "Privat & gewerblich",
+    sub: "Gebäudereinigung · privat & gewerblich",
     icon: serviceIconCleaning,
     color: "dark",
-    text: "Gründliche Reinigung für private und gewerbliche Objekte, passend zum jeweiligen Bedarf."
+    text: "Gebäudereinigung für private und gewerbliche Objekte – einmalig oder regelmäßig, Material wird mitgebracht."
   }
 ];
 
@@ -1026,10 +1026,10 @@ function cleaningPage() {
         <span>Reinigungsservice</span>
       </div>
       <p class="eyebrow">Reinigungsservice München</p>
-      <h1>Reinigungsservice in München – sauber, zuverlässig und passend zu Ihrem Bedarf.</h1>
+      <h1>Reinigungsservice in München – Gebäudereinigung für privat und gewerblich.</h1>
       <p class="lead">
-        Ob Wohnung, Haus, Büro, Treppenhaus oder Reinigung nach einer Räumung: All4You unterstützt bei
-        einmaligen und nach Absprache regelmäßigen Reinigungen in München und Umgebung.
+        All4You bietet Gebäudereinigung für private und gewerbliche Objekte in München und Umgebung –
+        einmalig oder regelmäßig nach Absprache. Das benötigte Reinigungsmaterial wird mitgebracht.
       </p>
       <div class="inline-actions">
         <a class="btn primary" href="#reinigungs-anfrage">Reinigung anfragen <span>›</span></a>
@@ -1041,33 +1041,56 @@ function cleaningPage() {
 
     <section class="section-pad two-col">
       <div class="info-card">
-        <p class="eyebrow">Was ist damit gemeint?</p>
-        <h2>Saubere Räume ohne unnötigen Aufwand.</h2>
+        <p class="eyebrow">Was wird angeboten?</p>
+        <h2>Gebäudereinigung nach Bedarf.</h2>
         <p class="lead">
-          All4You übernimmt Reinigungen für private und gewerbliche Bereiche – passend zum jeweiligen Objekt,
-          zur gewünschten Leistung und zum vereinbarten Umfang. Besonders praktisch ist die Kombination mit einer Räumung,
-          wenn ein Bereich nicht nur leer, sondern auch sauber übergeben werden soll.
+          Der Reinigungsservice richtet sich an private und gewerbliche Kunden. Ob einmalige Reinigung,
+          regelmäßige Objektpflege oder Reinigung nach einer Entrümpelung: All4You stimmt Umfang, Termin und Ablauf individuell ab.
         </p>
         <div class="info-grid">
-          <div class="mini-card"><h3>Wohnung & Haus</h3><p>Für private Räume, einzelne Bereiche oder komplette Wohnflächen.</p></div>
-          <div class="mini-card"><h3>Büro & Gewerbe</h3><p>Für Arbeitsbereiche, kleinere Gewerbeflächen oder Objekte nach Absprache.</p></div>
-          <div class="mini-card"><h3>Treppenhaus & Gemeinschaftsbereiche</h3><p>Für regelmäßig genutzte Bereiche, die ordentlich bleiben sollen.</p></div>
-          <div class="mini-card"><h3>Nach Räumung oder Umzug</h3><p>Wenn Räume für Übergabe, Neuvermietung oder weitere Nutzung vorbereitet werden sollen.</p></div>
+          <div class="mini-card"><h3>Privat</h3><p>Reinigung für Wohnungen, Häuser, einzelne Räume oder Bereiche nach Absprache.</p></div>
+          <div class="mini-card"><h3>Gewerblich</h3><p>Reinigung für Büros, Gewerbeflächen, Objekte oder Gemeinschaftsbereiche.</p></div>
+          <div class="mini-card"><h3>Einmalig oder regelmäßig</h3><p>Einmalige Reinigung oder wiederkehrende Reinigung nach Vereinbarung.</p></div>
+          <div class="mini-card"><h3>Material inklusive</h3><p>Das benötigte Reinigungsmaterial wird von All4You mitgebracht.</p></div>
         </div>
       </div>
 
       <aside class="check-card">
-        <p class="eyebrow">Typische Einsätze</p>
+        <p class="eyebrow">Leistungsumfang</p>
         <ul class="list">
-          <li>Reinigung nach einer Räumung</li>
+          <li>Gebäudereinigung nach Absprache</li>
+          <li>private und gewerbliche Reinigung möglich</li>
+          <li>einmalige oder regelmäßige Reinigung möglich</li>
+          <li>Reinigungsmaterial wird mitgebracht</li>
+          <li>Reinigung nach Entrümpelung möglich</li>
+          <li>Preis je nach Objekt, Umfang und Aufwand</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="section-pad two-col">
+      <div class="info-card">
+        <p class="eyebrow">Typische Einsätze</p>
+        <h2>Wenn Räume sauber vorbereitet werden sollen.</h2>
+        <ul class="list">
+          <li>Gebäudereinigung für private Objekte</li>
+          <li>Gebäudereinigung für gewerbliche Objekte</li>
+          <li>Reinigung nach einer Entrümpelung</li>
           <li>Reinigung vor Wohnungsübergabe</li>
           <li>Reinigung nach Umzug</li>
-          <li>einmalige Reinigung nach Absprache</li>
-          <li>Grundreinigung nach individueller Prüfung</li>
           <li>Büroreinigung oder Objektpflege</li>
-          <li>Treppenhausreinigung</li>
-          <li>regelmäßige Reinigung nach Absprache</li>
+          <li>Treppenhaus- und Gemeinschaftsbereiche nach Absprache</li>
+          <li>regelmäßige Reinigung nach Vereinbarung</li>
         </ul>
+      </div>
+
+      <aside class="notice-box">
+        <p class="eyebrow">Preis & Aufwand</p>
+        <h2>Je nach Objekt und Arbeitsweise.</h2>
+        <p>
+          Der Preis wird je nach Objekt, Fläche, Verschmutzungsgrad, gewünschter Reinigung und Arbeitsweise festgelegt.
+          Nach Ihrer Anfrage erhalten Sie eine passende Rückmeldung.
+        </p>
       </aside>
     </section>
 
@@ -1076,8 +1099,8 @@ function cleaningPage() {
         <p class="eyebrow">Reinigungs-Assistent</p>
         <h2>Reinigungs-Anfrage vorbereiten.</h2>
         <p class="lead">
-          Teilen Sie kurz mit, was gereinigt werden soll, wie groß der Bereich ungefähr ist und wann die Reinigung stattfinden soll.
-          So kann All4You den Aufwand schneller einschätzen und passend antworten.
+          Teilen Sie kurz mit, welches Objekt gereinigt werden soll, ob es privat oder gewerblich ist,
+          ob die Reinigung einmalig oder regelmäßig erfolgen soll und wann der Einsatz gewünscht ist.
         </p>
 
         <form class="cleaning-tool" id="cleaningForm">
@@ -1090,7 +1113,8 @@ function cleaningPage() {
             </label>
             <label>Art der Reinigung
               <select name="cleaningType">
-                <option>Reinigung nach Räumung</option>
+                <option>Gebäudereinigung</option>
+                <option>Reinigung nach Entrümpelung</option>
                 <option>Wohnungsreinigung</option>
                 <option>Hausreinigung</option>
                 <option>Büroreinigung</option>
@@ -1100,6 +1124,14 @@ function cleaningPage() {
                 <option>Sonstiges</option>
               </select>
             </label>
+            <label>Privat oder gewerblich?
+              <select name="customerType">
+                <option>Privat</option>
+                <option>Gewerblich</option>
+                <option>Beides / mehrere Bereiche</option>
+                <option>noch nicht sicher</option>
+              </select>
+            </label>
             <label>Objektart
               <select name="objectType">
                 <option>Wohnung</option>
@@ -1107,6 +1139,7 @@ function cleaningPage() {
                 <option>Büro</option>
                 <option>Treppenhaus</option>
                 <option>Gewerbefläche</option>
+                <option>Gebäude / Objekt</option>
                 <option>einzelner Raum / Teilbereich</option>
                 <option>Sonstiges</option>
               </select>
@@ -1133,17 +1166,17 @@ function cleaningPage() {
             <label>Wunschtermin
               <input name="desiredDate" placeholder="z. B. Freitag, nächste Woche, möglichst bald...">
             </label>
-            <label>Nach Räumung?
+            <label>Nach Entrümpelung?
               <select name="afterClearance">
                 <option>Nein</option>
                 <option>Ja</option>
                 <option>Unsicher / bitte prüfen</option>
               </select>
             </label>
-            <label>Reinigungsmittel vorhanden?
+            <label>Reinigungsmittel
               <select name="materials">
-                <option>Nein / bitte mitbringen</option>
-                <option>Ja</option>
+                <option>Bitte mitbringen</option>
+                <option>vor Ort vorhanden</option>
                 <option>teilweise vorhanden</option>
                 <option>nach Absprache</option>
               </select>
@@ -1153,6 +1186,14 @@ function cleaningPage() {
                 <option>Nein</option>
                 <option>Ja, kann ich senden</option>
                 <option>später nachreichen</option>
+              </select>
+            </label>
+            <label>Preiswunsch
+              <select name="priceModel">
+                <option>nach Objekt / Aufwand</option>
+                <option>nach Besichtigung / Rücksprache</option>
+                <option>regelmäßiger Preis nach Absprache</option>
+                <option>noch nicht sicher</option>
               </select>
             </label>
           </div>
@@ -1186,7 +1227,8 @@ function cleaningPage() {
           </div>
 
           <p class="form-note">
-            Die Anfrage ist unverbindlich. Der genaue Umfang und Preis werden nach Prüfung von Objekt, Fläche, Verschmutzungsgrad und gewünschtem Termin bestätigt.
+            Die Anfrage ist unverbindlich. Der genaue Umfang und Preis werden nach Prüfung von Objekt, Fläche,
+            Verschmutzungsgrad, gewünschtem Termin und Arbeitsweise bestätigt.
           </p>
         </form>
       </div>
@@ -1195,12 +1237,12 @@ function cleaningPage() {
         <p class="eyebrow">Was wir wissen müssen</p>
         <h2>Damit die Reinigung passend geplant werden kann.</h2>
         <ul class="list">
+          <li>Handelt es sich um ein privates oder gewerbliches Objekt?</li>
           <li>Welche Räume oder Bereiche sollen gereinigt werden?</li>
           <li>Wie groß ist die Fläche ungefähr?</li>
           <li>Ist die Reinigung einmalig oder regelmäßig gewünscht?</li>
           <li>Gibt es stärkere Verschmutzungen oder besondere Bereiche?</li>
-          <li>Soll die Reinigung nach einer Räumung erfolgen?</li>
-          <li>Sollen Reinigungsmittel mitgebracht werden?</li>
+          <li>Soll die Reinigung nach einer Entrümpelung erfolgen?</li>
           <li>Gibt es einen festen Wunschtermin oder eine Frist?</li>
           <li>Gibt es Fotos zur besseren Einschätzung?</li>
         </ul>
@@ -1209,30 +1251,30 @@ function cleaningPage() {
 
     <section class="section-pad two-col">
       <div class="notice-box">
-        <p class="eyebrow">Reinigung nach Räumung</p>
+        <p class="eyebrow">Reinigung nach Entrümpelung</p>
         <h2>Leer ist gut – sauber ist besser.</h2>
         <p>
-          Wenn nach einer Räumung zusätzlich eine Reinigung gewünscht ist, kann der Reinigungsservice direkt mit angefragt werden.
+          Wenn nach einer Entrümpelung zusätzlich eine Reinigung gewünscht ist, kann der Reinigungsservice direkt mit angefragt werden.
           So wird der Bereich nicht nur leer, sondern auch sauber für Übergabe, Neuvermietung oder weitere Nutzung vorbereitet.
         </p>
         <div class="pill-list">
-          <span>nach Räumung</span>
+          <span>nach Entrümpelung</span>
           <span>nach Umzug</span>
           <span>vor Übergabe</span>
-          <span>nach Absprache regelmäßig</span>
+          <span>regelmäßig nach Absprache</span>
         </div>
       </div>
 
       <aside class="info-card">
-        <p class="eyebrow">Umfang & Preis</p>
-        <h2>Individuell nach Objekt und Bedarf.</h2>
+        <p class="eyebrow">Material & Preis</p>
+        <h2>Material wird mitgebracht.</h2>
         <p class="lead">
-          Der Preis richtet sich nach Objektart, Fläche, Verschmutzungsgrad, gewünschter Reinigung und Termin.
-          Nach Ihrer Anfrage erhalten Sie eine passende Rückmeldung.
+          All4You bringt das benötigte Reinigungsmaterial mit. Der Preis richtet sich nach Objekt,
+          Umfang, Arbeitsweise und gewünschtem Ergebnis.
         </p>
         <div class="mini-card">
           <h3>Wichtig</h3>
-          <p>Fenster, starke Verschmutzungen oder Sonderreinigungen sollten immer in der Anfrage erwähnt werden, damit der Aufwand fair eingeschätzt werden kann.</p>
+          <p>Fenster, starke Verschmutzungen oder Sonderbereiche sollten immer in der Anfrage erwähnt werden, damit der Aufwand fair eingeschätzt werden kann.</p>
         </div>
       </aside>
     </section>
@@ -1253,18 +1295,18 @@ function cleaningPage() {
       <div class="faq-card">
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Bietet ihr einmalige Reinigungen an?</h3><p>Ja, einmalige Reinigungen können nach Bedarf und Verfügbarkeit angefragt werden.</p></article>
-          <article class="faq-item"><h3>Kann Reinigung nach einer Räumung kombiniert werden?</h3><p>Ja, Reinigung nach einer Räumung kann direkt mit angefragt werden.</p></article>
-          <article class="faq-item"><h3>Muss ich Reinigungsmittel stellen?</h3><p>Das wird nach Absprache geklärt. Geben Sie einfach an, ob Reinigungsmittel vorhanden sind oder mitgebracht werden sollen.</p></article>
-          <article class="faq-item"><h3>Reinigt ihr auch Büros oder Gewerbeflächen?</h3><p>Ja, Büro- und Gewerbereinigung kann nach Umfang und Objektart angefragt werden.</p></article>
+          <article class="faq-item"><h3>Bietet ihr private und gewerbliche Reinigung an?</h3><p>Ja, All4You bietet Reinigung für private und gewerbliche Objekte an.</p></article>
+          <article class="faq-item"><h3>Ist eine einmalige Reinigung möglich?</h3><p>Ja, einmalige Reinigungen können nach Bedarf und Verfügbarkeit angefragt werden.</p></article>
+          <article class="faq-item"><h3>Sind regelmäßige Reinigungen möglich?</h3><p>Ja, regelmäßige Reinigung ist nach Absprache möglich.</p></article>
+          <article class="faq-item"><h3>Bringt All4You Reinigungsmaterial mit?</h3><p>Ja, das benötigte Reinigungsmaterial wird mitgebracht.</p></article>
         </div>
       </div>
 
       <aside class="faq-card">
         <p class="eyebrow">Weitere Fragen</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Was kostet eine Reinigung?</h3><p>Der Preis hängt von Fläche, Umfang, Verschmutzung, Termin und gewünschter Leistung ab.</p></article>
-          <article class="faq-item"><h3>Kann ich regelmäßige Reinigung anfragen?</h3><p>Ja, regelmäßige Reinigung ist nach Absprache möglich.</p></article>
+          <article class="faq-item"><h3>Kann Reinigung nach einer Entrümpelung kombiniert werden?</h3><p>Ja, Reinigung nach einer Entrümpelung kann direkt mit angefragt werden.</p></article>
+          <article class="faq-item"><h3>Was kostet eine Reinigung?</h3><p>Der Preis hängt von Objekt, Fläche, Umfang, Verschmutzung, Termin und Arbeitsweise ab.</p></article>
           <article class="faq-item"><h3>Sind Fenster automatisch enthalten?</h3><p>Fenster oder Sonderbereiche sollten extra angegeben werden, damit der Umfang korrekt eingeschätzt werden kann.</p></article>
           <article class="faq-item"><h3>Kann ich Fotos mitschicken?</h3><p>Fotos sind hilfreich und können später in der Portal-Version direkt zur Anfrage ergänzt werden.</p></article>
         </div>
@@ -1275,12 +1317,13 @@ function cleaningPage() {
       <div class="cta-panel">
         <p class="eyebrow">Unverbindlich starten</p>
         <h2>Reinigung jetzt unverbindlich anfragen.</h2>
-        <p class="lead">Teilen Sie kurz mit, was gereinigt werden soll. All4You prüft Umfang, Termin und gewünschte Leistung.</p>
+        <p class="lead">Teilen Sie kurz mit, was gereinigt werden soll. All4You prüft Objekt, Umfang, Termin und gewünschte Arbeitsweise.</p>
         <a class="btn primary" href="#reinigungs-anfrage">Reinigungs-Anfrage öffnen <span>›</span></a>
       </div>
     </section>
   `;
 }
+
 
 
 function genericServicePage(slug) {
@@ -2128,6 +2171,7 @@ function bindCleaningTool() {
       contact: data.get("contact") || "",
       cleaningType: data.get("cleaningType") || "",
       objectType: data.get("objectType") || "",
+      customerType: data.get("customerType") || "",
       address: data.get("address") || "",
       area: data.get("area") || "",
       rooms: data.get("rooms") || "",
@@ -2136,6 +2180,7 @@ function bindCleaningTool() {
       afterClearance: data.get("afterClearance") || "",
       materials: data.get("materials") || "",
       photos: data.get("photos") || "",
+      priceModel: data.get("priceModel") || "",
       specialAreas: specialAreas.length ? specialAreas.join(", ") : "keine Angabe",
       message: data.get("message") || ""
     };
@@ -2148,6 +2193,7 @@ function bindCleaningTool() {
         <b>Kontakt:</b> ${escapeHtml(summary.contact)}<br>
         <b>Art der Reinigung:</b> ${escapeHtml(summary.cleaningType)}<br>
         <b>Objektart:</b> ${escapeHtml(summary.objectType)}<br>
+        <b>Privat/Gewerblich:</b> ${escapeHtml(summary.customerType)}<br>
         <b>Ort:</b> ${escapeHtml(summary.address)}<br>
         <b>Fläche:</b> ${escapeHtml(summary.area)}<br>
         <b>Räume:</b> ${escapeHtml(summary.rooms)}<br>
@@ -2155,6 +2201,7 @@ function bindCleaningTool() {
         <b>Wunschtermin:</b> ${escapeHtml(summary.desiredDate)}<br>
         <b>Nach Räumung:</b> ${escapeHtml(summary.afterClearance)}<br>
         <b>Reinigungsmittel:</b> ${escapeHtml(summary.materials)}<br>
+        <b>Preiswunsch:</b> ${escapeHtml(summary.priceModel)}<br>
         <b>Besondere Bereiche:</b> ${escapeHtml(summary.specialAreas)}<br><br>
         Später wird genau diese Anfrage zusätzlich in der Datenbank gespeichert, per E-Mail an All4You gesendet
         und im Mitarbeiterportal sichtbar gemacht.
@@ -2168,14 +2215,16 @@ function bindCleaningTool() {
       `Kontakt: ${summary.contact}\n` +
       `Art der Reinigung: ${summary.cleaningType}\n` +
       `Objektart: ${summary.objectType}\n` +
+      `Privat/Gewerblich: ${summary.customerType}\n` +
       `Adresse / Ort: ${summary.address}\n` +
       `Fläche: ${summary.area}\n` +
       `Anzahl Räume: ${summary.rooms}\n` +
       `Einmalig / regelmäßig: ${summary.interval}\n` +
       `Wunschtermin: ${summary.desiredDate}\n` +
       `Nach Räumung: ${summary.afterClearance}\n` +
-      `Reinigungsmittel vorhanden: ${summary.materials}\n` +
+      `Reinigungsmittel: ${summary.materials}\n` +
       `Fotos vorhanden: ${summary.photos}\n` +
+      `Preiswunsch: ${summary.priceModel}\n` +
       `Besondere Bereiche: ${summary.specialAreas}\n\n` +
       `Nachricht:\n${summary.message}`
     );

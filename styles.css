@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .dashboard-shell {
@@ -3263,7 +3263,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .is-hidden {
@@ -3417,7 +3417,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .auth-message.success {
@@ -3437,7 +3437,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3492,7 +3492,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3569,7 +3569,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .dashboard-detail {
@@ -3716,7 +3716,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .site-header {
@@ -3860,7 +3860,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .site-header {
@@ -3918,7 +3918,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
    ========================================================================== */
 
 .dashboard-messages {
@@ -4034,4 +4034,95 @@ label {
 .dashboard-mini-empty.error {
   border-color: rgba(190,40,40,.26);
   background: rgba(255,86,86,.08);
+}
+
+/* ==========================================================================
+   Dashboard Internal Notes
+   DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
+   ========================================================================== */
+
+.dashboard-internal-note {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(10,169,155,.20);
+  background: linear-gradient(135deg, rgba(10,169,155,.07), rgba(255,255,255,.76));
+}
+
+.dashboard-internal-note label {
+  display: grid;
+  gap: 8px;
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.dashboard-internal-note textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 92px;
+  border: 1px solid rgba(19,35,58,.14);
+  border-radius: 15px;
+  padding: 12px 13px;
+  color: var(--navy);
+  background: rgba(255,255,255,.9);
+  font: inherit;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.dashboard-internal-note textarea:disabled,
+.dashboard-internal-note .btn:disabled {
+  opacity: .58;
+  cursor: not-allowed;
+}
+
+.dashboard-note-message {
+  margin: 0;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(19,35,58,.10);
+  background: rgba(238,246,250,.66);
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.dashboard-note-message.success {
+  color: #08786f;
+  border-color: rgba(10,169,155,.26);
+  background: rgba(10,169,155,.09);
+}
+
+.dashboard-note-message.error {
+  color: #8a1f1f;
+  border-color: rgba(190,40,40,.26);
+  background: rgba(255,86,86,.08);
+}
+
+.dashboard-note-message.loading {
+  color: var(--blue);
+  border-color: rgba(11,78,145,.22);
+  background: rgba(11,78,145,.07);
+}
+
+.dashboard-message-item.internal {
+  position: relative;
+  border-left: 5px solid var(--teal);
+}
+
+.dashboard-message-item.internal::before {
+  content: "Intern";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(10,169,155,.12);
+  color: var(--teal-2);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }

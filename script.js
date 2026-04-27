@@ -300,6 +300,8 @@ function renderDashboardDetail(ticket) {
       </div>
     `;
     clearTicketExtras();
+    setDashboardInternalNoteEnabled(false);
+    setDashboardInternalNoteMessage("", "");
     setDashboardActionMessage("", "");
     return;
   }
@@ -329,6 +331,8 @@ function renderDashboardDetail(ticket) {
     ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
   `;
 
+  setDashboardInternalNoteEnabled(true);
+  setDashboardInternalNoteMessage("", "Interne Notizen sind nur im Mitarbeiter-Dashboard sichtbar.");
   setDashboardActionMessage("", "Statusänderungen werden automatisch im Statusverlauf gespeichert.");
   loadDashboardTicketExtras(ticket);
 }
@@ -686,7 +690,72 @@ function renderDashboardSummaryBlock(ticket) {
 
 
 let dashboardCurrentSession = null;
+let dashboardCurrentEmployeeProfile = null;
 let dashboardTicketExtrasLoadId = 0;
+
+
+async function createDashboardInternalNote(session, requestId, message, profile) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  if (!requestId) {
+    throw new Error("Kein Ticket ausgewählt.");
+  }
+
+  const cleanMessage = String(message || "").trim();
+
+  if (cleanMessage.length < 2) {
+    throw new Error("Bitte eine interne Notiz eintragen.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/request_messages`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify({
+      request_id: requestId,
+      sender_type: "team",
+      sender_name: profile?.display_name || profile?.email || "Mitarbeiter",
+      message: cleanMessage,
+      is_internal: true
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Interne Notiz konnte nicht gespeichert werden.");
+  }
+
+  if (!Array.isArray(data) || !data.length) {
+    throw new Error("Interne Notiz wurde nicht bestätigt.");
+  }
+
+  return data[0];
+}
+
+function setDashboardInternalNoteMessage(type, text) {
+  const message = document.querySelector("#dashboardInternalNoteMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function setDashboardInternalNoteEnabled(isEnabled) {
+  const text = document.querySelector("#dashboardInternalNoteText");
+  const button = document.querySelector("#dashboardInternalNoteButton");
+
+  if (text) text.disabled = !isEnabled;
+  if (button) button.disabled = !isEnabled;
+}
+
 
 function senderTypeLabel(senderType) {
   const labels = {
@@ -1036,7 +1105,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
+// DBG: ALL4YOU-ROUTER-V4.1-DASHBOARD-INTERNAL-NOTES
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2856,13 +2925,21 @@ function pageDashboard() {
               </p>
 
               <div class="dashboard-messages">
-                <p class="eyebrow">Kundennachrichten</p>
+                <p class="eyebrow">Nachrichten & interne Notizen</p>
                 <div class="dashboard-messages-list" id="dashboardMessagesList">
                   <div class="dashboard-mini-empty">
                     <strong>Nachrichten werden nach Ticketauswahl geladen …</strong>
-                    <p>Die gespeicherten Kundennachrichten erscheinen hier live aus Supabase.</p>
+                    <p>Die gespeicherten Kundennachrichten und internen Notizen erscheinen hier live aus Supabase.</p>
                   </div>
                 </div>
+
+                <form class="dashboard-internal-note" id="dashboardInternalNoteForm">
+                  <label>Interne Notiz
+                    <textarea id="dashboardInternalNoteText" rows="3" placeholder="z. B. Kunden zurückrufen, Preis prüfen, Fotos fehlen noch …" disabled></textarea>
+                  </label>
+                  <button class="btn primary" type="submit" id="dashboardInternalNoteButton" disabled>Notiz speichern <span>›</span></button>
+                  <p class="dashboard-note-message" id="dashboardInternalNoteMessage">Bitte zuerst ein Ticket auswählen.</p>
+                </form>
               </div>
 
               <div class="dashboard-timeline">
@@ -4618,6 +4695,9 @@ function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
   const saveStatusButton = document.querySelector("#dashboardSaveStatusButton");
   const statusSelect = document.querySelector("#dashboardStatusSelect");
+  const noteForm = document.querySelector("#dashboardInternalNoteForm");
+  const noteText = document.querySelector("#dashboardInternalNoteText");
+  const noteButton = document.querySelector("#dashboardInternalNoteButton");
 
   if (list) {
     list.addEventListener("click", event => {
@@ -4669,6 +4749,44 @@ function bindDashboardShell() {
     }
   });
 
+
+  noteForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const text = String(noteText?.value || "").trim();
+
+    if (!dashboardSelectedRequestId) {
+      setDashboardInternalNoteMessage("error", "Bitte zuerst ein Ticket auswählen.");
+      return;
+    }
+
+    if (!text) {
+      setDashboardInternalNoteMessage("error", "Bitte eine interne Notiz eintragen.");
+      return;
+    }
+
+    if (noteButton) noteButton.disabled = true;
+    setDashboardInternalNoteMessage("loading", "Interne Notiz wird gespeichert …");
+
+    try {
+      await createDashboardInternalNote(
+        dashboardCurrentSession,
+        dashboardSelectedRequestId,
+        text,
+        dashboardCurrentEmployeeProfile
+      );
+
+      if (noteText) noteText.value = "";
+      setDashboardInternalNoteMessage("success", "Interne Notiz wurde gespeichert.");
+      const ticket = dashboardRequestCache.find(item => item.id === dashboardSelectedRequestId);
+      await loadDashboardTicketExtras(ticket);
+    } catch (error) {
+      setDashboardInternalNoteMessage("error", error.message || "Interne Notiz konnte nicht gespeichert werden.");
+    } finally {
+      if (noteButton) noteButton.disabled = !dashboardSelectedRequestId;
+    }
+  });
+
   bindDashboardAuth();
 }
 function bindDashboardAuth() {
@@ -4695,6 +4813,7 @@ function bindDashboardAuth() {
 
   function showDashboard(profile, session) {
     dashboardCurrentSession = session;
+    dashboardCurrentEmployeeProfile = profile;
     gate.classList.add("is-hidden");
     protectedArea.classList.remove("is-hidden");
 
@@ -4757,6 +4876,7 @@ function bindDashboardAuth() {
     clearEmployeeSession();
     dashboardRequestCache = [];
     dashboardCurrentSession = null;
+    dashboardCurrentEmployeeProfile = null;
     clearTicketExtras();
     showLogin();
     setMessage("success", "Abgemeldet", "Die lokale Sitzung wurde beendet.");

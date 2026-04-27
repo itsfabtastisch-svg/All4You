@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2788,4 +2788,18 @@ label {
   .rental-result-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   Supabase Teststatus
+   DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
+   ========================================================================== */
+
+.mail-preview-btn {
+  margin-top: 14px;
+}
+
+.distance-result .form-note {
+  margin-top: 10px;
+  margin-bottom: 0;
 }

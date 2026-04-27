@@ -1,6 +1,101 @@
+
+/* ==========================================================================
+   Supabase Verbindung
+   Wichtig: Publishable Key ist browsergeeignet, Secret Key niemals hier eintragen.
+   ========================================================================== */
+
+const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WcOv91u6w7XLAE9SXwRb5A_AvKQHmZk";
+
+function isSupabaseConfigured() {
+  return Boolean(
+    SUPABASE_URL &&
+    SUPABASE_PUBLISHABLE_KEY &&
+    SUPABASE_URL.startsWith("https://") &&
+    SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")
+  );
+}
+
+function splitContactValue(contactValue) {
+  const contact = String(contactValue || "").trim();
+
+  if (!contact) {
+    return { email: null, phone: null };
+  }
+
+  if (contact.includes("@")) {
+    return { email: contact, phone: null };
+  }
+
+  return { email: null, phone: contact };
+}
+
+async function createPublicRequest(payload) {
+  if (!isSupabaseConfigured()) {
+    throw new Error("Supabase ist noch nicht konfiguriert.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/create_public_request`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  let data = null;
+  const text = await response.text();
+
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+
+  if (!response.ok) {
+    const message =
+      data?.message ||
+      data?.hint ||
+      data?.details ||
+      (typeof data === "string" ? data : "Supabase Anfrage konnte nicht gespeichert werden.");
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+function buildCleaningSummaryText(summary) {
+  const parts = [
+    summary.customerType,
+    summary.businessName ? `Firma: ${summary.businessName}` : "",
+    summary.cleaningType,
+    summary.objectType,
+    summary.area ? `Fläche: ${summary.area}` : "",
+    summary.interval ? `Turnus: ${summary.interval}` : "",
+    summary.desiredDate ? `Wunschtermin: ${summary.desiredDate}` : ""
+  ].filter(Boolean);
+
+  return parts.length
+    ? `Reinigungsanfrage: ${parts.join(" · ")}`
+    : "Reinigungsanfrage über den Webseiten-Assistenten.";
+}
+
+function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E-Mail öffnen") {
+  const mailButton = document.createElement("a");
+  mailButton.className = "btn blue mail-preview-btn";
+  mailButton.href = href;
+  mailButton.textContent = text;
+  result.appendChild(mailButton);
+}
+
+
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
+// DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2533,19 +2628,12 @@ function bindCleaningWizard() {
 
   customerType?.addEventListener("change", updateBusinessField);
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     renderSummary();
 
     const summary = collectSummary();
-    result.classList.add("show");
-    result.innerHTML = `
-      <strong>Reinigungs-Anfrage vorbereitet</strong>
-      <p>
-        Die Anfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
-        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
-      </p>
-    `;
+    const contact = splitContactValue(summary.contact);
 
     const subject = encodeURIComponent("Anfrage über die Webseite: Reinigungsservice");
     const body = encodeURIComponent(
@@ -2568,12 +2656,71 @@ function bindCleaningWizard() {
       `Besondere Bereiche: ${summary.specialAreas}\n\n` +
       `Nachricht:\n${summary.message}`
     );
+    const mailHref = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
 
-    const mailButton = document.createElement("a");
-    mailButton.className = "btn blue mail-preview-btn";
-    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
-    mailButton.textContent = "Anfrage per E-Mail öffnen";
-    result.appendChild(mailButton);
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Reinigungs-Anfrage wird gespeichert …</strong>
+      <p>
+        Einen Moment bitte. Die Anfrage wird gerade in Supabase gespeichert.
+      </p>
+    `;
+
+    try {
+      const response = await createPublicRequest({
+        p_service: "reinigung",
+        p_source: "wizard",
+        p_customer_name: summary.name,
+        p_customer_email: contact.email,
+        p_customer_phone: contact.phone,
+        p_subject: "Reinigungsanfrage",
+        p_summary: buildCleaningSummaryText(summary),
+        p_details: {
+          customer_type: summary.customerType,
+          business_name: summary.businessName,
+          cleaning_type: summary.cleaningType,
+          object_type: summary.objectType,
+          address: summary.address,
+          area: summary.area,
+          rooms: summary.rooms,
+          interval: summary.interval,
+          desired_date: summary.desiredDate,
+          after_clearance: summary.afterClearance,
+          materials: summary.materials,
+          photos: summary.photos,
+          price_model: summary.priceModel,
+          special_areas: summary.specialAreas,
+          message: summary.message
+        },
+        p_initial_message: summary.message
+      });
+
+      const ticketNumber = response?.ticket_number || "wurde erstellt";
+
+      result.innerHTML = `
+        <strong>Anfrage erfolgreich gespeichert</strong>
+        <p>
+          Die Reinigungs-Anfrage wurde in Supabase gespeichert.
+          <br><b>Ticketnummer:</b> ${escapeHtml(ticketNumber)}
+          <br><b>Status:</b> neu
+        </p>
+        <p class="form-note">
+          Aktuell ist zusätzlich noch die E-Mail-Vorschau verfügbar. Später wird der automatische E-Mail-Versand direkt über das Backend laufen.
+        </p>
+      `;
+      appendMailPreviewButton(result, mailHref);
+    } catch (error) {
+      result.innerHTML = `
+        <strong>Supabase-Speicherung fehlgeschlagen</strong>
+        <p>
+          Die Anfrage konnte noch nicht in Supabase gespeichert werden.
+          Sie können die Anfrage aber weiterhin per E-Mail vorbereiten.
+        </p>
+        <p class="form-note">${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+      `;
+      appendMailPreviewButton(result, mailHref, "Anfrage per E-Mail öffnen");
+    }
+
     result.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, { once: false });
 

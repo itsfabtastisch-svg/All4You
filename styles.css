@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .dashboard-shell {
@@ -3263,7 +3263,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .is-hidden {
@@ -3417,7 +3417,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .auth-message.success {
@@ -3437,7 +3437,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3492,7 +3492,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3569,7 +3569,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
    ========================================================================== */
 
 .dashboard-detail {
@@ -3711,5 +3711,149 @@ label {
 @media (max-width: 900px) {
   .detail-section-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Dashboard Service-Farben + Header Polish
+   DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
+   ========================================================================== */
+
+.site-header {
+  grid-template-columns: 280px minmax(0, 1fr) 230px;
+  padding: 14px 58px;
+  gap: 24px;
+}
+
+.brand-card {
+  width: 252px;
+  height: 66px;
+  border-radius: 15px;
+}
+
+.main-nav {
+  justify-self: center;
+  gap: 32px;
+}
+
+.header-cta {
+  justify-self: end;
+  min-width: 178px;
+}
+
+.dashboard-ticket,
+.detail-ticket-hero,
+.detail-summary-block {
+  --service-accent: var(--teal-2);
+  --service-soft: rgba(10,169,155,.09);
+  --service-border: rgba(10,169,155,.24);
+}
+
+.service-rollerabholservice {
+  --service-accent: #064a7a;
+  --service-soft: rgba(6,74,122,.08);
+  --service-border: rgba(6,74,122,.24);
+}
+
+.service-entruempelung {
+  --service-accent: #08766d;
+  --service-soft: rgba(8,118,109,.08);
+  --service-border: rgba(8,118,109,.24);
+}
+
+.service-anhaenger {
+  --service-accent: #0aa99b;
+  --service-soft: rgba(10,169,155,.09);
+  --service-border: rgba(10,169,155,.25);
+}
+
+.service-reinigung {
+  --service-accent: #2f3f4a;
+  --service-soft: rgba(47,63,74,.08);
+  --service-border: rgba(47,63,74,.24);
+}
+
+.dashboard-ticket {
+  position: relative;
+  border-left: 6px solid var(--service-accent);
+  background:
+    linear-gradient(90deg, var(--service-soft), rgba(255,255,255,.76) 18%),
+    rgba(255,255,255,.74);
+}
+
+.dashboard-ticket:hover,
+.dashboard-ticket.active {
+  border-left-color: var(--service-accent);
+  border-top-color: var(--service-border);
+  border-right-color: var(--service-border);
+  border-bottom-color: var(--service-border);
+  box-shadow: 0 14px 30px var(--service-soft);
+}
+
+.dashboard-ticket .ticket-service {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  color: var(--service-accent);
+  font-weight: 950;
+}
+
+.dashboard-ticket .ticket-service::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: var(--service-accent);
+  box-shadow: 0 0 0 4px var(--service-soft);
+}
+
+.detail-ticket-hero {
+  border-color: var(--service-border);
+  background:
+    radial-gradient(circle at 86% 2%, var(--service-soft), transparent 11rem),
+    linear-gradient(135deg, var(--service-soft), rgba(255,255,255,.80));
+}
+
+.detail-ticket-hero div:first-child {
+  border-left: 4px solid var(--service-accent);
+}
+
+.detail-ticket-hero div:nth-child(2) strong,
+.detail-ticket-hero div:nth-child(2) span {
+  color: var(--service-accent);
+}
+
+.detail-summary-block {
+  border-color: var(--service-border);
+  background:
+    radial-gradient(circle at 92% 0%, var(--service-soft), transparent 12rem),
+    linear-gradient(135deg, var(--service-soft), rgba(255,255,255,.82));
+}
+
+.detail-summary-block span {
+  color: var(--service-accent);
+}
+
+@media (max-width: 1180px) {
+  .site-header {
+    grid-template-columns: 245px 1fr auto;
+    padding: 14px 28px;
+  }
+
+  .brand-card {
+    width: 226px;
+    height: 60px;
+  }
+
+  .main-nav {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .brand-card {
+    width: 210px;
+    height: 56px;
   }
 }

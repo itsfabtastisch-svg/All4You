@@ -122,6 +122,16 @@ async function fetchEmployeeProfile(session) {
 
 let dashboardRequestCache = [];
 
+
+function serviceAccentClass(service) {
+  const clean = String(service || "allgemein")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "");
+
+  return `service-${clean || "allgemein"}`;
+}
+
+
 function serviceLabel(service) {
   const labels = {
     reinigung: "Reinigung",
@@ -250,7 +260,7 @@ function renderDashboardTickets(tickets) {
   }
 
   list.innerHTML = dashboardRequestCache.map((ticket, index) => `
-    <button class="dashboard-ticket ${index === 0 ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+    <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${index === 0 ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
       <span class="ticket-topline">
         <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
         <em>${escapeHtml(statusLabel(ticket.status))}</em>
@@ -643,7 +653,7 @@ function renderDashboardDetailSection(title, entries, options = {}) {
 
 function renderDashboardDetailHero(ticket) {
   return `
-    <div class="detail-ticket-hero">
+    <div class="detail-ticket-hero ${serviceAccentClass(ticket.service)}">
       <div>
         <span>Ticket</span>
         <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
@@ -664,7 +674,7 @@ function renderDashboardSummaryBlock(ticket) {
   if (!ticket.summary && !ticket.subject) return "";
 
   return `
-    <section class="detail-summary-block">
+    <section class="detail-summary-block ${serviceAccentClass(ticket.service)}">
       <span>Zusammenfassung</span>
       <p>${escapeHtml(ticket.summary || ticket.subject)}</p>
     </section>
@@ -822,7 +832,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
+// DBG: ALL4YOU-ROUTER-V3.9.2-DASHBOARD-COLOR-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

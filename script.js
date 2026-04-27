@@ -269,7 +269,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
+// DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3834,34 +3834,125 @@ function bindTrailerWizard() {
 
 
 
+
 function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
   const title = document.querySelector("#dashboardDetailTitle");
   const body = document.querySelector("#dashboardDetailBody");
 
-  if (!list || !title || !body) return;
+  if (list && title && body) {
+    list.addEventListener("click", event => {
+      const ticketButton = event.target.closest(".dashboard-ticket");
+      if (!ticketButton) return;
 
-  list.addEventListener("click", event => {
-    const ticketButton = event.target.closest(".dashboard-ticket");
-    if (!ticketButton) return;
+      list.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
+      ticketButton.classList.add("active");
 
-    list.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
-    ticketButton.classList.add("active");
+      let ticket = null;
+      try {
+        ticket = JSON.parse(ticketButton.dataset.ticket || "{}");
+      } catch {
+        ticket = null;
+      }
 
-    let ticket = null;
-    try {
-      ticket = JSON.parse(ticketButton.dataset.ticket || "{}");
-    } catch {
-      ticket = null;
+      if (!ticket) return;
+
+      title.textContent = ticket.id || "Ticket";
+      body.innerHTML = (ticket.details || [])
+        .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`)
+        .join("");
+    });
+  }
+
+  bindDashboardAuth();
+}
+
+function bindDashboardAuth() {
+  const gate = document.querySelector("#dashboardAuthGate");
+  const protectedArea = document.querySelector("#dashboardProtectedArea");
+  const form = document.querySelector("#dashboardLoginForm");
+  const message = document.querySelector("#dashboardAuthMessage");
+  const logoutButton = document.querySelector("#dashboardLogoutButton");
+  const employeeName = document.querySelector("#dashboardEmployeeName");
+  const employeeMeta = document.querySelector("#dashboardEmployeeMeta");
+
+  if (!gate || !protectedArea || !form || !message) return;
+
+  function setMessage(type, title, text) {
+    message.classList.remove("success", "error", "loading");
+    if (type) message.classList.add(type);
+    message.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(text)}</p>`;
+  }
+
+  function showLogin() {
+    gate.classList.remove("is-hidden");
+    protectedArea.classList.add("is-hidden");
+  }
+
+  function showDashboard(profile) {
+    gate.classList.add("is-hidden");
+    protectedArea.classList.remove("is-hidden");
+
+    if (employeeName) employeeName.textContent = profile.display_name || "Mitarbeiter";
+    if (employeeMeta) employeeMeta.textContent = `${profile.email || "angemeldet"} · ${profile.role || "mitarbeiter"}`;
+  }
+
+  async function validateStoredSession() {
+    const session = getStoredEmployeeSession();
+
+    if (!session) {
+      showLogin();
+      setMessage("loading", "Bereit", "Bitte mit Mitarbeiterkonto einloggen.");
+      return;
     }
 
-    if (!ticket) return;
+    setMessage("loading", "Sitzung wird geprüft", "Mitarbeiterprofil wird aus Supabase geladen.");
 
-    title.textContent = ticket.id || "Ticket";
-    body.innerHTML = (ticket.details || [])
-      .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`)
-      .join("");
+    try {
+      const profile = await fetchEmployeeProfile(session);
+      showDashboard(profile);
+    } catch (error) {
+      clearEmployeeSession();
+      showLogin();
+      setMessage("error", "Zugriff nicht möglich", error.message || "Sitzung konnte nicht geprüft werden.");
+    }
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const data = new FormData(form);
+    const email = String(data.get("email") || "").trim();
+    const password = String(data.get("password") || "");
+
+    setMessage("loading", "Login läuft", "Supabase Auth prüft die Zugangsdaten.");
+
+    try {
+      const session = await supabasePasswordLogin(email, password);
+      storeEmployeeSession(session);
+
+      const storedSession = getStoredEmployeeSession();
+      const profile = await fetchEmployeeProfile(storedSession);
+
+      setMessage("success", "Login erfolgreich", "Mitarbeiterprofil wurde gefunden.");
+      showDashboard(profile);
+      form.reset();
+    } catch (error) {
+      clearEmployeeSession();
+      showLogin();
+      setMessage("error", "Login fehlgeschlagen", error.message || "Bitte Zugangsdaten prüfen.");
+    }
   });
+
+  logoutButton?.addEventListener("click", async () => {
+    const session = getStoredEmployeeSession();
+    await supabaseLogout(session?.access_token);
+    clearEmployeeSession();
+    showLogin();
+    setMessage("success", "Abgemeldet", "Die lokale Sitzung wurde beendet.");
+  });
+
+  validateStoredSession();
 }
 
 

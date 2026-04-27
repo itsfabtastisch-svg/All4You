@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2597,4 +2597,101 @@ label {
 
 #clearanceWizardResult {
   margin: 0 22px 22px;
+}
+
+/* ==========================================================================
+   Rollerabholservice-Wizard
+   DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
+   ========================================================================== */
+
+.roller-wizard-card {
+  overflow: hidden;
+}
+
+.roller-wizard {
+  margin-top: 22px;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(10,169,155,.13), transparent 18rem),
+    linear-gradient(135deg, rgba(255,255,255,.95), rgba(238,246,250,.86));
+  box-shadow: 0 18px 44px rgba(16, 38, 60, .11);
+  overflow: hidden;
+}
+
+.route-preview-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(10,169,155,.22);
+  background: rgba(255,255,255,.72);
+}
+
+.route-preview-box strong {
+  display: block;
+  color: var(--navy);
+  margin-bottom: 5px;
+  font-size: 17px;
+}
+
+.route-preview-box p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.route-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.route-status-grid div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(238,246,250,.72);
+  border: 1px solid rgba(19,35,58,.1);
+}
+
+.route-status-grid strong {
+  color: var(--navy);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.route-status-grid span {
+  color: var(--teal-2);
+  font-weight: 900;
+}
+
+#rollerWizardSubmit {
+  display: none;
+}
+
+#rollerWizardResult {
+  margin: 0 22px 22px;
+}
+
+@media (max-width: 900px) {
+  .route-preview-box {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .route-preview-box .btn {
+    width: 100%;
+  }
+
+  .route-status-grid {
+    grid-template-columns: 1fr;
+  }
 }

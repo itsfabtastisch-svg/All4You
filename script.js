@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+// DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -220,8 +220,8 @@ function rollerPage() {
         zum Beispiel nach Hause, zur Werkstatt oder zu einem anderen Standort. Auch defekte Roller sind möglich.
       </p>
       <div class="inline-actions">
-        <a class="btn primary" href="#strecke">Transportstrecke prüfen <span>›</span></a>
-        <a class="btn ghost" href="/kontakt" data-link>Anfrage senden <span>›</span></a>
+        <a class="btn primary" href="#roller-anfrage">Roller-Anfrage starten <span>›</span></a>
+        <a class="btn ghost" href="#ablauf">Ablauf ansehen <span>›</span></a>
       </div>
     </section>
 
@@ -273,90 +273,174 @@ function rollerPage() {
       </div>
 
       <aside class="notice-box">
-        <p class="eyebrow">Preis & Aufwand</p>
-        <h2>Individuell nach Strecke und Situation.</h2>
+        <p class="eyebrow">Preis & Strecke</p>
+        <h2>Distanz als Grundlage für die Einschätzung.</h2>
         <p>
-          Der Preis wird individuell festgelegt und richtet sich unter anderem nach Entfernung, Zustand des Rollers,
-          Zugänglichkeit und Aufwand beim Verladen. Nach Ihrer Anfrage erhalten Sie eine passende Rückmeldung.
+          Später sollen Abholort und Zielort mit Google Maps verbunden werden. Dann kann die Strecke automatisch geprüft
+          und als Distanz mit in die Anfrage übernommen werden. Der Preis bleibt trotzdem individuell, weil Zustand,
+          Zugänglichkeit und Aufwand ebenfalls wichtig sind.
         </p>
       </aside>
     </section>
 
-    <section class="section-pad">
-      <p class="eyebrow">Ablauf</p>
-      <h2>So läuft der Rollerabholservice ab.</h2>
-      <div class="steps five-steps">
-        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie geben Abholort, Zielort und Zustand des Rollers an.</p></article>
-        <article class="step"><span>2</span><h3>Aufwand prüfen</h3><p>All4You prüft Strecke, Zugänglichkeit und Transportmöglichkeit.</p></article>
-        <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie erhalten eine Einschätzung zum Ablauf und Preis.</p></article>
-        <article class="step"><span>4</span><h3>Termin abstimmen</h3><p>Der passende Abholtermin wird gemeinsam vereinbart.</p></article>
-        <article class="step"><span>5</span><h3>Roller transportieren</h3><p>Der Roller wird abgeholt und zuverlässig zum Ziel gebracht.</p></article>
-      </div>
-    </section>
-
-    <section class="section-pad two-col" id="strecke">
-      <div class="form-card">
-        <p class="eyebrow">Transportstrecke prüfen</p>
-        <h2>Abholort und Zielort eintragen.</h2>
+    <section class="section-pad two-col" id="roller-anfrage">
+      <div class="form-card roller-wizard-card">
+        <p class="eyebrow">Roller-Assistent</p>
+        <h2>Rollerabholservice Schritt für Schritt anfragen.</h2>
         <p class="lead">
-          Die Distanz dient nur zur besseren Einschätzung der Anfrage. Der endgültige Preis wird individuell nach Strecke,
-          Zustand, Aufwand und Zugänglichkeit bestätigt.
+          Der Assistent fragt erst Abholort und Zielort ab, bereitet später die Distanzmessung per Google Maps vor
+          und sammelt danach Fahrzeugzustand, Zugänglichkeit und Kontaktangaben.
         </p>
 
-        <form class="route-tool" id="routeForm">
-          <div class="form-grid">
-            <label>Abholort
-              <input name="pickup" placeholder="z. B. Musterstraße 1, München" required>
-            </label>
-            <label>Zielort
-              <input name="dropoff" placeholder="z. B. Werkstattstraße 12, München" required>
-            </label>
-            <label>Fahrzeugart
-              <select name="vehicle">
-                <option>Roller / Motorroller</option>
-                <option>E-Roller / Elektro-Roller</option>
-                <option>Moped / Mokick</option>
-                <option>Anderes Zweirad</option>
-              </select>
-            </label>
-            <label>Zustand
-              <select name="condition">
-                <option>fahrbereit</option>
-                <option>defekt, aber rollbar</option>
-                <option>defekt, nicht rollbar</option>
-                <option>unbekannt / muss geprüft werden</option>
-              </select>
-            </label>
-            <label>Zugänglichkeit
-              <select name="access">
-                <option>steht ebenerdig</option>
-                <option>Straße / öffentlicher Bereich</option>
-                <option>Hof / Privatgrundstück</option>
-                <option>Garage</option>
-                <option>Tiefgarage</option>
-              </select>
-            </label>
-            <label>Kontakt
-              <input name="contact" placeholder="Telefon oder E-Mail">
-            </label>
-          </div>
-          <label>Nachricht
-            <textarea name="message" rows="4" placeholder="z. B. Schlüssel vorhanden, Lenkschloss aktiv, Roller steht im Hof..."></textarea>
-          </label>
-
-          <button class="btn primary" type="submit">Roller-Anfrage vorbereiten <span>›</span></button>
-
-          <div class="distance-result" id="distanceResult">
-            <strong>Roller-Anfrage vorbereitet</strong>
-            <p>
-              Die Felder sind als Anfrage-Assistent vorbereitet. Die echte Kilometer- und Fahrzeitberechnung kann später über Google Maps / Routes API angebunden werden.
-            </p>
+        <div class="roller-wizard" id="rollerWizard" data-current-step="0">
+          <div class="wizard-top">
+            <div>
+              <span class="wizard-kicker" id="rollerWizardCounter">Schritt 1 von 5</span>
+              <h3 id="rollerWizardTitle">Strecke & Distanz</h3>
+            </div>
+            <div class="wizard-progress">
+              <span id="rollerWizardProgress"></span>
+            </div>
           </div>
 
-          <p class="form-note">
-            Technischer Hinweis: Die echte Distanzberechnung ist für später geplant. Aktuell wird die Anfrage als strukturierte E-Mail vorbereitet.
-          </p>
-        </form>
+          <form id="rollerWizardForm" class="wizard-form">
+            <div class="wizard-step active" data-title="Strecke & Distanz">
+              <div class="form-grid">
+                <label>Abholort
+                  <input name="pickup" id="rollerPickup" placeholder="z. B. Musterstraße 1, München" required>
+                </label>
+                <label>Zielort
+                  <input name="dropoff" id="rollerDropoff" placeholder="z. B. Werkstattstraße 12, München" required>
+                </label>
+              </div>
+
+              <div class="route-preview-box" id="rollerRoutePreview">
+                <div>
+                  <strong>Distanzmessung vorbereitet</strong>
+                  <p>
+                    Später werden diese Felder mit Google Maps Places/Routes verbunden, damit nur gültige Adressen gewählt
+                    und Entfernung sowie Fahrzeit automatisch berechnet werden können.
+                  </p>
+                </div>
+                <button class="btn ghost" type="button" id="rollerMockDistance">Strecke vormerken</button>
+              </div>
+
+              <div class="route-status-grid">
+                <div><strong>Distanz</strong><span id="rollerDistanceValue">wird später automatisch berechnet</span></div>
+                <div><strong>Fahrzeit</strong><span id="rollerDurationValue">wird später automatisch berechnet</span></div>
+              </div>
+
+              <p class="form-note">
+                Der spätere Google-Maps-Anschluss soll Abholort, Zielort, Distanz und Fahrzeit automatisch in die Anfrage übernehmen.
+              </p>
+            </div>
+
+            <div class="wizard-step" data-title="Fahrzeugdaten">
+              <div class="form-grid">
+                <label>Fahrzeugart
+                  <select name="vehicle">
+                    <option>Roller / Motorroller</option>
+                    <option>E-Roller / Elektro-Roller</option>
+                    <option>Moped / Mokick</option>
+                    <option>Anderes Zweirad</option>
+                  </select>
+                </label>
+                <label>Zustand
+                  <select name="condition">
+                    <option>fahrbereit</option>
+                    <option>defekt, aber rollbar</option>
+                    <option>defekt, nicht rollbar</option>
+                    <option>unbekannt / muss geprüft werden</option>
+                  </select>
+                </label>
+                <label>Schlüssel vorhanden?
+                  <select name="hasKey">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher</option>
+                  </select>
+                </label>
+                <label>Roller angemeldet?
+                  <select name="registered">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher / nicht relevant</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Zugänglichkeit">
+              <div class="form-grid">
+                <label>Wo steht der Roller?
+                  <select name="access">
+                    <option>steht ebenerdig</option>
+                    <option>Straße / öffentlicher Bereich</option>
+                    <option>Hof / Privatgrundstück</option>
+                    <option>Garage</option>
+                    <option>Tiefgarage</option>
+                    <option>schwer zugänglich</option>
+                  </select>
+                </label>
+                <label>Kann der Roller geschoben werden?
+                  <select name="rollable">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher</option>
+                  </select>
+                </label>
+                <label>Besondere Situation
+                  <select name="specialSituation">
+                    <option>keine Besonderheit</option>
+                    <option>Lenkschloss aktiv</option>
+                    <option>enge Einfahrt / Hof</option>
+                    <option>Tiefgarage mit Höhenbegrenzung</option>
+                    <option>muss vor Ort geprüft werden</option>
+                  </select>
+                </label>
+                <label>Wunschtermin
+                  <input name="desiredDate" placeholder="z. B. heute, morgen, nächste Woche...">
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Kontakt & Nachricht">
+              <div class="form-grid wizard-message-grid">
+                <label>Ihr Name
+                  <input name="name" placeholder="Ihr Name" required>
+                </label>
+                <label>Telefon oder E-Mail
+                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                </label>
+                <label>Nachricht
+                  <textarea name="message" rows="4" placeholder="z. B. Schlüsselübergabe, Werkstattname, Roller steht im Hof, Lenkschloss aktiv..."></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Zusammenfassung prüfen">
+              <div class="wizard-summary" id="rollerWizardSummary"></div>
+              <p class="form-note">
+                Die Anfrage ist unverbindlich. Die Distanz dient später zur Einschätzung. Der endgültige Preis wird nach Strecke,
+                Zustand, Zugänglichkeit und Aufwand bestätigt.
+              </p>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="btn ghost" type="button" id="rollerWizardPrev">Zurück</button>
+              <button class="btn primary" type="button" id="rollerWizardNext">Weiter <span>›</span></button>
+              <button class="btn primary" type="submit" id="rollerWizardSubmit">Anfrage vorbereiten <span>›</span></button>
+            </div>
+
+            <div class="distance-result" id="rollerWizardResult">
+              <strong>Roller-Anfrage vorbereitet</strong>
+              <p>
+                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
+                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
 
       <aside class="faq-card">
@@ -384,6 +468,18 @@ function rollerPage() {
           </article>
         </div>
       </aside>
+    </section>
+
+    <section class="section-pad" id="ablauf">
+      <p class="eyebrow">Ablauf</p>
+      <h2>So läuft der Rollerabholservice ab.</h2>
+      <div class="steps five-steps">
+        <article class="step"><span>1</span><h3>Strecke eintragen</h3><p>Abholort und Zielort werden angegeben und später per Google Maps geprüft.</p></article>
+        <article class="step"><span>2</span><h3>Roller beschreiben</h3><p>Fahrzeugart, Zustand und Rollbarkeit werden erfasst.</p></article>
+        <article class="step"><span>3</span><h3>Zugang klären</h3><p>Standort, Garage, Tiefgarage oder besondere Situationen werden angegeben.</p></article>
+        <article class="step"><span>4</span><h3>Kontakt senden</h3><p>All4You erhält die vorbereitete Anfrage mit allen wichtigen Daten.</p></article>
+        <article class="step"><span>5</span><h3>Transport abstimmen</h3><p>Termin, Preis und Ablauf werden nach Prüfung bestätigt.</p></article>
+      </div>
     </section>
   `;
 }
@@ -1977,6 +2073,7 @@ function renderRoute() {
   bindCleaningTool();
   bindCleaningWizard();
   bindClearanceWizard();
+  bindRollerWizard();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -2608,6 +2705,175 @@ function bindClearanceWizard() {
       `Zusatzleistung: ${summary.extraService}\n\n` +
       `Was soll entrümpelt werden?\n${summary.clearanceItems}\n\n` +
       `Besondere Hinweise:\n${summary.message}`
+    );
+
+    const mailButton = document.createElement("a");
+    mailButton.className = "btn blue mail-preview-btn";
+    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
+    mailButton.textContent = "Anfrage per E-Mail öffnen";
+    result.appendChild(mailButton);
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, { once: false });
+
+  updateWizard();
+}
+
+
+
+function bindRollerWizard() {
+  const wizard = document.querySelector("#rollerWizard");
+  const form = document.querySelector("#rollerWizardForm");
+  const result = document.querySelector("#rollerWizardResult");
+  const prev = document.querySelector("#rollerWizardPrev");
+  const next = document.querySelector("#rollerWizardNext");
+  const submit = document.querySelector("#rollerWizardSubmit");
+  const counter = document.querySelector("#rollerWizardCounter");
+  const title = document.querySelector("#rollerWizardTitle");
+  const progress = document.querySelector("#rollerWizardProgress");
+  const summaryBox = document.querySelector("#rollerWizardSummary");
+  const mockDistanceButton = document.querySelector("#rollerMockDistance");
+  const distanceValue = document.querySelector("#rollerDistanceValue");
+  const durationValue = document.querySelector("#rollerDurationValue");
+
+  if (!wizard || !form || !result || !prev || !next || !submit) return;
+
+  const steps = Array.from(form.querySelectorAll(".wizard-step"));
+  let current = 0;
+  let routeInfo = {
+    distance: "wird später automatisch berechnet",
+    duration: "wird später automatisch berechnet"
+  };
+
+  function collectSummary() {
+    const data = new FormData(form);
+    return {
+      pickup: data.get("pickup") || "",
+      dropoff: data.get("dropoff") || "",
+      distance: routeInfo.distance,
+      duration: routeInfo.duration,
+      vehicle: data.get("vehicle") || "",
+      condition: data.get("condition") || "",
+      hasKey: data.get("hasKey") || "",
+      registered: data.get("registered") || "",
+      access: data.get("access") || "",
+      rollable: data.get("rollable") || "",
+      specialSituation: data.get("specialSituation") || "",
+      desiredDate: data.get("desiredDate") || "",
+      name: data.get("name") || "",
+      contact: data.get("contact") || "",
+      message: data.get("message") || ""
+    };
+  }
+
+  function renderSummary() {
+    if (!summaryBox) return;
+    const summary = collectSummary();
+    summaryBox.innerHTML = `
+      <div><strong>Abholort</strong><span>${escapeHtml(summary.pickup || "—")}</span></div>
+      <div><strong>Zielort</strong><span>${escapeHtml(summary.dropoff || "—")}</span></div>
+      <div><strong>Distanz</strong><span>${escapeHtml(summary.distance || "—")}</span></div>
+      <div><strong>Fahrzeit</strong><span>${escapeHtml(summary.duration || "—")}</span></div>
+      <div><strong>Fahrzeugart</strong><span>${escapeHtml(summary.vehicle || "—")}</span></div>
+      <div><strong>Zustand</strong><span>${escapeHtml(summary.condition || "—")}</span></div>
+      <div><strong>Schlüssel</strong><span>${escapeHtml(summary.hasKey || "—")}</span></div>
+      <div><strong>Angemeldet</strong><span>${escapeHtml(summary.registered || "—")}</span></div>
+      <div><strong>Zugänglichkeit</strong><span>${escapeHtml(summary.access || "—")}</span></div>
+      <div><strong>Rollbar</strong><span>${escapeHtml(summary.rollable || "—")}</span></div>
+      <div><strong>Besondere Situation</strong><span>${escapeHtml(summary.specialSituation || "—")}</span></div>
+      <div><strong>Wunschtermin</strong><span>${escapeHtml(summary.desiredDate || "—")}</span></div>
+      <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
+      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div class="summary-wide"><strong>Nachricht</strong><span>${escapeHtml(summary.message || "—")}</span></div>
+    `;
+  }
+
+  function updateWizard() {
+    steps.forEach((step, index) => {
+      step.classList.toggle("active", index === current);
+    });
+
+    const active = steps[current];
+    if (counter) counter.textContent = `Schritt ${current + 1} von ${steps.length}`;
+    if (title) title.textContent = active?.dataset.title || "";
+    if (progress) progress.style.width = `${((current + 1) / steps.length) * 100}%`;
+
+    prev.disabled = current === 0;
+    next.style.display = current === steps.length - 1 ? "none" : "inline-flex";
+    submit.style.display = current === steps.length - 1 ? "inline-flex" : "none";
+
+    if (current === steps.length - 1) renderSummary();
+  }
+
+  function validateStep() {
+    const activeInputs = Array.from(steps[current].querySelectorAll("input, select, textarea"));
+    for (const field of activeInputs) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  mockDistanceButton?.addEventListener("click", () => {
+    const summary = collectSummary();
+    if (!summary.pickup || !summary.dropoff) {
+      alert("Bitte zuerst Abholort und Zielort eintragen.");
+      return;
+    }
+
+    routeInfo = {
+      distance: "Google Maps Anbindung vorbereitet",
+      duration: "wird mit Routes API berechnet"
+    };
+
+    if (distanceValue) distanceValue.textContent = routeInfo.distance;
+    if (durationValue) durationValue.textContent = routeInfo.duration;
+  });
+
+  prev.addEventListener("click", () => {
+    current = Math.max(0, current - 1);
+    updateWizard();
+  });
+
+  next.addEventListener("click", () => {
+    if (!validateStep()) return;
+    current = Math.min(steps.length - 1, current + 1);
+    updateWizard();
+  });
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    renderSummary();
+
+    const summary = collectSummary();
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Roller-Anfrage vorbereitet</strong>
+      <p>
+        Die Anfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
+        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt. Die Distanzmessung ist für Google Maps vorbereitet.
+      </p>
+    `;
+
+    const subject = encodeURIComponent("Anfrage über die Webseite: Rollerabholservice");
+    const body = encodeURIComponent(
+      `Neue Rollerabholservice-Anfrage\n\n` +
+      `Abholort: ${summary.pickup}\n` +
+      `Zielort: ${summary.dropoff}\n` +
+      `Distanz: ${summary.distance}\n` +
+      `Fahrzeit: ${summary.duration}\n\n` +
+      `Fahrzeugart: ${summary.vehicle}\n` +
+      `Zustand: ${summary.condition}\n` +
+      `Schlüssel vorhanden: ${summary.hasKey}\n` +
+      `Angemeldet: ${summary.registered}\n` +
+      `Zugänglichkeit: ${summary.access}\n` +
+      `Rollbar: ${summary.rollable}\n` +
+      `Besondere Situation: ${summary.specialSituation}\n` +
+      `Wunschtermin: ${summary.desiredDate}\n\n` +
+      `Name: ${summary.name}\n` +
+      `Kontakt: ${summary.contact}\n\n` +
+      `Nachricht:\n${summary.message}`
     );
 
     const mailButton = document.createElement("a");

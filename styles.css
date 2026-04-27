@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2802,4 +2802,461 @@ label {
 .distance-result .form-note {
   margin-top: 10px;
   margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Mitarbeiter-Dashboard Shell
+   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   ========================================================================== */
+
+.dashboard-shell {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 120px);
+  padding: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 82% 8%, rgba(10,169,155,.14), transparent 28rem),
+    linear-gradient(135deg, #f7fbfd 0%, #eef8fa 100%);
+}
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 26px;
+  border-right: 1px solid rgba(19,35,58,.12);
+  background: linear-gradient(180deg, rgba(16,36,59,.98), rgba(18,59,98,.95));
+  color: #fff;
+}
+
+.dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 950;
+}
+
+.dashboard-brand img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: rgba(255,255,255,.92);
+  padding: 5px;
+}
+
+.dashboard-menu {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-menu a {
+  padding: 12px 13px;
+  border-radius: 14px;
+  color: rgba(255,255,255,.78);
+  text-decoration: none;
+  font-weight: 850;
+  transition: .18s ease;
+}
+
+.dashboard-menu a:hover,
+.dashboard-menu a.active {
+  color: #fff;
+  background: rgba(255,255,255,.12);
+}
+
+.dashboard-security-note {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+}
+
+.dashboard-security-note strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.dashboard-security-note p {
+  margin: 0;
+  color: rgba(255,255,255,.75);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dashboard-main {
+  padding: 28px;
+  overflow: auto;
+}
+
+.dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 26px;
+  border: 1px solid rgba(19,35,58,.1);
+  border-radius: 26px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 18px 44px rgba(16,38,60,.08);
+}
+
+.dashboard-hero h1 {
+  margin-bottom: 10px;
+}
+
+.dashboard-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(16,36,59,.08);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.status-pill.success {
+  color: #08786f;
+  background: rgba(10,169,155,.13);
+}
+
+.status-pill.warning {
+  color: #8a5a00;
+  background: rgba(255,183,77,.22);
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.dashboard-stats article {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 14px 32px rgba(16,38,60,.06);
+}
+
+.dashboard-stats span,
+.dashboard-stats small {
+  display: block;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.dashboard-stats strong {
+  display: block;
+  margin: 8px 0 4px;
+  color: var(--navy);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(380px, .75fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.dashboard-panel {
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 18px 44px rgba(16,38,60,.08);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: clamp(24px, 2vw, 34px);
+}
+
+.dashboard-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dashboard-filters button {
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: var(--navy);
+  background: rgba(238,246,250,.74);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.dashboard-filters button.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+}
+
+.dashboard-search-row {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dashboard-search-row input,
+.dashboard-search-row select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(19,35,58,.14);
+  border-radius: 14px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 750;
+  color: var(--navy);
+  background: rgba(255,255,255,.88);
+}
+
+.dashboard-ticket-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-ticket {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  text-align: left;
+  padding: 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.72);
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.dashboard-ticket:hover,
+.dashboard-ticket.active {
+  transform: translateY(-1px);
+  border-color: rgba(10,169,155,.35);
+  box-shadow: 0 14px 30px rgba(10,169,155,.09);
+}
+
+.ticket-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.ticket-topline em {
+  color: var(--teal-2);
+  font-style: normal;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+
+.ticket-service {
+  color: var(--teal-2);
+  font-weight: 950;
+}
+
+.ticket-summary,
+.ticket-meta {
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.ticket-meta {
+  font-size: 13px;
+}
+
+.dashboard-detail-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.dashboard-detail-body div {
+  display: grid;
+  gap: 5px;
+  padding: 13px;
+  border-radius: 15px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(238,246,250,.62);
+}
+
+.dashboard-detail-body strong {
+  color: var(--navy);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.dashboard-detail-body span {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.dashboard-actions .btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.dashboard-timeline {
+  margin-top: 22px;
+  display: grid;
+  gap: 13px;
+}
+
+.dashboard-timeline article {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 12px;
+}
+
+.dashboard-timeline article > span {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: var(--teal);
+  box-shadow: 0 0 0 5px rgba(10,169,155,.12);
+}
+
+.dashboard-timeline strong {
+  color: var(--navy);
+}
+
+.dashboard-timeline p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.dashboard-roadmap {
+  margin-top: 18px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.78);
+}
+
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.roadmap-grid article {
+  display: grid;
+  gap: 6px;
+  padding: 15px;
+  border-radius: 16px;
+  background: rgba(238,246,250,.74);
+  border: 1px solid rgba(19,35,58,.08);
+}
+
+.roadmap-grid strong {
+  color: var(--teal-2);
+  font-size: 18px;
+}
+
+.roadmap-grid span {
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+@media (max-width: 1220px) {
+  .dashboard-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-menu {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dashboard-security-note {
+    margin-top: 0;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-main {
+    padding: 18px;
+  }
+
+  .dashboard-hero,
+  .panel-head,
+  .dashboard-actions {
+    flex-direction: column;
+  }
+
+  .dashboard-stats,
+  .roadmap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-menu,
+  .dashboard-search-row,
+  .dashboard-detail-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard-stats,
+  .roadmap-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    padding: 18px;
+  }
 }

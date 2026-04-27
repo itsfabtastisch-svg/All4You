@@ -166,7 +166,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
+// DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1757,6 +1757,223 @@ function contactForm(buttonText = "Anfrage vorbereiten", defaultService = "Rolle
   `;
 }
 
+function pageDashboard() {
+  document.title = "Mitarbeiter-Dashboard | All4You Service München";
+  const previewTickets = [
+    {
+      id: "A4Y-2026-0005",
+      service: "Entrümpelung",
+      status: "neu",
+      customer: "Mustermann",
+      summary: "Wohnung / Entrümpelung · Entsorgung ja · Besichtigung gewünscht",
+      time: "heute · 03:17",
+      priority: "normal",
+      details: [
+        ["Leistung", "Entrümpelung"],
+        ["Status", "neu"],
+        ["Kontakt", "Telefon vorhanden"],
+        ["Quelle", "Webseiten-Wizard"],
+        ["Hinweis", "Live-Daten folgen mit Supabase Auth."]
+      ]
+    },
+    {
+      id: "A4Y-2026-0004",
+      service: "Anhänger",
+      status: "neu",
+      customer: "Mustermann",
+      summary: "Mietanfrage · Preis automatisch berechnet · Verfügbarkeit prüfen",
+      time: "heute · 03:15",
+      priority: "normal",
+      details: [
+        ["Leistung", "Anhängervermietung"],
+        ["Status", "neu"],
+        ["Mietpreis", "aus Wizard berechnet"],
+        ["Kaution", "nach Absprache"],
+        ["Hinweis", "Kalenderstatus wird später angebunden."]
+      ]
+    },
+    {
+      id: "A4Y-2026-0003",
+      service: "Roller",
+      status: "neu",
+      customer: "Mustermann",
+      summary: "Rollerabholservice · Strecke vorbereitet · Google Maps später",
+      time: "heute · 03:14",
+      priority: "normal",
+      details: [
+        ["Leistung", "Rollerabholservice"],
+        ["Status", "neu"],
+        ["Strecke", "Abholort/Zielort vorbereitet"],
+        ["Distanz", "Google Maps API später"],
+        ["Hinweis", "Routes API wird später angebunden."]
+      ]
+    },
+    {
+      id: "A4Y-2026-0002",
+      service: "Reinigung",
+      status: "neu",
+      customer: "Fabian",
+      summary: "Reinigungsanfrage · Privat/Gewerblich · Umfang & Termin",
+      time: "heute · 03:06",
+      priority: "normal",
+      details: [
+        ["Leistung", "Reinigung"],
+        ["Status", "neu"],
+        ["Quelle", "Webseiten-Wizard"],
+        ["Nachricht", "Kundennachricht wurde gespeichert"],
+        ["Hinweis", "Wurde bereits erfolgreich in Supabase getestet."]
+      ]
+    }
+  ];
+
+  const ticketCards = previewTickets.map((ticket, index) => `
+    <button class="dashboard-ticket ${index === 0 ? "active" : ""}" type="button"
+      data-ticket-index="${index}"
+      data-ticket='${escapeHtml(JSON.stringify(ticket))}'>
+      <span class="ticket-topline">
+        <strong>${ticket.id}</strong>
+        <em>${ticket.status}</em>
+      </span>
+      <span class="ticket-service">${ticket.service}</span>
+      <span class="ticket-summary">${ticket.summary}</span>
+      <span class="ticket-meta">${ticket.customer} · ${ticket.time}</span>
+    </button>
+  `).join("");
+
+  return `
+    <section class="dashboard-shell page">
+      <aside class="dashboard-sidebar">
+        <a class="dashboard-brand" href="/" data-link>
+          <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+          <span>Mitarbeiterportal</span>
+        </a>
+
+        <nav class="dashboard-menu" aria-label="Dashboard Navigation">
+          <a class="active" href="/dashboard" data-link>Übersicht</a>
+          <a href="/dashboard" data-link>Anfragen</a>
+          <a href="/dashboard" data-link>Kunden</a>
+          <a href="/dashboard" data-link>Statusverlauf</a>
+          <a href="/dashboard" data-link>YouBot</a>
+          <a href="/dashboard" data-link>Einstellungen</a>
+        </nav>
+
+        <div class="dashboard-security-note">
+          <strong>Login folgt in v3.7</strong>
+          <p>Diese Seite ist aktuell eine Dashboard-Hülle. Supabase Auth und Rechteprüfung werden im nächsten Schritt angebunden.</p>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <section class="dashboard-hero">
+          <div>
+            <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
+            <h1>Anfragen zentral verwalten.</h1>
+            <p class="lead">
+              Hier sollen später alle Wizard-Anfragen aus Supabase sichtbar werden – inklusive Ticketnummer,
+              Kunde, Leistung, Status, Nachrichten und Statusverlauf.
+            </p>
+          </div>
+          <div class="dashboard-hero-actions">
+            <span class="status-pill warning">Auth noch Platzhalter</span>
+            <span class="status-pill success">Supabase vorbereitet</span>
+          </div>
+        </section>
+
+        <section class="dashboard-stats">
+          <article><span>Neue Anfragen</span><strong>4</strong><small>Vorschau aus Testdaten</small></article>
+          <article><span>In Prüfung</span><strong>0</strong><small>Statuslogik vorbereitet</small></article>
+          <article><span>Offene Rückfragen</span><strong>0</strong><small>Nachrichtenmodul folgt</small></article>
+          <article><span>Erledigt</span><strong>0</strong><small>Später filterbar</small></article>
+        </section>
+
+        <section class="dashboard-grid">
+          <div class="dashboard-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Ticketliste</p>
+                <h2>Neue Anfragen</h2>
+              </div>
+              <div class="dashboard-filters">
+                <button class="active" type="button">Alle</button>
+                <button type="button">Neu</button>
+                <button type="button">In Prüfung</button>
+              </div>
+            </div>
+
+            <div class="dashboard-search-row">
+              <input type="search" placeholder="Suche nach Ticketnummer, Kunde oder Leistung">
+              <select>
+                <option>Alle Leistungen</option>
+                <option>Reinigung</option>
+                <option>Entrümpelung</option>
+                <option>Rollerabholservice</option>
+                <option>Anhängervermietung</option>
+              </select>
+            </div>
+
+            <div class="dashboard-ticket-list" id="dashboardTicketList">
+              ${ticketCards}
+            </div>
+          </div>
+
+          <aside class="dashboard-panel dashboard-detail">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Ticketdetails</p>
+                <h2 id="dashboardDetailTitle">A4Y-2026-0005</h2>
+              </div>
+              <span class="status-pill">neu</span>
+            </div>
+
+            <div class="dashboard-detail-body" id="dashboardDetailBody">
+              <div><strong>Leistung</strong><span>Entrümpelung</span></div>
+              <div><strong>Status</strong><span>neu</span></div>
+              <div><strong>Kontakt</strong><span>Telefon vorhanden</span></div>
+              <div><strong>Quelle</strong><span>Webseiten-Wizard</span></div>
+              <div><strong>Hinweis</strong><span>Live-Daten folgen mit Supabase Auth.</span></div>
+            </div>
+
+            <div class="dashboard-actions">
+              <button class="btn primary" type="button" disabled>Status ändern</button>
+              <button class="btn ghost" type="button" disabled>Nachricht öffnen</button>
+            </div>
+
+            <div class="dashboard-timeline">
+              <p class="eyebrow">Statusverlauf</p>
+              <article>
+                <span></span>
+                <div>
+                  <strong>Anfrage wurde erstellt.</strong>
+                  <p>Status: neu · automatisch durch Datenbank-Trigger</p>
+                </div>
+              </article>
+              <article>
+                <span></span>
+                <div>
+                  <strong>Nächster Schritt</strong>
+                  <p>In v3.8 werden echte Supabase-Daten geladen.</p>
+                </div>
+              </article>
+            </div>
+          </aside>
+        </section>
+
+        <section class="dashboard-roadmap">
+          <p class="eyebrow">Nächste Schritte</p>
+          <div class="roadmap-grid">
+            <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login</span></article>
+            <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase anzeigen</span></article>
+            <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
+            <article><strong>v4.0</strong><span>Kundenstatus, E-Mail und YouBot</span></article>
+          </div>
+        </section>
+      </main>
+    </section>
+  `;
+}
+
+
+
 function pageContact() {
   document.title = "Kontakt & Anfrage | All4You Service München";
   return `
@@ -2255,6 +2472,7 @@ function renderRoute() {
   else if (path === "/leistungen/raeumungen" || path === "/leistungen/entruempelung") html = clearancePage();
   else if (path === "/leistungen/reinigung") html = cleaningPage();
   else if (path.startsWith("/leistungen/")) html = genericServicePage(path.split("/").pop());
+  else if (path === "/dashboard" || path === "/mitarbeiter" || path === "/portal") html = pageDashboard();
   else if (path === "/kontakt") html = pageContact();
   else if (path === "/ueber-uns") html = pageAbout();
   else if (path === "/impressum") html = legalPage("impressum");
@@ -2272,6 +2490,7 @@ function renderRoute() {
   bindClearanceWizard();
   bindRollerWizard();
   bindTrailerWizard();
+  bindDashboardShell();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -3468,6 +3687,38 @@ function bindTrailerWizard() {
   }, { once: false });
 
   updateWizard();
+}
+
+
+
+function bindDashboardShell() {
+  const list = document.querySelector("#dashboardTicketList");
+  const title = document.querySelector("#dashboardDetailTitle");
+  const body = document.querySelector("#dashboardDetailBody");
+
+  if (!list || !title || !body) return;
+
+  list.addEventListener("click", event => {
+    const ticketButton = event.target.closest(".dashboard-ticket");
+    if (!ticketButton) return;
+
+    list.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
+    ticketButton.classList.add("active");
+
+    let ticket = null;
+    try {
+      ticket = JSON.parse(ticketButton.dataset.ticket || "{}");
+    } catch {
+      ticket = null;
+    }
+
+    if (!ticket) return;
+
+    title.textContent = ticket.id || "Ticket";
+    body.innerHTML = (ticket.details || [])
+      .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`)
+      .join("");
+  });
 }
 
 

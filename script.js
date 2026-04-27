@@ -955,6 +955,62 @@ async function loadDashboardTicketExtras(ticket) {
 }
 
 
+
+/* ==========================================================================
+   Team-E-Mail-Benachrichtigung
+   ========================================================================== */
+
+const TEAM_NOTIFICATION_EMAIL = "Itsfabtastisch@gmail.com";
+
+async function notifyTeamAboutRequest(requestResult) {
+  if (!requestResult?.id || !requestResult?.public_status_token) {
+    throw new Error("Ticketdaten für E-Mail-Benachrichtigung fehlen.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/notify-new-request`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      request_id: requestResult.id,
+      public_status_token: requestResult.public_status_token
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.success) {
+    throw new Error(data?.message || data?.error || "Team-E-Mail konnte nicht gesendet werden.");
+  }
+
+  return data;
+}
+
+function appendTeamNotificationNote(result, notificationResult) {
+  const note = document.createElement("p");
+  note.className = `form-note email-notification-note ${notificationResult?.success ? "success" : "warning"}`;
+  note.innerHTML = notificationResult?.success
+    ? `Team-Benachrichtigung wurde an <b>${escapeHtml(TEAM_NOTIFICATION_EMAIL)}</b> gesendet.`
+    : `Anfrage wurde gespeichert. Team-E-Mail noch nicht gesendet: ${escapeHtml(notificationResult?.message || "Edge Function noch nicht aktiv.")}`;
+  result.appendChild(note);
+}
+
+async function tryNotifyTeam(result, response) {
+  try {
+    const notification = await notifyTeamAboutRequest(response);
+    appendTeamNotificationNote(result, notification);
+  } catch (error) {
+    appendTeamNotificationNote(result, {
+      success: false,
+      message: error.message || "Unbekannter Fehler"
+    });
+  }
+}
+
+
 function splitContactValue(contactValue) {
   const contact = String(contactValue || "").trim();
 
@@ -1105,7 +1161,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.1.1-NOTE-BADGE-FIX
+// DBG: ALL4YOU-ROUTER-V4.2-EMAIL-NOTIFICATION-READY
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4212,6 +4268,7 @@ function bindClearanceWizard() {
         "Aktuell ist zusätzlich noch die E-Mail-Vorschau verfügbar. Später wird der automatische E-Mail-Versand direkt über das Backend laufen."
       );
       appendMailPreviewButton(result, mailHref);
+      await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
     }
@@ -4415,6 +4472,7 @@ function bindRollerWizard() {
         "Die Distanzmessung ist weiterhin für die spätere Google-Maps-Anbindung vorbereitet."
       );
       appendMailPreviewButton(result, mailHref);
+      await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
     }
@@ -4677,6 +4735,7 @@ function bindTrailerWizard() {
         "Die Mietanfrage ist unverbindlich. Verfügbarkeit, Kaution und Übergabe werden durch All4You bestätigt."
       );
       appendMailPreviewButton(result, mailHref);
+      await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
     }

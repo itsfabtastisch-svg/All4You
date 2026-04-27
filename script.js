@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
+// DBG: ALL4YOU-ROUTER-V2.8.3-ENTRUEMPELUNG
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -61,7 +61,7 @@ const services = [
   },
   {
     slug: "raeumungen",
-    title: "Besenreine Räumungen",
+    title: "Entrümpelung",
     sub: "Saubere Übergabe",
     icon: serviceIconClearance,
     color: "",
@@ -146,7 +146,7 @@ function pageHome() {
         <h1>Alles aus einer Hand <span>in München</span></h1>
         <p class="lead">
           All4You unterstützt bei Rollertransport, Anhängervermietung,
-          besenreinen Räumungen und Reinigungsservice – zuverlässig, regional und unkompliziert.
+          Entrümpelung und Reinigungsservice – zuverlässig, regional und unkompliziert.
         </p>
         <div class="hero-actions">
           <a class="btn primary" href="/kontakt" data-link>Jetzt anfragen <span>›</span></a>
@@ -639,22 +639,22 @@ function trailerPage() {
 
 
 function clearancePage() {
-  document.title = "Besenreine Räumungen in München | All4You Service München";
+  document.title = "Entrümpelung in München | All4You Service München";
   return `
     <section class="page page-head">
       <div class="breadcrumb">
         <a href="/" data-link>Startseite</a><span>›</span>
         <a href="/leistungen" data-link>Leistungen</a><span>›</span>
-        <span>Besenreine Räumungen</span>
+        <span>Entrümpelung</span>
       </div>
-      <p class="eyebrow">Besenreine Räumungen München</p>
-      <h1>Besenreine Räumungen in München – zuverlässig, sauber und stressfrei erledigt.</h1>
+      <p class="eyebrow">Entrümpelung München</p>
+      <h1>Entrümpelung in München – zuverlässig, sauber und stressfrei erledigt.</h1>
       <p class="lead">
         Ob Wohnung, Keller, Garage, Dachboden, Lager oder einzelne Räume: All4You unterstützt bei Räumungen
         in München und Umgebung und sorgt auf Wunsch für eine besenreine Übergabe.
       </p>
       <div class="inline-actions">
-        <a class="btn primary" href="#raeumungs-anfrage">Räumung anfragen <span>›</span></a>
+        <a class="btn primary" href="#raeumungs-anfrage">Entrümpelung anfragen <span>›</span></a>
         <a class="btn ghost" href="#ablauf">Ablauf ansehen <span>›</span></a>
       </div>
     </section>
@@ -696,7 +696,7 @@ function clearancePage() {
 
     <section class="section-pad two-col" id="raeumungs-anfrage">
       <div class="form-card">
-        <p class="eyebrow">Räumungs-Assistent</p>
+        <p class="eyebrow">Entrümpelungs-Assistent</p>
         <h2>Räumungs-Anfrage vorbereiten.</h2>
         <p class="lead">
           Beschreiben Sie kurz, was geräumt werden soll. Je genauer die Angaben sind, desto besser kann All4You
@@ -711,7 +711,7 @@ function clearancePage() {
             <label>Telefon oder E-Mail
               <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
             </label>
-            <label>Art der Räumung
+            <label>Art der Entrümpelung
               <select name="clearanceType">
                 <option>Wohnung</option>
                 <option>Zimmer / Teilbereich</option>
@@ -803,10 +803,10 @@ function clearancePage() {
             <textarea name="message" rows="4" placeholder="Besonderheiten, Zugang, Fristen, Schlüsselübergabe oder weitere Hinweise..."></textarea>
           </label>
 
-          <button class="btn primary" type="submit">Räumungs-Anfrage senden <span>›</span></button>
+          <button class="btn primary" type="submit">Entrümpelungs-Anfrage senden <span>›</span></button>
 
           <div class="distance-result" id="clearanceResult">
-            <strong>Räumungs-Anfrage vorbereitet</strong>
+            <strong>Entrümpelungs-Anfrage vorbereitet</strong>
             <p>
               In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert, per E-Mail an All4You gesendet
               und im Mitarbeiterportal angezeigt.
@@ -866,17 +866,17 @@ function clearancePage() {
         <p class="eyebrow">Kombinierbare Leistungen</p>
         <h2>Räumung kann mehr sein als nur leer machen.</h2>
         <div class="info-grid single-grid">
-          <div class="mini-card"><h3>Räumung + Reinigung</h3><p>Nach der Räumung kann auf Wunsch zusätzlich eine Reinigung angefragt werden.</p></div>
-          <div class="mini-card"><h3>Räumung + Anhänger</h3><p>Für kleinere Räumungen oder Transporte kann die Anhängervermietung interessant sein.</p></div>
-          <div class="mini-card"><h3>Räumung + Transport</h3><p>Wenn Gegenstände nicht entsorgt, sondern an einen anderen Ort gebracht werden sollen.</p></div>
-          <div class="mini-card"><h3>Räumung + Halteverbot</h3><p>Bei Bedarf kann geprüft werden, ob eine temporäre Halteverbotszone für die Räumung sinnvoll ist.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Reinigung</h3><p>Nach der Räumung kann auf Wunsch zusätzlich eine Reinigung angefragt werden.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Anhänger</h3><p>Für kleinere Räumungen oder Transporte kann die Anhängervermietung interessant sein.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Transport</h3><p>Wenn Gegenstände nicht entsorgt, sondern an einen anderen Ort gebracht werden sollen.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Halteverbot</h3><p>Bei Bedarf kann geprüft werden, ob eine temporäre Halteverbotszone für die Räumung sinnvoll ist.</p></div>
         </div>
       </aside>
     </section>
 
     <section class="section-pad" id="ablauf">
       <p class="eyebrow">Ablauf</p>
-      <h2>So läuft die Räumung ab.</h2>
+      <h2>So läuft die Entrümpelung ab.</h2>
       <div class="steps five-steps">
         <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie beschreiben, was geräumt werden soll.</p></article>
         <article class="step"><span>2</span><h3>Aufwand prüfen</h3><p>All4You prüft Umfang, Zugänglichkeit, Etage und Terminwunsch.</p></article>
@@ -919,7 +919,7 @@ function clearancePage() {
         <p class="eyebrow">Unverbindlich starten</p>
         <h2>Räumung jetzt unverbindlich anfragen.</h2>
         <p class="lead">Teilen Sie kurz mit, was geräumt werden soll. All4You prüft Umfang, Termin und gewünschte Übergabe.</p>
-        <a class="btn primary" href="#raeumungs-anfrage">Räumungs-Anfrage öffnen <span>›</span></a>
+        <a class="btn primary" href="#raeumungs-anfrage">Entrümpelungs-Anfrage öffnen <span>›</span></a>
       </div>
     </section>
   `;
@@ -1207,7 +1207,7 @@ function genericServicePage(slug) {
       bullets: ["flexible Mietdauer", "private und gewerbliche Nutzung", "unkomplizierte Anfrage", "faire Konditionen nach Bedarf"]
     },
     raeumungen: {
-      h1: "Besenreine Räumungen.",
+      h1: "Entrümpelung.",
       lead: "Ob Wohnung, Keller, Garage oder Objekt: All4You übernimmt Räumungen sauber, zuverlässig und auf Wunsch besenrein.",
       bullets: ["Wohnungsräumungen", "Keller und Garagen", "Objekt- und Teilräumungen", "saubere Übergabe nach Absprache"]
     },
@@ -1303,7 +1303,7 @@ function pageContact() {
         <p class="eyebrow">Direktkontakt</p>
         <h2>All4You Service München</h2>
         <p class="lead">
-          Für Rollertransport, Anhängervermietung, besenreine Räumungen und Reinigungsservice in München und Umgebung.
+          Für Rollertransport, Anhängervermietung, Entrümpelung und Reinigungsservice in München und Umgebung.
         </p>
         <div class="contact-list">
           <a href="tel:+498912345678">☎ 089 123 456 78</a>
@@ -1343,15 +1343,15 @@ function pageContact() {
 
         <article class="contact-choice-card">
           <div class="service-icon">${serviceIconClearance}</div>
-          <h3>Besenreine Räumungen</h3>
+          <h3>Entrümpelung</h3>
           <p>Wohnung, Keller, Garage oder einzelne Bereiche räumen und auf Wunsch besenrein übergeben.</p>
-          <a class="btn primary" href="/leistungen/raeumungen" data-link>Zur Räumung <span>›</span></a>
+          <a class="btn primary" href="/leistungen/entruempelung" data-link>Zur Räumung <span>›</span></a>
         </article>
 
         <article class="contact-choice-card">
           <div class="service-icon dark">${serviceIconCleaning}</div>
           <h3>Reinigungsservice</h3>
-          <p>Reinigung für Wohnung, Haus, Büro, Treppenhaus oder nach einer Räumung anfragen.</p>
+          <p>Reinigung für Wohnung, Haus, Büro, Treppenhaus oder nach einer Entrümpelung anfragen.</p>
           <a class="btn primary" href="/leistungen/reinigung" data-link>Zur Reinigung <span>›</span></a>
         </article>
       </div>
@@ -1490,8 +1490,8 @@ function pageAbout() {
             <strong>Anhängervermietung</strong>
             <span>Flexibel mieten für Umzug, Material oder kurzfristige Transporte.</span>
           </a>
-          <a href="/leistungen/raeumungen" data-link>
-            <strong>Besenreine Räumungen</strong>
+          <a href="/leistungen/entruempelung" data-link>
+            <strong>Entrümpelung</strong>
             <span>Räume frei bekommen und auf Wunsch besenrein übergeben.</span>
           </a>
           <a href="/leistungen/reinigung" data-link>
@@ -1780,7 +1780,7 @@ function renderRoute() {
   else if (path === "/leistungen") html = pageServices();
   else if (path === "/leistungen/rollertransport") html = rollerPage();
   else if (path === "/leistungen/anhaenger") html = trailerPage();
-  else if (path === "/leistungen/raeumungen") html = clearancePage();
+  else if (path === "/leistungen/raeumungen" || path === "/leistungen/entruempelung") html = clearancePage();
   else if (path === "/leistungen/reinigung") html = cleaningPage();
   else if (path.startsWith("/leistungen/")) html = genericServicePage(path.split("/").pop());
   else if (path === "/kontakt") html = pageContact();
@@ -1964,11 +1964,11 @@ function bindClearanceTool() {
 
     result.classList.add("show");
     result.innerHTML = `
-      <strong>Räumungs-Anfrage vorbereitet</strong>
+      <strong>Entrümpelungs-Anfrage vorbereitet</strong>
       <p>
         <b>Name:</b> ${escapeHtml(summary.name)}<br>
         <b>Kontakt:</b> ${escapeHtml(summary.contact)}<br>
-        <b>Art der Räumung:</b> ${escapeHtml(summary.clearanceType)}<br>
+        <b>Art der Entrümpelung:</b> ${escapeHtml(summary.clearanceType)}<br>
         <b>Ort:</b> ${escapeHtml(summary.address)}<br>
         <b>Etage:</b> ${escapeHtml(summary.floor)}<br>
         <b>Aufzug:</b> ${escapeHtml(summary.elevator)}<br>
@@ -1984,12 +1984,12 @@ function bindClearanceTool() {
       </p>
     `;
 
-    const subject = encodeURIComponent("Anfrage über die Webseite: Besenreine Räumung");
+    const subject = encodeURIComponent("Anfrage über die Webseite: Entrümpelung");
     const body = encodeURIComponent(
-      `Neue Räumungs-Anfrage\n\n` +
+      `Neue Entrümpelungs-Anfrage\n\n` +
       `Name: ${summary.name}\n` +
       `Kontakt: ${summary.contact}\n` +
-      `Art der Räumung: ${summary.clearanceType}\n` +
+      `Art der Entrümpelung: ${summary.clearanceType}\n` +
       `Adresse / Ort: ${summary.address}\n` +
       `Etage: ${summary.floor}\n` +
       `Aufzug: ${summary.elevator}\n` +

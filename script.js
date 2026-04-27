@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.0.2-FOOTER-LOGIN-VISIBLE
+// DBG: ALL4YOU-ROUTER-V5.0.3-FOOTER-LOGIN-INDEX-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

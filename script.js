@@ -256,24 +256,29 @@ function renderDashboardTickets(tickets) {
       </div>
     `;
     renderDashboardDetail(null);
+    updateDashboardActivityStats([]);
     return;
   }
 
-  list.innerHTML = dashboardRequestCache.map((ticket, index) => `
-    <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${index === 0 ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
-      <span class="ticket-topline">
-        <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
-        <em>${escapeHtml(statusLabel(ticket.status))}</em>
-      </span>
-      <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
-      <span class="ticket-summary">${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</span>
-      <span class="ticket-meta">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")} · ${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
-    </button>
-  `).join("");
+  list.innerHTML = dashboardRequestCache.map((ticket, index) => {
+    const activity = getTicketActivity(ticket.id);
+    return `
+      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${index === 0 ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+        <span class="ticket-topline">
+          <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+          <em>${escapeHtml(statusLabel(ticket.status))}</em>
+        </span>
+        <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
+        <span class="ticket-summary">${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</span>
+        ${renderTicketActivityBadges(ticket)}
+        <span class="ticket-meta">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")} · ${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+      </button>
+    `;
+  }).join("");
 
   renderDashboardDetail(dashboardRequestCache[0]);
+  updateDashboardActivityStats(dashboardRequestCache);
 }
-
 function renderDashboardDetail(ticket) {
   const title = document.querySelector("#dashboardDetailTitle");
   const body = document.querySelector("#dashboardDetailBody");
@@ -377,8 +382,10 @@ async function loadDashboardRequests(session) {
 
   try {
     const requests = await fetchDashboardRequests(session);
+    await fetchDashboardActivitySummary(session, requests);
     renderDashboardTickets(requests);
     updateDashboardStats(requests);
+    updateDashboardActivityStats(requests);
 
     if (liveStatus) {
       liveStatus.textContent = "Live-Daten aktiv";
@@ -982,6 +989,182 @@ async function loadDashboardTicketExtras(ticket) {
 /* ==========================================================================
    Team-E-Mail-Benachrichtigung
    ========================================================================== */
+
+
+/* ==========================================================================
+   Dashboard Aktivitäts-Hinweise
+   ========================================================================== */
+
+const DASHBOARD_SEEN_STORAGE_KEY = "all4you_dashboard_seen_activity_v1";
+let dashboardActivityMap = {};
+
+function getSeenActivityMap() {
+  try {
+    return JSON.parse(localStorage.getItem(DASHBOARD_SEEN_STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function setSeenActivityMap(map) {
+  localStorage.setItem(DASHBOARD_SEEN_STORAGE_KEY, JSON.stringify(map || {}));
+}
+
+function getTicketActivity(ticketId) {
+  return dashboardActivityMap[ticketId] || {
+    customerMessages: 0,
+    attachments: 0,
+    latestActivityAt: null,
+    hasNewActivity: false
+  };
+}
+
+function markDashboardTicketSeen(ticketId) {
+  if (!ticketId) return;
+
+  const activity = getTicketActivity(ticketId);
+  const seenMap = getSeenActivityMap();
+
+  seenMap[ticketId] = activity.latestActivityAt || new Date().toISOString();
+  setSeenActivityMap(seenMap);
+
+  if (dashboardActivityMap[ticketId]) {
+    dashboardActivityMap[ticketId].hasNewActivity = false;
+  }
+
+  const button = document.querySelector(`.dashboard-ticket[data-ticket-id="${CSS.escape(ticketId)}"]`);
+  if (button) {
+    button.classList.remove("has-new-activity");
+    const badge = button.querySelector(".ticket-activity-badge.new");
+    if (badge) badge.remove();
+  }
+}
+
+function buildTicketActivityMap(tickets, messages, attachments) {
+  const seenMap = getSeenActivityMap();
+  const map = {};
+
+  (tickets || []).forEach(ticket => {
+    map[ticket.id] = {
+      customerMessages: 0,
+      attachments: 0,
+      latestActivityAt: ticket.updated_at || ticket.created_at || null,
+      hasNewActivity: false
+    };
+  });
+
+  (messages || []).forEach(message => {
+    if (!message.request_id || !map[message.request_id]) return;
+
+    if (message.sender_type === "kunde" && !message.is_internal) {
+      map[message.request_id].customerMessages += 1;
+      if (!map[message.request_id].latestActivityAt || new Date(message.created_at) > new Date(map[message.request_id].latestActivityAt)) {
+        map[message.request_id].latestActivityAt = message.created_at;
+      }
+    }
+  });
+
+  (attachments || []).forEach(attachment => {
+    if (!attachment.request_id || !map[attachment.request_id]) return;
+
+    if (!attachment.is_internal) {
+      map[attachment.request_id].attachments += 1;
+      if (!map[attachment.request_id].latestActivityAt || new Date(attachment.created_at) > new Date(map[attachment.request_id].latestActivityAt)) {
+        map[attachment.request_id].latestActivityAt = attachment.created_at;
+      }
+    }
+  });
+
+  Object.entries(map).forEach(([ticketId, activity]) => {
+    const seenAt = seenMap[ticketId];
+
+    activity.hasNewActivity = Boolean(
+      activity.latestActivityAt &&
+      (!seenAt || new Date(activity.latestActivityAt) > new Date(seenAt))
+    );
+  });
+
+  return map;
+}
+
+async function fetchDashboardActivitySummary(session, tickets) {
+  if (!session?.access_token || !tickets?.length) {
+    dashboardActivityMap = {};
+    return {};
+  }
+
+  const ids = tickets.map(ticket => ticket.id).filter(Boolean);
+  if (!ids.length) {
+    dashboardActivityMap = {};
+    return {};
+  }
+
+  const idList = ids.map(id => `"${id}"`).join(",");
+
+  const headers = {
+    "apikey": SUPABASE_PUBLISHABLE_KEY,
+    "Authorization": `Bearer ${session.access_token}`,
+    "Accept": "application/json"
+  };
+
+  const messagesUrl = `${SUPABASE_URL}/rest/v1/request_messages?select=request_id,sender_type,is_internal,created_at&request_id=in.(${idList})&order=created_at.desc`;
+  const attachmentsUrl = `${SUPABASE_URL}/rest/v1/request_attachments?select=request_id,is_internal,created_at&request_id=in.(${idList})&order=created_at.desc`;
+
+  try {
+    const [messagesResponse, attachmentsResponse] = await Promise.all([
+      fetch(messagesUrl, { headers }),
+      fetch(attachmentsUrl, { headers })
+    ]);
+
+    const messages = await messagesResponse.json().catch(() => []);
+    const attachments = await attachmentsResponse.json().catch(() => []);
+
+    if (!messagesResponse.ok || !attachmentsResponse.ok) {
+      throw new Error("Aktivitäten konnten nicht geladen werden.");
+    }
+
+    dashboardActivityMap = buildTicketActivityMap(tickets, messages, attachments);
+    return dashboardActivityMap;
+  } catch {
+    dashboardActivityMap = {};
+    return {};
+  }
+}
+
+function renderTicketActivityBadges(ticket) {
+  const activity = getTicketActivity(ticket.id);
+  const badges = [];
+
+  if (activity.hasNewActivity) {
+    badges.push(`<span class="ticket-activity-badge new">Neu</span>`);
+  }
+
+  if (activity.customerMessages > 0) {
+    badges.push(`<span class="ticket-activity-badge">Nachrichten ${activity.customerMessages}</span>`);
+  }
+
+  if (activity.attachments > 0) {
+    badges.push(`<span class="ticket-activity-badge">Anhänge ${activity.attachments}</span>`);
+  }
+
+  return badges.length
+    ? `<span class="ticket-activity-row">${badges.join("")}</span>`
+    : "";
+}
+
+function updateDashboardActivityStats(tickets) {
+  const list = tickets || [];
+  const newActivityCount = list.filter(ticket => getTicketActivity(ticket.id).hasNewActivity).length;
+  const attachmentCount = list.reduce((sum, ticket) => sum + (getTicketActivity(ticket.id).attachments || 0), 0);
+
+  const newActivityElement = document.querySelector("#dashboardStatActivity");
+  const attachmentsElement = document.querySelector("#dashboardStatAttachments");
+
+  if (newActivityElement) newActivityElement.textContent = newActivityCount;
+  if (attachmentsElement) attachmentsElement.textContent = attachmentCount;
+}
+
+
 
 const TEAM_NOTIFICATION_EMAIL = "itsfabtastisch@gmail.com";
 
@@ -1854,7 +2037,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.6-ATTACHMENTS-SYSTEM
+// DBG: ALL4YOU-ROUTER-V4.7-DASHBOARD-ACTIVITY-HIGHLIGHTS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3611,9 +3794,9 @@ function pageDashboard() {
 
           <section class="dashboard-stats">
             <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live aus Supabase</small></article>
-            <article><span>In Prüfung</span><strong id="dashboardStatReview">0</strong><small>Live aus Supabase</small></article>
+            <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
-            <article><span>Erledigt</span><strong id="dashboardStatDone">0</strong><small>Live aus Supabase</small></article>
+            <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
           </section>
 
           <section class="dashboard-grid">
@@ -3723,7 +3906,7 @@ function pageDashboard() {
               <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login aktiv</span></article>
               <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase aktiv</span></article>
               <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
-              <article><strong>v4.0</strong><span>Statusverlauf & Nachrichten live</span></article>
+              <article><strong>v4.7</strong><span>Neue Kundennachrichten & Anhänge hervorgehoben</span></article>
             </div>
           </section>
         </main>
@@ -5486,6 +5669,15 @@ function bindDashboardShell() {
 
       const ticket = dashboardRequestCache.find(item => item.id === ticketButton.dataset.ticketId);
       renderDashboardDetail(ticket || null);
+
+      if (ticket?.id) {
+        setTimeout(() => {
+          if (dashboardSelectedRequestId === ticket.id) {
+            markDashboardTicketSeen(ticket.id);
+            updateDashboardActivityStats(dashboardRequestCache);
+          }
+        }, 750);
+      }
     });
   }
 

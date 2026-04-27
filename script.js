@@ -268,27 +268,47 @@ function renderDashboardDetail(ticket) {
   const title = document.querySelector("#dashboardDetailTitle");
   const body = document.querySelector("#dashboardDetailBody");
   const statusPill = document.querySelector("#dashboardDetailStatus");
+  const statusSelect = document.querySelector("#dashboardStatusSelect");
+  const statusSave = document.querySelector("#dashboardSaveStatusButton");
 
   if (!title || !body) return;
 
   if (!ticket) {
+    dashboardSelectedRequestId = null;
     title.textContent = "Kein Ticket";
     if (statusPill) statusPill.textContent = "—";
+    if (statusSelect) {
+      statusSelect.innerHTML = getDashboardStatusOptions("neu");
+      statusSelect.disabled = true;
+    }
+    if (statusSave) statusSave.disabled = true;
     body.innerHTML = `
       <div class="summary-wide">
         <strong>Hinweis</strong>
         <span>Es wurde noch kein Ticket ausgewählt.</span>
       </div>
     `;
+    setDashboardActionMessage("", "");
     return;
   }
+
+  dashboardSelectedRequestId = ticket.id;
 
   title.textContent = ticket.ticket_number || "Ticket";
   if (statusPill) statusPill.textContent = statusLabel(ticket.status);
 
+  if (statusSelect) {
+    statusSelect.innerHTML = getDashboardStatusOptions(ticket.status);
+    statusSelect.disabled = false;
+  }
+
+  if (statusSave) statusSave.disabled = false;
+
   body.innerHTML = getRequestDetails(ticket)
     .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(detailValue(value))}</span></div>`)
     .join("");
+
+  setDashboardActionMessage("", "Statusänderungen werden automatisch im Statusverlauf gespeichert.");
 }
 
 function updateDashboardStats(tickets) {
@@ -356,6 +376,73 @@ async function loadDashboardRequests(session) {
       liveStatus.classList.add("warning");
     }
   }
+}
+
+
+
+let dashboardSelectedRequestId = null;
+
+function getDashboardStatusOptions(currentStatus) {
+  const statuses = [
+    "neu",
+    "in_pruefung",
+    "rueckfrage_offen",
+    "angebot_vorbereitet",
+    "angebot_gesendet",
+    "termin_vorgeschlagen",
+    "termin_bestaetigt",
+    "in_bearbeitung",
+    "erledigt",
+    "storniert"
+  ];
+
+  return statuses
+    .map(status => `<option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`)
+    .join("");
+}
+
+async function updateDashboardRequestStatus(session, requestId, newStatus) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  if (!requestId) {
+    throw new Error("Kein Ticket ausgewählt.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify({
+      status: newStatus
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Status konnte nicht geändert werden.");
+  }
+
+  if (!Array.isArray(data) || !data.length) {
+    throw new Error("Statusänderung wurde nicht bestätigt.");
+  }
+
+  return data[0];
+}
+
+function setDashboardActionMessage(type, text) {
+  const message = document.querySelector("#dashboardActionMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
 }
 
 
@@ -509,7 +596,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+// DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2315,10 +2402,18 @@ function pageDashboard() {
                 <div class="summary-wide"><strong>Hinweis</strong><span>Nach dem Login werden hier echte Ticketdetails aus Supabase angezeigt.</span></div>
               </div>
 
-              <div class="dashboard-actions">
-                <button class="btn primary" type="button" disabled>Status ändern</button>
-                <button class="btn ghost" type="button" disabled>Nachricht öffnen</button>
+              <div class="dashboard-status-editor">
+                <label>Status ändern
+                  <select id="dashboardStatusSelect" disabled>
+                    <option>Ticket auswählen</option>
+                  </select>
+                </label>
+                <button class="btn primary" type="button" id="dashboardSaveStatusButton" disabled>Status speichern <span>›</span></button>
               </div>
+
+              <p class="dashboard-action-message" id="dashboardActionMessage">
+                Statusänderungen werden automatisch im Statusverlauf gespeichert.
+              </p>
 
               <div class="dashboard-timeline">
                 <p class="eyebrow">Statusverlauf</p>
@@ -4079,6 +4174,8 @@ function bindTrailerWizard() {
 
 function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
+  const saveStatusButton = document.querySelector("#dashboardSaveStatusButton");
+  const statusSelect = document.querySelector("#dashboardStatusSelect");
 
   if (list) {
     list.addEventListener("click", event => {
@@ -4093,9 +4190,44 @@ function bindDashboardShell() {
     });
   }
 
+  saveStatusButton?.addEventListener("click", async () => {
+    const session = getStoredEmployeeSession();
+    const selectedStatus = statusSelect?.value;
+
+    if (!dashboardSelectedRequestId || !selectedStatus) {
+      setDashboardActionMessage("error", "Bitte zuerst ein Ticket und einen Status auswählen.");
+      return;
+    }
+
+    saveStatusButton.disabled = true;
+    setDashboardActionMessage("loading", "Status wird gespeichert …");
+
+    try {
+      const updatedTicket = await updateDashboardRequestStatus(session, dashboardSelectedRequestId, selectedStatus);
+
+      dashboardRequestCache = dashboardRequestCache.map(ticket =>
+        ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
+      );
+
+      renderDashboardTickets(dashboardRequestCache);
+      updateDashboardStats(dashboardRequestCache);
+
+      const updatedButton = document.querySelector(`.dashboard-ticket[data-ticket-id="${CSS.escape(updatedTicket.id)}"]`);
+      if (updatedButton) {
+        document.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
+        updatedButton.classList.add("active");
+      }
+
+      renderDashboardDetail(dashboardRequestCache.find(ticket => ticket.id === updatedTicket.id) || updatedTicket);
+      setDashboardActionMessage("success", `Status wurde auf „${statusLabel(updatedTicket.status)}“ geändert.`);
+    } catch (error) {
+      setDashboardActionMessage("error", error.message || "Status konnte nicht geändert werden.");
+      saveStatusButton.disabled = false;
+    }
+  });
+
   bindDashboardAuth();
 }
-
 function bindDashboardAuth() {
   const gate = document.querySelector("#dashboardAuthGate");
   const protectedArea = document.querySelector("#dashboardProtectedArea");

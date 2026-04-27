@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .dashboard-shell {
@@ -3263,7 +3263,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .is-hidden {
@@ -3417,7 +3417,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .auth-message.success {
@@ -3437,7 +3437,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3488,4 +3488,81 @@ label {
 .dashboard-ticket-list::-webkit-scrollbar-track {
   background: rgba(19,35,58,.06);
   border-radius: 999px;
+}
+
+/* ==========================================================================
+   Dashboard Status Update
+   DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
+   ========================================================================== */
+
+.dashboard-status-editor {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 16px;
+}
+
+.dashboard-status-editor label {
+  display: grid;
+  gap: 8px;
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.dashboard-status-editor select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(19,35,58,.14);
+  border-radius: 14px;
+  padding: 0 14px;
+  color: var(--navy);
+  background: rgba(255,255,255,.9);
+  font: inherit;
+  font-weight: 800;
+}
+
+.dashboard-status-editor select:disabled,
+.dashboard-status-editor .btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.dashboard-action-message {
+  margin: 12px 0 0;
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(238,246,250,.62);
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.dashboard-action-message.success {
+  color: #08786f;
+  border-color: rgba(10,169,155,.26);
+  background: rgba(10,169,155,.09);
+}
+
+.dashboard-action-message.error {
+  color: #8a1f1f;
+  border-color: rgba(190,40,40,.26);
+  background: rgba(255,86,86,.08);
+}
+
+.dashboard-action-message.loading {
+  color: var(--blue);
+  border-color: rgba(11,78,145,.22);
+  background: rgba(11,78,145,.07);
+}
+
+@media (max-width: 760px) {
+  .dashboard-status-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-status-editor .btn {
+    width: 100%;
+  }
 }

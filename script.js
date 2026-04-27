@@ -121,6 +121,7 @@ async function fetchEmployeeProfile(session) {
 
 
 let dashboardRequestCache = [];
+let dashboardAllRequestCache = [];
 
 
 function serviceAccentClass(service) {
@@ -242,6 +243,139 @@ async function fetchDashboardRequests(session) {
   return Array.isArray(data) ? data : [];
 }
 
+
+/* ==========================================================================
+   Dashboard Filter & Suche
+   ========================================================================== */
+
+function getDashboardFilterState() {
+  const search = document.querySelector("#dashboardSearchInput");
+  const service = document.querySelector("#dashboardServiceFilter");
+  const status = document.querySelector("#dashboardStatusFilter");
+  const sort = document.querySelector("#dashboardSortSelect");
+  const activeQuick = document.querySelector(".dashboard-filters button.active");
+
+  return {
+    search: String(search?.value || "").trim().toLowerCase(),
+    service: service?.value || "all",
+    status: status?.value || "all",
+    sort: sort?.value || "newest",
+    quick: activeQuick?.dataset.filter || "all"
+  };
+}
+
+function ticketMatchesDashboardSearch(ticket, search) {
+  if (!search) return true;
+
+  const fields = [
+    ticket.ticket_number,
+    ticket.customer_name,
+    ticket.customer_email,
+    ticket.customer_phone,
+    serviceLabel(ticket.service),
+    statusLabel(ticket.status),
+    ticket.summary,
+    ticket.subject,
+    JSON.stringify(ticket.details || {})
+  ];
+
+  return fields.some(value => String(value || "").toLowerCase().includes(search));
+}
+
+function getFilteredDashboardRequests() {
+  const state = getDashboardFilterState();
+  let list = [...(dashboardAllRequestCache || [])];
+
+  if (state.quick === "activity") {
+    list = list.filter(ticket => getTicketActivity(ticket.id).hasNewActivity);
+  } else if (state.quick !== "all") {
+    list = list.filter(ticket => ticket.status === state.quick);
+  }
+
+  if (state.service !== "all") {
+    list = list.filter(ticket => ticket.service === state.service);
+  }
+
+  if (state.status !== "all") {
+    list = list.filter(ticket => ticket.status === state.status);
+  }
+
+  if (state.search) {
+    list = list.filter(ticket => ticketMatchesDashboardSearch(ticket, state.search));
+  }
+
+  list.sort((a, b) => {
+    const aDate = new Date(a.created_at || 0).getTime();
+    const bDate = new Date(b.created_at || 0).getTime();
+
+    if (state.sort === "oldest") return aDate - bDate;
+
+    if (state.sort === "activity") {
+      const aActivity = new Date(getTicketActivity(a.id).latestActivityAt || a.updated_at || a.created_at || 0).getTime();
+      const bActivity = new Date(getTicketActivity(b.id).latestActivityAt || b.updated_at || b.created_at || 0).getTime();
+      return bActivity - aActivity;
+    }
+
+    return bDate - aDate;
+  });
+
+  return list;
+}
+
+function updateDashboardFilterMeta(count, total) {
+  const meta = document.querySelector("#dashboardFilterMeta");
+  if (!meta) return;
+
+  meta.textContent = `${count} von ${total} Tickets angezeigt`;
+}
+
+function applyDashboardFilters() {
+  const filtered = getFilteredDashboardRequests();
+  renderDashboardTickets(filtered);
+  updateDashboardFilterMeta(filtered.length, dashboardAllRequestCache.length);
+}
+
+function resetDashboardFilters() {
+  const search = document.querySelector("#dashboardSearchInput");
+  const service = document.querySelector("#dashboardServiceFilter");
+  const status = document.querySelector("#dashboardStatusFilter");
+  const sort = document.querySelector("#dashboardSortSelect");
+
+  if (search) search.value = "";
+  if (service) service.value = "all";
+  if (status) status.value = "all";
+  if (sort) sort.value = "newest";
+
+  document.querySelectorAll(".dashboard-filters button").forEach(button => {
+    button.classList.toggle("active", button.dataset.filter === "all");
+  });
+
+  applyDashboardFilters();
+}
+
+function bindDashboardFilters() {
+  const search = document.querySelector("#dashboardSearchInput");
+  const service = document.querySelector("#dashboardServiceFilter");
+  const status = document.querySelector("#dashboardStatusFilter");
+  const sort = document.querySelector("#dashboardSortSelect");
+  const reset = document.querySelector("#dashboardResetFilters");
+
+  search?.addEventListener("input", applyDashboardFilters);
+  service?.addEventListener("change", applyDashboardFilters);
+  status?.addEventListener("change", applyDashboardFilters);
+  sort?.addEventListener("change", applyDashboardFilters);
+  reset?.addEventListener("click", resetDashboardFilters);
+
+  document.querySelectorAll(".dashboard-filters button").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".dashboard-filters button").forEach(item => item.classList.remove("active"));
+      button.classList.add("active");
+      applyDashboardFilters();
+    });
+  });
+}
+
+
 function renderDashboardTickets(tickets) {
   const list = document.querySelector("#dashboardTicketList");
   if (!list) return;
@@ -251,12 +385,13 @@ function renderDashboardTickets(tickets) {
   if (!dashboardRequestCache.length) {
     list.innerHTML = `
       <div class="dashboard-empty-state">
-        <strong>Keine Anfragen gefunden</strong>
-        <p>Sobald Kunden einen Wizard absenden, erscheinen die Tickets hier automatisch.</p>
+        <strong>Keine passenden Tickets gefunden</strong>
+        <p>Bitte Suche oder Filter anpassen. Sobald neue Anfragen eingehen, erscheinen sie weiterhin automatisch im Dashboard.</p>
       </div>
     `;
     renderDashboardDetail(null);
     updateDashboardActivityStats([]);
+    updateDashboardFilterMeta(0, dashboardAllRequestCache.length || 0);
     return;
   }
 
@@ -278,6 +413,7 @@ function renderDashboardTickets(tickets) {
 
   renderDashboardDetail(dashboardRequestCache[0]);
   updateDashboardActivityStats(dashboardRequestCache);
+  updateDashboardFilterMeta(dashboardRequestCache.length, dashboardAllRequestCache.length || dashboardRequestCache.length);
 }
 function renderDashboardDetail(ticket) {
   const title = document.querySelector("#dashboardDetailTitle");
@@ -382,8 +518,9 @@ async function loadDashboardRequests(session) {
 
   try {
     const requests = await fetchDashboardRequests(session);
+    dashboardAllRequestCache = requests;
     await fetchDashboardActivitySummary(session, requests);
-    renderDashboardTickets(requests);
+    applyDashboardFilters();
     updateDashboardStats(requests);
     updateDashboardActivityStats(requests);
 
@@ -2037,7 +2174,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.7-DASHBOARD-ACTIVITY-HIGHLIGHTS
+// DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3807,21 +3944,46 @@ function pageDashboard() {
                   <h2>Neue Anfragen</h2>
                 </div>
                 <div class="dashboard-filters">
-                  <button class="active" type="button">Alle</button>
-                  <button type="button">Neu</button>
-                  <button type="button">In Prüfung</button>
+                  <button class="active" type="button" data-filter="all">Alle</button>
+                  <button type="button" data-filter="neu">Neu</button>
+                  <button type="button" data-filter="in_pruefung">In Prüfung</button>
+                  <button type="button" data-filter="rueckfrage_offen">Rückfrage</button>
+                  <button type="button" data-filter="activity">Neue Aktivität</button>
                 </div>
               </div>
 
-              <div class="dashboard-search-row">
-                <input type="search" placeholder="Suche nach Ticketnummer, Kunde oder Leistung">
-                <select>
-                  <option>Alle Leistungen</option>
-                  <option>Reinigung</option>
-                  <option>Entrümpelung</option>
-                  <option>Rollerabholservice</option>
-                  <option>Anhängervermietung</option>
+              <div class="dashboard-search-row dashboard-search-row-advanced">
+                <input id="dashboardSearchInput" type="search" placeholder="Suche nach Ticketnummer, Kunde, Telefon, E-Mail oder Leistung">
+                <select id="dashboardServiceFilter" aria-label="Leistung filtern">
+                  <option value="all">Alle Leistungen</option>
+                  <option value="reinigung">Reinigung</option>
+                  <option value="entruempelung">Entrümpelung</option>
+                  <option value="rollerabholservice">Rollerabholservice</option>
+                  <option value="anhaenger">Anhänger</option>
                 </select>
+                <select id="dashboardStatusFilter" aria-label="Status filtern">
+                  <option value="all">Alle Status</option>
+                  <option value="neu">Neu</option>
+                  <option value="in_pruefung">In Prüfung</option>
+                  <option value="rueckfrage_offen">Rückfrage offen</option>
+                  <option value="angebot_vorbereitet">Angebot vorbereitet</option>
+                  <option value="angebot_gesendet">Angebot gesendet</option>
+                  <option value="termin_vorgeschlagen">Termin vorgeschlagen</option>
+                  <option value="termin_bestaetigt">Termin bestätigt</option>
+                  <option value="in_bearbeitung">In Bearbeitung</option>
+                  <option value="erledigt">Erledigt</option>
+                  <option value="storniert">Storniert</option>
+                </select>
+                <select id="dashboardSortSelect" aria-label="Sortierung">
+                  <option value="newest">Neueste zuerst</option>
+                  <option value="oldest">Älteste zuerst</option>
+                  <option value="activity">Letzte Aktivität</option>
+                </select>
+              </div>
+
+              <div class="dashboard-filter-meta-row">
+                <span id="dashboardFilterMeta">0 Tickets angezeigt</span>
+                <button class="dashboard-reset-filter" type="button" id="dashboardResetFilters">Filter zurücksetzen</button>
               </div>
 
               <div class="dashboard-ticket-list" id="dashboardTicketList">
@@ -5696,12 +5858,16 @@ function bindDashboardShell() {
     try {
       const updatedTicket = await updateDashboardRequestStatus(session, dashboardSelectedRequestId, selectedStatus);
 
+      dashboardAllRequestCache = dashboardAllRequestCache.map(ticket =>
+        ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
+      );
+
       dashboardRequestCache = dashboardRequestCache.map(ticket =>
         ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
       );
 
-      renderDashboardTickets(dashboardRequestCache);
-      updateDashboardStats(dashboardRequestCache);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
 
       const updatedButton = document.querySelector(`.dashboard-ticket[data-ticket-id="${CSS.escape(updatedTicket.id)}"]`);
       if (updatedButton) {
@@ -5756,6 +5922,7 @@ function bindDashboardShell() {
     }
   });
 
+  bindDashboardFilters();
   bindDashboardAuth();
 }
 function bindDashboardAuth() {
@@ -5844,6 +6011,7 @@ function bindDashboardAuth() {
     await supabaseLogout(session?.access_token);
     clearEmployeeSession();
     dashboardRequestCache = [];
+    dashboardAllRequestCache = [];
     dashboardCurrentSession = null;
     dashboardCurrentEmployeeProfile = null;
     clearTicketExtras();

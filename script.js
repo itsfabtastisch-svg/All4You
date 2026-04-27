@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.9.2-ROLLER-DATEN
+// DBG: ALL4YOU-ROUTER-V2.9.3-ENTRUEMPELUNG-DATEN
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -62,10 +62,10 @@ const services = [
   {
     slug: "raeumungen",
     title: "Entrümpelung",
-    sub: "Saubere Übergabe",
+    sub: "Mit Entsorgung & Besichtigung",
     icon: serviceIconClearance,
     color: "",
-    text: "Räumungen für Wohnungen, Keller, Garagen oder Objekte – auf Wunsch besenrein übergeben."
+    text: "Entrümpelung für alle Objektarten – mit Entsorgung, kostenloser Besichtigung und auf Wunsch besenrein."
   },
   {
     slug: "reinigung",
@@ -672,12 +672,12 @@ function clearancePage() {
       <p class="eyebrow">Entrümpelung München</p>
       <h1>Entrümpelung in München – zuverlässig, sauber und stressfrei erledigt.</h1>
       <p class="lead">
-        Ob Wohnung, Keller, Garage, Dachboden, Lager oder einzelne Räume: All4You unterstützt bei Räumungen
-        in München und Umgebung und sorgt auf Wunsch für eine besenreine Übergabe.
+        Ob Wohnung, Haus, Keller, Garage, Dachboden, Gewerbefläche oder einzelne Räume:
+        All4You übernimmt Entrümpelungen in München und Umgebung – inklusive Entsorgung und auf Wunsch besenrein.
       </p>
       <div class="inline-actions">
-        <a class="btn primary" href="#raeumungs-anfrage">Entrümpelung anfragen <span>›</span></a>
-        <a class="btn ghost" href="#ablauf">Ablauf ansehen <span>›</span></a>
+        <a class="btn primary" href="#entruempelungs-anfrage">Entrümpelung anfragen <span>›</span></a>
+        <a class="btn ghost" href="#besichtigung">Kostenlose Besichtigung <span>›</span></a>
       </div>
     </section>
 
@@ -685,44 +685,98 @@ function clearancePage() {
 
     <section class="section-pad two-col">
       <div class="info-card">
-        <p class="eyebrow">Was ist damit gemeint?</p>
-        <h2>Räume frei bekommen – sauber und organisiert.</h2>
+        <p class="eyebrow">Was wird entrümpelt?</p>
+        <h2>Alle Objektarten nach Absprache.</h2>
         <p class="lead">
-          Manchmal muss ein Bereich schnell, sauber und zuverlässig geräumt werden – zum Beispiel vor einer Übergabe,
-          nach einem Umzug, bei Haushaltsauflösung oder wenn Keller, Garage oder Dachboden wieder nutzbar werden sollen.
-          All4You übernimmt die Räumung nach Absprache und sorgt dafür, dass der Bereich ordentlich und besenrein hinterlassen wird.
+          All4You unterstützt bei Entrümpelungen aller Art – vom einzelnen Keller bis zur kompletten Wohnung,
+          vom Dachboden bis zur Garage oder Gewerbefläche. Die Entsorgung kann direkt mit übernommen werden.
         </p>
         <div class="info-grid">
-          <div class="mini-card"><h3>Wohnung & Zimmer</h3><p>Für komplette Wohnungen, einzelne Räume oder Teilbereiche.</p></div>
+          <div class="mini-card"><h3>Wohnung & Haus</h3><p>Für komplette Wohnungen, Häuser, einzelne Zimmer oder Teilbereiche.</p></div>
           <div class="mini-card"><h3>Keller & Dachboden</h3><p>Für vollgestellte Keller, Abstellräume, Dachböden oder Lagerflächen.</p></div>
-          <div class="mini-card"><h3>Garage & Hof</h3><p>Für Garagen, Schuppen, Höfe oder Außenbereiche.</p></div>
-          <div class="mini-card"><h3>Nach Umzug oder Übergabe</h3><p>Wenn Räume für Vermieter, Käufer oder Nachmieter sauber vorbereitet werden sollen.</p></div>
+          <div class="mini-card"><h3>Garage & Hof</h3><p>Für Garagen, Schuppen, Höfe oder Außenbereiche nach Absprache.</p></div>
+          <div class="mini-card"><h3>Gewerbe & Lager</h3><p>Auch gewerbliche Flächen, Lager oder Objektbereiche können angefragt werden.</p></div>
         </div>
       </div>
 
       <aside class="check-card">
-        <p class="eyebrow">Typische Einsätze</p>
+        <p class="eyebrow">Leistungsumfang</p>
         <ul class="list">
-          <li>Wohnungsräumung vor Übergabe</li>
-          <li>Keller entrümpeln und besenrein hinterlassen</li>
-          <li>Garage oder Schuppen räumen</li>
-          <li>Dachboden oder Abstellraum freimachen</li>
-          <li>einzelne Zimmer oder Teilbereiche räumen</li>
-          <li>Räumung nach Umzug</li>
-          <li>Räumung nach Haushaltsauflösung</li>
-          <li>Sperrgut oder alte Möbel entfernen</li>
-          <li>Vorbereitung für Renovierung, Verkauf oder Neuvermietung</li>
+          <li>Entrümpelung aller Objektarten nach Absprache</li>
+          <li>Entsorgung wird mit übernommen</li>
+          <li>kostenlose Besichtigung möglich</li>
+          <li>Festpreis nach Prüfung möglich</li>
+          <li>besenreine Übergabe möglich</li>
+          <li>Halteverbot / Ladezone kann bei Bedarf geprüft werden</li>
+          <li>Reinigung kann zusätzlich angefragt werden</li>
         </ul>
       </aside>
     </section>
 
-    <section class="section-pad two-col" id="raeumungs-anfrage">
+    <section class="section-pad two-col" id="besichtigung">
+      <div class="notice-box">
+        <p class="eyebrow">Kostenlose Besichtigung</p>
+        <h2>Erst ansehen, dann fair einschätzen.</h2>
+        <p>
+          Damit Umfang, Aufwand und Entsorgung realistisch eingeschätzt werden können, ist eine kostenlose Besichtigung möglich.
+          Danach kann All4You auf Wunsch ein passendes Angebot erstellen – auch als Festpreis nach Absprache.
+        </p>
+        <div class="pill-list">
+          <span>kostenlose Besichtigung</span>
+          <span>Festpreis möglich</span>
+          <span>Entsorgung inklusive Anfrage</span>
+          <span>besenrein möglich</span>
+        </div>
+      </div>
+
+      <aside class="info-card">
+        <p class="eyebrow">Wichtiger Hinweis</p>
+        <h2>Fest verbaute Dinge nach Absprache.</h2>
+        <p class="lead">
+          Normale Möbel, Hausrat, Sperrgut und typische Entrümpelungsgegenstände können angefragt werden.
+          Fest verbaute Sanitärobjekte wie Toiletten oder ähnliche Einbauten sollten vorab klar besprochen werden.
+        </p>
+        <div class="mini-card">
+          <h3>Saubere Formulierung</h3>
+          <p>Sanitärobjekte, fest verbaute Einrichtungen oder besondere Problemfälle bitte immer vorher angeben.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section-pad two-col">
+      <div class="info-card">
+        <p class="eyebrow">Typische Einsätze</p>
+        <h2>Wenn Räume wieder frei werden sollen.</h2>
+        <ul class="list">
+          <li>Wohnungsentrümpelung vor Übergabe</li>
+          <li>Keller entrümpeln und besenrein hinterlassen</li>
+          <li>Garage oder Schuppen räumen</li>
+          <li>Dachboden oder Abstellraum freimachen</li>
+          <li>einzelne Zimmer oder Teilbereiche entrümpeln</li>
+          <li>Entrümpelung nach Umzug</li>
+          <li>Entrümpelung nach Haushaltsauflösung</li>
+          <li>Sperrgut oder alte Möbel entfernen</li>
+          <li>Vorbereitung für Renovierung, Verkauf oder Neuvermietung</li>
+        </ul>
+      </div>
+
+      <aside class="notice-box">
+        <p class="eyebrow">Halteverbot / Ladezone</p>
+        <h2>Mehr Platz vor Ort spart Zeit.</h2>
+        <p>
+          Bei größeren Entrümpelungen kann eine freie Ladezone vor dem Objekt entscheidend sein.
+          Auf Wunsch kann All4You prüfen, ob eine temporäre Halteverbotszone sinnvoll ist oder bei der Organisation unterstützen.
+        </p>
+      </aside>
+    </section>
+
+    <section class="section-pad two-col" id="entruempelungs-anfrage">
       <div class="form-card">
         <p class="eyebrow">Entrümpelungs-Assistent</p>
-        <h2>Räumungs-Anfrage vorbereiten.</h2>
+        <h2>Entrümpelungs-Anfrage vorbereiten.</h2>
         <p class="lead">
-          Beschreiben Sie kurz, was geräumt werden soll. Je genauer die Angaben sind, desto besser kann All4You
-          Aufwand, Termin und mögliche Kosten einschätzen.
+          Beschreiben Sie kurz, was entrümpelt werden soll. Je genauer die Angaben sind, desto besser kann All4You
+          Umfang, Entsorgung, Besichtigung und mögliche Kosten einschätzen.
         </p>
 
         <form class="clearance-tool" id="clearanceForm">
@@ -736,6 +790,7 @@ function clearancePage() {
             <label>Art der Entrümpelung
               <select name="clearanceType">
                 <option>Wohnung</option>
+                <option>Haus</option>
                 <option>Zimmer / Teilbereich</option>
                 <option>Keller</option>
                 <option>Dachboden</option>
@@ -785,13 +840,34 @@ function clearancePage() {
                 <option>klein</option>
                 <option>mittel</option>
                 <option>groß</option>
-                <option>komplette Räumung</option>
+                <option>komplette Entrümpelung</option>
                 <option>schwer einzuschätzen</option>
+              </select>
+            </label>
+            <label>Entsorgung gewünscht?
+              <select name="disposal">
+                <option>Ja</option>
+                <option>Nein</option>
+                <option>Nach Absprache</option>
               </select>
             </label>
             <label>Besenreine Übergabe?
               <select name="broomClean">
                 <option>Ja</option>
+                <option>Nein</option>
+                <option>Nach Absprache</option>
+              </select>
+            </label>
+            <label>Kostenlose Besichtigung?
+              <select name="inspection">
+                <option>Ja, gerne</option>
+                <option>Nein, erstmal nur Anfrage</option>
+                <option>Nach Absprache</option>
+              </select>
+            </label>
+            <label>Festpreis gewünscht?
+              <select name="fixedPrice">
+                <option>Ja, wenn möglich</option>
                 <option>Nein</option>
                 <option>Nach Absprache</option>
               </select>
@@ -809,7 +885,7 @@ function clearancePage() {
             <label>Zusatzleistung
               <select name="extraService">
                 <option>keine Zusatzleistung</option>
-                <option>Reinigung nach der Räumung</option>
+                <option>Reinigung nach der Entrümpelung</option>
                 <option>Transport einzelner Gegenstände</option>
                 <option>Anhänger / Transportlösung prüfen</option>
                 <option>noch nicht sicher</option>
@@ -817,12 +893,12 @@ function clearancePage() {
             </label>
           </div>
 
-          <label>Was soll geräumt werden?
-            <textarea name="clearanceItems" rows="4" placeholder="z. B. alter Schrank, Kartons, Matratzen, Kellerinhalt, Möbel..."></textarea>
+          <label>Was soll entrümpelt werden?
+            <textarea name="clearanceItems" rows="4" placeholder="z. B. alte Möbel, Kartons, Kellerinhalt, Sperrgut, Haushaltsgegenstände..."></textarea>
           </label>
 
-          <label>Nachricht
-            <textarea name="message" rows="4" placeholder="Besonderheiten, Zugang, Fristen, Schlüsselübergabe oder weitere Hinweise..."></textarea>
+          <label>Besondere Hinweise
+            <textarea name="message" rows="4" placeholder="z. B. fest verbaute Gegenstände, Sanitärobjekte, Zugang, Fristen, Schlüsselübergabe..."></textarea>
           </label>
 
           <button class="btn primary" type="submit">Entrümpelungs-Anfrage senden <span>›</span></button>
@@ -836,7 +912,7 @@ function clearancePage() {
           </div>
 
           <p class="form-note">
-            Fotos helfen bei der Einschätzung des Aufwands. Falls möglich, können Bilder der Räume oder Gegenstände später zur Anfrage ergänzt werden.
+            Fotos helfen bei der Einschätzung des Aufwands. Eine kostenlose Besichtigung und ein Festpreis sind nach Prüfung möglich.
           </p>
         </form>
       </div>
@@ -845,16 +921,16 @@ function clearancePage() {
         <p class="eyebrow">Was wir wissen müssen</p>
         <h2>Je genauer die Angaben, desto besser die Einschätzung.</h2>
         <ul class="list">
-          <li>Welche Räume oder Bereiche sollen geräumt werden?</li>
+          <li>Welche Räume oder Objekte sollen entrümpelt werden?</li>
           <li>Wie groß ist der Umfang ungefähr?</li>
           <li>In welcher Etage befindet sich der Bereich?</li>
           <li>Gibt es einen Aufzug?</li>
           <li>Gibt es Parkmöglichkeiten in der Nähe?</li>
-          <li>Wird eine Ladezone oder temporäre Halteverbotszone vor dem Objekt benötigt?</li>
-          <li>Gibt es schwere oder sperrige Gegenstände?</li>
-          <li>Soll der Bereich besenrein übergeben werden?</li>
+          <li>Wird eine Ladezone oder temporäre Halteverbotszone benötigt?</li>
+          <li>Soll die Entsorgung übernommen werden?</li>
+          <li>Ist eine besenreine Übergabe gewünscht?</li>
           <li>Gibt es Fotos zur besseren Einschätzung?</li>
-          <li>Bis wann muss die Räumung erledigt sein?</li>
+          <li>Gibt es fest verbaute oder besondere Gegenstände?</li>
         </ul>
       </aside>
     </section>
@@ -864,7 +940,7 @@ function clearancePage() {
         <p class="eyebrow">Was bedeutet besenrein?</p>
         <h2>Ordentlich übergeben, aber keine Grundreinigung.</h2>
         <p>
-          Besenrein bedeutet, dass der geräumte Bereich grob gereinigt, frei von losem Schmutz und ordentlich hinterlassen wird.
+          Besenrein bedeutet, dass der entrümpelte Bereich grob gereinigt, frei von losem Schmutz und ordentlich hinterlassen wird.
           Eine gründliche Spezial- oder Grundreinigung ist davon getrennt und kann bei Bedarf zusätzlich angefragt werden.
         </p>
         <div class="pill-list">
@@ -873,25 +949,16 @@ function clearancePage() {
           <span>Übergabe vorbereiten</span>
           <span>Reinigung optional ergänzen</span>
         </div>
-
-        <div class="mini-card inline-extra-card">
-          <h3>Halteverbot vor Ort</h3>
-          <p>
-            Bei größeren Räumungen kann eine freie Ladezone vor dem Objekt entscheidend sein.
-            Auf Wunsch kann All4You die Organisation einer temporären Halteverbotszone prüfen oder bei der Beantragung unterstützen,
-            damit Transportfahrzeuge möglichst nah am Gebäude stehen können.
-          </p>
-        </div>
       </div>
 
       <aside class="info-card">
         <p class="eyebrow">Kombinierbare Leistungen</p>
-        <h2>Räumung kann mehr sein als nur leer machen.</h2>
+        <h2>Entrümpelung kann mehr sein als nur leer machen.</h2>
         <div class="info-grid single-grid">
-          <div class="mini-card"><h3>Entrümpelung + Reinigung</h3><p>Nach der Räumung kann auf Wunsch zusätzlich eine Reinigung angefragt werden.</p></div>
-          <div class="mini-card"><h3>Entrümpelung + Anhänger</h3><p>Für kleinere Räumungen oder Transporte kann die Anhängervermietung interessant sein.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Reinigung</h3><p>Nach der Entrümpelung kann auf Wunsch zusätzlich eine Reinigung angefragt werden.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Anhänger</h3><p>Für kleinere Transporte kann die Anhängervermietung interessant sein.</p></div>
           <div class="mini-card"><h3>Entrümpelung + Transport</h3><p>Wenn Gegenstände nicht entsorgt, sondern an einen anderen Ort gebracht werden sollen.</p></div>
-          <div class="mini-card"><h3>Entrümpelung + Halteverbot</h3><p>Bei Bedarf kann geprüft werden, ob eine temporäre Halteverbotszone für die Räumung sinnvoll ist.</p></div>
+          <div class="mini-card"><h3>Entrümpelung + Halteverbot</h3><p>Bei Bedarf kann geprüft werden, ob eine temporäre Halteverbotszone sinnvoll ist.</p></div>
         </div>
       </aside>
     </section>
@@ -900,21 +967,21 @@ function clearancePage() {
       <p class="eyebrow">Ablauf</p>
       <h2>So läuft die Entrümpelung ab.</h2>
       <div class="steps five-steps">
-        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie beschreiben, was geräumt werden soll.</p></article>
-        <article class="step"><span>2</span><h3>Aufwand prüfen</h3><p>All4You prüft Umfang, Zugänglichkeit, Etage und Terminwunsch.</p></article>
+        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie beschreiben, was entrümpelt werden soll.</p></article>
+        <article class="step"><span>2</span><h3>Besichtigung prüfen</h3><p>All4You prüft Umfang, Entsorgung, Zugänglichkeit und Terminwunsch.</p></article>
         <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie bekommen eine Einschätzung oder ein individuelles Angebot.</p></article>
         <article class="step"><span>4</span><h3>Termin vereinbaren</h3><p>Der passende Termin wird gemeinsam abgestimmt.</p></article>
-        <article class="step"><span>5</span><h3>Räumung durchführen</h3><p>Der Bereich wird nach Absprache geräumt und auf Wunsch besenrein hinterlassen.</p></article>
+        <article class="step"><span>5</span><h3>Entrümpelung durchführen</h3><p>Der Bereich wird nach Absprache entrümpelt und auf Wunsch besenrein hinterlassen.</p></article>
       </div>
     </section>
 
     <section class="section-pad two-col">
       <div class="info-card">
         <p class="eyebrow">Preis & Einschätzung</p>
-        <h2>Individuell nach Umfang und Aufwand.</h2>
+        <h2>Festpreis nach Besichtigung möglich.</h2>
         <p class="lead">
-          Der Preis richtet sich nach Umfang, Etage, Zugänglichkeit, Menge, gewünschter Übergabe und Aufwand.
-          Nach Ihrer Anfrage erhalten Sie eine individuelle Rückmeldung.
+          Der Preis richtet sich nach Umfang, Etage, Zugänglichkeit, Menge, Entsorgung, gewünschter Übergabe und Aufwand.
+          Nach einer kostenlosen Besichtigung kann auf Wunsch ein Festpreis vereinbart werden.
         </p>
         <div class="mini-card">
           <h3>Foto-Upload später möglich</h3>
@@ -925,13 +992,13 @@ function clearancePage() {
       <aside class="faq-card">
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
+          <article class="faq-item"><h3>Welche Objekte entrümpelt ihr?</h3><p>Grundsätzlich können alle Objektarten angefragt werden, zum Beispiel Wohnung, Haus, Keller, Garage, Dachboden, Lager oder Gewerbefläche.</p></article>
+          <article class="faq-item"><h3>Ist Entsorgung dabei?</h3><p>Ja, Entsorgung kann direkt mit übernommen werden.</p></article>
+          <article class="faq-item"><h3>Ist eine Besichtigung kostenlos?</h3><p>Ja, eine kostenlose Besichtigung ist möglich, um Aufwand und Umfang besser einzuschätzen.</p></article>
+          <article class="faq-item"><h3>Ist ein Festpreis möglich?</h3><p>Ja, nach Prüfung oder Besichtigung kann ein Festpreis vereinbart werden.</p></article>
           <article class="faq-item"><h3>Was bedeutet besenrein?</h3><p>Besenrein bedeutet, dass der Bereich grob gereinigt und ordentlich hinterlassen wird. Eine intensive Grundreinigung ist nicht automatisch enthalten.</p></article>
-          <article class="faq-item"><h3>Räumt ihr auch Keller oder Garagen?</h3><p>Ja, auch Keller, Garagen, Dachböden, Abstellräume oder einzelne Bereiche können angefragt werden.</p></article>
-          <article class="faq-item"><h3>Muss ich vorher Fotos schicken?</h3><p>Fotos sind nicht zwingend, helfen aber sehr bei der Einschätzung des Aufwands.</p></article>
-          <article class="faq-item"><h3>Könnt ihr nach der Räumung auch reinigen?</h3><p>Ja, eine zusätzliche Reinigung kann bei Bedarf direkt mit angefragt werden.</p></article>
-          <article class="faq-item"><h3>Was kostet eine Räumung?</h3><p>Das hängt von Umfang, Etage, Zugänglichkeit, Menge und gewünschtem Zustand nach der Räumung ab.</p></article>
-          <article class="faq-item"><h3>Muss ich vor Ort sein?</h3><p>Das wird individuell abgestimmt. Je nach Situation kann eine Übergabe vor Ort sinnvoll sein.</p></article>
-          <article class="faq-item"><h3>Können auch einzelne Möbelstücke entfernt werden?</h3><p>Ja, auch kleinere Teilräumungen oder einzelne Gegenstände können angefragt werden.</p></article>
+          <article class="faq-item"><h3>Gibt es Dinge, die nicht einfach mitgenommen werden?</h3><p>Fest verbaute Sanitärobjekte wie Toiletten oder besondere Problemfälle sollten vorab angegeben und separat abgestimmt werden.</p></article>
+          <article class="faq-item"><h3>Könnt ihr nach der Entrümpelung auch reinigen?</h3><p>Ja, eine zusätzliche Reinigung kann bei Bedarf direkt mit angefragt werden.</p></article>
         </div>
       </aside>
     </section>
@@ -939,9 +1006,9 @@ function clearancePage() {
     <section class="section-pad">
       <div class="cta-panel">
         <p class="eyebrow">Unverbindlich starten</p>
-        <h2>Räumung jetzt unverbindlich anfragen.</h2>
-        <p class="lead">Teilen Sie kurz mit, was geräumt werden soll. All4You prüft Umfang, Termin und gewünschte Übergabe.</p>
-        <a class="btn primary" href="#raeumungs-anfrage">Entrümpelungs-Anfrage öffnen <span>›</span></a>
+        <h2>Entrümpelung jetzt unverbindlich anfragen.</h2>
+        <p class="lead">Teilen Sie kurz mit, was entrümpelt werden soll. All4You prüft Umfang, Besichtigung, Entsorgung und gewünschte Übergabe.</p>
+        <a class="btn primary" href="#entruempelungs-anfrage">Entrümpelungs-Anfrage öffnen <span>›</span></a>
       </div>
     </section>
   `;
@@ -1977,6 +2044,9 @@ function bindClearanceTool() {
       noParkingZone: data.get("noParkingZone") || "",
       scope: data.get("scope") || "",
       broomClean: data.get("broomClean") || "",
+      disposal: data.get("disposal") || "",
+      inspection: data.get("inspection") || "",
+      fixedPrice: data.get("fixedPrice") || "",
       desiredDate: data.get("desiredDate") || "",
       photos: data.get("photos") || "",
       extraService: data.get("extraService") || "",
@@ -1998,6 +2068,9 @@ function bindClearanceTool() {
         <b>Halteverbot / Ladezone:</b> ${escapeHtml(summary.noParkingZone)}<br>
         <b>Umfang:</b> ${escapeHtml(summary.scope)}<br>
         <b>Besenrein:</b> ${escapeHtml(summary.broomClean)}<br>
+        <b>Entsorgung:</b> ${escapeHtml(summary.disposal)}<br>
+        <b>Besichtigung:</b> ${escapeHtml(summary.inspection)}<br>
+        <b>Festpreis:</b> ${escapeHtml(summary.fixedPrice)}<br>
         <b>Wunschtermin:</b> ${escapeHtml(summary.desiredDate)}<br>
         <b>Fotos:</b> ${escapeHtml(summary.photos)}<br>
         <b>Zusatzleistung:</b> ${escapeHtml(summary.extraService)}<br><br>
@@ -2019,6 +2092,9 @@ function bindClearanceTool() {
       `Halteverbot / Ladezone: ${summary.noParkingZone}\n` +
       `Umfang: ${summary.scope}\n` +
       `Besenreine Übergabe: ${summary.broomClean}\n` +
+      `Entsorgung: ${summary.disposal}\n` +
+      `Kostenlose Besichtigung: ${summary.inspection}\n` +
+      `Festpreis gewünscht: ${summary.fixedPrice}\n` +
       `Wunschtermin: ${summary.desiredDate}\n` +
       `Fotos vorhanden: ${summary.photos}\n` +
       `Zusatzleistung: ${summary.extraService}\n\n` +

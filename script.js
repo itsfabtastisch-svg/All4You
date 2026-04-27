@@ -285,6 +285,7 @@ function renderDashboardDetail(ticket) {
 
   if (!ticket) {
     dashboardSelectedRequestId = null;
+    dashboardTicketExtrasLoadId++;
     title.textContent = "Kein Ticket";
     if (statusPill) statusPill.textContent = "—";
     if (statusSelect) {
@@ -298,6 +299,7 @@ function renderDashboardDetail(ticket) {
         <p>Bitte links ein Ticket auswählen, um die Details anzuzeigen.</p>
       </div>
     `;
+    clearTicketExtras();
     setDashboardActionMessage("", "");
     return;
   }
@@ -328,8 +330,8 @@ function renderDashboardDetail(ticket) {
   `;
 
   setDashboardActionMessage("", "Statusänderungen werden automatisch im Statusverlauf gespeichert.");
+  loadDashboardTicketExtras(ticket);
 }
-
 function updateDashboardStats(tickets) {
   const list = tickets || [];
   const totalNew = list.filter(ticket => ticket.status === "neu").length;
@@ -682,6 +684,208 @@ function renderDashboardSummaryBlock(ticket) {
 }
 
 
+
+let dashboardCurrentSession = null;
+let dashboardTicketExtrasLoadId = 0;
+
+function senderTypeLabel(senderType) {
+  const labels = {
+    kunde: "Kunde",
+    team: "Team",
+    youbot: "YouBot",
+    system: "System"
+  };
+
+  return labels[senderType] || senderType || "Unbekannt";
+}
+
+async function fetchDashboardStatusHistory(session, requestId) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  const query = [
+    "select=id,request_id,old_status,new_status,note,created_at",
+    `request_id=eq.${encodeURIComponent(requestId)}`,
+    "order=created_at.desc"
+  ].join("&");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/request_status_history?${query}`, {
+    method: "GET",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Statusverlauf konnte nicht geladen werden.");
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchDashboardMessages(session, requestId) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  const query = [
+    "select=id,request_id,sender_type,sender_name,message,is_internal,created_at",
+    `request_id=eq.${encodeURIComponent(requestId)}`,
+    "order=created_at.desc"
+  ].join("&");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/request_messages?${query}`, {
+    method: "GET",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Nachrichten konnten nicht geladen werden.");
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+function renderDashboardMessages(messages) {
+  const list = document.querySelector("#dashboardMessagesList");
+  if (!list) return;
+
+  if (!messages?.length) {
+    list.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Keine Nachrichten</strong>
+        <p>Zu diesem Ticket wurde noch keine Nachricht gespeichert.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = messages.map(message => `
+    <article class="dashboard-message-item ${message.is_internal ? "internal" : ""}">
+      <div>
+        <strong>${escapeHtml(senderTypeLabel(message.sender_type))}</strong>
+        <span>${escapeHtml(message.sender_name || "—")} · ${escapeHtml(formatDashboardDate(message.created_at))}</span>
+      </div>
+      <p>${escapeHtml(message.message || "—")}</p>
+    </article>
+  `).join("");
+}
+
+function renderDashboardStatusHistory(history) {
+  const list = document.querySelector("#dashboardTimelineList");
+  if (!list) return;
+
+  if (!history?.length) {
+    list.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Kein Statusverlauf</strong>
+        <p>Für dieses Ticket wurde noch kein Statusverlauf gespeichert.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = history.map(entry => `
+    <article>
+      <span></span>
+      <div>
+        <strong>${escapeHtml(statusLabel(entry.new_status))}</strong>
+        <p>
+          ${entry.old_status ? `${escapeHtml(statusLabel(entry.old_status))} → ` : ""}
+          ${escapeHtml(statusLabel(entry.new_status))}
+          · ${escapeHtml(formatDashboardDate(entry.created_at))}
+        </p>
+        ${entry.note ? `<small>${escapeHtml(entry.note)}</small>` : ""}
+      </div>
+    </article>
+  `).join("");
+}
+
+function setTicketExtrasLoading() {
+  const messages = document.querySelector("#dashboardMessagesList");
+  const timeline = document.querySelector("#dashboardTimelineList");
+
+  if (messages) {
+    messages.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Nachrichten werden geladen …</strong>
+        <p>Die gespeicherten Kundennachrichten werden aus Supabase geladen.</p>
+      </div>
+    `;
+  }
+
+  if (timeline) {
+    timeline.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Statusverlauf wird geladen …</strong>
+        <p>Die Statushistorie wird aus Supabase geladen.</p>
+      </div>
+    `;
+  }
+}
+
+function clearTicketExtras() {
+  renderDashboardMessages([]);
+  renderDashboardStatusHistory([]);
+}
+
+async function loadDashboardTicketExtras(ticket) {
+  if (!ticket?.id || !dashboardCurrentSession) {
+    clearTicketExtras();
+    return;
+  }
+
+  const loadId = ++dashboardTicketExtrasLoadId;
+  setTicketExtrasLoading();
+
+  try {
+    const [messages, history] = await Promise.all([
+      fetchDashboardMessages(dashboardCurrentSession, ticket.id),
+      fetchDashboardStatusHistory(dashboardCurrentSession, ticket.id)
+    ]);
+
+    if (loadId !== dashboardTicketExtrasLoadId || dashboardSelectedRequestId !== ticket.id) return;
+
+    renderDashboardMessages(messages);
+    renderDashboardStatusHistory(history);
+  } catch (error) {
+    if (loadId !== dashboardTicketExtrasLoadId) return;
+
+    const messages = document.querySelector("#dashboardMessagesList");
+    const timeline = document.querySelector("#dashboardTimelineList");
+
+    if (messages) {
+      messages.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Nachrichten konnten nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+        </div>
+      `;
+    }
+
+    if (timeline) {
+      timeline.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Statusverlauf konnte nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+
 function splitContactValue(contactValue) {
   const contact = String(contactValue || "").trim();
 
@@ -832,7 +1036,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.9.3-HEADER-LOGO-FIX
+// DBG: ALL4YOU-ROUTER-V4.0-DASHBOARD-HISTORY-MESSAGES
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2651,22 +2855,24 @@ function pageDashboard() {
                 Statusänderungen werden automatisch im Statusverlauf gespeichert.
               </p>
 
+              <div class="dashboard-messages">
+                <p class="eyebrow">Kundennachrichten</p>
+                <div class="dashboard-messages-list" id="dashboardMessagesList">
+                  <div class="dashboard-mini-empty">
+                    <strong>Nachrichten werden nach Ticketauswahl geladen …</strong>
+                    <p>Die gespeicherten Kundennachrichten erscheinen hier live aus Supabase.</p>
+                  </div>
+                </div>
+              </div>
+
               <div class="dashboard-timeline">
                 <p class="eyebrow">Statusverlauf</p>
-                <article>
-                  <span></span>
-                  <div>
-                    <strong>Anfrage wurde erstellt.</strong>
-                    <p>Status: neu · automatisch durch Datenbank-Trigger</p>
+                <div class="dashboard-timeline-list" id="dashboardTimelineList">
+                  <div class="dashboard-mini-empty">
+                    <strong>Statusverlauf wird nach Ticketauswahl geladen …</strong>
+                    <p>Die Statushistorie erscheint hier live aus Supabase.</p>
                   </div>
-                </article>
-                <article>
-                  <span></span>
-                  <div>
-                    <strong>Nächster Schritt</strong>
-                    <p>In v3.8 werden echte Supabase-Daten geladen.</p>
-                  </div>
-                </article>
+                </div>
               </div>
             </aside>
           </section>
@@ -2677,7 +2883,7 @@ function pageDashboard() {
               <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login aktiv</span></article>
               <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase aktiv</span></article>
               <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
-              <article><strong>v4.0</strong><span>Kundenstatus, E-Mail und YouBot</span></article>
+              <article><strong>v4.0</strong><span>Statusverlauf & Nachrichten live</span></article>
             </div>
           </section>
         </main>
@@ -4456,6 +4662,7 @@ function bindDashboardShell() {
 
       renderDashboardDetail(dashboardRequestCache.find(ticket => ticket.id === updatedTicket.id) || updatedTicket);
       setDashboardActionMessage("success", `Status wurde auf „${statusLabel(updatedTicket.status)}“ geändert.`);
+      loadDashboardTicketExtras(dashboardRequestCache.find(ticket => ticket.id === updatedTicket.id) || updatedTicket);
     } catch (error) {
       setDashboardActionMessage("error", error.message || "Status konnte nicht geändert werden.");
       saveStatusButton.disabled = false;
@@ -4487,6 +4694,7 @@ function bindDashboardAuth() {
   }
 
   function showDashboard(profile, session) {
+    dashboardCurrentSession = session;
     gate.classList.add("is-hidden");
     protectedArea.classList.remove("is-hidden");
 
@@ -4548,6 +4756,8 @@ function bindDashboardAuth() {
     await supabaseLogout(session?.access_token);
     clearEmployeeSession();
     dashboardRequestCache = [];
+    dashboardCurrentSession = null;
+    clearTicketExtras();
     showLogin();
     setMessage("success", "Abgemeldet", "Die lokale Sitzung wurde beendet.");
   });

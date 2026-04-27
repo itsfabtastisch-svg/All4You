@@ -1,6 +1,6 @@
 # All4You Service München — Homepage
 
-DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
+DBG-Version: `ALL4YOU-ROUTER-V2.8.1-LOGO`
 
 ## Inhalt
 
@@ -88,7 +88,7 @@ http://localhost:8080/
   - Reinigungsservice
 - Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
 - Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.1-LOGO`
 
 
 ## v2.7 Über-uns-Seite
@@ -98,7 +98,7 @@ http://localhost:8080/
 - Erklärung, warum All4You mehrere Services bündelt
 - Leistungsübersicht mit Links ergänzt
 - Hinweis auf späteres Anfrage-, Mitarbeiter- und Kundenportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.1-LOGO`
 
 
 ## v2.8 Rechtliches
@@ -111,4 +111,11 @@ http://localhost:8080/
 - Platzhalter für Telefon, E-Mail, Website, USt-ID und weitere Angaben ergänzt
 - Datenschutzerklärung als Platzhalterstruktur vorbereitet
 - Hinweise zu Cloudflare Pages, Kontaktaufnahme, späterem Kundenkonto/Mitarbeiterportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8-RECHTLICHES`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.1-LOGO`
+
+
+## v2.8.1 Logo Update
+
+- `assets/logo-all4you.jpeg` gegen das neue bereitgestellte Logo ausgetauscht.
+- Header, Footer und alle weiteren Logo-Stellen nutzen dadurch automatisch das neue Logo.
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.8.1-LOGO`

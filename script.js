@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.8-RECHTLICHES
+// DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

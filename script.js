@@ -1219,11 +1219,21 @@ function splitContactValue(contactValue) {
     return { email: null, phone: null };
   }
 
-  if (contact.includes("@")) {
-    return { email: contact, phone: null };
-  }
+  const emailRegex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
+  const emailMatch = contact.match(emailRegex);
+  const email = emailMatch ? emailMatch[0].trim() : null;
 
-  return { email: null, phone: contact };
+  const withoutEmail = contact.replace(emailRegex, " ").trim();
+  const phoneCandidate =
+    withoutEmail.match(/(?:\+?\d[\d\s().\/-]{5,}\d)/)?.[0] ||
+    (!email ? contact : "");
+
+  const phoneDigits = String(phoneCandidate || "").replace(/\D/g, "");
+  const phone = phoneDigits.length >= 6
+    ? String(phoneCandidate).replace(/\s+/g, " ").trim()
+    : null;
+
+  return { email, phone };
 }
 
 async function createPublicRequest(payload) {
@@ -1362,7 +1372,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.3-CUSTOMER-STATUS-PAGE
+// DBG: ALL4YOU-ROUTER-V4.3.1-CONTACT-PARSER-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

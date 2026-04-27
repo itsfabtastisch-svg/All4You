@@ -84,6 +84,77 @@ function buildCleaningSummaryText(summary) {
     : "Reinigungsanfrage über den Webseiten-Assistenten.";
 }
 
+
+function buildClearanceSummaryText(summary) {
+  const parts = [
+    summary.clearanceType,
+    summary.businessName ? `Objekt: ${summary.businessName}` : "",
+    summary.address ? `Ort: ${summary.address}` : "",
+    summary.scope ? `Umfang: ${summary.scope}` : "",
+    summary.disposal ? `Entsorgung: ${summary.disposal}` : "",
+    summary.broomClean ? `Besenrein: ${summary.broomClean}` : "",
+    summary.desiredDate ? `Wunschtermin: ${summary.desiredDate}` : ""
+  ].filter(Boolean);
+
+  return parts.length
+    ? `Entrümpelungsanfrage: ${parts.join(" · ")}`
+    : "Entrümpelungsanfrage über den Webseiten-Assistenten.";
+}
+
+function buildRollerSummaryText(summary) {
+  const parts = [
+    summary.pickup ? `Abholort: ${summary.pickup}` : "",
+    summary.dropoff ? `Zielort: ${summary.dropoff}` : "",
+    summary.vehicle,
+    summary.condition,
+    summary.access ? `Zugang: ${summary.access}` : "",
+    summary.desiredDate ? `Wunschtermin: ${summary.desiredDate}` : ""
+  ].filter(Boolean);
+
+  return parts.length
+    ? `Rollerabholservice-Anfrage: ${parts.join(" · ")}`
+    : "Rollerabholservice-Anfrage über den Webseiten-Assistenten.";
+}
+
+function buildTrailerSummaryText(summary) {
+  const parts = [
+    summary.rentalStart && summary.rentalEnd ? `${summary.rentalStart} bis ${summary.rentalEnd}` : "",
+    summary.rentalDays ? `Mietdauer: ${summary.rentalDays}` : "",
+    summary.rentalPrice ? `Preis: ${summary.rentalPrice}` : "",
+    summary.handover,
+    summary.cargo ? `Transportgut: ${summary.cargo}` : ""
+  ].filter(Boolean);
+
+  return parts.length
+    ? `Anhänger-Mietanfrage: ${parts.join(" · ")}`
+    : "Anhänger-Mietanfrage über den Webseiten-Assistenten.";
+}
+
+function renderSupabaseSuccess(result, typeLabel, ticketNumber, extraNote = "") {
+  result.innerHTML = `
+    <strong>${escapeHtml(typeLabel)} erfolgreich gespeichert</strong>
+    <p>
+      Die Anfrage wurde in Supabase gespeichert.
+      <br><b>Ticketnummer:</b> ${escapeHtml(ticketNumber || "wurde erstellt")}
+      <br><b>Status:</b> neu
+    </p>
+    ${extraNote ? `<p class="form-note">${escapeHtml(extraNote)}</p>` : ""}
+  `;
+}
+
+function renderSupabaseError(result, error, mailHref) {
+  result.innerHTML = `
+    <strong>Supabase-Speicherung fehlgeschlagen</strong>
+    <p>
+      Die Anfrage konnte noch nicht in Supabase gespeichert werden.
+      Sie können die Anfrage aber weiterhin per E-Mail vorbereiten.
+    </p>
+    <p class="form-note">${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+  `;
+  appendMailPreviewButton(result, mailHref, "Anfrage per E-Mail öffnen");
+}
+
+
 function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E-Mail öffnen") {
   const mailButton = document.createElement("a");
   mailButton.className = "btn blue mail-preview-btn";
@@ -95,7 +166,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.4-SUPABASE-TEST
+// DBG: ALL4YOU-ROUTER-V3.5-SUPABASE-ALL-WIZARDS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2848,19 +2919,12 @@ function bindClearanceWizard() {
 
   clearanceType?.addEventListener("change", updateBusinessField);
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     renderSummary();
 
     const summary = collectSummary();
-    result.classList.add("show");
-    result.innerHTML = `
-      <strong>Entrümpelungs-Anfrage vorbereitet</strong>
-      <p>
-        Die Anfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
-        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
-      </p>
-    `;
+    const contact = splitContactValue(summary.contact);
 
     const subject = encodeURIComponent("Anfrage über die Webseite: Entrümpelung");
     const body = encodeURIComponent(
@@ -2885,12 +2949,56 @@ function bindClearanceWizard() {
       `Was soll entrümpelt werden?\n${summary.clearanceItems}\n\n` +
       `Besondere Hinweise:\n${summary.message}`
     );
+    const mailHref = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
 
-    const mailButton = document.createElement("a");
-    mailButton.className = "btn blue mail-preview-btn";
-    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
-    mailButton.textContent = "Anfrage per E-Mail öffnen";
-    result.appendChild(mailButton);
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Entrümpelungs-Anfrage wird gespeichert …</strong>
+      <p>Einen Moment bitte. Die Anfrage wird gerade in Supabase gespeichert.</p>
+    `;
+
+    try {
+      const response = await createPublicRequest({
+        p_service: "entruempelung",
+        p_source: "wizard",
+        p_customer_name: summary.name,
+        p_customer_email: contact.email,
+        p_customer_phone: contact.phone,
+        p_subject: "Entrümpelungsanfrage",
+        p_summary: buildClearanceSummaryText(summary),
+        p_details: {
+          clearance_type: summary.clearanceType,
+          business_name: summary.businessName,
+          address: summary.address,
+          floor: summary.floor,
+          elevator: summary.elevator,
+          parking: summary.parking,
+          no_parking_zone: summary.noParkingZone,
+          scope: summary.scope,
+          disposal: summary.disposal,
+          broom_clean: summary.broomClean,
+          inspection: summary.inspection,
+          fixed_price: summary.fixedPrice,
+          desired_date: summary.desiredDate,
+          photos: summary.photos,
+          extra_service: summary.extraService,
+          clearance_items: summary.clearanceItems,
+          message: summary.message
+        },
+        p_initial_message: summary.message || summary.clearanceItems
+      });
+
+      renderSupabaseSuccess(
+        result,
+        "Entrümpelungs-Anfrage",
+        response?.ticket_number,
+        "Aktuell ist zusätzlich noch die E-Mail-Vorschau verfügbar. Später wird der automatische E-Mail-Versand direkt über das Backend laufen."
+      );
+      appendMailPreviewButton(result, mailHref);
+    } catch (error) {
+      renderSupabaseError(result, error, mailHref);
+    }
+
     result.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, { once: false });
 
@@ -3021,19 +3129,12 @@ function bindRollerWizard() {
     updateWizard();
   });
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     renderSummary();
 
     const summary = collectSummary();
-    result.classList.add("show");
-    result.innerHTML = `
-      <strong>Roller-Anfrage vorbereitet</strong>
-      <p>
-        Die Anfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
-        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt. Die Distanzmessung ist für Google Maps vorbereitet.
-      </p>
-    `;
+    const contact = splitContactValue(summary.contact);
 
     const subject = encodeURIComponent("Anfrage über die Webseite: Rollerabholservice");
     const body = encodeURIComponent(
@@ -3054,12 +3155,53 @@ function bindRollerWizard() {
       `Kontakt: ${summary.contact}\n\n` +
       `Nachricht:\n${summary.message}`
     );
+    const mailHref = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
 
-    const mailButton = document.createElement("a");
-    mailButton.className = "btn blue mail-preview-btn";
-    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
-    mailButton.textContent = "Anfrage per E-Mail öffnen";
-    result.appendChild(mailButton);
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Roller-Anfrage wird gespeichert …</strong>
+      <p>Einen Moment bitte. Die Anfrage wird gerade in Supabase gespeichert.</p>
+    `;
+
+    try {
+      const response = await createPublicRequest({
+        p_service: "rollerabholservice",
+        p_source: "wizard",
+        p_customer_name: summary.name,
+        p_customer_email: contact.email,
+        p_customer_phone: contact.phone,
+        p_subject: "Rollerabholservice-Anfrage",
+        p_summary: buildRollerSummaryText(summary),
+        p_details: {
+          pickup: summary.pickup,
+          dropoff: summary.dropoff,
+          distance: summary.distance,
+          duration: summary.duration,
+          vehicle: summary.vehicle,
+          condition: summary.condition,
+          has_key: summary.hasKey,
+          registered: summary.registered,
+          access: summary.access,
+          rollable: summary.rollable,
+          special_situation: summary.specialSituation,
+          desired_date: summary.desiredDate,
+          message: summary.message,
+          google_maps_ready: true
+        },
+        p_initial_message: summary.message
+      });
+
+      renderSupabaseSuccess(
+        result,
+        "Roller-Anfrage",
+        response?.ticket_number,
+        "Die Distanzmessung ist weiterhin für die spätere Google-Maps-Anbindung vorbereitet."
+      );
+      appendMailPreviewButton(result, mailHref);
+    } catch (error) {
+      renderSupabaseError(result, error, mailHref);
+    }
+
     result.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, { once: false });
 
@@ -3247,19 +3389,12 @@ function bindTrailerWizard() {
     updateWizard();
   });
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     renderSummary();
 
     const summary = collectSummary();
-    result.classList.add("show");
-    result.innerHTML = `
-      <strong>Anhänger-Anfrage vorbereitet</strong>
-      <p>
-        Die Mietanfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
-        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
-      </p>
-    `;
+    const contact = splitContactValue(summary.contact);
 
     const subject = encodeURIComponent("Anfrage über die Webseite: Anhängervermietung");
     const body = encodeURIComponent(
@@ -3281,12 +3416,54 @@ function bindTrailerWizard() {
       `Kontakt: ${summary.contact}\n\n` +
       `Nachricht:\n${summary.message}`
     );
+    const mailHref = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
 
-    const mailButton = document.createElement("a");
-    mailButton.className = "btn blue mail-preview-btn";
-    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
-    mailButton.textContent = "Anfrage per E-Mail öffnen";
-    result.appendChild(mailButton);
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Anhänger-Anfrage wird gespeichert …</strong>
+      <p>Einen Moment bitte. Die Anfrage wird gerade in Supabase gespeichert.</p>
+    `;
+
+    try {
+      const response = await createPublicRequest({
+        p_service: "anhaenger",
+        p_source: "wizard",
+        p_customer_name: summary.name,
+        p_customer_email: contact.email,
+        p_customer_phone: contact.phone,
+        p_subject: "Anhänger-Mietanfrage",
+        p_summary: buildTrailerSummaryText(summary),
+        p_details: {
+          rental_start: summary.rentalStart,
+          rental_end: summary.rentalEnd,
+          rental_days: summary.rentalDays,
+          rental_price: summary.rentalPrice,
+          deposit: "nach Absprache",
+          handover: summary.handover,
+          delivery_address: summary.deliveryAddress,
+          cargo: summary.cargo,
+          cargo_size: summary.cargoSize,
+          tow_vehicle: summary.towVehicle,
+          trailer_hitch: summary.trailerHitch,
+          plug_type: summary.plugType,
+          extras: summary.extras,
+          message: summary.message,
+          availability_note: "Verfügbarkeit wird durch All4You bestätigt"
+        },
+        p_initial_message: summary.message
+      });
+
+      renderSupabaseSuccess(
+        result,
+        "Anhänger-Anfrage",
+        response?.ticket_number,
+        "Die Mietanfrage ist unverbindlich. Verfügbarkeit, Kaution und Übergabe werden durch All4You bestätigt."
+      );
+      appendMailPreviewButton(result, mailHref);
+    } catch (error) {
+      renderSupabaseError(result, error, mailHref);
+    }
+
     result.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, { once: false });
 

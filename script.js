@@ -476,9 +476,9 @@ function renderDashboardDetail(ticket) {
 
   setDashboardInternalNoteEnabled(true);
   setDashboardTicketActionsEnabled(true);
-  setDashboardTicketActionMessage("", "Schnellaktionen beziehen sich immer auf das ausgewählte Ticket.");
+  setDashboardTicketActionMessage("", "Schnellaktionen gelten für das ausgewählte Ticket.");
   setDashboardInternalNoteMessage("", "Interne Notizen sind nur im Mitarbeiter-Dashboard sichtbar.");
-  setDashboardActionMessage("", "Statusänderungen werden automatisch im Statusverlauf gespeichert.");
+  setDashboardActionMessage("", "Statusänderungen werden automatisch im Verlauf dokumentiert.");
   loadDashboardTicketExtras(ticket);
 }
 function updateDashboardStats(tickets) {
@@ -529,7 +529,7 @@ async function loadDashboardRequests(session) {
     updateDashboardActivityStats(requests);
 
     if (liveStatus) {
-      liveStatus.textContent = "Live-Daten aktiv";
+      liveStatus.textContent = "Live verbunden";
       liveStatus.classList.remove("warning");
       liveStatus.classList.add("success");
     }
@@ -1525,7 +1525,7 @@ function appendCustomerStatusLink(result, ticketNumber) {
   link.className = "btn ghost customer-status-link";
   link.href = `/status?ticket=${encodeURIComponent(ticketNumber)}`;
   link.setAttribute("data-link", "");
-  link.textContent = "Status später prüfen";
+  link.textContent = "Statuslink öffnen";
   result.appendChild(link);
 }
 
@@ -1655,7 +1655,7 @@ function renderCustomerStatusResult(result, ticket) {
       </div>
 
       <p class="customer-status-privacy">
-        Interne Notizen und Team-Kommentare sind für Kunden nicht sichtbar.
+        Interne Notizen und Team-Kommentare bleiben geschützt und sind hier nicht sichtbar.
       </p>
 
       <form class="customer-reply-form" id="customerReplyForm">
@@ -1690,8 +1690,8 @@ function pageCustomerStatus() {
         <p class="eyebrow">Anfrage verfolgen</p>
         <h1>Status Ihrer Anfrage prüfen.</h1>
         <p class="lead">
-          Geben Sie Ihre Ticketnummer und zur Sicherheit Ihre E-Mail-Adresse oder Telefonnummer ein.
-          Interne Notizen bleiben selbstverständlich verborgen.
+          Geben Sie Ihre Ticketnummer und zur Sicherheit die E-Mail-Adresse oder Telefonnummer aus Ihrer Anfrage ein.
+          Danach sehen Sie den aktuellen Bearbeitungsstand und können Nachrichten oder Dateien nachreichen.
         </p>
       </div>
 
@@ -1708,7 +1708,7 @@ function pageCustomerStatus() {
           <button class="btn primary" type="submit">Status prüfen <span>›</span></button>
 
           <p class="form-note">
-            Die Verifizierung verhindert, dass fremde Personen den Status einer Anfrage einsehen können.
+            So bleibt der Status geschützt und ist nur mit passenden Kontaktdaten abrufbar.
           </p>
         </form>
 
@@ -2291,11 +2291,11 @@ function renderSupabaseError(result, error, mailHref) {
     </p>
     <p class="form-note">${escapeHtml(error.message || "Unbekannter Fehler")}</p>
   `;
-  appendMailPreviewButton(result, mailHref, "Anfrage per E-Mail öffnen");
+  appendMailPreviewButton(result, mailHref, "E-Mail-Kopie öffnen");
 }
 
 
-function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E-Mail öffnen") {
+function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
   const mailButton = document.createElement("a");
   mailButton.className = "btn blue mail-preview-btn";
   mailButton.href = href;
@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
+// DBG: ALL4YOU-ROUTER-V5.0-SYSTEM-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2742,8 +2742,8 @@ function rollerPage() {
             <div class="distance-result" id="rollerWizardResult">
               <strong>Roller-Anfrage vorbereitet</strong>
               <p>
-                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
-                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+                Die Anfrage wird gespeichert, per E-Mail an das Team gemeldet
+                und im Mitarbeiterportal angezeigt.
               </p>
             </div>
           </form>
@@ -3031,8 +3031,8 @@ function trailerPage() {
             <div class="distance-result" id="trailerWizardResult">
               <strong>Anhänger-Anfrage vorbereitet</strong>
               <p>
-                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
-                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+                Die Anfrage wird gespeichert, per E-Mail an das Team gemeldet
+                und im Mitarbeiterportal angezeigt.
               </p>
             </div>
           </form>
@@ -3356,8 +3356,8 @@ function clearancePage() {
             <div class="distance-result" id="clearanceWizardResult">
               <strong>Entrümpelungs-Anfrage vorbereitet</strong>
               <p>
-                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
-                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+                Die Anfrage wird gespeichert, per E-Mail an das Team gemeldet
+                und im Mitarbeiterportal angezeigt.
               </p>
             </div>
           </form>
@@ -3709,8 +3709,8 @@ function cleaningPage() {
             <div class="distance-result" id="cleaningWizardResult">
               <strong>Reinigungs-Anfrage vorbereitet</strong>
               <p>
-                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
-                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+                Die Anfrage wird gespeichert, per E-Mail an das Team gemeldet
+                und im Mitarbeiterportal angezeigt.
               </p>
             </div>
           </form>
@@ -3896,94 +3896,13 @@ function contactForm(buttonText = "Anfrage vorbereiten", defaultService = "Rolle
         <textarea name="message" rows="5" placeholder="Kurz beschreiben, worum es geht..."></textarea>
       </label>
       <button class="btn primary" type="submit">${buttonText} <span>›</span></button>
-      <p class="form-note">Aktuell öffnet das Formular eine E-Mail. Später kann hier ein echter Formularversand angebunden werden.</p>
+      <p class="form-note">Die allgemeine Kurzanfrage öffnet eine vorbereitete E-Mail. Für strukturierte Anfragen nutzen Sie bitte die jeweiligen Assistenten.</p>
     </form>
   `;
 }
 
 function pageDashboard() {
   document.title = "Mitarbeiter-Dashboard | All4You Service München";
-  const previewTickets = [
-    {
-      id: "A4Y-2026-0005",
-      service: "Entrümpelung",
-      status: "neu",
-      customer: "Mustermann",
-      summary: "Wohnung / Entrümpelung · Entsorgung ja · Besichtigung gewünscht",
-      time: "heute · 03:17",
-      priority: "normal",
-      details: [
-        ["Leistung", "Entrümpelung"],
-        ["Status", "neu"],
-        ["Kontakt", "Telefon vorhanden"],
-        ["Quelle", "Webseiten-Wizard"],
-        ["Hinweis", "Live-Daten sind jetzt aktiv."]
-      ]
-    },
-    {
-      id: "A4Y-2026-0004",
-      service: "Anhänger",
-      status: "neu",
-      customer: "Mustermann",
-      summary: "Mietanfrage · Preis automatisch berechnet · Verfügbarkeit prüfen",
-      time: "heute · 03:15",
-      priority: "normal",
-      details: [
-        ["Leistung", "Anhängervermietung"],
-        ["Status", "neu"],
-        ["Mietpreis", "aus Wizard berechnet"],
-        ["Kaution", "nach Absprache"],
-        ["Hinweis", "Kalenderstatus wird später angebunden."]
-      ]
-    },
-    {
-      id: "A4Y-2026-0003",
-      service: "Roller",
-      status: "neu",
-      customer: "Mustermann",
-      summary: "Rollerabholservice · Strecke vorbereitet · Google Maps später",
-      time: "heute · 03:14",
-      priority: "normal",
-      details: [
-        ["Leistung", "Rollerabholservice"],
-        ["Status", "neu"],
-        ["Strecke", "Abholort/Zielort vorbereitet"],
-        ["Distanz", "Google Maps API später"],
-        ["Hinweis", "Routes API wird später angebunden."]
-      ]
-    },
-    {
-      id: "A4Y-2026-0002",
-      service: "Reinigung",
-      status: "neu",
-      customer: "Fabian",
-      summary: "Reinigungsanfrage · Privat/Gewerblich · Umfang & Termin",
-      time: "heute · 03:06",
-      priority: "normal",
-      details: [
-        ["Leistung", "Reinigung"],
-        ["Status", "neu"],
-        ["Quelle", "Webseiten-Wizard"],
-        ["Nachricht", "Kundennachricht wurde gespeichert"],
-        ["Hinweis", "Wurde bereits erfolgreich in Supabase getestet."]
-      ]
-    }
-  ];
-
-  const ticketCards = previewTickets.map((ticket, index) => `
-    <button class="dashboard-ticket ${index === 0 ? "active" : ""}" type="button"
-      data-ticket-index="${index}"
-      data-ticket='${escapeHtml(JSON.stringify(ticket))}'>
-      <span class="ticket-topline">
-        <strong>${ticket.id}</strong>
-        <em>${ticket.status}</em>
-      </span>
-      <span class="ticket-service">${ticket.service}</span>
-      <span class="ticket-summary">${ticket.summary}</span>
-      <span class="ticket-meta">${ticket.customer} · ${ticket.time}</span>
-    </button>
-  `).join("");
-
   return `
     <section class="dashboard-auth-page page">
       <div class="dashboard-auth-gate" id="dashboardAuthGate">
@@ -3995,8 +3914,8 @@ function pageDashboard() {
           <p class="eyebrow">Mitarbeiterportal</p>
           <h1>Einloggen, um Anfragen zu verwalten.</h1>
           <p class="lead">
-            Der Mitarbeiterbereich ist ab jetzt mit Supabase Auth vorbereitet.
-            Nur Benutzer mit aktivem Mitarbeiterprofil erhalten Zugriff.
+            Dieser Bereich ist nur für aktive Mitarbeiterkonten freigegeben.
+            Nach dem Login können Anfragen, Status, Nachrichten und Anhänge verwaltet werden.
           </p>
 
           <form class="auth-form" id="dashboardLoginForm">
@@ -4011,7 +3930,7 @@ function pageDashboard() {
 
           <div class="auth-message" id="dashboardAuthMessage">
             <strong>Hinweis</strong>
-            <p>Der Benutzer muss in Supabase Auth existieren und zusätzlich in der Tabelle employees eingetragen sein.</p>
+            <p>Bitte mit einem freigeschalteten Mitarbeiterkonto anmelden.</p>
           </div>
 
           <a class="auth-back" href="/" data-link>Zurück zur Webseite</a>
@@ -4027,11 +3946,10 @@ function pageDashboard() {
 
           <nav class="dashboard-menu" aria-label="Dashboard Navigation">
             <a class="active" href="/dashboard" data-link>Übersicht</a>
-            <a href="/dashboard" data-link>Anfragen</a>
-            <a href="/dashboard" data-link>Kunden</a>
+            <a href="/dashboard" data-link>Tickets</a>
+            <a href="/dashboard" data-link>Nachrichten</a>
+            <a href="/dashboard" data-link>Anhänge</a>
             <a href="/dashboard" data-link>Statusverlauf</a>
-            <a href="/dashboard" data-link>YouBot</a>
-            <a href="/dashboard" data-link>Einstellungen</a>
           </nav>
 
           <div class="dashboard-user-card">
@@ -4042,7 +3960,7 @@ function pageDashboard() {
 
           <div class="dashboard-security-note">
             <strong>Auth aktiv</strong>
-            <p>Diese Dashboard-Hülle prüft jetzt Supabase Auth und ein aktives Mitarbeiterprofil.</p>
+            <p>Zugriff nur mit gültigem Mitarbeiterkonto und aktivem Profil.</p>
           </div>
         </aside>
 
@@ -4052,17 +3970,17 @@ function pageDashboard() {
               <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
               <h1>Anfragen zentral verwalten.</h1>
               <p class="lead">
-                Der Login ist aktiv. Die echten Tickets werden jetzt live aus Supabase geladen.
+                Alle Anfragen, Nachrichten, Anhänge und Statusänderungen werden live aus Supabase geladen.
               </p>
             </div>
             <div class="dashboard-hero-actions">
               <span class="status-pill success">Auth aktiv</span>
-              <span class="status-pill success" id="dashboardLiveStatus">Live-Daten aktiv</span>
+              <span class="status-pill success" id="dashboardLiveStatus">Live verbunden</span>
             </div>
           </section>
 
           <section class="dashboard-stats">
-            <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live aus Supabase</small></article>
+            <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
@@ -4122,7 +4040,7 @@ function pageDashboard() {
                 
                 <div class="dashboard-empty-state">
                   <strong>Anfragen werden nach Login geladen …</strong>
-                  <p>Die Ticketliste wird direkt aus Supabase befüllt.</p>
+                  <p>Die Ticketliste wird automatisch geladen.</p>
                 </div>
               
               </div>
@@ -4132,13 +4050,13 @@ function pageDashboard() {
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Ticketdetails</p>
-                  <h2 id="dashboardDetailTitle">Live-Ticket</h2>
+                  <h2 id="dashboardDetailTitle">Ticket auswählen</h2>
                 </div>
                 <span class="status-pill" id="dashboardDetailStatus">—</span>
               </div>
 
               <div class="dashboard-detail-body" id="dashboardDetailBody">
-                <div class="summary-wide"><strong>Hinweis</strong><span>Nach dem Login werden hier echte Ticketdetails aus Supabase angezeigt.</span></div>
+                <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links ein Ticket aus, um Details, Nachrichten, Anhänge und Verlauf zu sehen.</span></div>
               </div>
 
               <div class="dashboard-status-editor">
@@ -4151,7 +4069,7 @@ function pageDashboard() {
               </div>
 
               <p class="dashboard-action-message" id="dashboardActionMessage">
-                Statusänderungen werden automatisch im Statusverlauf gespeichert.
+                Statusänderungen werden automatisch im Verlauf dokumentiert.
               </p>
 
               <div class="dashboard-ticket-actions">
@@ -4171,8 +4089,8 @@ function pageDashboard() {
                 <p class="eyebrow">Nachrichten & interne Notizen</p>
                 <div class="dashboard-messages-list" id="dashboardMessagesList">
                   <div class="dashboard-mini-empty">
-                    <strong>Nachrichten werden nach Ticketauswahl geladen …</strong>
-                    <p>Die gespeicherten Kundennachrichten und internen Notizen erscheinen hier live aus Supabase.</p>
+                    <strong>Nachrichten werden geladen …</strong>
+                    <p>Kundennachrichten und interne Notizen erscheinen hier.</p>
                   </div>
                 </div>
 
@@ -4189,8 +4107,8 @@ function pageDashboard() {
                 <p class="eyebrow">Anhänge</p>
                 <div class="dashboard-attachments-list" id="dashboardAttachmentsList">
                   <div class="dashboard-mini-empty">
-                    <strong>Anhänge werden nach Ticketauswahl geladen …</strong>
-                    <p>Fotos und Dokumente erscheinen hier live aus Supabase.</p>
+                    <strong>Anhänge werden geladen …</strong>
+                    <p>Fotos und Dokumente erscheinen hier.</p>
                   </div>
                 </div>
               </div>
@@ -4199,21 +4117,21 @@ function pageDashboard() {
                 <p class="eyebrow">Statusverlauf</p>
                 <div class="dashboard-timeline-list" id="dashboardTimelineList">
                   <div class="dashboard-mini-empty">
-                    <strong>Statusverlauf wird nach Ticketauswahl geladen …</strong>
-                    <p>Die Statushistorie erscheint hier live aus Supabase.</p>
+                    <strong>Statusverlauf wird geladen …</strong>
+                    <p>Die Statushistorie erscheint hier.</p>
                   </div>
                 </div>
               </div>
             </aside>
           </section>
 
-          <section class="dashboard-roadmap">
-            <p class="eyebrow">Nächste Schritte</p>
+          <section class="dashboard-roadmap system-status-board">
+            <p class="eyebrow">Systemstatus</p>
             <div class="roadmap-grid">
-              <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login aktiv</span></article>
-              <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase aktiv</span></article>
-              <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
-              <article><strong>v4.7</strong><span>Neue Kundennachrichten & Anhänge hervorgehoben</span></article>
+              <article><strong>Live</strong><span>Anfragen, Tickets und Statusverwaltung aktiv</span></article>
+              <article><strong>Portal</strong><span>Kundenstatus, Nachrichten und Datei-Uploads aktiv</span></article>
+              <article><strong>Team</strong><span>Interne Notizen, Anhänge, Suche und Aktionen aktiv</span></article>
+              <article><strong>Mail</strong><span>Team-Benachrichtigung mit Statuslink aktiv</span></article>
             </div>
           </section>
         </main>
@@ -4257,7 +4175,7 @@ function pageContact() {
         <h2>Auswahl treffen, Daten senden, Rückmeldung erhalten.</h2>
         <p>
           Die passenden Leistungsseiten fragen genau die Informationen ab, die All4You für eine schnelle Einschätzung braucht.
-          Später werden Anfragen zusätzlich im Mitarbeiterportal gespeichert und der Kunde erhält eine Zusammenfassung per E-Mail.
+          Anfragen werden im Mitarbeiterportal gespeichert, das Team wird benachrichtigt und Kunden können den Status online prüfen.
         </p>
       </aside>
     </section>
@@ -4686,9 +4604,9 @@ function legalPage(type) {
             <li>finale Kontakt-E-Mail ergänzen</li>
             <li>Telefonnummer ergänzen</li>
             <li>Hosting/Cloudflare-Angaben prüfen</li>
-            <li>spätere Datenbank/Backend-Anbieter ergänzen</li>
-            <li>E-Mail-Versand-Anbieter ergänzen</li>
-            <li>Kundenkonto-/Portal-Funktionen ergänzen</li>
+            <li>Supabase als Datenbank-/Portal-Anbieter prüfen und ergänzen</li>
+            <li>Resend als E-Mail-Versand-Anbieter prüfen und ergänzen</li>
+            <li>Kundenstatus-/Portal-Funktionen rechtlich prüfen und ergänzen</li>
             <li>Google Maps erst aufnehmen, wenn aktiv</li>
           </ul>
         </div>
@@ -5248,7 +5166,7 @@ function bindCleaningWizard() {
           <br><b>Status:</b> neu
         </p>
         <p class="form-note">
-          Aktuell ist zusätzlich noch die E-Mail-Vorschau verfügbar. Später wird der automatische E-Mail-Versand direkt über das Backend laufen.
+          Das Team wird automatisch benachrichtigt. Über den Statuslink kann der Bearbeitungsstand geprüft werden.
         </p>
       `;
       appendMailPreviewButton(result, mailHref);
@@ -5264,7 +5182,7 @@ function bindCleaningWizard() {
         </p>
         <p class="form-note">${escapeHtml(error.message || "Unbekannter Fehler")}</p>
       `;
-      appendMailPreviewButton(result, mailHref, "Anfrage per E-Mail öffnen");
+      appendMailPreviewButton(result, mailHref, "E-Mail-Kopie öffnen");
     }
 
     result.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -5467,7 +5385,7 @@ function bindClearanceWizard() {
         result,
         "Entrümpelungs-Anfrage",
         response?.ticket_number,
-        "Aktuell ist zusätzlich noch die E-Mail-Vorschau verfügbar. Später wird der automatische E-Mail-Versand direkt über das Backend laufen."
+        "Die Anfrage wurde gespeichert. Das Team wird automatisch benachrichtigt und der Kunde kann den Status später über den Statuslink prüfen."
       );
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);

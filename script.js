@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.1-YOUBOT-MVP
+// DBG: ALL4YOU-ROUTER-V5.1.1-YOUBOT-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -6132,12 +6132,12 @@ function escapeHtml(value) {
    ========================================================================== */
 
 const YOUBOT_QUICK_ACTIONS = [
-  { label: "Rollerabholung", value: "Rollerabholung" },
+  { label: "Roller abholen lassen", value: "Rollerabholung" },
   { label: "Anhänger mieten", value: "Anhänger mieten" },
-  { label: "Entrümpelung", value: "Entrümpelung" },
-  { label: "Reinigung", value: "Reinigung" },
+  { label: "Entrümpelung planen", value: "Entrümpelung" },
+  { label: "Reinigung anfragen", value: "Reinigung" },
   { label: "Status prüfen", value: "Status prüfen" },
-  { label: "Kontakt", value: "Kontakt" }
+  { label: "Kontakt aufnehmen", value: "Kontakt" }
 ];
 
 function youBotNormalize(text) {
@@ -6153,29 +6153,39 @@ function youBotServiceButton(href, label) {
 
 function youBotReplyFor(input) {
   const text = youBotNormalize(input);
+  const compactText = text.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
 
-  if (!text || text.length < 2) {
+  const isGreeting = /^(hi|hey|hallo|hello|servus|moin|guten morgen|guten tag|guten abend|abend|morgen|tach|yo|na|grüß dich|gruss|gruß)\b/.test(compactText);
+
+  if (!text || text.length < 2 || isGreeting) {
     return {
-      text: "Schreib mir kurz, wobei ich helfen soll: Roller abholen, Anhänger mieten, Entrümpelung, Reinigung oder Ticketstatus prüfen.",
+      text: "Hey, schön dass du da bist! Ich bin YouBot und helfe dir bei Fragen zu All4You. Geht es um eine Rollerabholung, eine Entrümpelung, Reinigung, Anhängermiete oder möchtest du den Status einer Anfrage prüfen?",
+      actions: YOUBOT_QUICK_ACTIONS
+    };
+  }
+
+  if (text.includes("danke") || text.includes("dankeschon") || text.includes("dankeschön") || text.includes("merci")) {
+    return {
+      text: "Sehr gerne! Wenn du möchtest, kann ich dich direkt zur passenden Anfrage oder zur Statusprüfung bringen.",
       actions: YOUBOT_QUICK_ACTIONS
     };
   }
 
   if (text.includes("status") || text.includes("ticket") || text.includes("nummer") || text.includes("bearbeitung")) {
     return {
-      text: `Den Status einer Anfrage können Kunden mit Ticketnummer plus E-Mail oder Telefonnummer prüfen. ${youBotServiceButton("/status", "Status prüfen")}`,
+      text: `Klar, den Bearbeitungsstand kannst du über die Statusseite prüfen. Du brauchst dafür deine Ticketnummer und zur Sicherheit die E-Mail-Adresse oder Telefonnummer aus deiner Anfrage. ${youBotServiceButton("/status", "Statusseite öffnen")}`,
       actions: [
-        { label: "Status prüfen", href: "/status" },
-        { label: "Neue Anfrage", href: "/kontakt" }
+        { label: "Status jetzt prüfen", href: "/status" },
+        { label: "Neue Anfrage stellen", href: "/kontakt" }
       ]
     };
   }
 
   if (text.includes("roller") || text.includes("moped") || text.includes("motorrad") || text.includes("werkstatt")) {
     return {
-      text: `Für den Rollerabholservice werden Abholort, Zielort, Fahrzeugart, Zustand, Zugänglichkeit und Kontaktdaten abgefragt. Fotos können direkt mitgeschickt werden. ${youBotServiceButton("/leistungen/rollerabholservice", "Rollerabholung anfragen")}`,
+      text: `Alles klar, beim Rollerabholservice sind vor allem Abholort, Zielort, Zustand, Schlüssel, Zugänglichkeit und Fotos wichtig. Du kannst die Anfrage direkt vorbereiten und bei Bedarf Bilder mitschicken. ${youBotServiceButton("/leistungen/rollerabholservice", "Rollerabholung anfragen")}`,
       actions: [
-        { label: "Rollerabholung anfragen", href: "/leistungen/rollerabholservice" },
+        { label: "Rollerabholung starten", href: "/leistungen/rollerabholservice" },
         { label: "Status prüfen", href: "/status" }
       ]
     };
@@ -6183,57 +6193,57 @@ function youBotReplyFor(input) {
 
   if (text.includes("anhanger") || text.includes("anhaenger") || text.includes("mieten") || text.includes("koffer") || text.includes("umzug")) {
     return {
-      text: `Bei der Anhängervermietung können Mietzeitraum, Transportgut, Abholung und Zusatzbedarf angegeben werden. Der Preis wird nach Mietdauer berechnet und die Anfrage wird vom Team bestätigt. ${youBotServiceButton("/leistungen/anhaenger", "Anhänger anfragen")}`,
+      text: `Für den Anhänger kannst du den gewünschten Mietzeitraum, Transportgut, Zugfahrzeug und Übergabeart angeben. Der Preis wird nach Mietdauer berechnet, die finale Verfügbarkeit bestätigt das Team. ${youBotServiceButton("/leistungen/anhaenger", "Anhänger anfragen")}`,
       actions: [
         { label: "Anhänger anfragen", href: "/leistungen/anhaenger" },
-        { label: "Kontakt", href: "/kontakt" }
+        { label: "Kontakt aufnehmen", href: "/kontakt" }
       ]
     };
   }
 
   if (text.includes("entrumpel") || text.includes("entruempel") || text.includes("raumung") || text.includes("räumung") || text.includes("keller") || text.includes("wohnung")) {
     return {
-      text: `Für Entrümpelungen sind Objektart, Adresse, Umfang, Etage, Aufzug, Parkmöglichkeit, Entsorgung und Fotos besonders hilfreich. Eine Besichtigung kann kostenlos angefragt werden. ${youBotServiceButton("/leistungen/entruempelung", "Entrümpelung anfragen")}`,
+      text: `Bei einer Entrümpelung helfen Fotos enorm. Wichtig sind Objektart, Etage, Aufzug, Parkmöglichkeit, Umfang, Entsorgung und ob eine besenreine Übergabe gewünscht ist. Eine Besichtigung kann ebenfalls angefragt werden. ${youBotServiceButton("/leistungen/entruempelung", "Entrümpelung anfragen")}`,
       actions: [
-        { label: "Entrümpelung anfragen", href: "/leistungen/entruempelung" },
-        { label: "Reinigung danach", href: "/leistungen/reinigung" }
+        { label: "Entrümpelung starten", href: "/leistungen/entruempelung" },
+        { label: "Reinigung danach anfragen", href: "/leistungen/reinigung" }
       ]
     };
   }
 
   if (text.includes("reinigung") || text.includes("putz") || text.includes("sauber") || text.includes("gebaude") || text.includes("gebäude")) {
     return {
-      text: `Beim Reinigungsservice werden Privat/Gewerblich, Objektart, Adresse, Fläche, Turnus, Terminwunsch, besondere Bereiche und Fotos abgefragt. Material wird mitgebracht. ${youBotServiceButton("/leistungen/reinigung", "Reinigung anfragen")}`,
+      text: `Für eine passende Reinigung fragt der Assistent ab, ob es privat oder gewerblich ist, welche Objektart vorliegt, wie groß die Fläche ist und ob es einmalig oder regelmäßig sein soll. Fotos kannst du ebenfalls hochladen. ${youBotServiceButton("/leistungen/reinigung", "Reinigung anfragen")}`,
       actions: [
-        { label: "Reinigung anfragen", href: "/leistungen/reinigung" },
-        { label: "Kontakt", href: "/kontakt" }
+        { label: "Reinigung starten", href: "/leistungen/reinigung" },
+        { label: "Kontakt aufnehmen", href: "/kontakt" }
       ]
     };
   }
 
   if (text.includes("preis") || text.includes("kosten") || text.includes("angebot") || text.includes("kostet")) {
     return {
-      text: "Die meisten Preise hängen von Aufwand, Strecke, Objekt, Umfang und Termin ab. Der Anhängerpreis wird nach Mietdauer berechnet, Reinigung und Entrümpelung werden nach Prüfung bzw. Besichtigung angeboten.",
+      text: "Die Preise hängen meistens vom Aufwand ab. Beim Anhänger wird nach Mietdauer gerechnet, bei Reinigung und Entrümpelung nach Objekt, Umfang und Arbeitsaufwand. Am besten schickst du eine Anfrage mit Fotos, dann kann das Team sauber einschätzen, was möglich ist.",
       actions: [
-        { label: "Anfrage senden", href: "/kontakt" },
-        { label: "Anhänger mieten", href: "/leistungen/anhaenger" }
+        { label: "Anfrage vorbereiten", href: "/kontakt" },
+        { label: "Anhängerpreise ansehen", href: "/leistungen/anhaenger" }
       ]
     };
   }
 
   if (text.includes("foto") || text.includes("bild") || text.includes("pdf") || text.includes("datei") || text.includes("hochladen")) {
     return {
-      text: "Dateien können direkt in den Anfrage-Assistenten hochgeladen werden. Erlaubt sind JPG, PNG, WEBP und PDF. Nachträglich können Dateien auch über die Statusseite zum Ticket ergänzt werden.",
+      text: "Ja, du kannst Bilder und PDFs direkt mitschicken. Erlaubt sind JPG, PNG, WEBP und PDF. Falls du nach der Anfrage noch etwas ergänzen möchtest, geht das später auch über die Statusseite.",
       actions: [
-        { label: "Status prüfen", href: "/status" },
-        { label: "Neue Anfrage", href: "/kontakt" }
+        { label: "Statusseite öffnen", href: "/status" },
+        { label: "Neue Anfrage stellen", href: "/kontakt" }
       ]
     };
   }
 
   if (text.includes("telefon") || text.includes("email") || text.includes("e-mail") || text.includes("kontakt") || text.includes("adresse")) {
     return {
-      text: `All4You ist aktuell über 089 123 456 78 und info@all4you-muenchen.de erreichbar. Für strukturierte Anfragen ist der passende Anfrage-Assistent am schnellsten. ${youBotServiceButton("/kontakt", "Kontakt öffnen")}`,
+      text: `Du kannst All4You direkt über Telefon oder E-Mail erreichen. Für strukturierte Anfragen ist aber der passende Assistent am bequemsten, weil dort direkt alle wichtigen Infos abgefragt werden. ${youBotServiceButton("/kontakt", "Kontakt öffnen")}`,
       actions: [
         { label: "Kontakt öffnen", href: "/kontakt" },
         { label: "Leistungen ansehen", href: "/leistungen" }
@@ -6243,7 +6253,7 @@ function youBotReplyFor(input) {
 
   if (text.includes("mitarbeiter") || text.includes("login") || text.includes("dashboard")) {
     return {
-      text: `Der Mitarbeiterbereich ist geschützt und nur für freigeschaltete Mitarbeiterkonten gedacht. ${youBotServiceButton("/dashboard", "Mitarbeiterlogin öffnen")}`,
+      text: `Der Mitarbeiterbereich ist geschützt und nur für freigeschaltete Konten gedacht. Wenn du zum Team gehörst, kommst du hier weiter. ${youBotServiceButton("/dashboard", "Mitarbeiterlogin öffnen")}`,
       actions: [
         { label: "Mitarbeiterlogin", href: "/dashboard" }
       ]
@@ -6251,11 +6261,10 @@ function youBotReplyFor(input) {
   }
 
   return {
-    text: "Ich kann bei Leistungen, Preisen, Datei-Uploads, Ticketstatus und Kontakt helfen. Für eine konkrete Anfrage öffne am besten den passenden Assistenten.",
+    text: "Ich glaube, ich weiß noch nicht ganz, worauf du hinaus möchtest. Ich kann dir aber bei Leistungen, Preisen, Datei-Uploads, Ticketstatus und Kontakt helfen. Wähle einfach einen Bereich aus oder beschreib mir kurz, worum es geht.",
     actions: YOUBOT_QUICK_ACTIONS
   };
 }
-
 function createYouBotMessage(type, html) {
   const message = document.createElement("article");
   message.className = `youbot-message ${type}`;
@@ -6323,13 +6332,13 @@ function initYouBot() {
 
       <div class="youbot-log" id="youbotLog">
         <article class="youbot-message bot">
-          <p>Hallo! Ich bin YouBot. Ich helfe bei Leistungen, Anfragewegen, Statusprüfung und Uploads.</p>
+          <p>Hey! Ich bin YouBot. Wobei darf ich helfen? Du kannst mir einfach kurz schreiben, worum es geht.</p>
           ${renderYouBotActions(YOUBOT_QUICK_ACTIONS)}
         </article>
       </div>
 
       <form class="youbot-form" id="youBotForm">
-        <input type="text" name="message" placeholder="Frage an YouBot …" autocomplete="off">
+        <input type="text" name="message" placeholder="Kurz schreiben, worum es geht …" autocomplete="off">
         <button type="submit">Senden</button>
       </form>
     </section>

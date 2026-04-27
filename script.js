@@ -1054,6 +1054,50 @@ function appendCustomerStatusLink(result, ticketNumber) {
   result.appendChild(link);
 }
 
+
+async function sendPublicRequestMessage(ticketNumber, verification, message) {
+  const cleanMessage = String(message || "").trim();
+
+  if (cleanMessage.length < 2) {
+    throw new Error("Bitte eine Nachricht eingeben.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/send_public_request_message`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_ticket_number: String(ticketNumber || "").trim(),
+      p_verification: String(verification || "").trim(),
+      p_message: cleanMessage
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Nachricht konnte nicht gesendet werden.");
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Nachricht konnte nicht gesendet werden.");
+  }
+
+  return data;
+}
+
+function setCustomerReplyMessage(type, text) {
+  const message = document.querySelector("#customerReplyMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
 function publicStatusStepLabel(status) {
   const labels = {
     neu: "Anfrage eingegangen",
@@ -1128,6 +1172,16 @@ function renderCustomerStatusResult(result, ticket) {
       <p class="customer-status-privacy">
         Interne Notizen und Team-Kommentare sind für Kunden nicht sichtbar.
       </p>
+
+      <form class="customer-reply-form" id="customerReplyForm">
+        <label>Nachricht an All4You senden
+          <textarea name="message" rows="4" placeholder="z. B. Termin passt, bitte zurückrufen, zusätzliche Information zur Anfrage …" required></textarea>
+        </label>
+        <button class="btn primary" type="submit" id="customerReplyButton">Nachricht senden <span>›</span></button>
+        <p class="customer-reply-message" id="customerReplyMessage">
+          Ihre Nachricht wird dem Ticket zugeordnet und im Mitarbeiter-Dashboard sichtbar.
+        </p>
+      </form>
     </div>
   `;
 }
@@ -1179,6 +1233,8 @@ function pageCustomerStatus() {
 function bindCustomerStatusPage() {
   const form = document.querySelector("#customerStatusForm");
   const result = document.querySelector("#customerStatusResult");
+  let currentTicketNumber = "";
+  let currentVerification = "";
 
   if (!form || !result) return;
 
@@ -1199,8 +1255,12 @@ function bindCustomerStatusPage() {
 
     try {
       const ticket = await fetchPublicRequestStatus(ticketNumber, verification);
+      currentTicketNumber = ticketNumber;
+      currentVerification = verification;
       renderCustomerStatusResult(result, ticket);
     } catch (error) {
+      currentTicketNumber = "";
+      currentVerification = "";
       result.innerHTML = `
         <div class="dashboard-mini-empty error">
           <strong>Status konnte nicht geladen werden</strong>
@@ -1209,8 +1269,41 @@ function bindCustomerStatusPage() {
       `;
     }
   });
-}
 
+  result.addEventListener("submit", async event => {
+    const replyForm = event.target.closest("#customerReplyForm");
+    if (!replyForm) return;
+
+    event.preventDefault();
+
+    const replyButton = replyForm.querySelector("#customerReplyButton");
+    const textarea = replyForm.querySelector('textarea[name="message"]');
+    const messageText = String(textarea?.value || "").trim();
+
+    if (!currentTicketNumber || !currentVerification) {
+      setCustomerReplyMessage("error", "Bitte den Status zuerst erneut prüfen.");
+      return;
+    }
+
+    if (!messageText) {
+      setCustomerReplyMessage("error", "Bitte eine Nachricht eingeben.");
+      return;
+    }
+
+    if (replyButton) replyButton.disabled = true;
+    setCustomerReplyMessage("loading", "Nachricht wird gesendet …");
+
+    try {
+      await sendPublicRequestMessage(currentTicketNumber, currentVerification, messageText);
+      if (textarea) textarea.value = "";
+      setCustomerReplyMessage("success", "Ihre Nachricht wurde gesendet und dem Ticket zugeordnet.");
+    } catch (error) {
+      setCustomerReplyMessage("error", error.message || "Nachricht konnte nicht gesendet werden.");
+    } finally {
+      if (replyButton) replyButton.disabled = false;
+    }
+  });
+}
 
 function splitContactValue(contactValue) {
   const contact = String(contactValue || "").trim();
@@ -1372,7 +1465,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.4-EMAIL-STATUS-LINK
+// DBG: ALL4YOU-ROUTER-V4.5-CUSTOMER-REPLY-MESSAGES
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

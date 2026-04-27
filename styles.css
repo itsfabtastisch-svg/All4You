@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Besenreine Räumungen Detailseite
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V2.8.1-LOGO
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
    ========================================================================== */
 
 .legal-layout {
@@ -2267,5 +2267,69 @@ label {
 
   .legal-sidebar {
     position: static;
+  }
+}
+
+/* ==========================================================================
+   Breites Logo im Header/Footer
+   DBG: ALL4YOU-ROUTER-V2.8.2-WIDE-LOGO
+   ========================================================================== */
+
+.site-header {
+  grid-template-columns: 420px 1fr auto;
+  min-height: 104px;
+}
+
+.brand-card {
+  width: 390px;
+  height: 82px;
+  padding: 4px 8px;
+  background: #fff;
+}
+
+.brand-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.footer-brand img {
+  width: 320px;
+  height: 94px;
+  object-fit: contain;
+  padding: 6px 10px;
+}
+
+@media (max-width: 1320px) {
+  .site-header {
+    grid-template-columns: 330px 1fr auto;
+  }
+
+  .brand-card {
+    width: 310px;
+    height: 72px;
+  }
+
+  .footer-brand img {
+    width: 280px;
+    height: 84px;
+  }
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .brand-card {
+    width: 260px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 560px) {
+  .brand-card {
+    width: 218px;
+    height: 58px;
   }
 }

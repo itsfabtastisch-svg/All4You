@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.1.1-YOUBOT-POLISH
+// DBG: ALL4YOU-ROUTER-V5.1.2-YOUBOT-INIT-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4674,7 +4674,6 @@ function navigateTo(url) {
   const nextUrl = new URL(url, window.location.origin);
   window.history.pushState({}, "", nextUrl.pathname + nextUrl.search);
   renderRoute();
-initYouBot();
 }
 
 function setActiveNav(path) {
@@ -6406,3 +6405,4 @@ if (navToggle && mainNav) {
 }
 
 renderRoute();
+initYouBot();

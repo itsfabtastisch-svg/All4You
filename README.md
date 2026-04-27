@@ -1,6 +1,6 @@
 # All4You Service München — Homepage
 
-DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 ## Inhalt
 
@@ -88,7 +88,7 @@ http://localhost:8080/
   - Reinigungsservice
 - Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
 - Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.7 Über-uns-Seite
@@ -98,7 +98,7 @@ http://localhost:8080/
 - Erklärung, warum All4You mehrere Services bündelt
 - Leistungsübersicht mit Links ergänzt
 - Hinweis auf späteres Anfrage-, Mitarbeiter- und Kundenportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.8 Rechtliches
@@ -111,14 +111,14 @@ http://localhost:8080/
 - Platzhalter für Telefon, E-Mail, Website, USt-ID und weitere Angaben ergänzt
 - Datenschutzerklärung als Platzhalterstruktur vorbereitet
 - Hinweise zu Cloudflare Pages, Kontaktaufnahme, späterem Kundenkonto/Mitarbeiterportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.8.1 Logo Update
 
 - `assets/logo-all4you.jpeg` gegen das neue bereitgestellte Logo ausgetauscht.
 - Header, Footer und alle weiteren Logo-Stellen nutzen dadurch automatisch das neue Logo.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.8.2 Wide Logo
@@ -126,7 +126,7 @@ http://localhost:8080/
 - `assets/logo-all4you.jpeg` gegen das breite Logo ausgetauscht.
 - Header links verbreitert, damit das Logo vollständig sichtbar ist.
 - Footer-Logo ebenfalls auf das breite Logo angepasst.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.8.3 Entrümpelung
@@ -135,7 +135,7 @@ http://localhost:8080/
 - Menü, Leistungsbereiche, Kontaktseite, Über-uns-Seite, Detailseite, Footer und Texte angepasst.
 - Neue sprechende URL ergänzt: `/leistungen/entruempelung`
 - Alte URL `/leistungen/raeumungen` bleibt als Alias weiterhin funktional.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.9.1 Anhängerdaten
@@ -147,7 +147,7 @@ http://localhost:8080/
 - Abholung/Rückgabe Sachsenstraße Höhe 25, 81543 München ergänzt.
 - Lieferung/Abholung zum Wunschort gegen Aufpreis ergänzt.
 - Führerscheinklasse B, Versicherung und Mietvertrag ergänzt.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.9.2 Rollerabholservice
@@ -161,7 +161,7 @@ http://localhost:8080/
   - Preis individuell nach Strecke, Zustand, Zugänglichkeit und Aufwand
 - Neue URL ergänzt: `/leistungen/rollerabholservice`
 - Alte URL `/leistungen/rollertransport` bleibt als Alias weiterhin funktional.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.9.3 Entrümpelungsdaten
@@ -175,7 +175,7 @@ http://localhost:8080/
 - Hinweis ergänzt: fest verbaute Sanitärobjekte / Toiletten nur nach vorheriger Absprache.
 - Anfrage-Assistent um Entsorgung, kostenlose Besichtigung und Festpreis erweitert.
 - E-Mail-Zusammenfassung um neue Felder erweitert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
 
 
 ## v2.9.4 Reinigungsdaten
@@ -188,4 +188,19 @@ http://localhost:8080/
   - Preis je nach Objekt, Umfang und Arbeitsweise
 - Anfrage-Assistent um Privat/Gewerblich, Preiswunsch und Materialangaben erweitert.
 - E-Mail-Zusammenfassung um neue Felder erweitert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`
+
+
+## v3.0 Reinigungs-Wizard
+
+- Reinigungsformular als Schritt-für-Schritt-Assistent umgesetzt.
+- Schritte:
+  1. Kontakt & Anfrageart
+  2. Objekt & Standort
+  3. Umfang & Termin
+  4. Besondere Bereiche
+  5. Zusammenfassung prüfen
+- Gewerbliche Anfragen zeigen zusätzlich ein Firmenname-Feld.
+- Zusammenfassung wird vor dem Absenden automatisch erzeugt.
+- Mailto-E-Mail-Vorschau bleibt als Zwischenlösung erhalten.
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD`

@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+// DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1095,142 +1095,180 @@ function cleaningPage() {
     </section>
 
     <section class="section-pad two-col" id="reinigungs-anfrage">
-      <div class="form-card">
+      <div class="form-card cleaning-wizard-card">
         <p class="eyebrow">Reinigungs-Assistent</p>
-        <h2>Reinigungs-Anfrage vorbereiten.</h2>
+        <h2>Reinigungs-Anfrage Schritt für Schritt.</h2>
         <p class="lead">
-          Teilen Sie kurz mit, welches Objekt gereinigt werden soll, ob es privat oder gewerblich ist,
-          ob die Reinigung einmalig oder regelmäßig erfolgen soll und wann der Einsatz gewünscht ist.
+          Statt eines langen Formulars führt dieser Assistent durch die wichtigsten Angaben.
+          Am Ende wird die Anfrage übersichtlich zusammengefasst.
         </p>
 
-        <form class="cleaning-tool" id="cleaningForm">
-          <div class="form-grid">
-            <label>Name
-              <input name="name" placeholder="Ihr Name" required>
-            </label>
-            <label>Telefon oder E-Mail
-              <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
-            </label>
-            <label>Art der Reinigung
-              <select name="cleaningType">
-                <option>Gebäudereinigung</option>
-                <option>Reinigung nach Entrümpelung</option>
-                <option>Wohnungsreinigung</option>
-                <option>Hausreinigung</option>
-                <option>Büroreinigung</option>
-                <option>Treppenhausreinigung</option>
-                <option>Übergabereinigung</option>
-                <option>Grundreinigung nach Absprache</option>
-                <option>Sonstiges</option>
-              </select>
-            </label>
-            <label>Privat oder gewerblich?
-              <select name="customerType">
-                <option>Privat</option>
-                <option>Gewerblich</option>
-                <option>Beides / mehrere Bereiche</option>
-                <option>noch nicht sicher</option>
-              </select>
-            </label>
-            <label>Objektart
-              <select name="objectType">
-                <option>Wohnung</option>
-                <option>Haus</option>
-                <option>Büro</option>
-                <option>Treppenhaus</option>
-                <option>Gewerbefläche</option>
-                <option>Gebäude / Objekt</option>
-                <option>einzelner Raum / Teilbereich</option>
-                <option>Sonstiges</option>
-              </select>
-            </label>
-            <label>Adresse / Ort
-              <input name="address" placeholder="z. B. Musterstraße, München">
-            </label>
-            <label>Ungefähre Fläche
-              <input name="area" placeholder="z. B. 60 m², 3 Zimmer, Treppenhaus...">
-            </label>
-            <label>Anzahl Räume
-              <input name="rooms" placeholder="z. B. 2 Zimmer, Küche, Bad">
-            </label>
-            <label>Einmalig oder regelmäßig?
-              <select name="interval">
-                <option>einmalig</option>
-                <option>wöchentlich</option>
-                <option>alle 2 Wochen</option>
-                <option>monatlich</option>
-                <option>regelmäßig nach Absprache</option>
-                <option>noch nicht sicher</option>
-              </select>
-            </label>
-            <label>Wunschtermin
-              <input name="desiredDate" placeholder="z. B. Freitag, nächste Woche, möglichst bald...">
-            </label>
-            <label>Nach Entrümpelung?
-              <select name="afterClearance">
-                <option>Nein</option>
-                <option>Ja</option>
-                <option>Unsicher / bitte prüfen</option>
-              </select>
-            </label>
-            <label>Reinigungsmittel
-              <select name="materials">
-                <option>Bitte mitbringen</option>
-                <option>vor Ort vorhanden</option>
-                <option>teilweise vorhanden</option>
-                <option>nach Absprache</option>
-              </select>
-            </label>
-            <label>Fotos vorhanden?
-              <select name="photos">
-                <option>Nein</option>
-                <option>Ja, kann ich senden</option>
-                <option>später nachreichen</option>
-              </select>
-            </label>
-            <label>Preiswunsch
-              <select name="priceModel">
-                <option>nach Objekt / Aufwand</option>
-                <option>nach Besichtigung / Rücksprache</option>
-                <option>regelmäßiger Preis nach Absprache</option>
-                <option>noch nicht sicher</option>
-              </select>
-            </label>
-          </div>
-
-          <fieldset class="option-fieldset">
-            <legend>Besondere Bereiche</legend>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="specialAreas" value="Küche"> Küche</label>
-              <label><input type="checkbox" name="specialAreas" value="Bad / Sanitär"> Bad / Sanitär</label>
-              <label><input type="checkbox" name="specialAreas" value="Böden"> Böden</label>
-              <label><input type="checkbox" name="specialAreas" value="Fenster nach Absprache"> Fenster nach Absprache</label>
-              <label><input type="checkbox" name="specialAreas" value="Treppenhaus"> Treppenhaus</label>
-              <label><input type="checkbox" name="specialAreas" value="stärkere Verschmutzung"> stärkere Verschmutzung</label>
-              <label><input type="checkbox" name="specialAreas" value="Übergabe vorbereiten"> Übergabe vorbereiten</label>
-              <label><input type="checkbox" name="specialAreas" value="noch nicht sicher"> noch nicht sicher</label>
+        <div class="cleaning-wizard" id="cleaningWizard" data-current-step="0">
+          <div class="wizard-top">
+            <div>
+              <span class="wizard-kicker" id="cleaningWizardCounter">Schritt 1 von 5</span>
+              <h3 id="cleaningWizardTitle">Kontakt & Anfrageart</h3>
             </div>
-          </fieldset>
-
-          <label>Nachricht
-            <textarea name="message" rows="4" placeholder="Besonderheiten, gewünschter Umfang, Zugang, Fristen oder weitere Hinweise..."></textarea>
-          </label>
-
-          <button class="btn primary" type="submit">Reinigungs-Anfrage senden <span>›</span></button>
-
-          <div class="distance-result" id="cleaningResult">
-            <strong>Reinigungs-Anfrage vorbereitet</strong>
-            <p>
-              In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert, per E-Mail an All4You gesendet
-              und im Mitarbeiterportal angezeigt.
-            </p>
+            <div class="wizard-progress">
+              <span id="cleaningWizardProgress"></span>
+            </div>
           </div>
 
-          <p class="form-note">
-            Die Anfrage ist unverbindlich. Der genaue Umfang und Preis werden nach Prüfung von Objekt, Fläche,
-            Verschmutzungsgrad, gewünschtem Termin und Arbeitsweise bestätigt.
-          </p>
-        </form>
+          <form id="cleaningWizardForm" class="wizard-form">
+            <div class="wizard-step active" data-title="Kontakt & Anfrageart">
+              <div class="form-grid">
+                <label>Ihr Name
+                  <input name="name" placeholder="Ihr Name" required>
+                </label>
+                <label>Telefon oder E-Mail
+                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                </label>
+                <label>Privat oder gewerblich?
+                  <select name="customerType" id="cleaningCustomerType">
+                    <option>Privat</option>
+                    <option>Gewerblich</option>
+                    <option>Beides / mehrere Bereiche</option>
+                    <option>noch nicht sicher</option>
+                  </select>
+                </label>
+                <label class="business-field" id="cleaningBusinessField">Firmenname
+                  <input name="businessName" placeholder="Name der Firma / des Unternehmens">
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Objekt & Standort">
+              <div class="form-grid">
+                <label>Art der Reinigung
+                  <select name="cleaningType">
+                    <option>Gebäudereinigung</option>
+                    <option>Reinigung nach Entrümpelung</option>
+                    <option>Wohnungsreinigung</option>
+                    <option>Hausreinigung</option>
+                    <option>Büroreinigung</option>
+                    <option>Treppenhausreinigung</option>
+                    <option>Übergabereinigung</option>
+                    <option>Grundreinigung nach Absprache</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </label>
+                <label>Objektart
+                  <select name="objectType">
+                    <option>Wohnung</option>
+                    <option>Haus</option>
+                    <option>Büro</option>
+                    <option>Treppenhaus</option>
+                    <option>Gewerbefläche</option>
+                    <option>Gebäude / Objekt</option>
+                    <option>einzelner Raum / Teilbereich</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </label>
+                <label>Adresse / Ort
+                  <input name="address" placeholder="z. B. Musterstraße, München">
+                </label>
+                <label>Ungefähre Fläche
+                  <input name="area" placeholder="z. B. 60 m², 3 Zimmer, Treppenhaus...">
+                </label>
+                <label>Anzahl Räume
+                  <input name="rooms" placeholder="z. B. 2 Zimmer, Küche, Bad">
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Umfang & Termin">
+              <div class="form-grid">
+                <label>Einmalig oder regelmäßig?
+                  <select name="interval">
+                    <option>einmalig</option>
+                    <option>wöchentlich</option>
+                    <option>alle 2 Wochen</option>
+                    <option>monatlich</option>
+                    <option>regelmäßig nach Absprache</option>
+                    <option>noch nicht sicher</option>
+                  </select>
+                </label>
+                <label>Wunschtermin
+                  <input name="desiredDate" placeholder="z. B. Freitag, nächste Woche, möglichst bald...">
+                </label>
+                <label>Nach Entrümpelung?
+                  <select name="afterClearance">
+                    <option>Nein</option>
+                    <option>Ja</option>
+                    <option>Unsicher / bitte prüfen</option>
+                  </select>
+                </label>
+                <label>Reinigungsmittel
+                  <select name="materials">
+                    <option>Bitte mitbringen</option>
+                    <option>vor Ort vorhanden</option>
+                    <option>teilweise vorhanden</option>
+                    <option>nach Absprache</option>
+                  </select>
+                </label>
+                <label>Preiswunsch
+                  <select name="priceModel">
+                    <option>nach Objekt / Aufwand</option>
+                    <option>nach Besichtigung / Rücksprache</option>
+                    <option>regelmäßiger Preis nach Absprache</option>
+                    <option>noch nicht sicher</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Besondere Bereiche">
+              <fieldset class="option-fieldset">
+                <legend>Was soll besonders beachtet werden?</legend>
+                <div class="checkbox-grid">
+                  <label><input type="checkbox" name="specialAreas" value="Küche"> Küche</label>
+                  <label><input type="checkbox" name="specialAreas" value="Bad / Sanitär"> Bad / Sanitär</label>
+                  <label><input type="checkbox" name="specialAreas" value="Böden"> Böden</label>
+                  <label><input type="checkbox" name="specialAreas" value="Fenster nach Absprache"> Fenster nach Absprache</label>
+                  <label><input type="checkbox" name="specialAreas" value="Treppenhaus"> Treppenhaus</label>
+                  <label><input type="checkbox" name="specialAreas" value="stärkere Verschmutzung"> stärkere Verschmutzung</label>
+                  <label><input type="checkbox" name="specialAreas" value="Übergabe vorbereiten"> Übergabe vorbereiten</label>
+                  <label><input type="checkbox" name="specialAreas" value="noch nicht sicher"> noch nicht sicher</label>
+                </div>
+              </fieldset>
+
+              <div class="form-grid wizard-message-grid">
+                <label>Fotos vorhanden?
+                  <select name="photos">
+                    <option>Nein</option>
+                    <option>Ja, kann ich senden</option>
+                    <option>später nachreichen</option>
+                  </select>
+                </label>
+                <label>Nachricht
+                  <textarea name="message" rows="4" placeholder="Besonderheiten, gewünschter Umfang, Zugang, Fristen oder weitere Hinweise..."></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Zusammenfassung prüfen">
+              <div class="wizard-summary" id="cleaningWizardSummary"></div>
+              <p class="form-note">
+                Die Anfrage ist unverbindlich. Der genaue Umfang und Preis werden nach Prüfung von Objekt, Fläche,
+                Verschmutzungsgrad, gewünschtem Termin und Arbeitsweise bestätigt.
+              </p>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="btn ghost" type="button" id="cleaningWizardPrev">Zurück</button>
+              <button class="btn primary" type="button" id="cleaningWizardNext">Weiter <span>›</span></button>
+              <button class="btn primary" type="submit" id="cleaningWizardSubmit">Anfrage vorbereiten <span>›</span></button>
+            </div>
+
+            <div class="distance-result" id="cleaningWizardResult">
+              <strong>Reinigungs-Anfrage vorbereitet</strong>
+              <p>
+                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
+                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
 
       <aside class="check-card">
@@ -1283,10 +1321,10 @@ function cleaningPage() {
       <p class="eyebrow">Ablauf</p>
       <h2>So läuft die Reinigungsanfrage ab.</h2>
       <div class="steps five-steps">
-        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie beschreiben Objekt, Umfang und Wunschtermin.</p></article>
-        <article class="step"><span>2</span><h3>Aufwand prüfen</h3><p>All4You prüft Fläche, Art der Reinigung und besondere Anforderungen.</p></article>
-        <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie bekommen eine Einschätzung oder ein individuelles Angebot.</p></article>
-        <article class="step"><span>4</span><h3>Termin abstimmen</h3><p>Der passende Termin wird gemeinsam festgelegt.</p></article>
+        <article class="step"><span>1</span><h3>Anfrage starten</h3><p>Sie werden Schritt für Schritt durch die wichtigsten Angaben geführt.</p></article>
+        <article class="step"><span>2</span><h3>Objekt beschreiben</h3><p>Objektart, Fläche, Turnus und Besonderheiten werden erfasst.</p></article>
+        <article class="step"><span>3</span><h3>Zusammenfassung prüfen</h3><p>Alle Angaben können vor dem Absenden nochmal kontrolliert werden.</p></article>
+        <article class="step"><span>4</span><h3>Rückmeldung erhalten</h3><p>All4You prüft Aufwand, Termin und gewünschte Arbeitsweise.</p></article>
         <article class="step"><span>5</span><h3>Reinigung durchführen</h3><p>Die Reinigung erfolgt nach vereinbartem Umfang und Bedarf.</p></article>
       </div>
     </section>
@@ -1317,8 +1355,8 @@ function cleaningPage() {
       <div class="cta-panel">
         <p class="eyebrow">Unverbindlich starten</p>
         <h2>Reinigung jetzt unverbindlich anfragen.</h2>
-        <p class="lead">Teilen Sie kurz mit, was gereinigt werden soll. All4You prüft Objekt, Umfang, Termin und gewünschte Arbeitsweise.</p>
-        <a class="btn primary" href="#reinigungs-anfrage">Reinigungs-Anfrage öffnen <span>›</span></a>
+        <p class="lead">Teilen Sie Schritt für Schritt mit, was gereinigt werden soll. All4You prüft Objekt, Umfang, Termin und gewünschte Arbeitsweise.</p>
+        <a class="btn primary" href="#reinigungs-anfrage">Reinigungs-Assistent öffnen <span>›</span></a>
       </div>
     </section>
   `;
@@ -1928,6 +1966,7 @@ function renderRoute() {
   bindTrailerTool();
   bindClearanceTool();
   bindCleaningTool();
+  bindCleaningWizard();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -2235,6 +2274,171 @@ function bindCleaningTool() {
     mailButton.textContent = "Anfrage per E-Mail öffnen";
     result.appendChild(mailButton);
   }, { once: false });
+}
+
+
+
+function bindCleaningWizard() {
+  const wizard = document.querySelector("#cleaningWizard");
+  const form = document.querySelector("#cleaningWizardForm");
+  const result = document.querySelector("#cleaningWizardResult");
+  const prev = document.querySelector("#cleaningWizardPrev");
+  const next = document.querySelector("#cleaningWizardNext");
+  const submit = document.querySelector("#cleaningWizardSubmit");
+  const counter = document.querySelector("#cleaningWizardCounter");
+  const title = document.querySelector("#cleaningWizardTitle");
+  const progress = document.querySelector("#cleaningWizardProgress");
+  const summaryBox = document.querySelector("#cleaningWizardSummary");
+  const customerType = document.querySelector("#cleaningCustomerType");
+  const businessField = document.querySelector("#cleaningBusinessField");
+
+  if (!wizard || !form || !result || !prev || !next || !submit) return;
+
+  const steps = Array.from(form.querySelectorAll(".wizard-step"));
+  let current = 0;
+
+  function collectSummary() {
+    const data = new FormData(form);
+    const specialAreas = data.getAll("specialAreas");
+    return {
+      name: data.get("name") || "",
+      contact: data.get("contact") || "",
+      customerType: data.get("customerType") || "",
+      businessName: data.get("businessName") || "",
+      cleaningType: data.get("cleaningType") || "",
+      objectType: data.get("objectType") || "",
+      address: data.get("address") || "",
+      area: data.get("area") || "",
+      rooms: data.get("rooms") || "",
+      interval: data.get("interval") || "",
+      desiredDate: data.get("desiredDate") || "",
+      afterClearance: data.get("afterClearance") || "",
+      materials: data.get("materials") || "",
+      photos: data.get("photos") || "",
+      priceModel: data.get("priceModel") || "",
+      specialAreas: specialAreas.length ? specialAreas.join(", ") : "keine Angabe",
+      message: data.get("message") || ""
+    };
+  }
+
+  function updateBusinessField() {
+    if (!customerType || !businessField) return;
+    const value = customerType.value.toLowerCase();
+    const show = value.includes("gewerblich") || value.includes("beides");
+    businessField.classList.toggle("is-hidden", !show);
+  }
+
+  function renderSummary() {
+    if (!summaryBox) return;
+    const summary = collectSummary();
+    summaryBox.innerHTML = `
+      <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
+      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div><strong>Privat/Gewerblich</strong><span>${escapeHtml(summary.customerType || "—")}</span></div>
+      ${summary.businessName ? `<div><strong>Firmenname</strong><span>${escapeHtml(summary.businessName)}</span></div>` : ""}
+      <div><strong>Reinigungsart</strong><span>${escapeHtml(summary.cleaningType || "—")}</span></div>
+      <div><strong>Objektart</strong><span>${escapeHtml(summary.objectType || "—")}</span></div>
+      <div><strong>Adresse / Ort</strong><span>${escapeHtml(summary.address || "—")}</span></div>
+      <div><strong>Fläche</strong><span>${escapeHtml(summary.area || "—")}</span></div>
+      <div><strong>Räume</strong><span>${escapeHtml(summary.rooms || "—")}</span></div>
+      <div><strong>Turnus</strong><span>${escapeHtml(summary.interval || "—")}</span></div>
+      <div><strong>Wunschtermin</strong><span>${escapeHtml(summary.desiredDate || "—")}</span></div>
+      <div><strong>Nach Entrümpelung</strong><span>${escapeHtml(summary.afterClearance || "—")}</span></div>
+      <div><strong>Reinigungsmittel</strong><span>${escapeHtml(summary.materials || "—")}</span></div>
+      <div><strong>Preiswunsch</strong><span>${escapeHtml(summary.priceModel || "—")}</span></div>
+      <div><strong>Besondere Bereiche</strong><span>${escapeHtml(summary.specialAreas || "—")}</span></div>
+      <div><strong>Fotos</strong><span>${escapeHtml(summary.photos || "—")}</span></div>
+      <div class="summary-wide"><strong>Nachricht</strong><span>${escapeHtml(summary.message || "—")}</span></div>
+    `;
+  }
+
+  function updateWizard() {
+    steps.forEach((step, index) => {
+      step.classList.toggle("active", index === current);
+    });
+
+    const active = steps[current];
+    if (counter) counter.textContent = `Schritt ${current + 1} von ${steps.length}`;
+    if (title) title.textContent = active?.dataset.title || "";
+    if (progress) progress.style.width = `${((current + 1) / steps.length) * 100}%`;
+
+    prev.disabled = current === 0;
+    next.style.display = current === steps.length - 1 ? "none" : "inline-flex";
+    submit.style.display = current === steps.length - 1 ? "inline-flex" : "none";
+
+    if (current === steps.length - 1) renderSummary();
+    updateBusinessField();
+  }
+
+  function validateStep() {
+    const activeInputs = Array.from(steps[current].querySelectorAll("input, select, textarea"));
+    for (const field of activeInputs) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  prev.addEventListener("click", () => {
+    current = Math.max(0, current - 1);
+    updateWizard();
+  });
+
+  next.addEventListener("click", () => {
+    if (!validateStep()) return;
+    current = Math.min(steps.length - 1, current + 1);
+    updateWizard();
+  });
+
+  customerType?.addEventListener("change", updateBusinessField);
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    renderSummary();
+
+    const summary = collectSummary();
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Reinigungs-Anfrage vorbereitet</strong>
+      <p>
+        Die Anfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
+        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+      </p>
+    `;
+
+    const subject = encodeURIComponent("Anfrage über die Webseite: Reinigungsservice");
+    const body = encodeURIComponent(
+      `Neue Reinigungs-Anfrage\n\n` +
+      `Name: ${summary.name}\n` +
+      `Kontakt: ${summary.contact}\n` +
+      `Privat/Gewerblich: ${summary.customerType}\n` +
+      `Firmenname: ${summary.businessName}\n` +
+      `Art der Reinigung: ${summary.cleaningType}\n` +
+      `Objektart: ${summary.objectType}\n` +
+      `Adresse / Ort: ${summary.address}\n` +
+      `Fläche: ${summary.area}\n` +
+      `Anzahl Räume: ${summary.rooms}\n` +
+      `Einmalig / regelmäßig: ${summary.interval}\n` +
+      `Wunschtermin: ${summary.desiredDate}\n` +
+      `Nach Entrümpelung: ${summary.afterClearance}\n` +
+      `Reinigungsmittel: ${summary.materials}\n` +
+      `Fotos vorhanden: ${summary.photos}\n` +
+      `Preiswunsch: ${summary.priceModel}\n` +
+      `Besondere Bereiche: ${summary.specialAreas}\n\n` +
+      `Nachricht:\n${summary.message}`
+    );
+
+    const mailButton = document.createElement("a");
+    mailButton.className = "btn blue mail-preview-btn";
+    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
+    mailButton.textContent = "Anfrage per E-Mail öffnen";
+    result.appendChild(mailButton);
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, { once: false });
+
+  updateWizard();
 }
 
 

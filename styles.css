@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V2.9.4-REINIGUNG-DATEN
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
    ========================================================================== */
 
 .price-table-card {
@@ -2392,5 +2392,181 @@ label {
 @media (max-width: 560px) {
   .price-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Reinigungs-Wizard
+   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   ========================================================================== */
+
+.cleaning-wizard-card {
+  overflow: hidden;
+}
+
+.cleaning-wizard {
+  margin-top: 22px;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(10,169,155,.13), transparent 18rem),
+    linear-gradient(135deg, rgba(255,255,255,.95), rgba(238,246,250,.86));
+  box-shadow: 0 18px 44px rgba(16, 38, 60, .11);
+  overflow: hidden;
+}
+
+.wizard-top {
+  display: grid;
+  gap: 14px;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.62);
+}
+
+.wizard-kicker {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--teal-2);
+  background: rgba(10,169,155,.1);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.wizard-top h3 {
+  margin: 0;
+  font-size: clamp(22px, 2vw, 31px);
+  letter-spacing: -.04em;
+}
+
+.wizard-progress {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(19,35,58,.1);
+  overflow: hidden;
+}
+
+.wizard-progress span {
+  display: block;
+  width: 20%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+  transition: width .25s ease;
+}
+
+.wizard-form {
+  display: grid;
+  gap: 0;
+}
+
+.wizard-step {
+  display: none;
+  padding: 22px;
+  animation: wizardFade .2s ease;
+}
+
+.wizard-step.active {
+  display: block;
+}
+
+@keyframes wizardFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.business-field.is-hidden {
+  display: none;
+}
+
+.wizard-message-grid {
+  margin-top: 14px;
+}
+
+.wizard-message-grid label:last-child {
+  grid-column: 1 / -1;
+}
+
+.wizard-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.wizard-summary div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.72);
+}
+
+.wizard-summary .summary-wide {
+  grid-column: 1 / -1;
+}
+
+.wizard-summary strong {
+  color: var(--navy);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.wizard-summary span {
+  color: var(--muted);
+  line-height: 1.4;
+  font-weight: 750;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 22px;
+  border-top: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.5);
+}
+
+.wizard-actions .btn {
+  min-width: 145px;
+}
+
+.wizard-actions .btn:disabled {
+  opacity: .45;
+  pointer-events: none;
+}
+
+#cleaningWizardSubmit {
+  display: none;
+}
+
+#cleaningWizardResult {
+  margin: 0 22px 22px;
+}
+
+@media (max-width: 900px) {
+  .wizard-top,
+  .wizard-step,
+  .wizard-actions {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .wizard-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-actions {
+    flex-direction: column;
+  }
+
+  .wizard-actions .btn {
+    width: 100%;
   }
 }

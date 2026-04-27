@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .dashboard-shell {
@@ -3263,7 +3263,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .is-hidden {
@@ -3417,7 +3417,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
    ========================================================================== */
 
 .auth-message.success {
@@ -3433,4 +3433,59 @@ label {
 .auth-message.loading {
   border-color: rgba(11,78,145,.2);
   background: rgba(11,78,145,.07);
+}
+
+/* ==========================================================================
+   Dashboard Live Requests
+   DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
+   ========================================================================== */
+
+.dashboard-empty-state {
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px dashed rgba(19,35,58,.18);
+  background: rgba(238,246,250,.62);
+}
+
+.dashboard-empty-state strong {
+  color: var(--navy);
+  font-size: 18px;
+}
+
+.dashboard-empty-state p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.dashboard-empty-state.error {
+  border-color: rgba(190,40,40,.26);
+  background: rgba(255,86,86,.08);
+}
+
+.dashboard-detail-body .summary-wide {
+  grid-column: 1 / -1;
+}
+
+.dashboard-ticket-list {
+  max-height: 760px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.dashboard-ticket-list::-webkit-scrollbar {
+  width: 9px;
+}
+
+.dashboard-ticket-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(10,169,155,.35);
+}
+
+.dashboard-ticket-list::-webkit-scrollbar-track {
+  background: rgba(19,35,58,.06);
+  border-radius: 999px;
 }

@@ -119,6 +119,246 @@ async function fetchEmployeeProfile(session) {
 }
 
 
+
+let dashboardRequestCache = [];
+
+function serviceLabel(service) {
+  const labels = {
+    reinigung: "Reinigung",
+    entruempelung: "Entrümpelung",
+    rollerabholservice: "Rollerabholservice",
+    anhaenger: "Anhänger",
+    allgemein: "Allgemein"
+  };
+
+  return labels[service] || service || "Unbekannt";
+}
+
+function statusLabel(status) {
+  const labels = {
+    neu: "Neu",
+    in_pruefung: "In Prüfung",
+    rueckfrage_offen: "Rückfrage offen",
+    angebot_vorbereitet: "Angebot vorbereitet",
+    angebot_gesendet: "Angebot gesendet",
+    termin_vorgeschlagen: "Termin vorgeschlagen",
+    termin_bestaetigt: "Termin bestätigt",
+    in_bearbeitung: "In Bearbeitung",
+    erledigt: "Erledigt",
+    storniert: "Storniert"
+  };
+
+  return labels[status] || status || "Unbekannt";
+}
+
+function formatDashboardDate(value) {
+  if (!value) return "—";
+
+  try {
+    return new Intl.DateTimeFormat("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
+function detailValue(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function getRequestDetails(ticket) {
+  const details = ticket.details || {};
+
+  const base = [
+    ["Ticket", ticket.ticket_number],
+    ["Leistung", serviceLabel(ticket.service)],
+    ["Status", statusLabel(ticket.status)],
+    ["Priorität", ticket.priority || "normal"],
+    ["Kunde", ticket.customer_name],
+    ["E-Mail", ticket.customer_email],
+    ["Telefon", ticket.customer_phone],
+    ["Quelle", ticket.source],
+    ["Erstellt", formatDashboardDate(ticket.created_at)],
+    ["Zusammenfassung", ticket.summary || ticket.subject || "—"]
+  ];
+
+  const detailEntries = Object.entries(details)
+    .filter(([_, value]) => value !== null && value !== undefined && value !== "")
+    .slice(0, 18)
+    .map(([key, value]) => [
+      key
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, char => char.toUpperCase()),
+      detailValue(value)
+    ]);
+
+  return [...base, ...detailEntries];
+}
+
+async function fetchDashboardRequests(session) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  const query = [
+    "select=id,ticket_number,service,source,status,priority,customer_name,customer_email,customer_phone,subject,summary,details,created_at,updated_at",
+    "order=created_at.desc",
+    "limit=50"
+  ].join("&");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?${query}`, {
+    method: "GET",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Anfragen konnten nicht geladen werden.");
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+function renderDashboardTickets(tickets) {
+  const list = document.querySelector("#dashboardTicketList");
+  if (!list) return;
+
+  dashboardRequestCache = tickets || [];
+
+  if (!dashboardRequestCache.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Keine Anfragen gefunden</strong>
+        <p>Sobald Kunden einen Wizard absenden, erscheinen die Tickets hier automatisch.</p>
+      </div>
+    `;
+    renderDashboardDetail(null);
+    return;
+  }
+
+  list.innerHTML = dashboardRequestCache.map((ticket, index) => `
+    <button class="dashboard-ticket ${index === 0 ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+      <span class="ticket-topline">
+        <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+        <em>${escapeHtml(statusLabel(ticket.status))}</em>
+      </span>
+      <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
+      <span class="ticket-summary">${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</span>
+      <span class="ticket-meta">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")} · ${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+    </button>
+  `).join("");
+
+  renderDashboardDetail(dashboardRequestCache[0]);
+}
+
+function renderDashboardDetail(ticket) {
+  const title = document.querySelector("#dashboardDetailTitle");
+  const body = document.querySelector("#dashboardDetailBody");
+  const statusPill = document.querySelector("#dashboardDetailStatus");
+
+  if (!title || !body) return;
+
+  if (!ticket) {
+    title.textContent = "Kein Ticket";
+    if (statusPill) statusPill.textContent = "—";
+    body.innerHTML = `
+      <div class="summary-wide">
+        <strong>Hinweis</strong>
+        <span>Es wurde noch kein Ticket ausgewählt.</span>
+      </div>
+    `;
+    return;
+  }
+
+  title.textContent = ticket.ticket_number || "Ticket";
+  if (statusPill) statusPill.textContent = statusLabel(ticket.status);
+
+  body.innerHTML = getRequestDetails(ticket)
+    .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(detailValue(value))}</span></div>`)
+    .join("");
+}
+
+function updateDashboardStats(tickets) {
+  const list = tickets || [];
+  const totalNew = list.filter(ticket => ticket.status === "neu").length;
+  const inReview = list.filter(ticket => ticket.status === "in_pruefung").length;
+  const openQuestions = list.filter(ticket => ticket.status === "rueckfrage_offen").length;
+  const done = list.filter(ticket => ticket.status === "erledigt").length;
+
+  const stats = {
+    dashboardStatNew: totalNew,
+    dashboardStatReview: inReview,
+    dashboardStatQuestions: openQuestions,
+    dashboardStatDone: done
+  };
+
+  Object.entries(stats).forEach(([id, value]) => {
+    const element = document.querySelector(`#${id}`);
+    if (element) element.textContent = value;
+  });
+}
+
+async function loadDashboardRequests(session) {
+  const list = document.querySelector("#dashboardTicketList");
+  const liveStatus = document.querySelector("#dashboardLiveStatus");
+
+  if (list) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Anfragen werden geladen …</strong>
+        <p>Live-Daten werden aus Supabase abgerufen.</p>
+      </div>
+    `;
+  }
+
+  if (liveStatus) {
+    liveStatus.textContent = "Live-Daten werden geladen";
+    liveStatus.classList.remove("success", "warning");
+    liveStatus.classList.add("warning");
+  }
+
+  try {
+    const requests = await fetchDashboardRequests(session);
+    renderDashboardTickets(requests);
+    updateDashboardStats(requests);
+
+    if (liveStatus) {
+      liveStatus.textContent = "Live-Daten aktiv";
+      liveStatus.classList.remove("warning");
+      liveStatus.classList.add("success");
+    }
+  } catch (error) {
+    if (list) {
+      list.innerHTML = `
+        <div class="dashboard-empty-state error">
+          <strong>Anfragen konnten nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+        </div>
+      `;
+    }
+
+    if (liveStatus) {
+      liveStatus.textContent = "Live-Daten Fehler";
+      liveStatus.classList.remove("success");
+      liveStatus.classList.add("warning");
+    }
+  }
+}
+
+
 function splitContactValue(contactValue) {
   const contact = String(contactValue || "").trim();
 
@@ -269,7 +509,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.7.2-DASHBOARD-AUTH-BIND-FIX
+// DBG: ALL4YOU-ROUTER-V3.8-DASHBOARD-LIVE-REQUESTS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1876,7 +2116,7 @@ function pageDashboard() {
         ["Status", "neu"],
         ["Kontakt", "Telefon vorhanden"],
         ["Quelle", "Webseiten-Wizard"],
-        ["Hinweis", "Live-Daten folgen mit Supabase in v3.8."]
+        ["Hinweis", "Live-Daten sind jetzt aktiv."]
       ]
     },
     {
@@ -2011,20 +2251,20 @@ function pageDashboard() {
               <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
               <h1>Anfragen zentral verwalten.</h1>
               <p class="lead">
-                Der Login ist aktiv. In v3.8 werden die echten Tickets aus Supabase geladen und ersetzen diese Vorschau.
+                Der Login ist aktiv. Die echten Tickets werden jetzt live aus Supabase geladen.
               </p>
             </div>
             <div class="dashboard-hero-actions">
               <span class="status-pill success">Auth aktiv</span>
-              <span class="status-pill warning">Live-Tickets folgen</span>
+              <span class="status-pill success" id="dashboardLiveStatus">Live-Daten aktiv</span>
             </div>
           </section>
 
           <section class="dashboard-stats">
-            <article><span>Neue Anfragen</span><strong>4</strong><small>Vorschau aus Testdaten</small></article>
-            <article><span>In Prüfung</span><strong>0</strong><small>Statuslogik vorbereitet</small></article>
-            <article><span>Offene Rückfragen</span><strong>0</strong><small>Nachrichtenmodul folgt</small></article>
-            <article><span>Erledigt</span><strong>0</strong><small>Später filterbar</small></article>
+            <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live aus Supabase</small></article>
+            <article><span>In Prüfung</span><strong id="dashboardStatReview">0</strong><small>Live aus Supabase</small></article>
+            <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
+            <article><span>Erledigt</span><strong id="dashboardStatDone">0</strong><small>Live aus Supabase</small></article>
           </section>
 
           <section class="dashboard-grid">
@@ -2053,7 +2293,12 @@ function pageDashboard() {
               </div>
 
               <div class="dashboard-ticket-list" id="dashboardTicketList">
-                ${ticketCards}
+                
+                <div class="dashboard-empty-state">
+                  <strong>Anfragen werden nach Login geladen …</strong>
+                  <p>Die Ticketliste wird direkt aus Supabase befüllt.</p>
+                </div>
+              
               </div>
             </div>
 
@@ -2061,17 +2306,13 @@ function pageDashboard() {
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Ticketdetails</p>
-                  <h2 id="dashboardDetailTitle">A4Y-2026-0005</h2>
+                  <h2 id="dashboardDetailTitle">Live-Ticket</h2>
                 </div>
-                <span class="status-pill">neu</span>
+                <span class="status-pill" id="dashboardDetailStatus">—</span>
               </div>
 
               <div class="dashboard-detail-body" id="dashboardDetailBody">
-                <div><strong>Leistung</strong><span>Entrümpelung</span></div>
-                <div><strong>Status</strong><span>neu</span></div>
-                <div><strong>Kontakt</strong><span>Telefon vorhanden</span></div>
-                <div><strong>Quelle</strong><span>Webseiten-Wizard</span></div>
-                <div><strong>Hinweis</strong><span>Live-Daten folgen mit Supabase in v3.8.</span></div>
+                <div class="summary-wide"><strong>Hinweis</strong><span>Nach dem Login werden hier echte Ticketdetails aus Supabase angezeigt.</span></div>
               </div>
 
               <div class="dashboard-actions">
@@ -2103,7 +2344,7 @@ function pageDashboard() {
             <p class="eyebrow">Nächste Schritte</p>
             <div class="roadmap-grid">
               <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login aktiv</span></article>
-              <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase anzeigen</span></article>
+              <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase aktiv</span></article>
               <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
               <article><strong>v4.0</strong><span>Kundenstatus, E-Mail und YouBot</span></article>
             </div>
@@ -3835,12 +4076,11 @@ function bindTrailerWizard() {
 
 
 
+
 function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
-  const title = document.querySelector("#dashboardDetailTitle");
-  const body = document.querySelector("#dashboardDetailBody");
 
-  if (list && title && body) {
+  if (list) {
     list.addEventListener("click", event => {
       const ticketButton = event.target.closest(".dashboard-ticket");
       if (!ticketButton) return;
@@ -3848,19 +4088,8 @@ function bindDashboardShell() {
       list.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
       ticketButton.classList.add("active");
 
-      let ticket = null;
-      try {
-        ticket = JSON.parse(ticketButton.dataset.ticket || "{}");
-      } catch {
-        ticket = null;
-      }
-
-      if (!ticket) return;
-
-      title.textContent = ticket.id || "Ticket";
-      body.innerHTML = (ticket.details || [])
-        .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`)
-        .join("");
+      const ticket = dashboardRequestCache.find(item => item.id === ticketButton.dataset.ticketId);
+      renderDashboardDetail(ticket || null);
     });
   }
 
@@ -3889,12 +4118,14 @@ function bindDashboardAuth() {
     protectedArea.classList.add("is-hidden");
   }
 
-  function showDashboard(profile) {
+  function showDashboard(profile, session) {
     gate.classList.add("is-hidden");
     protectedArea.classList.remove("is-hidden");
 
     if (employeeName) employeeName.textContent = profile.display_name || "Mitarbeiter";
     if (employeeMeta) employeeMeta.textContent = `${profile.email || "angemeldet"} · ${profile.role || "mitarbeiter"}`;
+
+    loadDashboardRequests(session);
   }
 
   async function validateStoredSession() {
@@ -3910,7 +4141,7 @@ function bindDashboardAuth() {
 
     try {
       const profile = await fetchEmployeeProfile(session);
-      showDashboard(profile);
+      showDashboard(profile, session);
     } catch (error) {
       clearEmployeeSession();
       showLogin();
@@ -3935,7 +4166,7 @@ function bindDashboardAuth() {
       const profile = await fetchEmployeeProfile(storedSession);
 
       setMessage("success", "Login erfolgreich", "Mitarbeiterprofil wurde gefunden.");
-      showDashboard(profile);
+      showDashboard(profile, storedSession);
       form.reset();
     } catch (error) {
       clearEmployeeSession();
@@ -3948,6 +4179,7 @@ function bindDashboardAuth() {
     const session = getStoredEmployeeSession();
     await supabaseLogout(session?.access_token);
     clearEmployeeSession();
+    dashboardRequestCache = [];
     showLogin();
     setMessage("success", "Abgemeldet", "Die lokale Sitzung wurde beendet.");
   });

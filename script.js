@@ -283,9 +283,9 @@ function renderDashboardDetail(ticket) {
     }
     if (statusSave) statusSave.disabled = true;
     body.innerHTML = `
-      <div class="summary-wide">
-        <strong>Hinweis</strong>
-        <span>Es wurde noch kein Ticket ausgewählt.</span>
+      <div class="dashboard-empty-state">
+        <strong>Kein Ticket ausgewählt</strong>
+        <p>Bitte links ein Ticket auswählen, um die Details anzuzeigen.</p>
       </div>
     `;
     setDashboardActionMessage("", "");
@@ -304,9 +304,18 @@ function renderDashboardDetail(ticket) {
 
   if (statusSave) statusSave.disabled = false;
 
-  body.innerHTML = getRequestDetails(ticket)
-    .map(([label, value]) => `<div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(detailValue(value))}</span></div>`)
-    .join("");
+  const groups = getDashboardDetailGroups(ticket);
+
+  body.innerHTML = `
+    ${renderDashboardDetailHero(ticket)}
+    ${renderDashboardSummaryBlock(ticket)}
+    ${renderDashboardDetailSection("Kunde & Kontakt", groups["Kunde & Kontakt"])}
+    ${renderDashboardDetailSection("Ticket", groups["Ticket"])}
+    ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+    ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
+    ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"])}
+    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+  `;
 
   setDashboardActionMessage("", "Statusänderungen werden automatisch im Statusverlauf gespeichert.");
 }
@@ -443,6 +452,223 @@ function setDashboardActionMessage(type, text) {
   message.classList.remove("success", "error", "loading");
   if (type) message.classList.add(type);
   message.textContent = text || "";
+}
+
+
+
+function dashboardFieldLabel(key) {
+  const labels = {
+    ticket_number: "Ticketnummer",
+    service: "Leistung",
+    status: "Status",
+    priority: "Priorität",
+    source: "Quelle",
+    created_at: "Erstellt",
+    updated_at: "Aktualisiert",
+    customer_name: "Kunde",
+    customer_email: "E-Mail",
+    customer_phone: "Telefon",
+
+    customer_type: "Kundentyp",
+    business_name: "Firma / Objekt",
+    cleaning_type: "Reinigungsart",
+    object_type: "Objektart",
+    address: "Adresse",
+    area: "Fläche",
+    rooms: "Räume",
+    interval: "Turnus",
+    desired_date: "Wunschtermin",
+    after_clearance: "Nach Entrümpelung",
+    materials: "Material",
+    photos: "Fotos",
+    price_model: "Preiswunsch",
+    special_areas: "Besondere Bereiche",
+
+    clearance_type: "Art der Entrümpelung",
+    floor: "Etage",
+    elevator: "Aufzug",
+    parking: "Parkmöglichkeit",
+    no_parking_zone: "Halteverbot / Ladezone",
+    scope: "Umfang",
+    disposal: "Entsorgung",
+    broom_clean: "Besenrein",
+    inspection: "Besichtigung",
+    fixed_price: "Festpreis",
+    extra_service: "Zusatzleistung",
+    clearance_items: "Was soll entrümpelt werden?",
+
+    pickup: "Abholort",
+    dropoff: "Zielort",
+    distance: "Distanz",
+    duration: "Fahrzeit",
+    vehicle: "Fahrzeugart",
+    condition: "Zustand",
+    has_key: "Schlüssel",
+    registered: "Angemeldet",
+    access: "Zugänglichkeit",
+    rollable: "Rollbar",
+    special_situation: "Besondere Situation",
+    google_maps_ready: "Google Maps vorbereitet",
+
+    rental_start: "Mietbeginn",
+    rental_end: "Mietende",
+    rental_days: "Mietdauer",
+    rental_price: "Mietpreis",
+    deposit: "Kaution",
+    handover: "Übergabe",
+    delivery_address: "Wunschort / Lieferung",
+    cargo: "Transportgut",
+    cargo_size: "Menge / Größe",
+    tow_vehicle: "Zugfahrzeug",
+    trailer_hitch: "Anhängerkupplung",
+    plug_type: "Steckeranschluss",
+    extras: "Zubehör",
+    availability_note: "Verfügbarkeit",
+
+    message: "Nachricht"
+  };
+
+  return labels[key] || key
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function isLongDashboardField(key, value) {
+  const longKeys = [
+    "summary",
+    "message",
+    "clearance_items",
+    "special_areas",
+    "availability_note",
+    "extra_service"
+  ];
+
+  return longKeys.includes(key) || String(value || "").length > 80;
+}
+
+function getDashboardDetailGroups(ticket) {
+  const details = ticket.details || {};
+  const groups = {
+    "Kunde & Kontakt": [
+      ["Kunde", ticket.customer_name],
+      ["Telefon", ticket.customer_phone],
+      ["E-Mail", ticket.customer_email]
+    ],
+    "Ticket": [
+      ["Leistung", serviceLabel(ticket.service)],
+      ["Status", statusLabel(ticket.status)],
+      ["Priorität", ticket.priority || "normal"],
+      ["Quelle", ticket.source],
+      ["Erstellt", formatDashboardDate(ticket.created_at)]
+    ],
+    "Termin & Zeitraum": [],
+    "Standort & Strecke": [],
+    "Anfrage-Details": [],
+    "Nachricht & Hinweise": []
+  };
+
+  const timeKeys = [
+    "desired_date",
+    "rental_start",
+    "rental_end",
+    "rental_days",
+    "rental_price",
+    "deposit",
+    "interval"
+  ];
+
+  const locationKeys = [
+    "address",
+    "pickup",
+    "dropoff",
+    "distance",
+    "duration",
+    "delivery_address",
+    "handover",
+    "no_parking_zone",
+    "parking"
+  ];
+
+  const noteKeys = [
+    "message",
+    "clearance_items",
+    "special_areas",
+    "availability_note",
+    "extra_service"
+  ];
+
+  Object.entries(details).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === "") return;
+
+    const entry = [dashboardFieldLabel(key), detailValue(value), key];
+
+    if (noteKeys.includes(key) || isLongDashboardField(key, value)) {
+      groups["Nachricht & Hinweise"].push(entry);
+    } else if (timeKeys.includes(key)) {
+      groups["Termin & Zeitraum"].push(entry);
+    } else if (locationKeys.includes(key)) {
+      groups["Standort & Strecke"].push(entry);
+    } else {
+      groups["Anfrage-Details"].push(entry);
+    }
+  });
+
+  return groups;
+}
+
+function renderDashboardDetailSection(title, entries, options = {}) {
+  const visibleEntries = (entries || []).filter(([_, value]) => value !== null && value !== undefined && value !== "");
+
+  if (!visibleEntries.length) return "";
+
+  const content = visibleEntries.map(([label, value, key]) => {
+    const isLong = options.fullWidth || isLongDashboardField(key, value);
+    return `
+      <div class="detail-field ${isLong ? "wide" : ""}">
+        <strong>${escapeHtml(label)}</strong>
+        <span>${escapeHtml(detailValue(value))}</span>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <section class="detail-section">
+      <h3>${escapeHtml(title)}</h3>
+      <div class="detail-section-grid">
+        ${content}
+      </div>
+    </section>
+  `;
+}
+
+function renderDashboardDetailHero(ticket) {
+  return `
+    <div class="detail-ticket-hero">
+      <div>
+        <span>Ticket</span>
+        <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+      </div>
+      <div>
+        <span>Leistung</span>
+        <strong>${escapeHtml(serviceLabel(ticket.service))}</strong>
+      </div>
+      <div>
+        <span>Status</span>
+        <strong>${escapeHtml(statusLabel(ticket.status))}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function renderDashboardSummaryBlock(ticket) {
+  if (!ticket.summary && !ticket.subject) return "";
+
+  return `
+    <section class="detail-summary-block">
+      <span>Zusammenfassung</span>
+      <p>${escapeHtml(ticket.summary || ticket.subject)}</p>
+    </section>
+  `;
 }
 
 
@@ -596,7 +822,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.9-DASHBOARD-STATUS-UPDATE
+// DBG: ALL4YOU-ROUTER-V3.9.1-DASHBOARD-DETAIL-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

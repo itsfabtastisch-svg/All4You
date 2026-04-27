@@ -960,7 +960,7 @@ async function loadDashboardTicketExtras(ticket) {
    Team-E-Mail-Benachrichtigung
    ========================================================================== */
 
-const TEAM_NOTIFICATION_EMAIL = "Itsfabtastisch@gmail.com";
+const TEAM_NOTIFICATION_EMAIL = "itsfabtastisch@gmail.com";
 
 async function notifyTeamAboutRequest(requestResult) {
   if (!requestResult?.id || !requestResult?.public_status_token) {
@@ -1008,6 +1008,207 @@ async function tryNotifyTeam(result, response) {
       message: error.message || "Unbekannter Fehler"
     });
   }
+}
+
+
+
+/* ==========================================================================
+   Kundenstatus-Seite
+   ========================================================================== */
+
+async function fetchPublicRequestStatus(ticketNumber, verification) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_public_request_status`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_ticket_number: String(ticketNumber || "").trim(),
+      p_verification: String(verification || "").trim()
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Status konnte nicht geladen werden.");
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Ticket wurde nicht gefunden oder die Verifizierung stimmt nicht.");
+  }
+
+  return data;
+}
+
+function appendCustomerStatusLink(result, ticketNumber) {
+  if (!ticketNumber || ticketNumber === "wurde erstellt") return;
+
+  const link = document.createElement("a");
+  link.className = "btn ghost customer-status-link";
+  link.href = `/status?ticket=${encodeURIComponent(ticketNumber)}`;
+  link.setAttribute("data-link", "");
+  link.textContent = "Status später prüfen";
+  result.appendChild(link);
+}
+
+function publicStatusStepLabel(status) {
+  const labels = {
+    neu: "Anfrage eingegangen",
+    in_pruefung: "In Prüfung",
+    rueckfrage_offen: "Rückfrage offen",
+    angebot_vorbereitet: "Angebot wird vorbereitet",
+    angebot_gesendet: "Angebot gesendet",
+    termin_vorgeschlagen: "Termin vorgeschlagen",
+    termin_bestaetigt: "Termin bestätigt",
+    in_bearbeitung: "In Bearbeitung",
+    erledigt: "Erledigt",
+    storniert: "Storniert"
+  };
+
+  return labels[status] || statusLabel(status);
+}
+
+function renderCustomerStatusResult(result, ticket) {
+  const history = Array.isArray(ticket.history) ? ticket.history : [];
+
+  result.classList.add("show");
+  result.innerHTML = `
+    <div class="customer-status-card ${serviceAccentClass(ticket.service)}">
+      <div class="customer-status-head">
+        <div>
+          <p class="eyebrow">Kundenstatus</p>
+          <h2>${escapeHtml(ticket.ticket_number || "Ticket")}</h2>
+        </div>
+        <span class="status-pill">${escapeHtml(publicStatusStepLabel(ticket.status))}</span>
+      </div>
+
+      <div class="customer-status-main">
+        <article>
+          <span>Leistung</span>
+          <strong>${escapeHtml(serviceLabel(ticket.service))}</strong>
+        </article>
+        <article>
+          <span>Status</span>
+          <strong>${escapeHtml(publicStatusStepLabel(ticket.status))}</strong>
+        </article>
+        <article>
+          <span>Erstellt</span>
+          <strong>${escapeHtml(formatDashboardDate(ticket.created_at))}</strong>
+        </article>
+      </div>
+
+      ${ticket.summary ? `
+        <div class="customer-status-summary">
+          <span>Zusammenfassung</span>
+          <p>${escapeHtml(ticket.summary)}</p>
+        </div>
+      ` : ""}
+
+      <div class="customer-status-timeline">
+        <p class="eyebrow">Statusverlauf</p>
+        ${
+          history.length
+            ? history.map(entry => `
+              <article>
+                <span></span>
+                <div>
+                  <strong>${escapeHtml(publicStatusStepLabel(entry.new_status))}</strong>
+                  <p>${escapeHtml(formatDashboardDate(entry.created_at))}</p>
+                  ${entry.note ? `<small>${escapeHtml(entry.note)}</small>` : ""}
+                </div>
+              </article>
+            `).join("")
+            : `<div class="dashboard-mini-empty"><strong>Noch kein Verlauf</strong><p>Der Statusverlauf wird angezeigt, sobald Änderungen vorliegen.</p></div>`
+        }
+      </div>
+
+      <p class="customer-status-privacy">
+        Interne Notizen und Team-Kommentare sind für Kunden nicht sichtbar.
+      </p>
+    </div>
+  `;
+}
+
+function pageCustomerStatus() {
+  document.title = "Anfragestatus prüfen | All4You Service München";
+  const params = new URLSearchParams(window.location.search);
+  const ticket = params.get("ticket") || "";
+
+  return `
+    <section class="page customer-status-page section-pad">
+      <div class="customer-status-hero">
+        <p class="eyebrow">Anfrage verfolgen</p>
+        <h1>Status Ihrer Anfrage prüfen.</h1>
+        <p class="lead">
+          Geben Sie Ihre Ticketnummer und zur Sicherheit Ihre E-Mail-Adresse oder Telefonnummer ein.
+          Interne Notizen bleiben selbstverständlich verborgen.
+        </p>
+      </div>
+
+      <div class="customer-status-layout">
+        <form class="customer-status-form" id="customerStatusForm">
+          <label>Ticketnummer
+            <input type="text" name="ticket" value="${escapeHtml(ticket)}" placeholder="z. B. A4Y-2026-0006" required>
+          </label>
+
+          <label>E-Mail oder Telefonnummer
+            <input type="text" name="verification" placeholder="E-Mail oder Telefon aus der Anfrage" required>
+          </label>
+
+          <button class="btn primary" type="submit">Status prüfen <span>›</span></button>
+
+          <p class="form-note">
+            Die Verifizierung verhindert, dass fremde Personen den Status einer Anfrage einsehen können.
+          </p>
+        </form>
+
+        <div class="customer-status-result" id="customerStatusResult">
+          <div class="dashboard-mini-empty">
+            <strong>Noch kein Ticket geladen</strong>
+            <p>Nach erfolgreicher Prüfung erscheint hier der aktuelle Status Ihrer Anfrage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function bindCustomerStatusPage() {
+  const form = document.querySelector("#customerStatusForm");
+  const result = document.querySelector("#customerStatusResult");
+
+  if (!form || !result) return;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const data = new FormData(form);
+    const ticketNumber = String(data.get("ticket") || "").trim();
+    const verification = String(data.get("verification") || "").trim();
+
+    result.classList.add("show");
+    result.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Status wird geprüft …</strong>
+        <p>Die Anfrage wird sicher abgeglichen.</p>
+      </div>
+    `;
+
+    try {
+      const ticket = await fetchPublicRequestStatus(ticketNumber, verification);
+      renderCustomerStatusResult(result, ticket);
+    } catch (error) {
+      result.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Status konnte nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Bitte Angaben prüfen.")}</p>
+        </div>
+      `;
+    }
+  });
 }
 
 
@@ -1161,7 +1362,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.2-EMAIL-NOTIFICATION-READY
+// DBG: ALL4YOU-ROUTER-V4.3-CUSTOMER-STATUS-PAGE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3527,6 +3728,7 @@ function renderRoute() {
   else if (path === "/leistungen/reinigung") html = cleaningPage();
   else if (path.startsWith("/leistungen/")) html = genericServicePage(path.split("/").pop());
   else if (path === "/dashboard" || path === "/mitarbeiter" || path === "/portal") html = pageDashboard();
+  else if (path === "/status" || path === "/kundenstatus" || path === "/ticketstatus") html = pageCustomerStatus();
   else if (path === "/kontakt") html = pageContact();
   else if (path === "/ueber-uns") html = pageAbout();
   else if (path === "/impressum") html = legalPage("impressum");
@@ -3545,6 +3747,7 @@ function renderRoute() {
   bindRollerWizard();
   bindTrailerWizard();
   bindDashboardShell();
+  bindCustomerStatusPage();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -3555,7 +3758,7 @@ function normalizePath(path) {
 
 function navigateTo(url) {
   const nextUrl = new URL(url, window.location.origin);
-  window.history.pushState({}, "", nextUrl.pathname);
+  window.history.pushState({}, "", nextUrl.pathname + nextUrl.search);
   renderRoute();
 }
 
@@ -4053,6 +4256,8 @@ function bindCleaningWizard() {
         </p>
       `;
       appendMailPreviewButton(result, mailHref);
+      appendCustomerStatusLink(result, ticketNumber);
+      await tryNotifyTeam(result, response);
     } catch (error) {
       result.innerHTML = `
         <strong>Supabase-Speicherung fehlgeschlagen</strong>
@@ -4268,6 +4473,7 @@ function bindClearanceWizard() {
         "Aktuell ist zusätzlich noch die E-Mail-Vorschau verfügbar. Später wird der automatische E-Mail-Versand direkt über das Backend laufen."
       );
       appendMailPreviewButton(result, mailHref);
+      appendCustomerStatusLink(result, response?.ticket_number);
       await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
@@ -4472,6 +4678,7 @@ function bindRollerWizard() {
         "Die Distanzmessung ist weiterhin für die spätere Google-Maps-Anbindung vorbereitet."
       );
       appendMailPreviewButton(result, mailHref);
+      appendCustomerStatusLink(result, response?.ticket_number);
       await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
@@ -4735,6 +4942,7 @@ function bindTrailerWizard() {
         "Die Mietanfrage ist unverbindlich. Verfügbarkeit, Kaution und Übergabe werden durch All4You bestätigt."
       );
       appendMailPreviewButton(result, mailHref);
+      appendCustomerStatusLink(result, response?.ticket_number);
       await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
@@ -4962,7 +5170,7 @@ document.addEventListener("click", event => {
   if (url.origin !== window.location.origin) return;
 
   event.preventDefault();
-  navigateTo(url.pathname);
+  navigateTo(url.pathname + url.search);
 
   if (mainNav) {
     mainNav.classList.remove("open");

@@ -884,6 +884,7 @@ function renderDashboardStatusHistory(history) {
 function setTicketExtrasLoading() {
   const messages = document.querySelector("#dashboardMessagesList");
   const timeline = document.querySelector("#dashboardTimelineList");
+  const attachments = document.querySelector("#dashboardAttachmentsList");
 
   if (messages) {
     messages.innerHTML = `
@@ -902,11 +903,21 @@ function setTicketExtrasLoading() {
       </div>
     `;
   }
+
+  if (attachments) {
+    attachments.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Anhänge werden geladen …</strong>
+        <p>Fotos und Dokumente werden aus Supabase geladen.</p>
+      </div>
+    `;
+  }
 }
 
 function clearTicketExtras() {
   renderDashboardMessages([]);
   renderDashboardStatusHistory([]);
+  renderDashboardAttachments([]);
 }
 
 async function loadDashboardTicketExtras(ticket) {
@@ -919,20 +930,23 @@ async function loadDashboardTicketExtras(ticket) {
   setTicketExtrasLoading();
 
   try {
-    const [messages, history] = await Promise.all([
+    const [messages, history, attachments] = await Promise.all([
       fetchDashboardMessages(dashboardCurrentSession, ticket.id),
-      fetchDashboardStatusHistory(dashboardCurrentSession, ticket.id)
+      fetchDashboardStatusHistory(dashboardCurrentSession, ticket.id),
+      fetchDashboardAttachments(dashboardCurrentSession, ticket.id)
     ]);
 
     if (loadId !== dashboardTicketExtrasLoadId || dashboardSelectedRequestId !== ticket.id) return;
 
     renderDashboardMessages(messages);
     renderDashboardStatusHistory(history);
+    await renderDashboardAttachments(attachments);
   } catch (error) {
     if (loadId !== dashboardTicketExtrasLoadId) return;
 
     const messages = document.querySelector("#dashboardMessagesList");
     const timeline = document.querySelector("#dashboardTimelineList");
+    const attachments = document.querySelector("#dashboardAttachmentsList");
 
     if (messages) {
       messages.innerHTML = `
@@ -947,6 +961,15 @@ async function loadDashboardTicketExtras(ticket) {
       timeline.innerHTML = `
         <div class="dashboard-mini-empty error">
           <strong>Statusverlauf konnte nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+        </div>
+      `;
+    }
+
+    if (attachments) {
+      attachments.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Anhänge konnten nicht geladen werden</strong>
           <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
         </div>
       `;
@@ -1054,6 +1077,16 @@ function appendCustomerStatusLink(result, ticketNumber) {
   result.appendChild(link);
 }
 
+
+
+function setCustomerAttachmentMessage(type, text) {
+  const message = document.querySelector("#customerAttachmentMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
 
 async function sendPublicRequestMessage(ticketNumber, verification, message) {
   const cleanMessage = String(message || "").trim();
@@ -1182,6 +1215,14 @@ function renderCustomerStatusResult(result, ticket) {
           Ihre Nachricht wird dem Ticket zugeordnet und im Mitarbeiter-Dashboard sichtbar.
         </p>
       </form>
+
+      <form class="customer-attachment-form" id="customerAttachmentForm">
+        ${buildAttachmentUploadBox("status")}
+        <button class="btn primary" type="submit" id="customerAttachmentButton">Dateien hochladen <span>›</span></button>
+        <p class="customer-attachment-message" id="customerAttachmentMessage">
+          Ihre Dateien werden dem Ticket zugeordnet und sind im Mitarbeiter-Dashboard sichtbar.
+        </p>
+      </form>
     </div>
   `;
 }
@@ -1303,8 +1344,42 @@ function bindCustomerStatusPage() {
       if (replyButton) replyButton.disabled = false;
     }
   });
-}
 
+  result.addEventListener("submit", async event => {
+    const attachmentForm = event.target.closest("#customerAttachmentForm");
+    if (!attachmentForm) return;
+
+    event.preventDefault();
+
+    const attachmentButton = attachmentForm.querySelector("#customerAttachmentButton");
+    const files = getAttachmentFiles(attachmentForm);
+
+    if (!currentTicketNumber || !currentVerification) {
+      setCustomerAttachmentMessage("error", "Bitte den Status zuerst erneut prüfen.");
+      return;
+    }
+
+    if (!files.length) {
+      setCustomerAttachmentMessage("error", "Bitte mindestens eine Datei auswählen.");
+      return;
+    }
+
+    if (attachmentButton) attachmentButton.disabled = true;
+    setCustomerAttachmentMessage("loading", "Dateien werden hochgeladen …");
+
+    try {
+      const count = await uploadCustomerStatusAttachments(currentTicketNumber, currentVerification, files);
+      attachmentForm.reset();
+      setCustomerAttachmentMessage("success", `${count} Datei(en) wurden dem Ticket zugeordnet.`);
+    } catch (error) {
+      setCustomerAttachmentMessage("error", error.message || "Dateien konnten nicht hochgeladen werden.");
+    } finally {
+      if (attachmentButton) attachmentButton.disabled = false;
+    }
+  });
+
+
+}
 function splitContactValue(contactValue) {
   const contact = String(contactValue || "").trim();
 
@@ -1365,6 +1440,320 @@ async function createPublicRequest(payload) {
   }
 
   return data;
+}
+
+
+/* ==========================================================================
+   Datei-Uploads / Anhänge
+   ========================================================================== */
+
+const ATTACHMENT_BUCKET = "request-attachments";
+const MAX_ATTACHMENT_FILES = 10;
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf"
+];
+
+function formatFileSize(bytes) {
+  const size = Number(bytes || 0);
+
+  if (size >= 1024 * 1024) {
+    return `${(size / 1024 / 1024).toFixed(1).replace(".0", "")} MB`;
+  }
+
+  if (size >= 1024) {
+    return `${Math.round(size / 1024)} KB`;
+  }
+
+  return `${size} B`;
+}
+
+function safeAttachmentFileName(name) {
+  const original = String(name || "datei").trim();
+  const cleaned = original
+    .normalize("NFKD")
+    .replace(/[^\w.\-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return cleaned || `datei-${Date.now()}`;
+}
+
+function getAttachmentFiles(root) {
+  const input = root?.querySelector?.('input[type="file"][data-attachment-input]');
+  const files = input?.files ? Array.from(input.files) : [];
+
+  return files;
+}
+
+function validateAttachmentFiles(files) {
+  if (!files.length) return [];
+
+  if (files.length > MAX_ATTACHMENT_FILES) {
+    throw new Error(`Bitte maximal ${MAX_ATTACHMENT_FILES} Dateien auswählen.`);
+  }
+
+  files.forEach(file => {
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      throw new Error(`${file.name} ist zu groß. Maximal erlaubt sind 10 MB pro Datei.`);
+    }
+
+    if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
+      throw new Error(`${file.name} hat einen nicht erlaubten Dateityp. Erlaubt sind JPG, PNG, WEBP und PDF.`);
+    }
+  });
+
+  return files;
+}
+
+function buildAttachmentUploadBox(context = "wizard") {
+  const subtitle = context === "status"
+    ? "Hier können Sie Fotos oder PDF-Dokumente zur bestehenden Anfrage nachreichen."
+    : "Sie können Fotos oder PDF-Dokumente direkt zur Anfrage hinzufügen.";
+
+  return `
+    <div class="attachment-upload-box">
+      <div>
+        <strong>Dateien anhängen</strong>
+        <p>${subtitle}</p>
+        <small>Erlaubt: JPG, PNG, WEBP, PDF · max. 10 Dateien · max. 10 MB pro Datei</small>
+      </div>
+      <label class="attachment-drop">
+        <span>Dateien auswählen</span>
+        <input type="file" name="attachments" data-attachment-input multiple accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
+      </label>
+    </div>
+  `;
+}
+
+function showAttachmentUploadState(result, type, text) {
+  const note = document.createElement("p");
+  note.className = `form-note attachment-upload-note ${type || ""}`;
+  note.textContent = text;
+  result.appendChild(note);
+}
+
+async function uploadAttachmentFile(file, folder) {
+  const safeName = safeAttachmentFileName(file.name);
+  const random = (crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const filePath = `${folder}/${Date.now()}-${random}-${safeName}`;
+  const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
+
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${ATTACHMENT_BUCKET}/${encodedPath}`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "false"
+    },
+    body: file
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || `${file.name} konnte nicht hochgeladen werden.`);
+  }
+
+  return {
+    file_name: file.name,
+    file_path: filePath,
+    file_type: file.type?.startsWith("image/") ? "image" : "document",
+    mime_type: file.type || "application/octet-stream",
+    file_size: file.size
+  };
+}
+
+async function registerPublicRequestAttachment(requestResult, fileMeta) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/register_public_request_attachment`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_request_id: requestResult.id,
+      p_public_status_token: requestResult.public_status_token,
+      p_file_name: fileMeta.file_name,
+      p_file_path: fileMeta.file_path,
+      p_file_type: fileMeta.file_type,
+      p_mime_type: fileMeta.mime_type,
+      p_file_size: fileMeta.file_size
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.success) {
+    throw new Error(data?.message || data?.hint || data?.details || "Datei konnte nicht dem Ticket zugeordnet werden.");
+  }
+
+  return data;
+}
+
+async function registerPublicStatusAttachment(ticketNumber, verification, fileMeta) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/register_public_status_attachment`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_ticket_number: String(ticketNumber || "").trim(),
+      p_verification: String(verification || "").trim(),
+      p_file_name: fileMeta.file_name,
+      p_file_path: fileMeta.file_path,
+      p_file_type: fileMeta.file_type,
+      p_mime_type: fileMeta.mime_type,
+      p_file_size: fileMeta.file_size
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.success) {
+    throw new Error(data?.message || data?.hint || data?.details || "Datei konnte nicht dem Ticket zugeordnet werden.");
+  }
+
+  return data;
+}
+
+async function uploadPublicRequestAttachments(requestResult, form, result) {
+  const files = getAttachmentFiles(form);
+
+  if (!files.length) return;
+
+  try {
+    validateAttachmentFiles(files);
+
+    if (!requestResult?.id || !requestResult?.public_status_token) {
+      throw new Error("Ticketdaten fehlen. Dateien konnten nicht zugeordnet werden.");
+    }
+
+    showAttachmentUploadState(result, "loading", `${files.length} Datei(en) werden hochgeladen …`);
+
+    for (const file of files) {
+      const fileMeta = await uploadAttachmentFile(file, `requests/${requestResult.id}`);
+      await registerPublicRequestAttachment(requestResult, fileMeta);
+    }
+
+    showAttachmentUploadState(result, "success", `${files.length} Datei(en) wurden dem Ticket zugeordnet.`);
+  } catch (error) {
+    showAttachmentUploadState(result, "warning", `Anfrage wurde gespeichert, aber Upload prüfen: ${error.message || "Unbekannter Fehler"}`);
+  }
+}
+
+async function uploadCustomerStatusAttachments(ticketNumber, verification, files) {
+  const validFiles = validateAttachmentFiles(files);
+
+  if (!validFiles.length) {
+    throw new Error("Bitte mindestens eine Datei auswählen.");
+  }
+
+  const safeTicket = safeAttachmentFileName(String(ticketNumber || "ticket").toUpperCase());
+
+  for (const file of validFiles) {
+    const fileMeta = await uploadAttachmentFile(file, `status/${safeTicket}`);
+    await registerPublicStatusAttachment(ticketNumber, verification, fileMeta);
+  }
+
+  return validFiles.length;
+}
+
+async function fetchDashboardAttachments(session, requestId) {
+  if (!session?.access_token || !requestId) {
+    return [];
+  }
+
+  const query = [
+    "select=id,request_id,file_name,file_path,file_type,mime_type,file_size,uploaded_by,is_internal,created_at",
+    `request_id=eq.${encodeURIComponent(requestId)}`,
+    "order=created_at.desc"
+  ].join("&");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/request_attachments?${query}`, {
+    method: "GET",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Anhänge konnten nicht geladen werden.");
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+async function createSignedAttachmentUrl(session, filePath) {
+  if (!session?.access_token || !filePath) return null;
+
+  const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
+
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${ATTACHMENT_BUCKET}/${encodedPath}`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ expiresIn: 3600 })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  if (data?.signedURL?.startsWith("http")) return data.signedURL;
+  if (data?.signedURL) return `${SUPABASE_URL}/storage/v1${data.signedURL}`;
+
+  return null;
+}
+
+async function renderDashboardAttachments(attachments) {
+  const list = document.querySelector("#dashboardAttachmentsList");
+  if (!list) return;
+
+  if (!attachments?.length) {
+    list.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Keine Anhänge</strong>
+        <p>Zu diesem Ticket wurden noch keine Dateien hochgeladen.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rows = await Promise.all(attachments.map(async attachment => {
+    const signedUrl = await createSignedAttachmentUrl(dashboardCurrentSession, attachment.file_path);
+    const tag = attachment.file_type === "image" ? "Bild" : "Dokument";
+    const size = formatFileSize(attachment.file_size);
+    const uploadedBy = attachment.uploaded_by === "team" ? "Team" : "Kunde";
+
+    return `
+      <article class="dashboard-attachment-item">
+        <div>
+          <strong>${escapeHtml(attachment.file_name || "Datei")}</strong>
+          <span>${escapeHtml(tag)} · ${escapeHtml(size)} · ${escapeHtml(uploadedBy)} · ${escapeHtml(formatDashboardDate(attachment.created_at))}</span>
+        </div>
+        ${signedUrl ? `<a class="btn ghost" href="${escapeHtml(signedUrl)}" target="_blank" rel="noopener">Öffnen</a>` : `<span class="attachment-unavailable">Nicht verfügbar</span>`}
+      </article>
+    `;
+  }));
+
+  list.innerHTML = rows.join("");
 }
 
 function buildCleaningSummaryText(summary) {
@@ -1465,7 +1854,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.5-CUSTOMER-REPLY-MESSAGES
+// DBG: ALL4YOU-ROUTER-V4.6-ATTACHMENTS-SYSTEM
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1885,6 +2274,7 @@ function rollerPage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="rollerWizardSummary"></div>
+              ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Die Distanz dient später zur Einschätzung. Der endgültige Preis wird nach Strecke,
                 Zustand, Zugänglichkeit und Aufwand bestätigt.
@@ -2174,6 +2564,7 @@ function trailerPage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="trailerWizardSummary"></div>
+              ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Verfügbarkeit, Kaution und eventuelle Liefer-/Abholkosten werden nach Prüfung bestätigt.
               </p>
@@ -2497,6 +2888,7 @@ function clearancePage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="clearanceWizardSummary"></div>
+              ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Fotos helfen bei der Einschätzung des Aufwands.
                 Eine kostenlose Besichtigung und ein Festpreis sind nach Prüfung möglich.
@@ -2849,6 +3241,7 @@ function cleaningPage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="cleaningWizardSummary"></div>
+              ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Der genaue Umfang und Preis werden nach Prüfung von Objekt, Fläche,
                 Verschmutzungsgrad, gewünschtem Termin und Arbeitsweise bestätigt.
@@ -3300,6 +3693,16 @@ function pageDashboard() {
                   <button class="btn primary" type="submit" id="dashboardInternalNoteButton" disabled>Notiz speichern <span>›</span></button>
                   <p class="dashboard-note-message" id="dashboardInternalNoteMessage">Bitte zuerst ein Ticket auswählen.</p>
                 </form>
+              </div>
+
+              <div class="dashboard-attachments">
+                <p class="eyebrow">Anhänge</p>
+                <div class="dashboard-attachments-list" id="dashboardAttachmentsList">
+                  <div class="dashboard-mini-empty">
+                    <strong>Anhänge werden nach Ticketauswahl geladen …</strong>
+                    <p>Fotos und Dokumente erscheinen hier live aus Supabase.</p>
+                  </div>
+                </div>
               </div>
 
               <div class="dashboard-timeline">
@@ -4360,6 +4763,7 @@ function bindCleaningWizard() {
       `;
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, ticketNumber);
+      await uploadPublicRequestAttachments(response, form, result);
       await tryNotifyTeam(result, response);
     } catch (error) {
       result.innerHTML = `
@@ -4577,6 +4981,7 @@ function bindClearanceWizard() {
       );
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
+      await uploadPublicRequestAttachments(response, form, result);
       await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
@@ -4782,6 +5187,7 @@ function bindRollerWizard() {
       );
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
+      await uploadPublicRequestAttachments(response, form, result);
       await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
@@ -5046,6 +5452,7 @@ function bindTrailerWizard() {
       );
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
+      await uploadPublicRequestAttachments(response, form, result);
       await tryNotifyTeam(result, response);
     } catch (error) {
       renderSupabaseError(result, error, mailHref);

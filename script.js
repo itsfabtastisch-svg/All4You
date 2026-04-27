@@ -88,29 +88,34 @@ async function fetchEmployeeProfile(session) {
     throw new Error("Keine gültige Sitzung vorhanden.");
   }
 
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/employees?select=id,display_name,email,role,is_active&auth_user_id=eq.${encodeURIComponent(session.user.id)}&is_active=eq.true&limit=1`,
-    {
-      method: "GET",
-      headers: {
-        "apikey": SUPABASE_PUBLISHABLE_KEY,
-        "Authorization": `Bearer ${session.access_token}`,
-        "Accept": "application/json"
-      }
-    }
-  );
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_my_employee_profile`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({})
+  });
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(data?.message || "Mitarbeiterprofil konnte nicht geladen werden.");
+    throw new Error(data?.message || data?.hint || data?.details || "Mitarbeiterprofil konnte nicht geladen werden.");
   }
 
-  if (!Array.isArray(data) || !data.length) {
-    throw new Error("Login gültig, aber kein aktives Mitarbeiterprofil gefunden.");
+  if (!data?.success) {
+    const authInfo = data?.auth_uid ? ` Auth UID: ${data.auth_uid}` : "";
+    throw new Error((data?.message || "Kein aktives Mitarbeiterprofil gefunden.") + authInfo);
   }
 
-  return data[0];
+  return {
+    id: data.id,
+    display_name: data.display_name,
+    email: data.email,
+    role: data.role,
+    is_active: data.is_active
+  };
 }
 
 
@@ -264,7 +269,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+// DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");

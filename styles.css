@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .dashboard-shell {
@@ -3263,7 +3263,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   DBG: ALL4YOU-ROUTER-V3.7.1-DASHBOARD-AUTH-RPC-FIX
    ========================================================================== */
 
 .is-hidden {

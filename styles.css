@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-shell {
@@ -3263,7 +3263,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .is-hidden {
@@ -3417,7 +3417,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .auth-message.success {
@@ -3437,7 +3437,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3492,7 +3492,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3569,7 +3569,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-detail {
@@ -3716,7 +3716,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .site-header {
@@ -3860,7 +3860,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .site-header {
@@ -3918,7 +3918,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-messages {
@@ -4038,7 +4038,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4129,7 +4129,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4174,7 +4174,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .email-notification-note {
@@ -4199,7 +4199,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .customer-status-link {
@@ -4394,7 +4394,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .customer-reply-form {
@@ -4465,7 +4465,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4617,7 +4617,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4681,7 +4681,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4732,5 +4732,80 @@ label {
   .dashboard-filter-meta-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+/* ==========================================================================
+   Dashboard Ticket Actions
+   DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
+   ========================================================================== */
+
+.dashboard-ticket-actions {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(19,35,58,.10);
+  background:
+    radial-gradient(circle at 95% 0%, rgba(10,169,155,.07), transparent 12rem),
+    rgba(255,255,255,.72);
+}
+
+.dashboard-ticket-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashboard-ticket-action-grid .btn {
+  width: 100%;
+  min-height: 42px;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.dashboard-ticket-action-grid .btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.dashboard-ticket-action-grid .soft-action {
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+  box-shadow: 0 10px 22px rgba(10,169,155,.14);
+}
+
+.dashboard-ticket-action-message {
+  margin: 0;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(19,35,58,.10);
+  background: rgba(238,246,250,.66);
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.dashboard-ticket-action-message.success {
+  color: #08786f;
+  border-color: rgba(10,169,155,.26);
+  background: rgba(10,169,155,.09);
+}
+
+.dashboard-ticket-action-message.error {
+  color: #8a1f1f;
+  border-color: rgba(190,40,40,.26);
+  background: rgba(255,86,86,.08);
+}
+
+.dashboard-ticket-action-message.loading {
+  color: var(--blue);
+  border-color: rgba(11,78,145,.22);
+  background: rgba(11,78,145,.07);
+}
+
+@media (max-width: 560px) {
+  .dashboard-ticket-action-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -442,6 +442,8 @@ function renderDashboardDetail(ticket) {
     `;
     clearTicketExtras();
     setDashboardInternalNoteEnabled(false);
+    setDashboardTicketActionsEnabled(false);
+    setDashboardTicketActionMessage("", "");
     setDashboardInternalNoteMessage("", "");
     setDashboardActionMessage("", "");
     return;
@@ -473,6 +475,8 @@ function renderDashboardDetail(ticket) {
   `;
 
   setDashboardInternalNoteEnabled(true);
+  setDashboardTicketActionsEnabled(true);
+  setDashboardTicketActionMessage("", "Schnellaktionen beziehen sich immer auf das ausgewählte Ticket.");
   setDashboardInternalNoteMessage("", "Interne Notizen sind nur im Mitarbeiter-Dashboard sichtbar.");
   setDashboardActionMessage("", "Statusänderungen werden automatisch im Statusverlauf gespeichert.");
   loadDashboardTicketExtras(ticket);
@@ -569,6 +573,134 @@ function getDashboardStatusOptions(currentStatus) {
     .map(status => `<option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`)
     .join("");
 }
+
+
+/* ==========================================================================
+   Dashboard Ticket-Aktionen
+   ========================================================================== */
+
+function getSelectedDashboardTicket() {
+  if (!dashboardSelectedRequestId) return null;
+
+  return (
+    dashboardAllRequestCache.find(ticket => ticket.id === dashboardSelectedRequestId) ||
+    dashboardRequestCache.find(ticket => ticket.id === dashboardSelectedRequestId) ||
+    null
+  );
+}
+
+function buildPublicStatusLink(ticket) {
+  if (!ticket?.ticket_number) return "";
+
+  return `${window.location.origin}/status?ticket=${encodeURIComponent(ticket.ticket_number)}`;
+}
+
+async function copyTextToClipboard(text) {
+  const value = String(text || "").trim();
+
+  if (!value) {
+    throw new Error("Nichts zum Kopieren vorhanden.");
+  }
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+function buildTicketContactText(ticket) {
+  return [
+    `Ticket: ${ticket.ticket_number || "—"}`,
+    `Kunde: ${ticket.customer_name || "—"}`,
+    `Telefon: ${ticket.customer_phone || "—"}`,
+    `E-Mail: ${ticket.customer_email || "—"}`
+  ].join("\n");
+}
+
+function buildTicketCompactText(ticket) {
+  const details = ticket.details || {};
+  const detailLines = Object.entries(details)
+    .filter(([_, value]) => value !== null && value !== undefined && value !== "")
+    .slice(0, 12)
+    .map(([key, value]) => `${dashboardFieldLabel(key)}: ${detailValue(value)}`);
+
+  return [
+    `Ticket: ${ticket.ticket_number || "—"}`,
+    `Leistung: ${serviceLabel(ticket.service)}`,
+    `Status: ${statusLabel(ticket.status)}`,
+    `Kunde: ${ticket.customer_name || "—"}`,
+    `Telefon: ${ticket.customer_phone || "—"}`,
+    `E-Mail: ${ticket.customer_email || "—"}`,
+    `Erstellt: ${formatDashboardDate(ticket.created_at)}`,
+    "",
+    "Zusammenfassung:",
+    ticket.summary || ticket.subject || "—",
+    "",
+    detailLines.length ? "Details:" : "",
+    ...detailLines,
+    "",
+    `Statuslink: ${buildPublicStatusLink(ticket)}`
+  ].filter(line => line !== "").join("\n");
+}
+
+function setDashboardTicketActionMessage(type, text) {
+  const message = document.querySelector("#dashboardTicketActionMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function setDashboardTicketActionsEnabled(isEnabled) {
+  document.querySelectorAll("[data-ticket-action]").forEach(button => {
+    button.disabled = !isEnabled;
+  });
+}
+
+async function applyDashboardTicketStatusUpdate(requestId, status) {
+  const session = getStoredEmployeeSession();
+  const updatedTicket = await updateDashboardRequestStatus(session, requestId, status);
+
+  dashboardAllRequestCache = dashboardAllRequestCache.map(ticket =>
+    ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
+  );
+
+  dashboardRequestCache = dashboardRequestCache.map(ticket =>
+    ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
+  );
+
+  applyDashboardFilters();
+  updateDashboardStats(dashboardAllRequestCache);
+  updateDashboardActivityStats(dashboardAllRequestCache);
+
+  const mergedTicket =
+    dashboardAllRequestCache.find(ticket => ticket.id === updatedTicket.id) ||
+    dashboardRequestCache.find(ticket => ticket.id === updatedTicket.id) ||
+    updatedTicket;
+
+  const updatedButton = document.querySelector(`.dashboard-ticket[data-ticket-id="${CSS.escape(updatedTicket.id)}"]`);
+  if (updatedButton) {
+    document.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
+    updatedButton.classList.add("active");
+  }
+
+  renderDashboardDetail(mergedTicket);
+  await loadDashboardTicketExtras(mergedTicket);
+
+  return mergedTicket;
+}
+
 
 async function updateDashboardRequestStatus(session, requestId, newStatus) {
   if (!session?.access_token) {
@@ -2174,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V4.8-DASHBOARD-FILTERS-SEARCH
+// DBG: ALL4YOU-ROUTER-V4.9-DASHBOARD-TICKET-ACTIONS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4022,6 +4154,19 @@ function pageDashboard() {
                 Statusänderungen werden automatisch im Statusverlauf gespeichert.
               </p>
 
+              <div class="dashboard-ticket-actions">
+                <p class="eyebrow">Ticket-Aktionen</p>
+                <div class="dashboard-ticket-action-grid">
+                  <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
+                  <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
+                  <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
+                  <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als erledigt markieren</button>
+                </div>
+                <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
+                  Bitte zuerst ein Ticket auswählen.
+                </p>
+              </div>
+
               <div class="dashboard-messages">
                 <p class="eyebrow">Nachrichten & interne Notizen</p>
                 <div class="dashboard-messages-list" id="dashboardMessagesList">
@@ -5820,6 +5965,7 @@ function bindDashboardShell() {
   const noteForm = document.querySelector("#dashboardInternalNoteForm");
   const noteText = document.querySelector("#dashboardInternalNoteText");
   const noteButton = document.querySelector("#dashboardInternalNoteButton");
+  const ticketActions = document.querySelector(".dashboard-ticket-actions");
 
   if (list) {
     list.addEventListener("click", event => {
@@ -5856,34 +6002,63 @@ function bindDashboardShell() {
     setDashboardActionMessage("loading", "Status wird gespeichert …");
 
     try {
-      const updatedTicket = await updateDashboardRequestStatus(session, dashboardSelectedRequestId, selectedStatus);
-
-      dashboardAllRequestCache = dashboardAllRequestCache.map(ticket =>
-        ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
-      );
-
-      dashboardRequestCache = dashboardRequestCache.map(ticket =>
-        ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
-      );
-
-      applyDashboardFilters();
-      updateDashboardStats(dashboardAllRequestCache);
-
-      const updatedButton = document.querySelector(`.dashboard-ticket[data-ticket-id="${CSS.escape(updatedTicket.id)}"]`);
-      if (updatedButton) {
-        document.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
-        updatedButton.classList.add("active");
-      }
-
-      renderDashboardDetail(dashboardRequestCache.find(ticket => ticket.id === updatedTicket.id) || updatedTicket);
+      const updatedTicket = await applyDashboardTicketStatusUpdate(dashboardSelectedRequestId, selectedStatus);
       setDashboardActionMessage("success", `Status wurde auf „${statusLabel(updatedTicket.status)}“ geändert.`);
-      loadDashboardTicketExtras(dashboardRequestCache.find(ticket => ticket.id === updatedTicket.id) || updatedTicket);
     } catch (error) {
       setDashboardActionMessage("error", error.message || "Status konnte nicht geändert werden.");
       saveStatusButton.disabled = false;
     }
   });
 
+
+  ticketActions?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-ticket-action]");
+    if (!button) return;
+
+    const action = button.dataset.ticketAction;
+    const ticket = getSelectedDashboardTicket();
+
+    if (!ticket) {
+      setDashboardTicketActionMessage("error", "Bitte zuerst ein Ticket auswählen.");
+      return;
+    }
+
+    try {
+      if (action === "copy-contact") {
+        await copyTextToClipboard(buildTicketContactText(ticket));
+        setDashboardTicketActionMessage("success", "Kontaktdaten wurden kopiert.");
+        return;
+      }
+
+      if (action === "copy-status-link") {
+        await copyTextToClipboard(buildPublicStatusLink(ticket));
+        setDashboardTicketActionMessage("success", "Statuslink wurde kopiert.");
+        return;
+      }
+
+      if (action === "copy-ticket") {
+        await copyTextToClipboard(buildTicketCompactText(ticket));
+        setDashboardTicketActionMessage("success", "Kompakte Ticketdaten wurden kopiert.");
+        return;
+      }
+
+      if (action === "mark-done") {
+        if (ticket.status === "erledigt") {
+          setDashboardTicketActionMessage("success", "Ticket ist bereits erledigt.");
+          return;
+        }
+
+        button.disabled = true;
+        setDashboardTicketActionMessage("loading", "Ticket wird als erledigt markiert …");
+        const updatedTicket = await applyDashboardTicketStatusUpdate(ticket.id, "erledigt");
+        setDashboardTicketActionMessage("success", `Ticket ${updatedTicket.ticket_number || ""} wurde als erledigt markiert.`);
+        return;
+      }
+    } catch (error) {
+      setDashboardTicketActionMessage("error", error.message || "Aktion konnte nicht ausgeführt werden.");
+      if (action === "mark-done") button.disabled = false;
+    }
+  });
 
   noteForm?.addEventListener("submit", async event => {
     event.preventDefault();

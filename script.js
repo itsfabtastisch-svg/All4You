@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+// DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -743,178 +743,189 @@ function clearancePage() {
       </aside>
     </section>
 
-    <section class="section-pad two-col">
-      <div class="info-card">
-        <p class="eyebrow">Typische Einsätze</p>
-        <h2>Wenn Räume wieder frei werden sollen.</h2>
-        <ul class="list">
-          <li>Wohnungsentrümpelung vor Übergabe</li>
-          <li>Keller entrümpeln und besenrein hinterlassen</li>
-          <li>Garage oder Schuppen räumen</li>
-          <li>Dachboden oder Abstellraum freimachen</li>
-          <li>einzelne Zimmer oder Teilbereiche entrümpeln</li>
-          <li>Entrümpelung nach Umzug</li>
-          <li>Entrümpelung nach Haushaltsauflösung</li>
-          <li>Sperrgut oder alte Möbel entfernen</li>
-          <li>Vorbereitung für Renovierung, Verkauf oder Neuvermietung</li>
-        </ul>
-      </div>
-
-      <aside class="notice-box">
-        <p class="eyebrow">Halteverbot / Ladezone</p>
-        <h2>Mehr Platz vor Ort spart Zeit.</h2>
-        <p>
-          Bei größeren Entrümpelungen kann eine freie Ladezone vor dem Objekt entscheidend sein.
-          Auf Wunsch kann All4You prüfen, ob eine temporäre Halteverbotszone sinnvoll ist oder bei der Organisation unterstützen.
-        </p>
-      </aside>
-    </section>
-
     <section class="section-pad two-col" id="entruempelungs-anfrage">
-      <div class="form-card">
+      <div class="form-card clearance-wizard-card">
         <p class="eyebrow">Entrümpelungs-Assistent</p>
-        <h2>Entrümpelungs-Anfrage vorbereiten.</h2>
+        <h2>Entrümpelungs-Anfrage Schritt für Schritt.</h2>
         <p class="lead">
-          Beschreiben Sie kurz, was entrümpelt werden soll. Je genauer die Angaben sind, desto besser kann All4You
-          Umfang, Entsorgung, Besichtigung und mögliche Kosten einschätzen.
+          Der Assistent führt Sie durch alle wichtigen Angaben: Objekt, Zugang, Umfang, Entsorgung,
+          Besichtigung, Festpreis und besondere Hinweise.
         </p>
 
-        <form class="clearance-tool" id="clearanceForm">
-          <div class="form-grid">
-            <label>Name
-              <input name="name" placeholder="Ihr Name" required>
-            </label>
-            <label>Telefon oder E-Mail
-              <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
-            </label>
-            <label>Art der Entrümpelung
-              <select name="clearanceType">
-                <option>Wohnung</option>
-                <option>Haus</option>
-                <option>Zimmer / Teilbereich</option>
-                <option>Keller</option>
-                <option>Dachboden</option>
-                <option>Garage</option>
-                <option>Lager / Gewerbefläche</option>
-                <option>Hof / Außenbereich</option>
-                <option>Sonstiges</option>
-              </select>
-            </label>
-            <label>Adresse / Ort
-              <input name="address" placeholder="z. B. Musterstraße, München">
-            </label>
-            <label>Etage
-              <select name="floor">
-                <option>Erdgeschoss</option>
-                <option>1. Etage</option>
-                <option>2. Etage</option>
-                <option>3. Etage oder höher</option>
-                <option>Keller</option>
-                <option>Dachboden</option>
-                <option>unbekannt / nach Absprache</option>
-              </select>
-            </label>
-            <label>Aufzug vorhanden?
-              <select name="elevator">
-                <option>Ja</option>
-                <option>Nein</option>
-                <option>Unsicher</option>
-              </select>
-            </label>
-            <label>Parkmöglichkeit in der Nähe?
-              <select name="parking">
-                <option>Ja</option>
-                <option>Nein</option>
-                <option>Unsicher</option>
-              </select>
-            </label>
-            <label>Halteverbot / Ladezone benötigt?
-              <select name="noParkingZone">
-                <option>Nein</option>
-                <option>Ja</option>
-                <option>Unsicher / bitte prüfen</option>
-              </select>
-            </label>
-            <label>Umfang
-              <select name="scope">
-                <option>klein</option>
-                <option>mittel</option>
-                <option>groß</option>
-                <option>komplette Entrümpelung</option>
-                <option>schwer einzuschätzen</option>
-              </select>
-            </label>
-            <label>Entsorgung gewünscht?
-              <select name="disposal">
-                <option>Ja</option>
-                <option>Nein</option>
-                <option>Nach Absprache</option>
-              </select>
-            </label>
-            <label>Besenreine Übergabe?
-              <select name="broomClean">
-                <option>Ja</option>
-                <option>Nein</option>
-                <option>Nach Absprache</option>
-              </select>
-            </label>
-            <label>Kostenlose Besichtigung?
-              <select name="inspection">
-                <option>Ja, gerne</option>
-                <option>Nein, erstmal nur Anfrage</option>
-                <option>Nach Absprache</option>
-              </select>
-            </label>
-            <label>Festpreis gewünscht?
-              <select name="fixedPrice">
-                <option>Ja, wenn möglich</option>
-                <option>Nein</option>
-                <option>Nach Absprache</option>
-              </select>
-            </label>
-            <label>Wunschtermin
-              <input name="desiredDate" placeholder="z. B. nächste Woche, Samstag, möglichst schnell...">
-            </label>
-            <label>Fotos vorhanden?
-              <select name="photos">
-                <option>Ja, kann ich senden</option>
-                <option>Nein</option>
-                <option>später nachreichen</option>
-              </select>
-            </label>
-            <label>Zusatzleistung
-              <select name="extraService">
-                <option>keine Zusatzleistung</option>
-                <option>Reinigung nach der Entrümpelung</option>
-                <option>Transport einzelner Gegenstände</option>
-                <option>Anhänger / Transportlösung prüfen</option>
-                <option>noch nicht sicher</option>
-              </select>
-            </label>
+        <div class="clearance-wizard" id="clearanceWizard" data-current-step="0">
+          <div class="wizard-top">
+            <div>
+              <span class="wizard-kicker" id="clearanceWizardCounter">Schritt 1 von 5</span>
+              <h3 id="clearanceWizardTitle">Kontakt & Objektart</h3>
+            </div>
+            <div class="wizard-progress">
+              <span id="clearanceWizardProgress"></span>
+            </div>
           </div>
 
-          <label>Was soll entrümpelt werden?
-            <textarea name="clearanceItems" rows="4" placeholder="z. B. alte Möbel, Kartons, Kellerinhalt, Sperrgut, Haushaltsgegenstände..."></textarea>
-          </label>
+          <form id="clearanceWizardForm" class="wizard-form">
+            <div class="wizard-step active" data-title="Kontakt & Objektart">
+              <div class="form-grid">
+                <label>Ihr Name
+                  <input name="name" placeholder="Ihr Name" required>
+                </label>
+                <label>Telefon oder E-Mail
+                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                </label>
+                <label>Art der Entrümpelung
+                  <select name="clearanceType" id="clearanceTypeSelect">
+                    <option>Wohnung</option>
+                    <option>Haus</option>
+                    <option>Zimmer / Teilbereich</option>
+                    <option>Keller</option>
+                    <option>Dachboden</option>
+                    <option>Garage</option>
+                    <option>Lager / Gewerbefläche</option>
+                    <option>Hof / Außenbereich</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </label>
+                <label class="business-field" id="clearanceBusinessField">Firmenname / Objektname
+                  <input name="businessName" placeholder="Firma, Lager, Objektname oder Ansprechpartner">
+                </label>
+              </div>
+            </div>
 
-          <label>Besondere Hinweise
-            <textarea name="message" rows="4" placeholder="z. B. fest verbaute Gegenstände, Sanitärobjekte, Zugang, Fristen, Schlüsselübergabe..."></textarea>
-          </label>
+            <div class="wizard-step" data-title="Standort & Zugang">
+              <div class="form-grid">
+                <label>Adresse / Ort
+                  <input name="address" placeholder="z. B. Musterstraße, München">
+                </label>
+                <label>Etage
+                  <select name="floor">
+                    <option>Erdgeschoss</option>
+                    <option>1. Etage</option>
+                    <option>2. Etage</option>
+                    <option>3. Etage oder höher</option>
+                    <option>Keller</option>
+                    <option>Dachboden</option>
+                    <option>unbekannt / nach Absprache</option>
+                  </select>
+                </label>
+                <label>Aufzug vorhanden?
+                  <select name="elevator">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher</option>
+                  </select>
+                </label>
+                <label>Parkmöglichkeit in der Nähe?
+                  <select name="parking">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher</option>
+                  </select>
+                </label>
+                <label>Halteverbot / Ladezone benötigt?
+                  <select name="noParkingZone">
+                    <option>Nein</option>
+                    <option>Ja</option>
+                    <option>Unsicher / bitte prüfen</option>
+                  </select>
+                </label>
+              </div>
+            </div>
 
-          <button class="btn primary" type="submit">Entrümpelungs-Anfrage senden <span>›</span></button>
+            <div class="wizard-step" data-title="Umfang & Leistungen">
+              <div class="form-grid">
+                <label>Umfang
+                  <select name="scope">
+                    <option>klein</option>
+                    <option>mittel</option>
+                    <option>groß</option>
+                    <option>komplette Entrümpelung</option>
+                    <option>schwer einzuschätzen</option>
+                  </select>
+                </label>
+                <label>Entsorgung gewünscht?
+                  <select name="disposal">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Nach Absprache</option>
+                  </select>
+                </label>
+                <label>Besenreine Übergabe?
+                  <select name="broomClean">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Nach Absprache</option>
+                  </select>
+                </label>
+                <label>Kostenlose Besichtigung?
+                  <select name="inspection">
+                    <option>Ja, gerne</option>
+                    <option>Nein, erstmal nur Anfrage</option>
+                    <option>Nach Absprache</option>
+                  </select>
+                </label>
+                <label>Festpreis gewünscht?
+                  <select name="fixedPrice">
+                    <option>Ja, wenn möglich</option>
+                    <option>Nein</option>
+                    <option>Nach Absprache</option>
+                  </select>
+                </label>
+              </div>
+            </div>
 
-          <div class="distance-result" id="clearanceResult">
-            <strong>Entrümpelungs-Anfrage vorbereitet</strong>
-            <p>
-              In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert, per E-Mail an All4You gesendet
-              und im Mitarbeiterportal angezeigt.
-            </p>
-          </div>
+            <div class="wizard-step" data-title="Inhalt & Hinweise">
+              <div class="form-grid wizard-message-grid">
+                <label>Wunschtermin
+                  <input name="desiredDate" placeholder="z. B. nächste Woche, Samstag, möglichst schnell...">
+                </label>
+                <label>Fotos vorhanden?
+                  <select name="photos">
+                    <option>Ja, kann ich senden</option>
+                    <option>Nein</option>
+                    <option>später nachreichen</option>
+                  </select>
+                </label>
+                <label>Zusatzleistung
+                  <select name="extraService">
+                    <option>keine Zusatzleistung</option>
+                    <option>Reinigung nach der Entrümpelung</option>
+                    <option>Transport einzelner Gegenstände</option>
+                    <option>Anhänger / Transportlösung prüfen</option>
+                    <option>noch nicht sicher</option>
+                  </select>
+                </label>
+                <label>Was soll entrümpelt werden?
+                  <textarea name="clearanceItems" rows="4" placeholder="z. B. alte Möbel, Kartons, Kellerinhalt, Sperrgut, Haushaltsgegenstände..."></textarea>
+                </label>
+                <label>Besondere Hinweise
+                  <textarea name="message" rows="4" placeholder="z. B. fest verbaute Gegenstände, Sanitärobjekte, Zugang, Fristen, Schlüsselübergabe..."></textarea>
+                </label>
+              </div>
+            </div>
 
-          <p class="form-note">
-            Fotos helfen bei der Einschätzung des Aufwands. Eine kostenlose Besichtigung und ein Festpreis sind nach Prüfung möglich.
-          </p>
-        </form>
+            <div class="wizard-step" data-title="Zusammenfassung prüfen">
+              <div class="wizard-summary" id="clearanceWizardSummary"></div>
+              <p class="form-note">
+                Die Anfrage ist unverbindlich. Fotos helfen bei der Einschätzung des Aufwands.
+                Eine kostenlose Besichtigung und ein Festpreis sind nach Prüfung möglich.
+              </p>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="btn ghost" type="button" id="clearanceWizardPrev">Zurück</button>
+              <button class="btn primary" type="button" id="clearanceWizardNext">Weiter <span>›</span></button>
+              <button class="btn primary" type="submit" id="clearanceWizardSubmit">Anfrage vorbereiten <span>›</span></button>
+            </div>
+
+            <div class="distance-result" id="clearanceWizardResult">
+              <strong>Entrümpelungs-Anfrage vorbereitet</strong>
+              <p>
+                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
+                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
 
       <aside class="check-card">
@@ -925,12 +936,10 @@ function clearancePage() {
           <li>Wie groß ist der Umfang ungefähr?</li>
           <li>In welcher Etage befindet sich der Bereich?</li>
           <li>Gibt es einen Aufzug?</li>
-          <li>Gibt es Parkmöglichkeiten in der Nähe?</li>
-          <li>Wird eine Ladezone oder temporäre Halteverbotszone benötigt?</li>
+          <li>Gibt es Parkmöglichkeiten oder braucht es eine Ladezone?</li>
           <li>Soll die Entsorgung übernommen werden?</li>
           <li>Ist eine besenreine Übergabe gewünscht?</li>
-          <li>Gibt es Fotos zur besseren Einschätzung?</li>
-          <li>Gibt es fest verbaute oder besondere Gegenstände?</li>
+          <li>Gibt es Fotos oder besondere Gegenstände?</li>
         </ul>
       </aside>
     </section>
@@ -967,8 +976,8 @@ function clearancePage() {
       <p class="eyebrow">Ablauf</p>
       <h2>So läuft die Entrümpelung ab.</h2>
       <div class="steps five-steps">
-        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie beschreiben, was entrümpelt werden soll.</p></article>
-        <article class="step"><span>2</span><h3>Besichtigung prüfen</h3><p>All4You prüft Umfang, Entsorgung, Zugänglichkeit und Terminwunsch.</p></article>
+        <article class="step"><span>1</span><h3>Anfrage starten</h3><p>Der Assistent führt durch Kontakt, Objekt, Zugang und Umfang.</p></article>
+        <article class="step"><span>2</span><h3>Umfang prüfen</h3><p>All4You prüft Entsorgung, Besichtigung, Zugang und Terminwunsch.</p></article>
         <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie bekommen eine Einschätzung oder ein individuelles Angebot.</p></article>
         <article class="step"><span>4</span><h3>Termin vereinbaren</h3><p>Der passende Termin wird gemeinsam abgestimmt.</p></article>
         <article class="step"><span>5</span><h3>Entrümpelung durchführen</h3><p>Der Bereich wird nach Absprache entrümpelt und auf Wunsch besenrein hinterlassen.</p></article>
@@ -1007,8 +1016,8 @@ function clearancePage() {
       <div class="cta-panel">
         <p class="eyebrow">Unverbindlich starten</p>
         <h2>Entrümpelung jetzt unverbindlich anfragen.</h2>
-        <p class="lead">Teilen Sie kurz mit, was entrümpelt werden soll. All4You prüft Umfang, Besichtigung, Entsorgung und gewünschte Übergabe.</p>
-        <a class="btn primary" href="#entruempelungs-anfrage">Entrümpelungs-Anfrage öffnen <span>›</span></a>
+        <p class="lead">Teilen Sie Schritt für Schritt mit, was entrümpelt werden soll. All4You prüft Umfang, Besichtigung, Entsorgung und gewünschte Übergabe.</p>
+        <a class="btn primary" href="#entruempelungs-anfrage">Entrümpelungs-Assistent öffnen <span>›</span></a>
       </div>
     </section>
   `;
@@ -1967,6 +1976,7 @@ function renderRoute() {
   bindClearanceTool();
   bindCleaningTool();
   bindCleaningWizard();
+  bindClearanceWizard();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -2428,6 +2438,176 @@ function bindCleaningWizard() {
       `Preiswunsch: ${summary.priceModel}\n` +
       `Besondere Bereiche: ${summary.specialAreas}\n\n` +
       `Nachricht:\n${summary.message}`
+    );
+
+    const mailButton = document.createElement("a");
+    mailButton.className = "btn blue mail-preview-btn";
+    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
+    mailButton.textContent = "Anfrage per E-Mail öffnen";
+    result.appendChild(mailButton);
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, { once: false });
+
+  updateWizard();
+}
+
+
+
+function bindClearanceWizard() {
+  const wizard = document.querySelector("#clearanceWizard");
+  const form = document.querySelector("#clearanceWizardForm");
+  const result = document.querySelector("#clearanceWizardResult");
+  const prev = document.querySelector("#clearanceWizardPrev");
+  const next = document.querySelector("#clearanceWizardNext");
+  const submit = document.querySelector("#clearanceWizardSubmit");
+  const counter = document.querySelector("#clearanceWizardCounter");
+  const title = document.querySelector("#clearanceWizardTitle");
+  const progress = document.querySelector("#clearanceWizardProgress");
+  const summaryBox = document.querySelector("#clearanceWizardSummary");
+  const clearanceType = document.querySelector("#clearanceTypeSelect");
+  const businessField = document.querySelector("#clearanceBusinessField");
+
+  if (!wizard || !form || !result || !prev || !next || !submit) return;
+
+  const steps = Array.from(form.querySelectorAll(".wizard-step"));
+  let current = 0;
+
+  function collectSummary() {
+    const data = new FormData(form);
+    return {
+      name: data.get("name") || "",
+      contact: data.get("contact") || "",
+      clearanceType: data.get("clearanceType") || "",
+      businessName: data.get("businessName") || "",
+      address: data.get("address") || "",
+      floor: data.get("floor") || "",
+      elevator: data.get("elevator") || "",
+      parking: data.get("parking") || "",
+      noParkingZone: data.get("noParkingZone") || "",
+      scope: data.get("scope") || "",
+      disposal: data.get("disposal") || "",
+      broomClean: data.get("broomClean") || "",
+      inspection: data.get("inspection") || "",
+      fixedPrice: data.get("fixedPrice") || "",
+      desiredDate: data.get("desiredDate") || "",
+      photos: data.get("photos") || "",
+      extraService: data.get("extraService") || "",
+      clearanceItems: data.get("clearanceItems") || "",
+      message: data.get("message") || ""
+    };
+  }
+
+  function updateBusinessField() {
+    if (!clearanceType || !businessField) return;
+    const value = clearanceType.value.toLowerCase();
+    const show = value.includes("lager") || value.includes("gewerbe");
+    businessField.classList.toggle("is-hidden", !show);
+  }
+
+  function renderSummary() {
+    if (!summaryBox) return;
+    const summary = collectSummary();
+    summaryBox.innerHTML = `
+      <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
+      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div><strong>Art der Entrümpelung</strong><span>${escapeHtml(summary.clearanceType || "—")}</span></div>
+      ${summary.businessName ? `<div><strong>Firma / Objekt</strong><span>${escapeHtml(summary.businessName)}</span></div>` : ""}
+      <div><strong>Adresse / Ort</strong><span>${escapeHtml(summary.address || "—")}</span></div>
+      <div><strong>Etage</strong><span>${escapeHtml(summary.floor || "—")}</span></div>
+      <div><strong>Aufzug</strong><span>${escapeHtml(summary.elevator || "—")}</span></div>
+      <div><strong>Parkmöglichkeit</strong><span>${escapeHtml(summary.parking || "—")}</span></div>
+      <div><strong>Halteverbot / Ladezone</strong><span>${escapeHtml(summary.noParkingZone || "—")}</span></div>
+      <div><strong>Umfang</strong><span>${escapeHtml(summary.scope || "—")}</span></div>
+      <div><strong>Entsorgung</strong><span>${escapeHtml(summary.disposal || "—")}</span></div>
+      <div><strong>Besenrein</strong><span>${escapeHtml(summary.broomClean || "—")}</span></div>
+      <div><strong>Besichtigung</strong><span>${escapeHtml(summary.inspection || "—")}</span></div>
+      <div><strong>Festpreis</strong><span>${escapeHtml(summary.fixedPrice || "—")}</span></div>
+      <div><strong>Wunschtermin</strong><span>${escapeHtml(summary.desiredDate || "—")}</span></div>
+      <div><strong>Fotos</strong><span>${escapeHtml(summary.photos || "—")}</span></div>
+      <div><strong>Zusatzleistung</strong><span>${escapeHtml(summary.extraService || "—")}</span></div>
+      <div class="summary-wide"><strong>Was soll entrümpelt werden?</strong><span>${escapeHtml(summary.clearanceItems || "—")}</span></div>
+      <div class="summary-wide"><strong>Besondere Hinweise</strong><span>${escapeHtml(summary.message || "—")}</span></div>
+    `;
+  }
+
+  function updateWizard() {
+    steps.forEach((step, index) => {
+      step.classList.toggle("active", index === current);
+    });
+
+    const active = steps[current];
+    if (counter) counter.textContent = `Schritt ${current + 1} von ${steps.length}`;
+    if (title) title.textContent = active?.dataset.title || "";
+    if (progress) progress.style.width = `${((current + 1) / steps.length) * 100}%`;
+
+    prev.disabled = current === 0;
+    next.style.display = current === steps.length - 1 ? "none" : "inline-flex";
+    submit.style.display = current === steps.length - 1 ? "inline-flex" : "none";
+
+    if (current === steps.length - 1) renderSummary();
+    updateBusinessField();
+  }
+
+  function validateStep() {
+    const activeInputs = Array.from(steps[current].querySelectorAll("input, select, textarea"));
+    for (const field of activeInputs) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  prev.addEventListener("click", () => {
+    current = Math.max(0, current - 1);
+    updateWizard();
+  });
+
+  next.addEventListener("click", () => {
+    if (!validateStep()) return;
+    current = Math.min(steps.length - 1, current + 1);
+    updateWizard();
+  });
+
+  clearanceType?.addEventListener("change", updateBusinessField);
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    renderSummary();
+
+    const summary = collectSummary();
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Entrümpelungs-Anfrage vorbereitet</strong>
+      <p>
+        Die Anfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
+        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+      </p>
+    `;
+
+    const subject = encodeURIComponent("Anfrage über die Webseite: Entrümpelung");
+    const body = encodeURIComponent(
+      `Neue Entrümpelungs-Anfrage\n\n` +
+      `Name: ${summary.name}\n` +
+      `Kontakt: ${summary.contact}\n` +
+      `Art der Entrümpelung: ${summary.clearanceType}\n` +
+      `Firma / Objekt: ${summary.businessName}\n` +
+      `Adresse / Ort: ${summary.address}\n` +
+      `Etage: ${summary.floor}\n` +
+      `Aufzug: ${summary.elevator}\n` +
+      `Parkmöglichkeit: ${summary.parking}\n` +
+      `Halteverbot / Ladezone: ${summary.noParkingZone}\n` +
+      `Umfang: ${summary.scope}\n` +
+      `Entsorgung: ${summary.disposal}\n` +
+      `Besenreine Übergabe: ${summary.broomClean}\n` +
+      `Kostenlose Besichtigung: ${summary.inspection}\n` +
+      `Festpreis gewünscht: ${summary.fixedPrice}\n` +
+      `Wunschtermin: ${summary.desiredDate}\n` +
+      `Fotos vorhanden: ${summary.photos}\n` +
+      `Zusatzleistung: ${summary.extraService}\n\n` +
+      `Was soll entrümpelt werden?\n${summary.clearanceItems}\n\n` +
+      `Besondere Hinweise:\n${summary.message}`
     );
 
     const mailButton = document.createElement("a");

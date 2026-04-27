@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.0-REINIGUNG-WIZARD
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2569,4 +2569,32 @@ label {
   .wizard-actions .btn {
     width: 100%;
   }
+}
+
+/* ==========================================================================
+   Entrümpelungs-Wizard
+   DBG: ALL4YOU-ROUTER-V3.1-ENTRUEMPELUNG-WIZARD
+   ========================================================================== */
+
+.clearance-wizard-card {
+  overflow: hidden;
+}
+
+.clearance-wizard {
+  margin-top: 22px;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(11,78,145,.12), transparent 18rem),
+    linear-gradient(135deg, rgba(255,255,255,.95), rgba(238,246,250,.86));
+  box-shadow: 0 18px 44px rgba(16, 38, 60, .11);
+  overflow: hidden;
+}
+
+#clearanceWizardSubmit {
+  display: none;
+}
+
+#clearanceWizardResult {
+  margin: 0 22px 22px;
 }

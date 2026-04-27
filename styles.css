@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH.3-ANHAENGER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL.3-ANHAENGER
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH.3-ANHAENGER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .legal-layout {
@@ -2272,7 +2272,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .site-header {
@@ -2336,7 +2336,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .price-table-card {
@@ -2397,7 +2397,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2573,7 +2573,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2601,7 +2601,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2698,7 +2698,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2792,7 +2792,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2806,7 +2806,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
    ========================================================================== */
 
 .dashboard-shell {
@@ -3259,4 +3259,158 @@ label {
   .dashboard-sidebar {
     padding: 18px;
   }
+}
+
+/* ==========================================================================
+   Dashboard Auth
+   DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
+   ========================================================================== */
+
+.is-hidden {
+  display: none !important;
+}
+
+.dashboard-auth-page {
+  padding: 0;
+}
+
+.dashboard-auth-gate {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 34px;
+  background:
+    radial-gradient(circle at 80% 10%, rgba(10,169,155,.16), transparent 30rem),
+    linear-gradient(135deg, #f7fbfd 0%, #eef8fa 100%);
+}
+
+.auth-card {
+  width: min(620px, 100%);
+  padding: clamp(24px, 4vw, 42px);
+  border-radius: 30px;
+  border: 1px solid rgba(19,35,58,.12);
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 24px 70px rgba(16,38,60,.14);
+}
+
+.auth-logo {
+  display: inline-flex;
+  width: 210px;
+  min-height: 80px;
+  margin-bottom: 18px;
+  padding: 12px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(19,35,58,.1);
+}
+
+.auth-logo img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.auth-card h1 {
+  margin-bottom: 10px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.auth-form input {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid rgba(19,35,58,.16);
+  border-radius: 16px;
+  padding: 0 15px;
+  font: inherit;
+  font-weight: 750;
+  color: var(--navy);
+  background: rgba(255,255,255,.9);
+}
+
+.auth-message {
+  margin-top: 18px;
+  padding: 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(19,35,58,.12);
+  background: rgba(238,246,250,.72);
+}
+
+.auth-message strong {
+  display: block;
+  color: var(--navy);
+  margin-bottom: 5px;
+}
+
+.auth-message p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.auth-message.success {
+  border-color: rgba(10,169,155,.28);
+  background: rgba(10,169,155,.09);
+}
+
+.auth-message.error {
+  border-color: rgba(190,40,40,.25);
+  background: rgba(255,86,86,.08);
+}
+
+.auth-message.loading {
+  border-color: rgba(11,78,145,.2);
+  background: rgba(11,78,145,.07);
+}
+
+.auth-back {
+  display: inline-flex;
+  margin-top: 18px;
+  color: var(--teal-2);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.dashboard-user-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+}
+
+.dashboard-user-card strong {
+  color: #fff;
+}
+
+.dashboard-user-card span {
+  color: rgba(255,255,255,.72);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.dashboard-user-card .btn {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 4px;
+  color: #fff;
+  border-color: rgba(255,255,255,.3);
+  background: rgba(255,255,255,.08);
+}
+
+.dashboard-user-card .btn:hover {
+  background: rgba(255,255,255,.16);
 }

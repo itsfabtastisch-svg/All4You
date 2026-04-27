@@ -16,6 +16,104 @@ function isSupabaseConfigured() {
   );
 }
 
+
+/* ==========================================================================
+   Supabase Auth / Mitarbeiter-Login
+   ========================================================================== */
+
+const ALL4YOU_AUTH_STORAGE_KEY = "all4you_employee_session_v1";
+
+function storeEmployeeSession(session) {
+  localStorage.setItem(ALL4YOU_AUTH_STORAGE_KEY, JSON.stringify({
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: Date.now() + ((session.expires_in || 3600) * 1000),
+    user: session.user
+  }));
+}
+
+function getStoredEmployeeSession() {
+  try {
+    const raw = localStorage.getItem(ALL4YOU_AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (!session?.access_token || !session?.user?.id) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+function clearEmployeeSession() {
+  localStorage.removeItem(ALL4YOU_AUTH_STORAGE_KEY);
+}
+
+async function supabasePasswordLogin(email, password) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email,
+      password
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.error_description || data?.msg || data?.message || "Login fehlgeschlagen.");
+  }
+
+  return data;
+}
+
+async function supabaseLogout(accessToken) {
+  if (!accessToken) return;
+
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    }
+  }).catch(() => null);
+}
+
+async function fetchEmployeeProfile(session) {
+  if (!session?.access_token || !session?.user?.id) {
+    throw new Error("Keine gültige Sitzung vorhanden.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/employees?select=id,display_name,email,role,is_active&auth_user_id=eq.${encodeURIComponent(session.user.id)}&is_active=eq.true&limit=1`,
+    {
+      method: "GET",
+      headers: {
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${session.access_token}`,
+        "Accept": "application/json"
+      }
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Mitarbeiterprofil konnte nicht geladen werden.");
+  }
+
+  if (!Array.isArray(data) || !data.length) {
+    throw new Error("Login gültig, aber kein aktives Mitarbeiterprofil gefunden.");
+  }
+
+  return data[0];
+}
+
+
 function splitContactValue(contactValue) {
   const contact = String(contactValue || "").trim();
 
@@ -166,7 +264,7 @@ function appendMailPreviewButton(result, href, text = "Anfrage zusätzlich per E
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.6-DASHBOARD-SHELL
+// DBG: ALL4YOU-ROUTER-V3.7-DASHBOARD-AUTH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -1773,7 +1871,7 @@ function pageDashboard() {
         ["Status", "neu"],
         ["Kontakt", "Telefon vorhanden"],
         ["Quelle", "Webseiten-Wizard"],
-        ["Hinweis", "Live-Daten folgen mit Supabase Auth."]
+        ["Hinweis", "Live-Daten folgen mit Supabase in v3.8."]
       ]
     },
     {
@@ -1841,136 +1939,176 @@ function pageDashboard() {
   `).join("");
 
   return `
-    <section class="dashboard-shell page">
-      <aside class="dashboard-sidebar">
-        <a class="dashboard-brand" href="/" data-link>
-          <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
-          <span>Mitarbeiterportal</span>
-        </a>
+    <section class="dashboard-auth-page page">
+      <div class="dashboard-auth-gate" id="dashboardAuthGate">
+        <div class="auth-card">
+          <a class="auth-logo" href="/" data-link>
+            <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+          </a>
 
-        <nav class="dashboard-menu" aria-label="Dashboard Navigation">
-          <a class="active" href="/dashboard" data-link>Übersicht</a>
-          <a href="/dashboard" data-link>Anfragen</a>
-          <a href="/dashboard" data-link>Kunden</a>
-          <a href="/dashboard" data-link>Statusverlauf</a>
-          <a href="/dashboard" data-link>YouBot</a>
-          <a href="/dashboard" data-link>Einstellungen</a>
-        </nav>
+          <p class="eyebrow">Mitarbeiterportal</p>
+          <h1>Einloggen, um Anfragen zu verwalten.</h1>
+          <p class="lead">
+            Der Mitarbeiterbereich ist ab jetzt mit Supabase Auth vorbereitet.
+            Nur Benutzer mit aktivem Mitarbeiterprofil erhalten Zugriff.
+          </p>
 
-        <div class="dashboard-security-note">
-          <strong>Login folgt in v3.7</strong>
-          <p>Diese Seite ist aktuell eine Dashboard-Hülle. Supabase Auth und Rechteprüfung werden im nächsten Schritt angebunden.</p>
+          <form class="auth-form" id="dashboardLoginForm">
+            <label>E-Mail
+              <input type="email" name="email" autocomplete="email" placeholder="mitarbeiter@example.de" required>
+            </label>
+            <label>Passwort
+              <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
+            </label>
+            <button class="btn primary" type="submit">Einloggen <span>›</span></button>
+          </form>
+
+          <div class="auth-message" id="dashboardAuthMessage">
+            <strong>Hinweis</strong>
+            <p>Der Benutzer muss in Supabase Auth existieren und zusätzlich in der Tabelle employees eingetragen sein.</p>
+          </div>
+
+          <a class="auth-back" href="/" data-link>Zurück zur Webseite</a>
         </div>
-      </aside>
+      </div>
 
-      <main class="dashboard-main">
-        <section class="dashboard-hero">
-          <div>
-            <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
-            <h1>Anfragen zentral verwalten.</h1>
-            <p class="lead">
-              Hier sollen später alle Wizard-Anfragen aus Supabase sichtbar werden – inklusive Ticketnummer,
-              Kunde, Leistung, Status, Nachrichten und Statusverlauf.
-            </p>
-          </div>
-          <div class="dashboard-hero-actions">
-            <span class="status-pill warning">Auth noch Platzhalter</span>
-            <span class="status-pill success">Supabase vorbereitet</span>
-          </div>
-        </section>
+      <div class="dashboard-shell is-hidden" id="dashboardProtectedArea">
+        <aside class="dashboard-sidebar">
+          <a class="dashboard-brand" href="/" data-link>
+            <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+            <span>Mitarbeiterportal</span>
+          </a>
 
-        <section class="dashboard-stats">
-          <article><span>Neue Anfragen</span><strong>4</strong><small>Vorschau aus Testdaten</small></article>
-          <article><span>In Prüfung</span><strong>0</strong><small>Statuslogik vorbereitet</small></article>
-          <article><span>Offene Rückfragen</span><strong>0</strong><small>Nachrichtenmodul folgt</small></article>
-          <article><span>Erledigt</span><strong>0</strong><small>Später filterbar</small></article>
-        </section>
+          <nav class="dashboard-menu" aria-label="Dashboard Navigation">
+            <a class="active" href="/dashboard" data-link>Übersicht</a>
+            <a href="/dashboard" data-link>Anfragen</a>
+            <a href="/dashboard" data-link>Kunden</a>
+            <a href="/dashboard" data-link>Statusverlauf</a>
+            <a href="/dashboard" data-link>YouBot</a>
+            <a href="/dashboard" data-link>Einstellungen</a>
+          </nav>
 
-        <section class="dashboard-grid">
-          <div class="dashboard-panel">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">Ticketliste</p>
-                <h2>Neue Anfragen</h2>
-              </div>
-              <div class="dashboard-filters">
-                <button class="active" type="button">Alle</button>
-                <button type="button">Neu</button>
-                <button type="button">In Prüfung</button>
-              </div>
-            </div>
-
-            <div class="dashboard-search-row">
-              <input type="search" placeholder="Suche nach Ticketnummer, Kunde oder Leistung">
-              <select>
-                <option>Alle Leistungen</option>
-                <option>Reinigung</option>
-                <option>Entrümpelung</option>
-                <option>Rollerabholservice</option>
-                <option>Anhängervermietung</option>
-              </select>
-            </div>
-
-            <div class="dashboard-ticket-list" id="dashboardTicketList">
-              ${ticketCards}
-            </div>
+          <div class="dashboard-user-card">
+            <strong id="dashboardEmployeeName">Mitarbeiter</strong>
+            <span id="dashboardEmployeeMeta">angemeldet</span>
+            <button class="btn ghost" type="button" id="dashboardLogoutButton">Abmelden</button>
           </div>
 
-          <aside class="dashboard-panel dashboard-detail">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">Ticketdetails</p>
-                <h2 id="dashboardDetailTitle">A4Y-2026-0005</h2>
-              </div>
-              <span class="status-pill">neu</span>
-            </div>
+          <div class="dashboard-security-note">
+            <strong>Auth aktiv</strong>
+            <p>Diese Dashboard-Hülle prüft jetzt Supabase Auth und ein aktives Mitarbeiterprofil.</p>
+          </div>
+        </aside>
 
-            <div class="dashboard-detail-body" id="dashboardDetailBody">
-              <div><strong>Leistung</strong><span>Entrümpelung</span></div>
-              <div><strong>Status</strong><span>neu</span></div>
-              <div><strong>Kontakt</strong><span>Telefon vorhanden</span></div>
-              <div><strong>Quelle</strong><span>Webseiten-Wizard</span></div>
-              <div><strong>Hinweis</strong><span>Live-Daten folgen mit Supabase Auth.</span></div>
+        <main class="dashboard-main">
+          <section class="dashboard-hero">
+            <div>
+              <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
+              <h1>Anfragen zentral verwalten.</h1>
+              <p class="lead">
+                Der Login ist aktiv. In v3.8 werden die echten Tickets aus Supabase geladen und ersetzen diese Vorschau.
+              </p>
             </div>
-
-            <div class="dashboard-actions">
-              <button class="btn primary" type="button" disabled>Status ändern</button>
-              <button class="btn ghost" type="button" disabled>Nachricht öffnen</button>
+            <div class="dashboard-hero-actions">
+              <span class="status-pill success">Auth aktiv</span>
+              <span class="status-pill warning">Live-Tickets folgen</span>
             </div>
+          </section>
 
-            <div class="dashboard-timeline">
-              <p class="eyebrow">Statusverlauf</p>
-              <article>
-                <span></span>
+          <section class="dashboard-stats">
+            <article><span>Neue Anfragen</span><strong>4</strong><small>Vorschau aus Testdaten</small></article>
+            <article><span>In Prüfung</span><strong>0</strong><small>Statuslogik vorbereitet</small></article>
+            <article><span>Offene Rückfragen</span><strong>0</strong><small>Nachrichtenmodul folgt</small></article>
+            <article><span>Erledigt</span><strong>0</strong><small>Später filterbar</small></article>
+          </section>
+
+          <section class="dashboard-grid">
+            <div class="dashboard-panel">
+              <div class="panel-head">
                 <div>
-                  <strong>Anfrage wurde erstellt.</strong>
-                  <p>Status: neu · automatisch durch Datenbank-Trigger</p>
+                  <p class="eyebrow">Ticketliste</p>
+                  <h2>Neue Anfragen</h2>
                 </div>
-              </article>
-              <article>
-                <span></span>
-                <div>
-                  <strong>Nächster Schritt</strong>
-                  <p>In v3.8 werden echte Supabase-Daten geladen.</p>
+                <div class="dashboard-filters">
+                  <button class="active" type="button">Alle</button>
+                  <button type="button">Neu</button>
+                  <button type="button">In Prüfung</button>
                 </div>
-              </article>
-            </div>
-          </aside>
-        </section>
+              </div>
 
-        <section class="dashboard-roadmap">
-          <p class="eyebrow">Nächste Schritte</p>
-          <div class="roadmap-grid">
-            <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login</span></article>
-            <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase anzeigen</span></article>
-            <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
-            <article><strong>v4.0</strong><span>Kundenstatus, E-Mail und YouBot</span></article>
-          </div>
-        </section>
-      </main>
+              <div class="dashboard-search-row">
+                <input type="search" placeholder="Suche nach Ticketnummer, Kunde oder Leistung">
+                <select>
+                  <option>Alle Leistungen</option>
+                  <option>Reinigung</option>
+                  <option>Entrümpelung</option>
+                  <option>Rollerabholservice</option>
+                  <option>Anhängervermietung</option>
+                </select>
+              </div>
+
+              <div class="dashboard-ticket-list" id="dashboardTicketList">
+                ${ticketCards}
+              </div>
+            </div>
+
+            <aside class="dashboard-panel dashboard-detail">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Ticketdetails</p>
+                  <h2 id="dashboardDetailTitle">A4Y-2026-0005</h2>
+                </div>
+                <span class="status-pill">neu</span>
+              </div>
+
+              <div class="dashboard-detail-body" id="dashboardDetailBody">
+                <div><strong>Leistung</strong><span>Entrümpelung</span></div>
+                <div><strong>Status</strong><span>neu</span></div>
+                <div><strong>Kontakt</strong><span>Telefon vorhanden</span></div>
+                <div><strong>Quelle</strong><span>Webseiten-Wizard</span></div>
+                <div><strong>Hinweis</strong><span>Live-Daten folgen mit Supabase in v3.8.</span></div>
+              </div>
+
+              <div class="dashboard-actions">
+                <button class="btn primary" type="button" disabled>Status ändern</button>
+                <button class="btn ghost" type="button" disabled>Nachricht öffnen</button>
+              </div>
+
+              <div class="dashboard-timeline">
+                <p class="eyebrow">Statusverlauf</p>
+                <article>
+                  <span></span>
+                  <div>
+                    <strong>Anfrage wurde erstellt.</strong>
+                    <p>Status: neu · automatisch durch Datenbank-Trigger</p>
+                  </div>
+                </article>
+                <article>
+                  <span></span>
+                  <div>
+                    <strong>Nächster Schritt</strong>
+                    <p>In v3.8 werden echte Supabase-Daten geladen.</p>
+                  </div>
+                </article>
+              </div>
+            </aside>
+          </section>
+
+          <section class="dashboard-roadmap">
+            <p class="eyebrow">Nächste Schritte</p>
+            <div class="roadmap-grid">
+              <article><strong>v3.7</strong><span>Supabase Auth / Mitarbeiter-Login aktiv</span></article>
+              <article><strong>v3.8</strong><span>Live-Anfragen aus Supabase anzeigen</span></article>
+              <article><strong>v3.9</strong><span>Ticketdetails und Status ändern</span></article>
+              <article><strong>v4.0</strong><span>Kundenstatus, E-Mail und YouBot</span></article>
+            </div>
+          </section>
+        </main>
+      </div>
     </section>
   `;
 }
+
 
 
 

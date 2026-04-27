@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.0.3-FOOTER-LOGIN-INDEX-FIX
+// DBG: ALL4YOU-ROUTER-V5.1-YOUBOT-MVP
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4674,6 +4674,7 @@ function navigateTo(url) {
   const nextUrl = new URL(url, window.location.origin);
   window.history.pushState({}, "", nextUrl.pathname + nextUrl.search);
   renderRoute();
+initYouBot();
 }
 
 function setActiveNav(path) {
@@ -6124,6 +6125,251 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+
+/* ==========================================================================
+   YouBot MVP
+   ========================================================================== */
+
+const YOUBOT_QUICK_ACTIONS = [
+  { label: "Rollerabholung", value: "Rollerabholung" },
+  { label: "Anhänger mieten", value: "Anhänger mieten" },
+  { label: "Entrümpelung", value: "Entrümpelung" },
+  { label: "Reinigung", value: "Reinigung" },
+  { label: "Status prüfen", value: "Status prüfen" },
+  { label: "Kontakt", value: "Kontakt" }
+];
+
+function youBotNormalize(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function youBotServiceButton(href, label) {
+  return `<a class="youbot-inline-link" href="${href}" data-link>${label}</a>`;
+}
+
+function youBotReplyFor(input) {
+  const text = youBotNormalize(input);
+
+  if (!text || text.length < 2) {
+    return {
+      text: "Schreib mir kurz, wobei ich helfen soll: Roller abholen, Anhänger mieten, Entrümpelung, Reinigung oder Ticketstatus prüfen.",
+      actions: YOUBOT_QUICK_ACTIONS
+    };
+  }
+
+  if (text.includes("status") || text.includes("ticket") || text.includes("nummer") || text.includes("bearbeitung")) {
+    return {
+      text: `Den Status einer Anfrage können Kunden mit Ticketnummer plus E-Mail oder Telefonnummer prüfen. ${youBotServiceButton("/status", "Status prüfen")}`,
+      actions: [
+        { label: "Status prüfen", href: "/status" },
+        { label: "Neue Anfrage", href: "/kontakt" }
+      ]
+    };
+  }
+
+  if (text.includes("roller") || text.includes("moped") || text.includes("motorrad") || text.includes("werkstatt")) {
+    return {
+      text: `Für den Rollerabholservice werden Abholort, Zielort, Fahrzeugart, Zustand, Zugänglichkeit und Kontaktdaten abgefragt. Fotos können direkt mitgeschickt werden. ${youBotServiceButton("/leistungen/rollerabholservice", "Rollerabholung anfragen")}`,
+      actions: [
+        { label: "Rollerabholung anfragen", href: "/leistungen/rollerabholservice" },
+        { label: "Status prüfen", href: "/status" }
+      ]
+    };
+  }
+
+  if (text.includes("anhanger") || text.includes("anhaenger") || text.includes("mieten") || text.includes("koffer") || text.includes("umzug")) {
+    return {
+      text: `Bei der Anhängervermietung können Mietzeitraum, Transportgut, Abholung und Zusatzbedarf angegeben werden. Der Preis wird nach Mietdauer berechnet und die Anfrage wird vom Team bestätigt. ${youBotServiceButton("/leistungen/anhaenger", "Anhänger anfragen")}`,
+      actions: [
+        { label: "Anhänger anfragen", href: "/leistungen/anhaenger" },
+        { label: "Kontakt", href: "/kontakt" }
+      ]
+    };
+  }
+
+  if (text.includes("entrumpel") || text.includes("entruempel") || text.includes("raumung") || text.includes("räumung") || text.includes("keller") || text.includes("wohnung")) {
+    return {
+      text: `Für Entrümpelungen sind Objektart, Adresse, Umfang, Etage, Aufzug, Parkmöglichkeit, Entsorgung und Fotos besonders hilfreich. Eine Besichtigung kann kostenlos angefragt werden. ${youBotServiceButton("/leistungen/entruempelung", "Entrümpelung anfragen")}`,
+      actions: [
+        { label: "Entrümpelung anfragen", href: "/leistungen/entruempelung" },
+        { label: "Reinigung danach", href: "/leistungen/reinigung" }
+      ]
+    };
+  }
+
+  if (text.includes("reinigung") || text.includes("putz") || text.includes("sauber") || text.includes("gebaude") || text.includes("gebäude")) {
+    return {
+      text: `Beim Reinigungsservice werden Privat/Gewerblich, Objektart, Adresse, Fläche, Turnus, Terminwunsch, besondere Bereiche und Fotos abgefragt. Material wird mitgebracht. ${youBotServiceButton("/leistungen/reinigung", "Reinigung anfragen")}`,
+      actions: [
+        { label: "Reinigung anfragen", href: "/leistungen/reinigung" },
+        { label: "Kontakt", href: "/kontakt" }
+      ]
+    };
+  }
+
+  if (text.includes("preis") || text.includes("kosten") || text.includes("angebot") || text.includes("kostet")) {
+    return {
+      text: "Die meisten Preise hängen von Aufwand, Strecke, Objekt, Umfang und Termin ab. Der Anhängerpreis wird nach Mietdauer berechnet, Reinigung und Entrümpelung werden nach Prüfung bzw. Besichtigung angeboten.",
+      actions: [
+        { label: "Anfrage senden", href: "/kontakt" },
+        { label: "Anhänger mieten", href: "/leistungen/anhaenger" }
+      ]
+    };
+  }
+
+  if (text.includes("foto") || text.includes("bild") || text.includes("pdf") || text.includes("datei") || text.includes("hochladen")) {
+    return {
+      text: "Dateien können direkt in den Anfrage-Assistenten hochgeladen werden. Erlaubt sind JPG, PNG, WEBP und PDF. Nachträglich können Dateien auch über die Statusseite zum Ticket ergänzt werden.",
+      actions: [
+        { label: "Status prüfen", href: "/status" },
+        { label: "Neue Anfrage", href: "/kontakt" }
+      ]
+    };
+  }
+
+  if (text.includes("telefon") || text.includes("email") || text.includes("e-mail") || text.includes("kontakt") || text.includes("adresse")) {
+    return {
+      text: `All4You ist aktuell über 089 123 456 78 und info@all4you-muenchen.de erreichbar. Für strukturierte Anfragen ist der passende Anfrage-Assistent am schnellsten. ${youBotServiceButton("/kontakt", "Kontakt öffnen")}`,
+      actions: [
+        { label: "Kontakt öffnen", href: "/kontakt" },
+        { label: "Leistungen ansehen", href: "/leistungen" }
+      ]
+    };
+  }
+
+  if (text.includes("mitarbeiter") || text.includes("login") || text.includes("dashboard")) {
+    return {
+      text: `Der Mitarbeiterbereich ist geschützt und nur für freigeschaltete Mitarbeiterkonten gedacht. ${youBotServiceButton("/dashboard", "Mitarbeiterlogin öffnen")}`,
+      actions: [
+        { label: "Mitarbeiterlogin", href: "/dashboard" }
+      ]
+    };
+  }
+
+  return {
+    text: "Ich kann bei Leistungen, Preisen, Datei-Uploads, Ticketstatus und Kontakt helfen. Für eine konkrete Anfrage öffne am besten den passenden Assistenten.",
+    actions: YOUBOT_QUICK_ACTIONS
+  };
+}
+
+function createYouBotMessage(type, html) {
+  const message = document.createElement("article");
+  message.className = `youbot-message ${type}`;
+  message.innerHTML = html;
+  return message;
+}
+
+function appendYouBotMessage(type, html) {
+  const log = document.querySelector("#youbotLog");
+  if (!log) return;
+
+  log.appendChild(createYouBotMessage(type, html));
+  log.scrollTop = log.scrollHeight;
+}
+
+function renderYouBotActions(actions = []) {
+  if (!actions.length) return "";
+
+  return `
+    <div class="youbot-actions">
+      ${actions.map(action => {
+        if (action.href) {
+          return `<a href="${action.href}" data-link>${escapeHtml(action.label)}</a>`;
+        }
+
+        return `<button type="button" data-youbot-quick="${escapeHtml(action.value || action.label)}">${escapeHtml(action.label)}</button>`;
+      }).join("")}
+    </div>
+  `;
+}
+
+function answerYouBot(value) {
+  const userText = String(value || "").trim();
+  if (!userText) return;
+
+  appendYouBotMessage("user", `<p>${escapeHtml(userText)}</p>`);
+
+  const reply = youBotReplyFor(userText);
+
+  window.setTimeout(() => {
+    appendYouBotMessage("bot", `<p>${reply.text}</p>${renderYouBotActions(reply.actions)}`);
+  }, 180);
+}
+
+function initYouBot() {
+  if (document.querySelector("#youBotWidget")) return;
+
+  const widget = document.createElement("div");
+  widget.id = "youBotWidget";
+  widget.className = "youbot-widget";
+  widget.innerHTML = `
+    <button class="youbot-toggle" type="button" id="youBotToggle" aria-label="YouBot öffnen">
+      <span>YouBot</span>
+      <strong>?</strong>
+    </button>
+
+    <section class="youbot-panel" id="youBotPanel" aria-label="YouBot Assistent">
+      <header>
+        <div>
+          <strong>YouBot</strong>
+          <span>All4You Assistent</span>
+        </div>
+        <button type="button" id="youBotClose" aria-label="YouBot schließen">×</button>
+      </header>
+
+      <div class="youbot-log" id="youbotLog">
+        <article class="youbot-message bot">
+          <p>Hallo! Ich bin YouBot. Ich helfe bei Leistungen, Anfragewegen, Statusprüfung und Uploads.</p>
+          ${renderYouBotActions(YOUBOT_QUICK_ACTIONS)}
+        </article>
+      </div>
+
+      <form class="youbot-form" id="youBotForm">
+        <input type="text" name="message" placeholder="Frage an YouBot …" autocomplete="off">
+        <button type="submit">Senden</button>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(widget);
+
+  const toggle = widget.querySelector("#youBotToggle");
+  const panel = widget.querySelector("#youBotPanel");
+  const close = widget.querySelector("#youBotClose");
+  const form = widget.querySelector("#youBotForm");
+
+  const setOpen = isOpen => {
+    widget.classList.toggle("open", Boolean(isOpen));
+    toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  };
+
+  toggle.addEventListener("click", () => setOpen(!widget.classList.contains("open")));
+  close.addEventListener("click", () => setOpen(false));
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    const input = form.elements.message;
+    const value = input.value.trim();
+    if (!value) return;
+
+    input.value = "";
+    answerYouBot(value);
+  });
+
+  widget.addEventListener("click", event => {
+    const quick = event.target.closest("[data-youbot-quick]");
+    if (!quick) return;
+
+    setOpen(true);
+    answerYouBot(quick.dataset.youbotQuick);
+  });
+}
+
+
 
 document.addEventListener("click", event => {
   const link = event.target.closest("a[data-link]");

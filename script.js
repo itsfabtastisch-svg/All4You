@@ -1,6 +1,6 @@
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V3.2-ROLLER-WIZARD
+// DBG: ALL4YOU-ROUTER-V3.3-ANHAENGER-WIZARD
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -502,7 +502,7 @@ function trailerPage() {
         Baumarkt-Einkäufe, Material oder private Transporte in München und Umgebung.
       </p>
       <div class="inline-actions">
-        <a class="btn primary" href="#anhaenger-anfrage">Anhänger anfragen <span>›</span></a>
+        <a class="btn primary" href="#anhaenger-anfrage">Verfügbarkeit & Preis prüfen <span>›</span></a>
         <a class="btn ghost" href="#preise">Preise ansehen <span>›</span></a>
       </div>
     </section>
@@ -539,33 +539,6 @@ function trailerPage() {
       </aside>
     </section>
 
-    <section class="section-pad two-col">
-      <div class="info-card">
-        <p class="eyebrow">Typische Einsätze</p>
-        <h2>Für viele Transporte schnell die passende Lösung.</h2>
-        <ul class="list">
-          <li>kleiner Umzug innerhalb München oder Umgebung</li>
-          <li>Möbeltransport von Wohnung, Lager oder Möbelhaus</li>
-          <li>Baumarkt- oder Materialabholung</li>
-          <li>Gartenabfälle, Grünschnitt oder Holz transportieren</li>
-          <li>Sperrgut oder größere Gegenstände bewegen</li>
-          <li>Transport nach einer Entrümpelung</li>
-          <li>private Transporte ohne eigenen Anhänger</li>
-          <li>gewerbliche Transporte nach Absprache</li>
-        </ul>
-      </div>
-
-      <aside class="notice-box">
-        <p class="eyebrow">Bring- & Abholservice</p>
-        <h2>Auf Wunsch direkt zum Einsatzort.</h2>
-        <p>
-          Standardmäßig erfolgt die Abholung und Rückgabe in der Sachsenstraße Höhe 25, 81543 München.
-          Auf Wunsch kann All4You den Anhänger gegen Aufpreis direkt zu Ihrem Wunschort bringen und nach Absprache
-          auch wieder bequem abholen.
-        </p>
-      </aside>
-    </section>
-
     <section class="section-pad" id="preise">
       <p class="eyebrow">Mietpreise</p>
       <h2>Transparente Preise nach Mietdauer.</h2>
@@ -591,104 +564,171 @@ function trailerPage() {
     </section>
 
     <section class="section-pad two-col" id="anhaenger-anfrage">
-      <div class="form-card">
-        <p class="eyebrow">Mietanfrage-Assistent</p>
-        <h2>Anhänger-Anfrage vorbereiten.</h2>
+      <div class="form-card trailer-wizard-card">
+        <p class="eyebrow">Anhänger-Assistent</p>
+        <h2>Verfügbarkeit & Preis Schritt für Schritt prüfen.</h2>
         <p class="lead">
-          Teilen Sie uns mit, wann Sie den Anhänger benötigen, was transportiert werden soll und ob ein eigenes Zugfahrzeug vorhanden ist.
-          So kann All4You Ihre Anfrage schneller prüfen und passend beantworten.
+          Wählen Sie zuerst den gewünschten Mietzeitraum. Der Preis wird automatisch anhand der Mietdauer berechnet.
+          Die finale Verfügbarkeit, Kaution und Übergabe werden durch All4You bestätigt.
         </p>
 
-        <form class="trailer-tool" id="trailerForm">
-          <div class="form-grid">
-            <label>Name
-              <input name="name" placeholder="Ihr Name" required>
-            </label>
-            <label>Telefon oder E-Mail
-              <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
-            </label>
-            <label>Mietbeginn
-              <input name="rentalStart" type="datetime-local">
-            </label>
-            <label>Mietende
-              <input name="rentalEnd" type="datetime-local">
-            </label>
-            <label>Transportgut
-              <select name="cargo">
-                <option>Möbel / Umzug</option>
-                <option>Baumarkt / Material</option>
-                <option>Gartenabfälle</option>
-                <option>Sperrgut</option>
-                <option>Geräte / Maschinen</option>
-                <option>Sonstiges</option>
-              </select>
-            </label>
-            <label>Ungefähre Menge / Größe
-              <input name="cargoSize" placeholder="z. B. 1 Sofa, 12 Kartons, Grünschnitt...">
-            </label>
-            <label>Eigenes Zugfahrzeug vorhanden?
-              <select name="towVehicle">
-                <option>Ja</option>
-                <option>Nein</option>
-                <option>Unsicher</option>
-              </select>
-            </label>
-            <label>Anhängerkupplung vorhanden?
-              <select name="trailerHitch">
-                <option>Ja</option>
-                <option>Nein</option>
-                <option>Unsicher</option>
-              </select>
-            </label>
-            <label>Steckeranschluss bekannt?
-              <select name="plugType">
-                <option>unbekannt</option>
-                <option>7-polig</option>
-                <option>13-polig</option>
-              </select>
-            </label>
-            <label>Wunschübergabe
-              <select name="handover">
-                <option>Abholung Sachsenstraße Höhe 25</option>
-                <option>Lieferung zum Wunschort gegen Aufpreis</option>
-                <option>Lieferung & Abholung gegen Aufpreis</option>
-                <option>All4You soll Rücksprache halten</option>
-              </select>
-            </label>
-          </div>
-
-          <fieldset class="option-fieldset">
-            <legend>Zubehör gewünscht?</legend>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="extras" value="Spanngurte"> Spanngurte</label>
-              <label><input type="checkbox" name="extras" value="Auffahrrampe"> Auffahrrampe</label>
-              <label><input type="checkbox" name="extras" value="Schloss"> Schloss</label>
-              <label><input type="checkbox" name="extras" value="Adapter"> Adapter</label>
-              <label><input type="checkbox" name="extras" value="Plane"> Plane</label>
-              <label><input type="checkbox" name="extras" value="Sackkarre"> Sackkarre</label>
-              <label><input type="checkbox" name="extras" value="Umzugsdecken"> Umzugsdecken</label>
-              <label><input type="checkbox" name="extras" value="noch nicht sicher"> noch nicht sicher</label>
+        <div class="trailer-wizard" id="trailerWizard" data-current-step="0">
+          <div class="wizard-top">
+            <div>
+              <span class="wizard-kicker" id="trailerWizardCounter">Schritt 1 von 5</span>
+              <h3 id="trailerWizardTitle">Mietzeitraum & Preis</h3>
             </div>
-          </fieldset>
-
-          <label>Nachricht
-            <textarea name="message" rows="4" placeholder="z. B. genauer Transport, Besonderheiten, gewünschte Uhrzeit..."></textarea>
-          </label>
-
-          <button class="btn primary" type="submit">Anhänger-Anfrage senden <span>›</span></button>
-
-          <div class="distance-result" id="trailerResult">
-            <strong>Anhänger-Anfrage vorbereitet</strong>
-            <p>
-              In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert, per E-Mail an All4You gesendet
-              und im Mitarbeiterportal angezeigt.
-            </p>
+            <div class="wizard-progress">
+              <span id="trailerWizardProgress"></span>
+            </div>
           </div>
 
-          <p class="form-note">
-            Die Anfrage ist unverbindlich. Verfügbarkeit, Kaution und eventuelle Liefer-/Abholkosten werden nach Prüfung bestätigt.
-          </p>
-        </form>
+          <form id="trailerWizardForm" class="wizard-form">
+            <div class="wizard-step active" data-title="Mietzeitraum & Preis">
+              <div class="form-grid">
+                <label>Mietbeginn
+                  <input name="rentalStart" id="trailerStartDate" type="date" required>
+                </label>
+                <label>Mietende
+                  <input name="rentalEnd" id="trailerEndDate" type="date" required>
+                </label>
+              </div>
+
+              <div class="calendar-hint-box">
+                <strong>Kalender-Logik vorbereitet</strong>
+                <p>
+                  Später können hier echte Kalenderstatus wie frei, angefragt, belegt oder nur auf Anfrage angezeigt werden.
+                  Feiertage und Sondertage können ebenfalls als „nur auf Anfrage“ markiert werden.
+                </p>
+              </div>
+
+              <div class="rental-result-grid">
+                <div><strong>Mietdauer</strong><span id="trailerDaysValue">Bitte Zeitraum wählen</span></div>
+                <div><strong>Mietpreis</strong><span id="trailerPriceValue">—</span></div>
+                <div><strong>Kaution</strong><span>nach Absprache</span></div>
+                <div><strong>Status</strong><span>Verfügbarkeit wird geprüft</span></div>
+              </div>
+
+              <p class="form-note">
+                Der angezeigte Preis basiert auf der gewählten Mietdauer. Es handelt sich nicht um eine verbindliche Buchung,
+                sondern um eine Mietanfrage mit finaler Bestätigung durch All4You.
+              </p>
+            </div>
+
+            <div class="wizard-step" data-title="Übergabe & Standort">
+              <div class="form-grid">
+                <label>Wunschübergabe
+                  <select name="handover" id="trailerHandover">
+                    <option>Abholung Sachsenstraße Höhe 25</option>
+                    <option>Lieferung zum Wunschort gegen Aufpreis</option>
+                    <option>Lieferung & Abholung gegen Aufpreis</option>
+                    <option>All4You soll Rücksprache halten</option>
+                  </select>
+                </label>
+                <label class="delivery-field" id="trailerDeliveryAddressField">Wunschort / Lieferadresse
+                  <input name="deliveryAddress" placeholder="Adresse für Lieferung oder Abholung">
+                </label>
+                <label>Abholung/Rückgabe
+                  <input value="Sachsenstraße Höhe 25, 81543 München" readonly>
+                </label>
+                <label>Hinweis
+                  <input value="Lieferung/Abholung gegen Aufpreis möglich" readonly>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Transport & Zugfahrzeug">
+              <div class="form-grid">
+                <label>Transportgut
+                  <select name="cargo">
+                    <option>Möbel / Umzug</option>
+                    <option>Baumarkt / Material</option>
+                    <option>Gartenabfälle</option>
+                    <option>Sperrgut</option>
+                    <option>Geräte / Maschinen</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </label>
+                <label>Ungefähre Menge / Größe
+                  <input name="cargoSize" placeholder="z. B. 1 Sofa, 12 Kartons, Grünschnitt...">
+                </label>
+                <label>Eigenes Zugfahrzeug vorhanden?
+                  <select name="towVehicle">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher</option>
+                  </select>
+                </label>
+                <label>Anhängerkupplung vorhanden?
+                  <select name="trailerHitch">
+                    <option>Ja</option>
+                    <option>Nein</option>
+                    <option>Unsicher</option>
+                  </select>
+                </label>
+                <label>Steckeranschluss bekannt?
+                  <select name="plugType">
+                    <option>unbekannt</option>
+                    <option>7-polig</option>
+                    <option>13-polig</option>
+                  </select>
+                </label>
+                <label>Führerscheinklasse
+                  <input value="Klasse B ausreichend" readonly>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Zubehör & Kontakt">
+              <fieldset class="option-fieldset">
+                <legend>Zubehör gewünscht?</legend>
+                <div class="checkbox-grid">
+                  <label><input type="checkbox" name="extras" value="Spanngurte"> Spanngurte</label>
+                  <label><input type="checkbox" name="extras" value="Auffahrrampe"> Auffahrrampe</label>
+                  <label><input type="checkbox" name="extras" value="Schloss"> Schloss</label>
+                  <label><input type="checkbox" name="extras" value="Adapter"> Adapter</label>
+                  <label><input type="checkbox" name="extras" value="Plane"> Plane</label>
+                  <label><input type="checkbox" name="extras" value="Sackkarre"> Sackkarre</label>
+                  <label><input type="checkbox" name="extras" value="Umzugsdecken"> Umzugsdecken</label>
+                  <label><input type="checkbox" name="extras" value="noch nicht sicher"> noch nicht sicher</label>
+                </div>
+              </fieldset>
+
+              <div class="form-grid wizard-message-grid">
+                <label>Ihr Name
+                  <input name="name" placeholder="Ihr Name" required>
+                </label>
+                <label>Telefon oder E-Mail
+                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                </label>
+                <label>Nachricht
+                  <textarea name="message" rows="4" placeholder="z. B. genauer Transport, Besonderheiten, gewünschte Uhrzeit..."></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-step" data-title="Zusammenfassung prüfen">
+              <div class="wizard-summary" id="trailerWizardSummary"></div>
+              <p class="form-note">
+                Die Anfrage ist unverbindlich. Verfügbarkeit, Kaution und eventuelle Liefer-/Abholkosten werden nach Prüfung bestätigt.
+              </p>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="btn ghost" type="button" id="trailerWizardPrev">Zurück</button>
+              <button class="btn primary" type="button" id="trailerWizardNext">Weiter <span>›</span></button>
+              <button class="btn primary" type="submit" id="trailerWizardSubmit">Mietanfrage vorbereiten <span>›</span></button>
+            </div>
+
+            <div class="distance-result" id="trailerWizardResult">
+              <strong>Anhänger-Anfrage vorbereitet</strong>
+              <p>
+                In der späteren Backend-Version wird diese Anfrage in der Datenbank gespeichert,
+                per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
 
       <aside class="check-card">
@@ -713,11 +753,11 @@ function trailerPage() {
       <p class="eyebrow">Ablauf</p>
       <h2>So läuft die Anhängervermietung ab.</h2>
       <div class="steps five-steps">
-        <article class="step"><span>1</span><h3>Anfrage senden</h3><p>Sie geben Zeitraum, Transportgut und Fahrzeugdaten an.</p></article>
-        <article class="step"><span>2</span><h3>Verfügbarkeit prüfen</h3><p>All4You prüft, ob der Anhänger verfügbar ist.</p></article>
-        <article class="step"><span>3</span><h3>Rückmeldung erhalten</h3><p>Sie erhalten Informationen zu Preis, Kaution und Übergabe.</p></article>
-        <article class="step"><span>4</span><h3>Anhänger nutzen</h3><p>Sie holen den Anhänger ab oder stimmen Lieferung/Abholung individuell ab.</p></article>
-        <article class="step"><span>5</span><h3>Rückgabe</h3><p>Nach Nutzung erfolgt die Rückgabe zum vereinbarten Zeitpunkt.</p></article>
+        <article class="step"><span>1</span><h3>Zeitraum wählen</h3><p>Start- und Enddatum werden ausgewählt und der Preis wird automatisch berechnet.</p></article>
+        <article class="step"><span>2</span><h3>Übergabe klären</h3><p>Abholung oder Lieferung/Abholung gegen Aufpreis wird ausgewählt.</p></article>
+        <article class="step"><span>3</span><h3>Transport beschreiben</h3><p>Transportgut, Zugfahrzeug, Kupplung und Stecker werden angegeben.</p></article>
+        <article class="step"><span>4</span><h3>Anfrage senden</h3><p>Kontakt und Nachricht werden ergänzt und die Anfrage vorbereitet.</p></article>
+        <article class="step"><span>5</span><h3>Bestätigung erhalten</h3><p>All4You bestätigt Verfügbarkeit, Kaution, Übergabe und finalen Ablauf.</p></article>
       </div>
     </section>
 
@@ -735,21 +775,12 @@ function trailerPage() {
       <aside class="faq-card">
         <p class="eyebrow">Weitere Fragen</p>
         <div class="faq-list">
+          <article class="faq-item"><h3>Ist die Auswahl verbindlich gebucht?</h3><p>Nein, der Zeitraum wird angefragt. Die finale Verfügbarkeit wird durch All4You bestätigt.</p></article>
           <article class="faq-item"><h3>Gibt es eine Kaution?</h3><p>Eine Kaution kann je nach Mietdauer und Absprache erforderlich sein.</p></article>
           <article class="faq-item"><h3>Ist der Anhänger versichert?</h3><p>Ja, eine Versicherung ist vorhanden.</p></article>
           <article class="faq-item"><h3>Gibt es einen Mietvertrag?</h3><p>Ja, ein Mietvertrag ist vorhanden.</p></article>
-          <article class="faq-item"><h3>Gibt es Zurrmöglichkeiten?</h3><p>Ja, der Anhänger verfügt über 6 verschiebbare Zurrösen.</p></article>
         </div>
       </aside>
-    </section>
-
-    <section class="section-pad">
-      <div class="cta-panel">
-        <p class="eyebrow">Unverbindlich starten</p>
-        <h2>Anhänger für Ihren Transport anfragen.</h2>
-        <p class="lead">Senden Sie den gewünschten Zeitraum und die wichtigsten Angaben. All4You prüft die Anfrage und meldet sich mit einer passenden Rückmeldung.</p>
-        <a class="btn primary" href="#anhaenger-anfrage">Anhänger-Anfrage öffnen <span>›</span></a>
-      </div>
     </section>
   `;
 }
@@ -2074,6 +2105,7 @@ function renderRoute() {
   bindCleaningWizard();
   bindClearanceWizard();
   bindRollerWizard();
+  bindTrailerWizard();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -2871,6 +2903,233 @@ function bindRollerWizard() {
       `Rollbar: ${summary.rollable}\n` +
       `Besondere Situation: ${summary.specialSituation}\n` +
       `Wunschtermin: ${summary.desiredDate}\n\n` +
+      `Name: ${summary.name}\n` +
+      `Kontakt: ${summary.contact}\n\n` +
+      `Nachricht:\n${summary.message}`
+    );
+
+    const mailButton = document.createElement("a");
+    mailButton.className = "btn blue mail-preview-btn";
+    mailButton.href = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
+    mailButton.textContent = "Anfrage per E-Mail öffnen";
+    result.appendChild(mailButton);
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, { once: false });
+
+  updateWizard();
+}
+
+
+
+function bindTrailerWizard() {
+  const wizard = document.querySelector("#trailerWizard");
+  const form = document.querySelector("#trailerWizardForm");
+  const result = document.querySelector("#trailerWizardResult");
+  const prev = document.querySelector("#trailerWizardPrev");
+  const next = document.querySelector("#trailerWizardNext");
+  const submit = document.querySelector("#trailerWizardSubmit");
+  const counter = document.querySelector("#trailerWizardCounter");
+  const title = document.querySelector("#trailerWizardTitle");
+  const progress = document.querySelector("#trailerWizardProgress");
+  const summaryBox = document.querySelector("#trailerWizardSummary");
+  const startDate = document.querySelector("#trailerStartDate");
+  const endDate = document.querySelector("#trailerEndDate");
+  const daysValue = document.querySelector("#trailerDaysValue");
+  const priceValue = document.querySelector("#trailerPriceValue");
+  const handover = document.querySelector("#trailerHandover");
+  const deliveryAddressField = document.querySelector("#trailerDeliveryAddressField");
+
+  if (!wizard || !form || !result || !prev || !next || !submit) return;
+
+  const steps = Array.from(form.querySelectorAll(".wizard-step"));
+  let current = 0;
+
+  function getRentalPrice(days) {
+    if (!days || days < 1) return { label: "—", price: "", daysText: "Bitte Zeitraum wählen" };
+    if (days === 1) return { label: "29 €", price: "29 €", daysText: "1 Tag" };
+    if (days === 2) return { label: "56 €", price: "56 €", daysText: "2 Tage" };
+    if (days === 3) return { label: "75 €", price: "75 €", daysText: "3 Tage" };
+    if (days === 4) return { label: "88 €", price: "88 €", daysText: "4 Tage" };
+    if (days === 5) return { label: "100 €", price: "100 €", daysText: "5 Tage" };
+    if (days === 6) return { label: "114 €", price: "114 €", daysText: "6 Tage" };
+    if (days === 7) return { label: "126 €", price: "126 €", daysText: "7 Tage" };
+    if (days === 8) return { label: "136 €", price: "136 €", daysText: "8 Tage" };
+    if (days === 9) return { label: "144 €", price: "144 €", daysText: "9 Tage" };
+    if (days >= 10 && days <= 13) return { label: "200 €", price: "200 €", daysText: `${days} Tage` };
+    if (days >= 14 && days <= 21) return { label: "250 €", price: "250 €", daysText: `${days} Tage` };
+    if (days >= 22 && days <= 31) return { label: "300 €", price: "300 €", daysText: `${days} Tage` };
+    return { label: "auf Anfrage", price: "auf Anfrage", daysText: `${days} Tage` };
+  }
+
+  function calculateRental() {
+    const start = startDate?.value ? new Date(`${startDate.value}T00:00:00`) : null;
+    const end = endDate?.value ? new Date(`${endDate.value}T00:00:00`) : null;
+
+    if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return { days: 0, daysText: "Bitte Zeitraum wählen", price: "—" };
+    }
+
+    if (end < start) {
+      return { days: 0, daysText: "Enddatum prüfen", price: "—" };
+    }
+
+    const diffMs = end.getTime() - start.getTime();
+    const days = Math.floor(diffMs / 86400000) + 1;
+    const price = getRentalPrice(days);
+    return { days, daysText: price.daysText, price: price.price };
+  }
+
+  function updateRentalBox() {
+    const rental = calculateRental();
+    if (daysValue) daysValue.textContent = rental.daysText;
+    if (priceValue) priceValue.textContent = rental.price;
+  }
+
+  function updateDeliveryField() {
+    if (!handover || !deliveryAddressField) return;
+    const value = handover.value.toLowerCase();
+    const show = value.includes("lieferung") || value.includes("wunschort");
+    deliveryAddressField.classList.toggle("is-hidden", !show);
+  }
+
+  function collectSummary() {
+    const data = new FormData(form);
+    const extras = data.getAll("extras");
+    const rental = calculateRental();
+
+    return {
+      rentalStart: data.get("rentalStart") || "",
+      rentalEnd: data.get("rentalEnd") || "",
+      rentalDays: rental.daysText,
+      rentalPrice: rental.price,
+      handover: data.get("handover") || "",
+      deliveryAddress: data.get("deliveryAddress") || "",
+      cargo: data.get("cargo") || "",
+      cargoSize: data.get("cargoSize") || "",
+      towVehicle: data.get("towVehicle") || "",
+      trailerHitch: data.get("trailerHitch") || "",
+      plugType: data.get("plugType") || "",
+      extras: extras.length ? extras.join(", ") : "keine Angabe",
+      name: data.get("name") || "",
+      contact: data.get("contact") || "",
+      message: data.get("message") || ""
+    };
+  }
+
+  function renderSummary() {
+    if (!summaryBox) return;
+    const summary = collectSummary();
+    summaryBox.innerHTML = `
+      <div><strong>Mietbeginn</strong><span>${escapeHtml(summary.rentalStart || "—")}</span></div>
+      <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd || "—")}</span></div>
+      <div><strong>Mietdauer</strong><span>${escapeHtml(summary.rentalDays || "—")}</span></div>
+      <div><strong>Mietpreis</strong><span>${escapeHtml(summary.rentalPrice || "—")}</span></div>
+      <div><strong>Kaution</strong><span>nach Absprache</span></div>
+      <div><strong>Übergabe</strong><span>${escapeHtml(summary.handover || "—")}</span></div>
+      ${summary.deliveryAddress ? `<div><strong>Wunschort</strong><span>${escapeHtml(summary.deliveryAddress)}</span></div>` : ""}
+      <div><strong>Transportgut</strong><span>${escapeHtml(summary.cargo || "—")}</span></div>
+      <div><strong>Menge / Größe</strong><span>${escapeHtml(summary.cargoSize || "—")}</span></div>
+      <div><strong>Zugfahrzeug</strong><span>${escapeHtml(summary.towVehicle || "—")}</span></div>
+      <div><strong>Anhängerkupplung</strong><span>${escapeHtml(summary.trailerHitch || "—")}</span></div>
+      <div><strong>Stecker</strong><span>${escapeHtml(summary.plugType || "—")}</span></div>
+      <div><strong>Zubehör</strong><span>${escapeHtml(summary.extras || "—")}</span></div>
+      <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
+      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div class="summary-wide"><strong>Nachricht</strong><span>${escapeHtml(summary.message || "—")}</span></div>
+    `;
+  }
+
+  function updateWizard() {
+    steps.forEach((step, index) => {
+      step.classList.toggle("active", index === current);
+    });
+
+    const active = steps[current];
+    if (counter) counter.textContent = `Schritt ${current + 1} von ${steps.length}`;
+    if (title) title.textContent = active?.dataset.title || "";
+    if (progress) progress.style.width = `${((current + 1) / steps.length) * 100}%`;
+
+    prev.disabled = current === 0;
+    next.style.display = current === steps.length - 1 ? "none" : "inline-flex";
+    submit.style.display = current === steps.length - 1 ? "inline-flex" : "none";
+
+    updateRentalBox();
+    updateDeliveryField();
+
+    if (current === steps.length - 1) renderSummary();
+  }
+
+  function validateStep() {
+    const activeInputs = Array.from(steps[current].querySelectorAll("input, select, textarea"));
+    for (const field of activeInputs) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+
+    if (current === 0) {
+      const rental = calculateRental();
+      if (!rental.days || rental.daysText === "Enddatum prüfen") {
+        alert("Bitte einen gültigen Mietzeitraum auswählen.");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  startDate?.addEventListener("change", () => {
+    if (endDate && startDate.value && (!endDate.value || endDate.value < startDate.value)) {
+      endDate.value = startDate.value;
+    }
+    updateRentalBox();
+  });
+
+  endDate?.addEventListener("change", updateRentalBox);
+  handover?.addEventListener("change", updateDeliveryField);
+
+  prev.addEventListener("click", () => {
+    current = Math.max(0, current - 1);
+    updateWizard();
+  });
+
+  next.addEventListener("click", () => {
+    if (!validateStep()) return;
+    current = Math.min(steps.length - 1, current + 1);
+    updateWizard();
+  });
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    renderSummary();
+
+    const summary = collectSummary();
+    result.classList.add("show");
+    result.innerHTML = `
+      <strong>Anhänger-Anfrage vorbereitet</strong>
+      <p>
+        Die Mietanfrage wurde im Assistenten vorbereitet. Später wird sie direkt in der Datenbank gespeichert,
+        per E-Mail an All4You gesendet und im Mitarbeiterportal angezeigt.
+      </p>
+    `;
+
+    const subject = encodeURIComponent("Anfrage über die Webseite: Anhängervermietung");
+    const body = encodeURIComponent(
+      `Neue Anhänger-Mietanfrage\n\n` +
+      `Mietbeginn: ${summary.rentalStart}\n` +
+      `Mietende: ${summary.rentalEnd}\n` +
+      `Mietdauer: ${summary.rentalDays}\n` +
+      `Berechneter Mietpreis: ${summary.rentalPrice}\n` +
+      `Kaution: nach Absprache\n\n` +
+      `Übergabe: ${summary.handover}\n` +
+      `Wunschort: ${summary.deliveryAddress}\n\n` +
+      `Transportgut: ${summary.cargo}\n` +
+      `Menge / Größe: ${summary.cargoSize}\n` +
+      `Zugfahrzeug: ${summary.towVehicle}\n` +
+      `Anhängerkupplung: ${summary.trailerHitch}\n` +
+      `Steckeranschluss: ${summary.plugType}\n` +
+      `Zubehör: ${summary.extras}\n\n` +
       `Name: ${summary.name}\n` +
       `Kontakt: ${summary.contact}\n\n` +
       `Nachricht:\n${summary.message}`

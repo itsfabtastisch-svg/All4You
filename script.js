@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.4-DATENSCHUTZ-EXAKT
+// DBG: ALL4YOU-ROUTER-V5.5.5-WIZARD-BUTTON-HARD-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -6870,6 +6870,180 @@ function initYouBot() {
 
 
 
+// Sicherheitsnetz für Wizard-Buttons
+// Fix: Falls ein alter/gecachter Wizard-Handler durch einen JS-Fehler hängen bleibt,
+// springt dieser Fallback nur dann ein, wenn der normale Klick den Schritt NICHT geändert hat.
+function installWizardButtonFallback() {
+  if (window.__all4youWizardButtonFallbackInstalled) return;
+  window.__all4youWizardButtonFallbackInstalled = true;
+
+  const configs = {
+    trailer: {
+      wizard: "#trailerWizard",
+      form: "#trailerWizardForm",
+      prev: "#trailerWizardPrev",
+      next: "#trailerWizardNext",
+      submit: "#trailerWizardSubmit",
+      counter: "#trailerWizardCounter",
+      title: "#trailerWizardTitle",
+      progress: "#trailerWizardProgress",
+      summary: "#trailerWizardSummary"
+    },
+    clearance: {
+      wizard: "#clearanceWizard",
+      form: "#clearanceWizardForm",
+      prev: "#clearanceWizardPrev",
+      next: "#clearanceWizardNext",
+      submit: "#clearanceWizardSubmit",
+      counter: "#clearanceWizardCounter",
+      title: "#clearanceWizardTitle",
+      progress: "#clearanceWizardProgress",
+      summary: "#clearanceWizardSummary"
+    },
+    cleaning: {
+      wizard: "#cleaningWizard",
+      form: "#cleaningWizardForm",
+      prev: "#cleaningWizardPrev",
+      next: "#cleaningWizardNext",
+      submit: "#cleaningWizardSubmit",
+      counter: "#cleaningWizardCounter",
+      title: "#cleaningWizardTitle",
+      progress: "#cleaningWizardProgress",
+      summary: "#cleaningWizardSummary"
+    },
+    roller: {
+      wizard: "#rollerWizard",
+      form: "#rollerWizardForm",
+      prev: "#rollerWizardPrev",
+      next: "#rollerWizardNext",
+      submit: "#rollerWizardSubmit",
+      counter: "#rollerWizardCounter",
+      title: "#rollerWizardTitle",
+      progress: "#rollerWizardProgress",
+      summary: "#rollerWizardSummary"
+    }
+  };
+
+  function getConfigFromButton(button) {
+    if (!button) return null;
+    if (button.matches("#trailerWizardPrev, #trailerWizardNext")) return { key: "trailer", config: configs.trailer };
+    if (button.matches("#clearanceWizardPrev, #clearanceWizardNext")) return { key: "clearance", config: configs.clearance };
+    if (button.matches("#cleaningWizardPrev, #cleaningWizardNext")) return { key: "cleaning", config: configs.cleaning };
+    if (button.matches("#rollerWizardPrev, #rollerWizardNext")) return { key: "roller", config: configs.roller };
+    return null;
+  }
+
+  function getWizardParts(config) {
+    const wizard = document.querySelector(config.wizard);
+    const form = document.querySelector(config.form);
+    if (!wizard || !form) return null;
+    const steps = Array.from(form.querySelectorAll(".wizard-step"));
+    const foundIndex = steps.findIndex(step => step.classList.contains("active"));
+    const activeIndex = foundIndex >= 0 ? foundIndex : 0;
+    return {
+      wizard,
+      form,
+      steps,
+      activeIndex,
+      prev: document.querySelector(config.prev),
+      next: document.querySelector(config.next),
+      submit: document.querySelector(config.submit),
+      counter: document.querySelector(config.counter),
+      title: document.querySelector(config.title),
+      progress: document.querySelector(config.progress),
+      summary: document.querySelector(config.summary)
+    };
+  }
+
+  function validateActiveStep(parts) {
+    const activeStep = parts.steps[parts.activeIndex];
+    if (!activeStep) return false;
+    const fields = Array.from(activeStep.querySelectorAll("input, select, textarea"));
+    for (const field of fields) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function fillFallbackSummary(parts) {
+    if (!parts.summary || parts.summary.children.length) return;
+    const data = new FormData(parts.form);
+    const rows = [];
+    for (const [key, value] of data.entries()) {
+      if (!String(value || "").trim()) continue;
+      rows.push('<div><strong>' + escapeHtml(key) + '</strong><span>' + escapeHtml(value) + '</span></div>');
+    }
+    parts.summary.innerHTML = rows.length ? rows.join("") : '<div><strong>Hinweis</strong><span>Bitte Angaben prüfen und Anfrage absenden.</span></div>';
+  }
+
+  function updateWizardDom(parts, nextIndex) {
+    parts.steps.forEach((step, index) => step.classList.toggle("active", index === nextIndex));
+    const active = parts.steps[nextIndex];
+    if (parts.counter) parts.counter.textContent = "Schritt " + (nextIndex + 1) + " von " + parts.steps.length;
+    if (parts.title) parts.title.textContent = active?.dataset.title || "";
+    if (parts.progress) parts.progress.style.width = ((nextIndex + 1) / parts.steps.length) * 100 + "%";
+    if (parts.prev) parts.prev.disabled = nextIndex === 0;
+    if (parts.next) parts.next.style.display = nextIndex === parts.steps.length - 1 ? "none" : "inline-flex";
+    if (parts.submit) parts.submit.style.display = nextIndex === parts.steps.length - 1 ? "inline-flex" : "none";
+    if (nextIndex === parts.steps.length - 1) fillFallbackSummary(parts);
+  }
+
+  function handleFallback(button, beforeIndex) {
+    const found = getConfigFromButton(button);
+    if (!found) return;
+
+    const parts = getWizardParts(found.config);
+    if (!parts || !parts.steps.length) return;
+
+    // Wenn der normale Handler bereits sauber geschaltet hat, nicht doppelt springen.
+    if (parts.activeIndex !== beforeIndex) return;
+
+    const isPrev = button.matches(found.config.prev);
+    const isNext = button.matches(found.config.next);
+
+    if (isPrev) {
+      updateWizardDom(parts, Math.max(0, parts.activeIndex - 1));
+      return;
+    }
+
+    if (!isNext) return;
+
+    // Roller Schritt 1 bleibt absichtlich streng: Adresse/Routenberechnung darf nicht per Fallback übersprungen werden.
+    if (found.key === "roller" && parts.activeIndex === 0) return;
+
+    if (!validateActiveStep(parts)) return;
+
+    // Anhänger Schritt 1 zusätzlich gegen ungültige Datumslogik absichern.
+    if (found.key === "trailer" && parts.activeIndex === 0) {
+      const start = document.querySelector("#trailerStartDate")?.value;
+      const end = document.querySelector("#trailerEndDate")?.value;
+      if (!start || !end || end < start) {
+        alert("Bitte einen gültigen Mietzeitraum auswählen.");
+        return;
+      }
+    }
+
+    updateWizardDom(parts, Math.min(parts.steps.length - 1, parts.activeIndex + 1));
+  }
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest("#trailerWizardPrev, #trailerWizardNext, #clearanceWizardPrev, #clearanceWizardNext, #cleaningWizardPrev, #cleaningWizardNext, #rollerWizardPrev, #rollerWizardNext");
+    if (!button) return;
+
+    const found = getConfigFromButton(button);
+    if (!found) return;
+
+    const parts = getWizardParts(found.config);
+    const beforeIndex = parts?.activeIndex ?? -1;
+
+    window.setTimeout(() => handleFallback(button, beforeIndex), 0);
+  }, true);
+}
+
+
 document.addEventListener("click", event => {
   const link = event.target.closest("a[data-link]");
   if (!link) return;
@@ -6895,5 +7069,6 @@ if (navToggle && mainNav) {
   });
 }
 
+installWizardButtonFallback();
 renderRoute();
 initYouBot();

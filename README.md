@@ -1,6 +1,14 @@
 # All4You Service München
 
-DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+## ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE
+
+- Footer-Kontaktnummer auf `01511 5417411` aktualisiert.
+- Impressum, Datenschutzerklärung, AGB, Cookie-Banner und Wizard-Logik bleiben unverändert.
+- Keine Supabase-/Resend-/Dashboard-/Auth-/Formular-Änderungen.
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
+
+
+DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 ## v5.5.4 Datenschutz exakt
 
@@ -16,7 +24,7 @@ DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
 - Zusätzlich passend zum aktuellen Funktionsstand aufgenommen: Datei-Uploads, Kundenstatus/Ticketverwaltung und Google-Adress-/Routenprüfung.
 - Platzhalterstatus der alten Datenschutzerklärung entfernt.
 - Keine Supabase-, Resend-, Dashboard-, Auth- oder Formular-Flows geändert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## Neu in V5.4.0
@@ -127,7 +135,7 @@ http://localhost:8080/
   - Reinigungsservice
 - Allgemeine Kurzanfrage für mehrere Leistungen / unklare Anliegen ergänzt
 - Hinweis auf späteres Mitarbeiterportal und E-Mail-Zusammenfassungen ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.7 Über-uns-Seite
@@ -137,7 +145,7 @@ http://localhost:8080/
 - Erklärung, warum All4You mehrere Services bündelt
 - Leistungsübersicht mit Links ergänzt
 - Hinweis auf späteres Anfrage-, Mitarbeiter- und Kundenportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.8 Rechtliches
@@ -150,14 +158,14 @@ http://localhost:8080/
 - Telefon, E-Mail und Website-Kontaktdaten eingepflegt
 - Datenschutzerklärung final mit gelieferten Datenschutzangaben eingepflegt
 - Hinweise zu Cloudflare Pages, Kontaktaufnahme, späterem Kundenkonto/Mitarbeiterportal ergänzt
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.8.1 Logo Update
 
 - `assets/logo-all4you.jpeg` gegen das neue bereitgestellte Logo ausgetauscht.
 - Header, Footer und alle weiteren Logo-Stellen nutzen dadurch automatisch das neue Logo.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.8.2 Wide Logo
@@ -165,7 +173,7 @@ http://localhost:8080/
 - `assets/logo-all4you.jpeg` gegen das breite Logo ausgetauscht.
 - Header links verbreitert, damit das Logo vollständig sichtbar ist.
 - Footer-Logo ebenfalls auf das breite Logo angepasst.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.8.3 Entrümpelung
@@ -174,7 +182,7 @@ http://localhost:8080/
 - Menü, Leistungsbereiche, Kontaktseite, Über-uns-Seite, Detailseite, Footer und Texte angepasst.
 - Neue sprechende URL ergänzt: `/leistungen/entruempelung`
 - Alte URL `/leistungen/raeumungen` bleibt als Alias weiterhin funktional.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.9.1 Anhängerdaten
@@ -186,7 +194,7 @@ http://localhost:8080/
 - Abholung/Rückgabe Sachsenstraße Höhe 25, 81543 München ergänzt.
 - Lieferung/Abholung zum Wunschort gegen Aufpreis ergänzt.
 - Führerscheinklasse B, Versicherung und Mietvertrag ergänzt.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.9.2 Rollerabholservice
@@ -200,7 +208,7 @@ http://localhost:8080/
   - Preis individuell nach Strecke, Zustand, Zugänglichkeit und Aufwand
 - Neue URL ergänzt: `/leistungen/rollerabholservice`
 - Alte URL `/leistungen/rollertransport` bleibt als Alias weiterhin funktional.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.9.3 Entrümpelungsdaten
@@ -214,7 +222,7 @@ http://localhost:8080/
 - Hinweis ergänzt: fest verbaute Sanitärobjekte / Toiletten nur nach vorheriger Absprache.
 - Anfrage-Assistent um Entsorgung, kostenlose Besichtigung und Festpreis erweitert.
 - E-Mail-Zusammenfassung um neue Felder erweitert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v2.9.4 Reinigungsdaten
@@ -227,7 +235,7 @@ http://localhost:8080/
   - Preis je nach Objekt, Umfang und Arbeitsweise
 - Anfrage-Assistent um Privat/Gewerblich, Preiswunsch und Materialangaben erweitert.
 - E-Mail-Zusammenfassung um neue Felder erweitert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.0 Reinigungs-Wizard
@@ -242,7 +250,7 @@ http://localhost:8080/
 - Gewerbliche Anfragen zeigen zusätzlich ein Firmenname-Feld.
 - Zusammenfassung wird vor dem Absenden automatisch erzeugt.
 - Mailto-E-Mail-Vorschau bleibt als Zwischenlösung erhalten.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.1 Entrümpelungs-Wizard
@@ -257,7 +265,7 @@ http://localhost:8080/
 - Lager/Gewerbefläche zeigt zusätzlich ein Feld für Firmenname / Objektname.
 - Zusammenfassung wird vor dem Absenden automatisch erzeugt.
 - Mailto-E-Mail-Vorschau bleibt als Zwischenlösung erhalten.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.2 Rollerabholservice-Wizard
@@ -272,7 +280,7 @@ http://localhost:8080/
 - Abholort und Zielort sind für spätere Google Maps Places/Routes Anbindung vorbereitet.
 - Distanz/Fahrzeit werden aktuell als vorbereitet markiert und später per Google Maps API berechnet.
 - Zusammenfassung und Mailto-E-Mail-Vorschau enthalten Strecke, Distanz/Fahrzeit-Platzhalter, Fahrzeugdaten und Zugang.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.3 Anhänger-Wizard
@@ -288,7 +296,7 @@ http://localhost:8080/
 - Preis wird automatisch nach Preistabelle berechnet.
 - Lieferung/Wunschort blendet ein zusätzliches Adressfeld ein.
 - Kalenderstatus für frei/angefragt/belegt/nur auf Anfrage ist als spätere Logik vorbereitet.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.4 Supabase Test
@@ -299,7 +307,7 @@ http://localhost:8080/
 - SQL-Datei liegt unter `supabase/01_create_public_request_rpc.sql`.
 - Bei erfolgreicher Speicherung wird die Ticketnummer angezeigt.
 - Mailto-E-Mail-Vorschau bleibt als Fallback erhalten.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.5 Supabase All Wizards
@@ -317,7 +325,7 @@ http://localhost:8080/
   - `anhaenger`
 - `customers`, `request_messages` und `request_status_history` werden weiterhin automatisch befüllt.
 - Mailto-E-Mail-Vorschau bleibt als Fallback erhalten.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.6 Dashboard Shell
@@ -335,7 +343,7 @@ http://localhost:8080/
   - Roadmap für nächste Schritte
 - Noch keine echte Auth und noch kein Live-Select aus Supabase.
 - Nächster Schritt: Supabase Auth / Mitarbeiter-Login.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.7 Dashboard Auth
@@ -348,7 +356,7 @@ http://localhost:8080/
 - Dashboard zeigt weiterhin Vorschau-Tickets; Live-Tickets folgen in v3.8.
 - SQL-Vorlage für Mitarbeiterprofil:
   - `supabase/02_create_employee_login_template.sql`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.7.1 Dashboard Auth RPC Fix
@@ -359,7 +367,7 @@ http://localhost:8080/
 - Das behebt Fälle, in denen der Auth-User und `employees` korrekt angelegt sind, aber die direkte RLS-Abfrage im Frontend scheitert.
 - SQL-Ablage:
   - `supabase/03_get_my_employee_profile_rpc.sql`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.7.2 Dashboard Auth Bind Fix
@@ -369,7 +377,7 @@ http://localhost:8080/
 - Beim Laden muss der Hinweis nun zu „Bereit“ wechseln.
 - Beim Klick auf „Einloggen“ muss der Hinweis zu „Login läuft“ wechseln.
 - Mitarbeiterprofil wird weiterhin über `get_my_employee_profile()` geprüft.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.8 Dashboard Live Requests
@@ -384,7 +392,7 @@ http://localhost:8080/
   - rueckfrage_offen
   - erledigt
 - Voraussetzung: Mitarbeiter ist per Supabase Auth eingeloggt und in `employees` aktiv.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.9 Dashboard Status Update
@@ -405,7 +413,7 @@ http://localhost:8080/
   - in_bearbeitung
   - erledigt
   - storniert
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.9.1 Dashboard Detail Polish
@@ -421,7 +429,7 @@ http://localhost:8080/
   - Nachricht & Hinweise
 - Technische Feldnamen werden deutsch/lesbar übersetzt.
 - Statusbereich bleibt erhalten und wirkt jetzt ruhiger vom Detailbereich getrennt.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.9.2 Dashboard Color Polish
@@ -436,7 +444,7 @@ http://localhost:8080/
 - Rechtes Detailfenster übernimmt die Leistungsfarbe dezent in Kopfkarte und Zusammenfassung.
 - Header-Logo oben links wurde etwas kleiner gesetzt.
 - Navigation im Header wurde optisch ruhiger und zentrierter ausgerichtet.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v3.9.3 Header Logo Fix
@@ -445,7 +453,7 @@ http://localhost:8080/
 - Logo wird nicht weiter verkleinert, sondern bekommt mehr vertikalen Platz.
 - `object-fit: contain` und sichtbarer Überlauf verhindern abgeschnittene Bereiche.
 - Navigation bleibt weiterhin zentriert, CTA rechts bleibt unverändert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.0 Dashboard History Messages
@@ -457,7 +465,7 @@ http://localhost:8080/
 - Statusverlauf wird live pro ausgewähltem Ticket angezeigt.
 - Nach einer Statusänderung wird der Statusverlauf automatisch erneut geladen.
 - Ladezustände und Fehlermeldungen für Nachrichten/Statusverlauf ergänzt.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.1 Dashboard Internal Notes
@@ -469,7 +477,7 @@ http://localhost:8080/
 - Nach dem Speichern werden Nachrichten/Notizen im Ticket automatisch neu geladen.
 - Interne Notizen erhalten im Dashboard ein eigenes internes Badge.
 - Notizfeld ist deaktiviert, solange kein Ticket ausgewählt ist.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.1.1 Note Badge Fix
@@ -478,7 +486,7 @@ http://localhost:8080/
 - Das „Intern“-Badge überschneidet sich nicht mehr mit Name, Datum oder Uhrzeit.
 - Der Kopfbereich interner Notizen reserviert jetzt rechts Platz für das Badge.
 - Auf kleinen Bildschirmen wandert das Badge nach links oben und bleibt lesbar.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.2 Email Notification Ready
@@ -499,7 +507,7 @@ http://localhost:8080/
   - `supabase/functions/notify-new-request/index.ts`
   - `deploy-email-function.bat`
 - Wichtig: Für echten Versand muss ein Resend API Key als Supabase Secret gesetzt und die Edge Function deployed werden.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.3 Customer Status Page
@@ -523,7 +531,7 @@ http://localhost:8080/
   - Mitarbeiterdaten
 - Nach erfolgreicher Wizard-Anfrage erscheint zusätzlich ein Link „Status später prüfen“.
 - Reinigungs-Wizard löst jetzt ebenfalls die Team-E-Mail-Benachrichtigung aus.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.3.1 Contact Parser Fix
@@ -542,7 +550,7 @@ http://localhost:8080/
 - SQL-Dateien:
   - `supabase/05_get_public_request_status.sql`
   - `supabase/06_contact_parser_status_fix.sql`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.4 Email Status Link
@@ -557,7 +565,7 @@ http://localhost:8080/
   - `SEND_CUSTOMER_CONFIRMATION=false`
   - Aktivieren erst sinnvoll, wenn Resend-Domain verifiziert ist.
 - Deploy-BAT nutzt jetzt `npx supabase` und setzt zusätzlich `PUBLIC_SITE_URL`.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.5 Customer Reply Messages
@@ -573,7 +581,7 @@ http://localhost:8080/
 - Interne Notizen bleiben weiterhin unsichtbar für Kunden.
 - SQL-Datei:
   - `supabase/07_send_public_request_message.sql`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.6 Attachments System
@@ -600,7 +608,7 @@ http://localhost:8080/
   - `request_attachments`
 - Neue SQL-Datei:
   - `supabase/08_attachments_system.sql`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.7 Dashboard Activity Highlights
@@ -617,7 +625,7 @@ http://localhost:8080/
 - Gesehen-Status wird lokal im Browser gespeichert:
   - sobald ein Ticket geöffnet wird, gilt die neue Aktivität als gesehen
   - keine zusätzliche Datenbank-Tabelle nötig
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.8 Dashboard Filters Search
@@ -642,7 +650,7 @@ http://localhost:8080/
   - `X von Y Tickets angezeigt`
 - Filter-zurücksetzen-Button ergänzt.
 - Design bleibt ruhig: keine neuen grellen Farben, nur bestehende Dashboard-Akzente.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v4.9 Dashboard Ticket Actions
@@ -657,7 +665,7 @@ http://localhost:8080/
 - „Als erledigt markieren“ setzt den Status direkt auf `erledigt`.
 - Statusänderung läuft weiterhin über Supabase und schreibt automatisch in den Statusverlauf.
 - Design bleibt ruhig und kompakt, keine zusätzlichen grellen Farben.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.0 System Polish
@@ -671,7 +679,7 @@ http://localhost:8080/
 - E-Mail-Kopie/Statuslink-Hinweise klarer benannt.
 - Menübegriffe im Mitarbeiterportal vereinfacht.
 - Keine Funktionslogik bewusst verändert, Fokus liegt auf Wording, Übersicht und sauberem Stand.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.0.1 Footer Employee Login
@@ -681,7 +689,7 @@ http://localhost:8080/
 - Link führt auf:
   - `/dashboard`
 - Bewusst nicht prominent in der Hauptnavigation, damit Kunden nicht abgelenkt werden.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.0.2 Footer Login Visible Fix
@@ -691,7 +699,7 @@ http://localhost:8080/
 - Zusätzlich ist unten in der Copyright-Zeile ein kleiner Mitarbeiterlogin-Link vorhanden.
 - Ziel bleibt:
   - `/dashboard`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.0.3 Footer Login Index Fix
@@ -704,7 +712,7 @@ http://localhost:8080/
   - untere Footer-Zeile neben Copyright/DBG
 - Link-Ziel:
   - `/dashboard`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.1 YouBot MVP
@@ -729,7 +737,7 @@ http://localhost:8080/
   - `/status`
   - `/kontakt`
   - `/dashboard`
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.1.1 YouBot Polish
@@ -749,7 +757,7 @@ http://localhost:8080/
   - weniger Padding
   - ruhigeres Erscheinungsbild
 - Keine echte AI-API eingebaut; weiterhin sicherer Präsentations-MVP ohne Zusatzkosten.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.1.2 YouBot Init Fix
@@ -761,7 +769,7 @@ http://localhost:8080/
 - Fix:
   - `initYouBot()` steht jetzt unten nach dem initialen `renderRoute()`.
   - YouBot ist direkt beim Öffnen der Seite sichtbar.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.4.0 Google Address Route
@@ -777,7 +785,7 @@ http://localhost:8080/
   - Google Place-ID für Abholort/Zielort
   - Meter/Sekunden-Rohwerte
 - Benötigt Supabase Secret `GOOGLE_MAPS_API_KEY`.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.2.1 Info Email Switch
@@ -791,7 +799,7 @@ http://localhost:8080/
 - Wichtiger Hinweis:
   - Resend muss für Versand an diese Adresse bzw. für eine saubere Absenderadresse passend eingerichtet/verifiziert sein.
   - `EMAIL_FROM` bleibt vorerst bei `All4You <onboarding@resend.dev>`, bis die Domain in Resend verifiziert ist.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.3.1 Reference PNG Visuals
@@ -805,7 +813,7 @@ http://localhost:8080/
   - Reinigungs-Icon
 - Hinweis: Die Qualität hängt vom gelieferten Screenshot ab. Für finale Premium-Qualität wird das originale Bildmaterial empfohlen.
 - Keine Supabase-/Resend-/Dashboard-Funktionalität verändert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.3.2 Hero Cleanup + Service Image Cards
@@ -819,7 +827,7 @@ http://localhost:8080/
   - Reinigungsservice
 - Servicebilder sitzen jetzt in einer sauberen weißen Mini-Bildkarte mit Rahmen, Radius und dezentem Schatten.
 - Keine Supabase-/Resend-/Dashboard-Funktionalität verändert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 ## v5.3.3 Service Image Swap + Hover Glow
@@ -828,10 +836,10 @@ http://localhost:8080/
 - Hover-Zustand der Service-Karten erweitert:
   - kleine Bildkarte bekommt nun ebenfalls einen dezenten grünen LED-/Glow-Rahmen.
 - Keine Supabase-/Resend-/Dashboard-Funktionalität verändert.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
-## ALL4YOU-ROUTER-V5.5.7-AGB-FINAL
+## ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE
 
 Technischer SEO-Grundstein für Google:
 
@@ -845,18 +853,18 @@ Technischer SEO-Grundstein für Google:
 - Geschützte Bereiche wie `/dashboard` und Statusseiten werden per Meta-Robots/robots.txt nicht indexiert.
 - Keine Änderungen an Supabase-, Resend-, Dashboard-, Upload-, Login- oder Anfrage-Flows.
 
-## ALL4YOU-ROUTER-V5.5.7-AGB-FINAL
+## ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE
 
 - Impressum final mit den gelieferten Angaben eingepflegt.
 - Anbieter/Kontakt/Verantwortlichkeit nach MStV ergänzt.
 - Platzhalter im Impressum entfernt.
 - Footer-Telefonnummer und LocalBusiness-JSON-LD mit Adresse/Telefon aktualisiert.
 - Keine Änderungen an Supabase-, Resend-, Dashboard-, Auth- oder Formular-Flows.
-- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+- Sichtbare DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 
 
-## ALL4YOU-ROUTER-V5.5.7-AGB-FINAL
+## ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE
 
 - Fix: Weiter-Buttons in Anhänger, Entrümpelung und Reinigung reagieren wieder.
 - Ursache: Google-Routenprüfung war versehentlich auch in nicht-Roller-Assistenten eingehängt.
@@ -865,7 +873,7 @@ Technischer SEO-Grundstein für Google:
 
 ## Änderung V5.5.7
 
-DBG-Version: `ALL4YOU-ROUTER-V5.5.7-AGB-FINAL`
+DBG-Version: `ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE`
 
 - AGB als eigene Route `/agb` eingepflegt.
 - Footer-Link „AGB“ im Bereich Rechtliches ergänzt.

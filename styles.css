@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .price-table-card {
@@ -2402,7 +2402,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2578,7 +2578,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2606,7 +2606,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2703,7 +2703,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2742,6 +2742,183 @@ label {
   font-weight: 650;
   line-height: 1.45;
 }
+
+/* Trailer-Kalenderstatus */
+.trailer-calendar-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.calendar-status-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.calendar-status-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(19,35,58,.12);
+  background: rgba(255,255,255,.78);
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.calendar-status-badge.status-free {
+  color: #047857;
+  background: rgba(209,250,229,.78);
+  border-color: rgba(4,120,87,.2);
+}
+
+.calendar-status-badge.status-request {
+  color: #92400e;
+  background: rgba(254,243,199,.9);
+  border-color: rgba(180,83,9,.22);
+}
+
+.calendar-status-badge.status-review {
+  color: #075985;
+  background: rgba(224,242,254,.9);
+  border-color: rgba(3,105,161,.2);
+}
+
+.calendar-status-badge.status-busy,
+.calendar-status-badge.status-past {
+  color: #991b1b;
+  background: rgba(254,226,226,.9);
+  border-color: rgba(153,27,27,.2);
+}
+
+.trailer-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.calendar-month {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(19,35,58,.1);
+  background: rgba(255,255,255,.68);
+}
+
+.calendar-month-title {
+  color: var(--navy);
+  font-weight: 950;
+  margin-bottom: 10px;
+}
+
+.calendar-weekdays,
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.calendar-weekdays span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.calendar-day {
+  position: relative;
+  min-height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(19,35,58,.08);
+  background: rgba(255,255,255,.7);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.calendar-day em {
+  position: relative;
+  z-index: 1;
+  font-style: normal;
+}
+
+.calendar-day.status-free {
+  box-shadow: inset 0 -3px 0 rgba(16,185,129,.22);
+}
+
+.calendar-day.status-request {
+  background: rgba(254,243,199,.82);
+  box-shadow: inset 0 -3px 0 rgba(245,158,11,.42);
+}
+
+.calendar-day.status-review {
+  background: rgba(224,242,254,.9);
+  box-shadow: inset 0 -3px 0 rgba(14,165,233,.36);
+}
+
+.calendar-day.status-busy,
+.calendar-day.status-past {
+  background: rgba(254,226,226,.9);
+  color: #991b1b;
+  box-shadow: inset 0 -3px 0 rgba(239,68,68,.38);
+}
+
+.calendar-day.is-today {
+  border-color: rgba(10,169,155,.55);
+}
+
+.calendar-day.is-selected {
+  background: rgba(10,169,155,.16);
+  border-color: rgba(10,169,155,.42);
+}
+
+.calendar-day.is-start,
+.calendar-day.is-end {
+  background: var(--teal);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(10,169,155,.18);
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  background: #dbeafe;
+}
+
+.legend-dot.status-free { background: #10b981; }
+.legend-dot.status-request { background: #f59e0b; }
+.legend-dot.status-busy { background: #ef4444; }
+.legend-dot.status-review { background: #0ea5e9; }
 
 .rental-result-grid {
   display: grid;
@@ -2790,14 +2967,23 @@ label {
 }
 
 @media (max-width: 900px) {
-  .rental-result-grid {
+  .rental-result-grid,
+  .trailer-calendar-grid {
     grid-template-columns: 1fr;
+  }
+
+  .calendar-status-head {
+    flex-direction: column;
+  }
+
+  .calendar-status-badge {
+    width: 100%;
   }
 }
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2811,7 +2997,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-shell {
@@ -3268,7 +3454,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .is-hidden {
@@ -3422,7 +3608,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .auth-message.success {
@@ -3442,7 +3628,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3497,7 +3683,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3574,7 +3760,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-detail {
@@ -3721,7 +3907,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .site-header {
@@ -3865,7 +4051,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .site-header {
@@ -3923,7 +4109,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-messages {
@@ -4043,7 +4229,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4134,7 +4320,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4179,7 +4365,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .email-notification-note {
@@ -4204,7 +4390,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .customer-status-link {
@@ -4399,7 +4585,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .customer-reply-form {
@@ -4470,7 +4656,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4622,7 +4808,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4686,7 +4872,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4742,7 +4928,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -4817,7 +5003,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -4857,7 +5043,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .footer-bottom-links {
@@ -4890,7 +5076,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .footer-employee-login {
@@ -4932,7 +5118,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -4981,7 +5167,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .youbot-widget {
@@ -5187,7 +5373,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .youbot-widget {
@@ -5293,7 +5479,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .roller-route-note {
@@ -5426,7 +5612,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5511,7 +5697,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ========================================================================== */
 
 .service-icon {
@@ -5559,7 +5745,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
+   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
    ======================================================================== */
 
 .cookie-consent-shell {

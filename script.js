@@ -1435,7 +1435,7 @@ function updateDashboardActivityStats(tickets) {
 
 
 
-const TEAM_NOTIFICATION_EMAIL = "itsfabtastisch@gmail.com";
+const TEAM_NOTIFICATION_EMAIL = "info@all4you-muenchen.de";
 
 async function notifyTeamAboutRequest(requestResult) {
   if (!requestResult?.id || !requestResult?.public_status_token) {
@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.1.2-YOUBOT-INIT-FIX
+// DBG: ALL4YOU-ROUTER-V5.2.1-INFO-EMAIL-SWITCH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2622,22 +2622,22 @@ function rollerPage() {
 
               <div class="route-preview-box" id="rollerRoutePreview">
                 <div>
-                  <strong>Distanzmessung vorbereitet</strong>
+                  <strong>Distanzmessung aktiv</strong>
                   <p>
-                    Später werden diese Felder mit Google Maps Places/Routes verbunden, damit nur gültige Adressen gewählt
-                    und Entfernung sowie Fahrzeit automatisch berechnet werden können.
+                    Abholort und Zielort können für die Präsentation über eine kostenlose OpenStreetMap/OSRM-Demo berechnet werden.
+                    Für den produktiven Betrieb kann später Google Maps oder ein eigener Routing-Anbieter angebunden werden.
                   </p>
                 </div>
-                <button class="btn ghost" type="button" id="rollerMockDistance">Strecke vormerken</button>
+                <button class="btn ghost" type="button" id="rollerMockDistance">Strecke berechnen</button>
               </div>
 
               <div class="route-status-grid">
-                <div><strong>Distanz</strong><span id="rollerDistanceValue">wird später automatisch berechnet</span></div>
-                <div><strong>Fahrzeit</strong><span id="rollerDurationValue">wird später automatisch berechnet</span></div>
+                <div><strong>Distanz</strong><span id="rollerDistanceValue">Noch nicht berechnet</span></div>
+                <div><strong>Fahrzeit</strong><span id="rollerDurationValue">Noch nicht berechnet</span></div>
               </div>
 
-              <p class="form-note">
-                Der spätere Google-Maps-Anschluss soll Abholort, Zielort, Distanz und Fahrzeit automatisch in die Anfrage übernehmen.
+              <p class="form-note roller-route-note" id="rollerRouteNote">
+                Bitte Abholort und Zielort eintragen und anschließend „Strecke berechnen“ klicken.
               </p>
             </div>
 
@@ -4753,7 +4753,10 @@ function bindTrailerTool() {
       plugType: data.get("plugType") || "",
       handover: data.get("handover") || "",
       extras: extras.length ? extras.join(", ") : "keine Angabe",
-      message: data.get("message") || ""
+      message: data.get("message") || "",
+      pickupLabel: routeInfo.pickupLabel || "",
+      dropoffLabel: routeInfo.dropoffLabel || "",
+      routeProvider: routeInfo.provider || ""
     };
 
     result.classList.add("show");
@@ -5403,6 +5406,107 @@ function bindClearanceWizard() {
 
 
 
+
+/* ==========================================================================
+   Roller Distanzmessung Demo
+   ========================================================================== */
+
+function formatRouteDistance(meters) {
+  const km = Number(meters || 0) / 1000;
+  if (!Number.isFinite(km) || km <= 0) return "nicht berechnet";
+  return `${km.toFixed(km < 10 ? 1 : 0).replace(".", ",")} km`;
+}
+
+function formatRouteDuration(seconds) {
+  const minutes = Math.round(Number(seconds || 0) / 60);
+  if (!Number.isFinite(minutes) || minutes <= 0) return "nicht berechnet";
+
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return rest ? `${hours} Std. ${rest} Min.` : `${hours} Std.`;
+  }
+
+  return `${minutes} Min.`;
+}
+
+async function geocodeRollerAddress(address) {
+  const query = String(address || "").trim();
+  if (!query) throw new Error("Adresse fehlt.");
+
+  const params = new URLSearchParams({
+    format: "jsonv2",
+    q: `${query}, München, Deutschland`,
+    countrycodes: "de",
+    limit: "1",
+    addressdetails: "1"
+  });
+
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok || !Array.isArray(data) || !data.length) {
+    throw new Error(`Adresse konnte nicht gefunden werden: ${query}`);
+  }
+
+  const place = data[0];
+  return {
+    lat: Number(place.lat),
+    lon: Number(place.lon),
+    label: place.display_name || query
+  };
+}
+
+async function calculateRollerRoute(pickup, dropoff) {
+  const [from, to] = await Promise.all([
+    geocodeRollerAddress(pickup),
+    geocodeRollerAddress(dropoff)
+  ]);
+
+  if (!Number.isFinite(from.lat) || !Number.isFinite(from.lon) || !Number.isFinite(to.lat) || !Number.isFinite(to.lon)) {
+    throw new Error("Koordinaten konnten nicht sauber gelesen werden.");
+  }
+
+  const coords = `${from.lon},${from.lat};${to.lon},${to.lat}`;
+  const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=false&alternatives=false&steps=false`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+  const route = data?.routes?.[0];
+
+  if (!response.ok || !route) {
+    throw new Error("Route konnte nicht berechnet werden.");
+  }
+
+  return {
+    distance: formatRouteDistance(route.distance),
+    duration: formatRouteDuration(route.duration),
+    rawDistanceMeters: Math.round(route.distance || 0),
+    rawDurationSeconds: Math.round(route.duration || 0),
+    pickupLabel: from.label,
+    dropoffLabel: to.label,
+    provider: "OpenStreetMap / OSRM Demo"
+  };
+}
+
+function setRollerRouteState(element, type, text) {
+  if (!element) return;
+  element.classList.remove("success", "error", "loading");
+  if (type) element.classList.add(type);
+  element.textContent = text || "";
+}
+
+
 function bindRollerWizard() {
   const wizard = document.querySelector("#rollerWizard");
   const form = document.querySelector("#rollerWizardForm");
@@ -5417,14 +5521,20 @@ function bindRollerWizard() {
   const mockDistanceButton = document.querySelector("#rollerMockDistance");
   const distanceValue = document.querySelector("#rollerDistanceValue");
   const durationValue = document.querySelector("#rollerDurationValue");
+  const routeNote = document.querySelector("#rollerRouteNote");
 
   if (!wizard || !form || !result || !prev || !next || !submit) return;
 
   const steps = Array.from(form.querySelectorAll(".wizard-step"));
   let current = 0;
   let routeInfo = {
-    distance: "wird später automatisch berechnet",
-    duration: "wird später automatisch berechnet"
+    distance: "Noch nicht berechnet",
+    duration: "Noch nicht berechnet",
+    rawDistanceMeters: null,
+    rawDurationSeconds: null,
+    pickupLabel: "",
+    dropoffLabel: "",
+    provider: ""
   };
 
   function collectSummary() {
@@ -5456,6 +5566,7 @@ function bindRollerWizard() {
       <div><strong>Zielort</strong><span>${escapeHtml(summary.dropoff || "—")}</span></div>
       <div><strong>Distanz</strong><span>${escapeHtml(summary.distance || "—")}</span></div>
       <div><strong>Fahrzeit</strong><span>${escapeHtml(summary.duration || "—")}</span></div>
+      <div><strong>Berechnung</strong><span>${escapeHtml(summary.routeProvider || "—")}</span></div>
       <div><strong>Fahrzeugart</strong><span>${escapeHtml(summary.vehicle || "—")}</span></div>
       <div><strong>Zustand</strong><span>${escapeHtml(summary.condition || "—")}</span></div>
       <div><strong>Schlüssel</strong><span>${escapeHtml(summary.hasKey || "—")}</span></div>
@@ -5498,20 +5609,48 @@ function bindRollerWizard() {
     return true;
   }
 
-  mockDistanceButton?.addEventListener("click", () => {
+  mockDistanceButton?.addEventListener("click", async () => {
     const summary = collectSummary();
     if (!summary.pickup || !summary.dropoff) {
-      alert("Bitte zuerst Abholort und Zielort eintragen.");
+      setRollerRouteState(routeNote, "error", "Bitte zuerst Abholort und Zielort eintragen.");
       return;
     }
 
-    routeInfo = {
-      distance: "Google Maps Anbindung vorbereitet",
-      duration: "wird mit Routes API berechnet"
-    };
+    mockDistanceButton.disabled = true;
+    mockDistanceButton.textContent = "Berechne …";
+    if (distanceValue) distanceValue.textContent = "Berechnung läuft …";
+    if (durationValue) durationValue.textContent = "Berechnung läuft …";
+    setRollerRouteState(routeNote, "loading", "Adresse und Route werden geprüft …");
 
-    if (distanceValue) distanceValue.textContent = routeInfo.distance;
-    if (durationValue) durationValue.textContent = routeInfo.duration;
+    try {
+      routeInfo = await calculateRollerRoute(summary.pickup, summary.dropoff);
+
+      if (distanceValue) distanceValue.textContent = routeInfo.distance;
+      if (durationValue) durationValue.textContent = routeInfo.duration;
+
+      setRollerRouteState(
+        routeNote,
+        "success",
+        `Strecke berechnet: ${routeInfo.distance}, ca. ${routeInfo.duration}. Die Werte werden mit der Anfrage gespeichert.`
+      );
+    } catch (error) {
+      routeInfo = {
+        distance: "nicht berechnet",
+        duration: "nicht berechnet",
+        rawDistanceMeters: null,
+        rawDurationSeconds: null,
+        pickupLabel: "",
+        dropoffLabel: "",
+        provider: "OpenStreetMap / OSRM Demo"
+      };
+
+      if (distanceValue) distanceValue.textContent = routeInfo.distance;
+      if (durationValue) durationValue.textContent = routeInfo.duration;
+      setRollerRouteState(routeNote, "error", error.message || "Strecke konnte nicht berechnet werden.");
+    } finally {
+      mockDistanceButton.disabled = false;
+      mockDistanceButton.textContent = "Strecke berechnen";
+    }
   });
 
   prev.addEventListener("click", () => {
@@ -5573,6 +5712,9 @@ function bindRollerWizard() {
           dropoff: summary.dropoff,
           distance: summary.distance,
           duration: summary.duration,
+          route_provider: summary.routeProvider,
+          pickup_verified_address: summary.pickupLabel,
+          dropoff_verified_address: summary.dropoffLabel,
           vehicle: summary.vehicle,
           condition: summary.condition,
           has_key: summary.hasKey,
@@ -5582,7 +5724,7 @@ function bindRollerWizard() {
           special_situation: summary.specialSituation,
           desired_date: summary.desiredDate,
           message: summary.message,
-          google_maps_ready: true
+          distance_demo_active: true
         },
         p_initial_message: summary.message
       });
@@ -5591,7 +5733,7 @@ function bindRollerWizard() {
         result,
         "Roller-Anfrage",
         response?.ticket_number,
-        "Die Distanzmessung ist weiterhin für die spätere Google-Maps-Anbindung vorbereitet."
+        "Falls die Strecke berechnet wurde, sind Distanz und Fahrzeit direkt in der Anfrage gespeichert."
       );
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);

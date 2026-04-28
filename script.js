@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.3-WIZARD-NEXT-FIX
+// DBG: ALL4YOU-ROUTER-V5.5.4-DATENSCHUTZ-EXAKT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4603,198 +4603,106 @@ function legalPage(type) {
       <p class="eyebrow">Rechtliches</p>
       <h1>Datenschutzerklärung</h1>
       <p class="lead">
-        Wir behandeln personenbezogene Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften,
-        insbesondere der Datenschutz-Grundverordnung (DSGVO).
+        Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften (DSGVO).
       </p>
     </section>
 
-    <section class="section-pad legal-layout">
+    <section class="section-pad legal-layout legal-only">
       <div class="legal-main">
         <article class="legal-card">
           <p class="eyebrow">Allgemeine Hinweise</p>
-          <h2>Datenschutz auf dieser Webseite</h2>
+          <h2>Allgemeine Hinweise</h2>
           <p>
-            Der Schutz Ihrer persönlichen Daten ist uns wichtig. Personenbezogene Daten werden auf dieser Webseite nur erhoben,
-            verarbeitet und gespeichert, soweit dies zur Bereitstellung der Webseite, zur Bearbeitung Ihrer Anfrage oder zur
-            Durchführung angefragter Dienstleistungen erforderlich ist.
+            Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften (DSGVO).
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Verantwortliche Stelle</p>
-          <h2>Verantwortlich für die Datenverarbeitung</h2>
+          <h2>Verantwortliche Stelle</h2>
           <div class="legal-data">
-            <p><strong>All4You Service München</strong></p>
             <p>Silvija Vardijan</p>
             <p>Schönstraße 23<br>81543 München<br>Deutschland</p>
-            <p><strong>Telefon:</strong> <a href="tel:+4915124017683">0151 24017683</a></p>
+            <p><strong>Telefon:</strong> <a href="tel:+4915124017683">015124017683</a></p>
             <p><strong>E-Mail:</strong> <a href="mailto:info@all4you-muenchen.de">info@all4you-muenchen.de</a></p>
           </div>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Server-Logfiles</p>
-          <h2>Technische Zugriffsdaten</h2>
+          <h2>Server-Logfiles</h2>
           <p>
-            Beim Besuch der Webseite werden automatisch technische Daten erfasst. Dazu können insbesondere IP-Adresse,
-            verwendeter Browser, Betriebssystem, Uhrzeit des Seitenaufrufs, aufgerufene Seiten und technische Protokolldaten gehören.
-          </p>
-          <p>
-            Diese Daten dienen der technischen Bereitstellung, Stabilität und Sicherheit der Webseite.
+            Beim Besuch der Website werden automatisch Daten erfasst (IP-Adresse, Browser, Uhrzeit). Diese dienen der technischen Sicherheit.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Kontaktformular & E-Mail</p>
-          <h2>Bearbeitung von Anfragen</h2>
+          <h2>Kontaktformular & E-Mail</h2>
           <p>
-            Wenn Sie uns per Kontaktformular, Anfrage-Assistent oder E-Mail kontaktieren, werden die von Ihnen angegebenen Daten
-            zur Bearbeitung Ihrer Anfrage gespeichert und verarbeitet. Dazu können insbesondere Name, E-Mail-Adresse,
-            Telefonnummer, Nachricht, gewünschte Leistung und weitere von Ihnen übermittelte Angaben gehören.
-          </p>
-          <p>
-            Eine Weitergabe an Dritte erfolgt nicht ohne Einwilligung, sofern keine rechtliche Grundlage besteht oder die Weitergabe
-            nicht zur technischen Bereitstellung beziehungsweise Bearbeitung der Anfrage erforderlich ist.
+            Ihre Daten werden zur Bearbeitung Ihrer Anfrage gespeichert. Keine Weitergabe ohne Einwilligung.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Buchungen / Dienstleistungen</p>
-          <h2>Daten zur Vertrags- und Auftragsabwicklung</h2>
+          <h2>Buchungen / Dienstleistungen</h2>
           <p>
-            Bei Anfragen, Buchungen oder Dienstleistungsaufträgen werden die erforderlichen Daten zur Vorbereitung,
-            Bearbeitung und Durchführung der jeweiligen Leistung verarbeitet. Dazu können Name, Adresse, Kontaktdaten,
-            Leistungsdetails, Objekt- oder Fahrzeugangaben, gewünschte Termine, Abhol- und Zielorte sowie weitere auftragsbezogene
-            Informationen gehören.
-          </p>
-          <p>
-            Dies betrifft insbesondere Anfragen zur Vermietung von Anhängern, zum Transport von Rollern, zu besenreinen Räumungen
-            sowie zum Reinigungsservice.
-          </p>
-        </article>
-
-        <article class="legal-card">
-          <p class="eyebrow">Datei-Uploads</p>
-          <h2>Bilder, PDFs und Dokumente</h2>
-          <p>
-            Sofern Sie über die Webseite Bilder, PDFs oder andere Dokumente hochladen, werden diese Dateien zur Bearbeitung Ihrer
-            Anfrage gespeichert und dem jeweiligen Ticket beziehungsweise Vorgang zugeordnet. Bitte übermitteln Sie nur Inhalte,
-            die für die Bearbeitung Ihrer Anfrage erforderlich sind.
-          </p>
-        </article>
-
-        <article class="legal-card">
-          <p class="eyebrow">Kundenstatus & Ticketverwaltung</p>
-          <h2>Statusabfrage und interne Bearbeitung</h2>
-          <p>
-            Anfragen können mit einer Ticketnummer versehen und in einem geschützten Mitarbeiterbereich verwaltet werden.
-            Kunden können den Status einer Anfrage über eine Ticketnummer in Verbindung mit angegebenen Kontaktdaten prüfen.
-          </p>
-          <p>
-            Die Verarbeitung dient der strukturierten Bearbeitung, Nachverfolgung und Kommunikation rund um Ihre Anfrage.
-          </p>
-        </article>
-
-        <article class="legal-card">
-          <p class="eyebrow">Google Maps / Adressprüfung</p>
-          <h2>Adressvorschläge und Routenberechnung</h2>
-          <p>
-            Für bestimmte Anfrageformulare können Adressvorschläge sowie eine Distanz- und Fahrzeitberechnung genutzt werden.
-            Dabei können eingegebene Abhol- und Zielorte zur Prüfung und Routenberechnung an Google-Dienste übermittelt werden.
-          </p>
-          <p>
-            Diese Funktion dient dazu, Adressen besser zu prüfen und Dienstleistungsanfragen, insbesondere Rollertransporte,
-            genauer vorzubereiten.
+            Bei Anfragen oder Buchungen werden Ihre Daten zur Vertragsabwicklung verarbeitet (Name, Adresse, Kontaktdaten, Leistungsdetails).
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Cookies</p>
-          <h2>Nutzung von Cookies</h2>
+          <h2>Cookies</h2>
           <p>
-            Diese Webseite kann Cookies verwenden, um die Nutzererfahrung zu verbessern und bestimmte Funktionen technisch
-            bereitzustellen. Technisch notwendige Cookies können für den Betrieb der Webseite erforderlich sein.
+            Diese Website verwendet Cookies zur Verbesserung der Nutzererfahrung.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Google Analytics</p>
-          <h2>Analyse nur nach Einwilligung</h2>
+          <h2>Google Analytics</h2>
           <p>
-            Diese Webseite kann Google Analytics mit IP-Anonymisierung nutzen. Die Nutzung erfolgt nur nach Ihrer Einwilligung.
-            Solange keine entsprechende Einwilligung erteilt wurde, findet keine analysebezogene Nutzung statt.
+            Diese Website nutzt Google Analytics (mit IP-Anonymisierung). Die Nutzung erfolgt nur nach Ihrer Einwilligung.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Hosting</p>
-          <h2>Externe Bereitstellung der Webseite</h2>
+          <h2>Hosting</h2>
           <p>
-            Die Webseite wird extern gehostet. Ein Auftragsverarbeitungsvertrag besteht beziehungsweise ist entsprechend
-            der eingesetzten technischen Dienstleister vorgesehen. Beim Hosting können technische Zugriffsdaten verarbeitet werden,
-            die für den sicheren und stabilen Betrieb der Webseite erforderlich sind.
+            Die Website wird extern gehostet. Ein Auftragsverarbeitungsvertrag besteht.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">SSL-Verschlüsselung</p>
-          <h2>Sichere Verbindung</h2>
+          <h2>SSL-Verschlüsselung</h2>
           <p>
-            Diese Webseite nutzt eine SSL- beziehungsweise TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie unter anderem
-            daran, dass die Adresse der Webseite mit <strong>https://</strong> beginnt.
+            Die Website nutzt eine sichere SSL-Verbindung.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Ihre Rechte</p>
-          <h2>Auskunft, Berichtigung, Löschung und Widerspruch</h2>
+          <h2>Ihre Rechte</h2>
           <p>
-            Sie haben im Rahmen der gesetzlichen Vorschriften das Recht auf Auskunft über die zu Ihrer Person gespeicherten Daten,
-            auf Berichtigung unrichtiger Daten, auf Löschung, auf Einschränkung der Verarbeitung sowie auf Widerspruch gegen bestimmte
-            Verarbeitungen.
+            Sie haben Recht auf Auskunft, Berichtigung, Löschung und Widerspruch.
           </p>
         </article>
 
         <article class="legal-card">
           <p class="eyebrow">Beschwerderecht</p>
-          <h2>Beschwerde bei einer Datenschutzbehörde</h2>
+          <h2>Beschwerderecht</h2>
           <p>
-            Wenn Sie der Ansicht sind, dass die Verarbeitung Ihrer personenbezogenen Daten gegen Datenschutzrecht verstößt,
-            können Sie sich bei einer zuständigen Datenschutzaufsichtsbehörde beschweren.
-          </p>
-        </article>
-
-        <article class="legal-card">
-          <p class="eyebrow">Stand</p>
-          <h2>Aktualität dieser Datenschutzerklärung</h2>
-          <p>
-            Diese Datenschutzerklärung kann angepasst werden, wenn sich die Webseite, die eingesetzten Dienste oder die rechtlichen
-            Anforderungen ändern.
+            Sie können sich bei einer Datenschutzbehörde beschweren.
           </p>
         </article>
       </div>
-
-      <aside class="legal-sidebar">
-        <div class="check-card">
-          <p class="eyebrow">Kontakt Datenschutz</p>
-          <h2>All4You Service München</h2>
-          <p>Silvija Vardijan<br>Schönstraße 23<br>81543 München</p>
-          <p><a href="tel:+4915124017683">0151 24017683</a></p>
-          <p><a href="mailto:info@all4you-muenchen.de">info@all4you-muenchen.de</a></p>
-        </div>
-
-        <div class="check-card subtle-card">
-          <p class="eyebrow">Hinweis</p>
-          <p>
-            Diese Seite enthält die bereitgestellten Datenschutzangaben in sauberer Webseitenform. Bei neuen Tools oder externen
-            Diensten sollte der Text erneut geprüft und bei Bedarf ergänzt werden.
-          </p>
-        </div>
-      </aside>
     </section>
   `;
 }
-
 
 function pageNotFound() {
   document.title = "Seite nicht gefunden | All4You Service München";

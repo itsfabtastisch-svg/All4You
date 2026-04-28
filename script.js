@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.5-WIZARD-BUTTON-HARD-FIX
+// DBG: ALL4YOU-ROUTER-V5.5.6-COOKIE-CONSENT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7044,6 +7044,161 @@ function installWizardButtonFallback() {
 }
 
 
+/* ==========================================================================
+   Cookie Consent
+   DBG: ALL4YOU-ROUTER-V5.5.6-COOKIE-CONSENT
+   ========================================================================== */
+
+const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";
+const ALL4YOU_GOOGLE_ANALYTICS_ID = ""; // Wenn später Google Analytics aktiv genutzt wird: Measurement-ID hier eintragen, z. B. G-XXXXXXXXXX.
+
+function getCookieConsent() {
+  try {
+    const raw = localStorage.getItem(ALL4YOU_COOKIE_CONSENT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCookieConsent(settings) {
+  const consent = {
+    necessary: true,
+    analytics: Boolean(settings?.analytics),
+    savedAt: new Date().toISOString(),
+    version: "v1"
+  };
+  localStorage.setItem(ALL4YOU_COOKIE_CONSENT_KEY, JSON.stringify(consent));
+  window.all4youCookieConsent = consent;
+  if (consent.analytics) loadGoogleAnalyticsAfterConsent();
+  return consent;
+}
+
+function loadGoogleAnalyticsAfterConsent() {
+  if (!ALL4YOU_GOOGLE_ANALYTICS_ID || window.__all4youGoogleAnalyticsLoaded) return;
+  window.__all4youGoogleAnalyticsLoaded = true;
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(ALL4YOU_GOOGLE_ANALYTICS_ID);
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ window.dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag("js", new Date());
+  gtag("config", ALL4YOU_GOOGLE_ANALYTICS_ID, { anonymize_ip: true });
+}
+
+function closeCookieSettings() {
+  document.querySelector(".cookie-settings-backdrop")?.remove();
+}
+
+function closeCookieBanner() {
+  document.querySelector(".cookie-consent-shell")?.remove();
+}
+
+function openCookieSettings() {
+  closeCookieSettings();
+  const current = getCookieConsent();
+  const backdrop = document.createElement("div");
+  backdrop.className = "cookie-settings-backdrop";
+  backdrop.setAttribute("role", "dialog");
+  backdrop.setAttribute("aria-modal", "true");
+  backdrop.setAttribute("aria-labelledby", "cookieSettingsTitle");
+  backdrop.innerHTML = `
+    <div class="cookie-settings-card">
+      <h2 id="cookieSettingsTitle">Cookie-Einstellungen</h2>
+      <p>
+        Sie können selbst entscheiden, welche Cookies und externen Dienste zugelassen werden.
+        Weitere Informationen finden Sie in unserer <a href="/datenschutz" data-link>Datenschutzerklärung</a>.
+      </p>
+
+      <label class="cookie-settings-option">
+        <input type="checkbox" checked disabled>
+        <span>
+          <strong>Notwendige Cookies</strong>
+          <small>Erforderlich für Grundfunktionen der Webseite, z. B. Sicherheit, Formularfunktionen und gespeicherte Auswahl.</small>
+        </span>
+      </label>
+
+      <label class="cookie-settings-option">
+        <input type="checkbox" data-cookie-analytics ${current?.analytics ? "checked" : ""}>
+        <span>
+          <strong>Analyse / Google Analytics</strong>
+          <small>Hilft uns, die Nutzung der Webseite auszuwerten und unser Angebot zu verbessern. Wird nur nach Ihrer Einwilligung aktiviert.</small>
+        </span>
+      </label>
+
+      <div class="cookie-settings-actions">
+        <button class="cookie-btn primary" type="button" data-cookie-save>Auswahl speichern</button>
+        <button class="cookie-btn secondary" type="button" data-cookie-accept-all>Alle akzeptieren</button>
+        <button class="cookie-btn ghost" type="button" data-cookie-necessary>Nur notwendige</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+}
+
+function showCookieBanner() {
+  if (document.querySelector(".cookie-consent-shell")) return;
+  const shell = document.createElement("div");
+  shell.className = "cookie-consent-shell";
+  shell.innerHTML = `
+    <div class="cookie-consent-card" role="dialog" aria-live="polite" aria-label="Cookie-Hinweis">
+      <h2>Cookie-Einstellungen</h2>
+      <p>
+        Diese Website verwendet Cookies und externe Dienste (z. B. Google Analytics), um die Nutzung zu analysieren und unser Angebot zu verbessern.
+        Sie können selbst entscheiden, welche Cookies Sie zulassen.
+        Weitere Informationen finden Sie in unserer <a href="/datenschutz" data-link>Datenschutzerklärung</a>.
+      </p>
+      <div class="cookie-consent-actions">
+        <button class="cookie-btn primary" type="button" data-cookie-accept-all>Alle akzeptieren</button>
+        <button class="cookie-btn secondary" type="button" data-cookie-necessary>Nur notwendige</button>
+        <button class="cookie-btn ghost" type="button" data-cookie-open-settings>Einstellungen</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(shell);
+}
+
+function initCookieConsent() {
+  const saved = getCookieConsent();
+  if (saved?.analytics) loadGoogleAnalyticsAfterConsent();
+  if (!saved) showCookieBanner();
+
+  document.addEventListener("click", event => {
+    const settingsButton = event.target.closest("[data-cookie-settings], [data-cookie-open-settings]");
+    if (settingsButton) {
+      event.preventDefault();
+      openCookieSettings();
+      return;
+    }
+
+    if (event.target.closest("[data-cookie-accept-all]")) {
+      saveCookieConsent({ analytics: true });
+      closeCookieBanner();
+      closeCookieSettings();
+      return;
+    }
+
+    if (event.target.closest("[data-cookie-necessary]")) {
+      saveCookieConsent({ analytics: false });
+      closeCookieBanner();
+      closeCookieSettings();
+      return;
+    }
+
+    if (event.target.closest("[data-cookie-save]")) {
+      const analytics = Boolean(document.querySelector("[data-cookie-analytics]")?.checked);
+      saveCookieConsent({ analytics });
+      closeCookieBanner();
+      closeCookieSettings();
+    }
+  });
+}
+
+
 document.addEventListener("click", event => {
   const link = event.target.closest("a[data-link]");
   if (!link) return;
@@ -7072,3 +7227,4 @@ if (navToggle && mainNav) {
 installWizardButtonFallback();
 renderRoute();
 initYouBot();
+initCookieConsent();

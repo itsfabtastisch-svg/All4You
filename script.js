@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.3.1-REFERENCE-PNG-VISUALS
+// DBG: ALL4YOU-ROUTER-V5.3.2-HERO-CLEAN-SERVICE-CARDS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2319,13 +2319,13 @@ const icons = {
   euro: `<svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 8h-4a4 4 0 0 0 0 8h4"/><path d="M8 11h7"/><path d="M8 14h7"/></svg>`,
 };
 
-const serviceIconTruck = `<img src="/assets/service-rollertransport-reference-v531.png" alt="" loading="lazy">`;
+const serviceIconTruck = `<img src="/assets/service-rollertransport-clean-v532.png" alt="" loading="lazy">`;
 
-const serviceIconTrailer = `<img src="/assets/service-anhaenger-reference-v531.png" alt="" loading="lazy">`;
+const serviceIconTrailer = `<img src="/assets/service-anhaenger-clean-v532.png" alt="" loading="lazy">`;
 
-const serviceIconClearance = `<img src="/assets/service-entruempelung-reference-v531.png" alt="" loading="lazy">`;
+const serviceIconClearance = `<img src="/assets/service-entruempelung-clean-v532.png" alt="" loading="lazy">`;
 
-const serviceIconCleaning = `<img src="/assets/service-reinigung-reference-v531.png" alt="" loading="lazy">`;
+const serviceIconCleaning = `<img src="/assets/service-reinigung-clean-v532.png" alt="" loading="lazy">`;
 
 const services = [
   {
@@ -2364,8 +2364,8 @@ const services = [
 
 function heroVisual() {
   return `
-    <figure class="hero-visual hero-visual-reference-v531" aria-label="All4You Services in München">
-      <img src="/assets/all4you-reference-hero-v531.png" alt="Illustration von Rollertransport, Anhänger, Entrümpelung und Reinigung in München">
+    <figure class="hero-visual hero-visual-clean-v532" aria-label="All4You Services in München">
+      <img src="/assets/all4you-reference-hero-clean-v532.png" alt="Illustration von Rollertransport, Anhänger, Entrümpelung und Reinigung in München">
     </figure>
   `;
 }

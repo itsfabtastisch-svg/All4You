@@ -817,6 +817,8 @@ function dashboardFieldLabel(key) {
     deposit: "Kaution",
     handover: "Übergabe",
     delivery_address: "Wunschort / Lieferung",
+    pickup_return_address: "Abholung/Rückgabeort",
+    handover_note: "Hinweis Übergabe",
     cargo: "Transportgut",
     cargo_size: "Menge / Größe",
     tow_vehicle: "Zugfahrzeug",
@@ -892,7 +894,9 @@ function getDashboardDetailGroups(ticket) {
     "route_provider",
     "google_address_route_active",
     "delivery_address",
+    "pickup_return_address",
     "handover",
+    "handover_note",
     "no_parking_zone",
     "parking"
   ];
@@ -2281,6 +2285,7 @@ function buildTrailerSummaryText(summary) {
     summary.rentalPrice ? `Preis: ${summary.rentalPrice}` : "",
     summary.availabilityStatus ? `Anfragestatus: ${summary.availabilityStatus}` : "",
     summary.handover,
+    summary.pickupReturnAddress ? `Ort: ${summary.pickupReturnAddress}` : "",
     summary.cargo ? `Transportgut: ${summary.cargo}` : ""
   ].filter(Boolean);
 
@@ -2325,7 +2330,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
+// DBG: ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3070,20 +3075,20 @@ function trailerPage() {
               <div class="form-grid">
                 <label>Wunschübergabe
                   <select name="handover" id="trailerHandover">
-                    <option>Abholung Sachsenstraße Höhe 25</option>
-                    <option>Lieferung zum Wunschort gegen Aufpreis</option>
-                    <option>Lieferung & Abholung gegen Aufpreis</option>
-                    <option>All4You soll Rücksprache halten</option>
+                    <option value="Abholung/Rückgabe am Standort Sachsenstraße">Abholung/Rückgabe am Standort Sachsenstraße</option>
+                    <option value="Lieferung zum Wunschort gegen Aufpreis">Lieferung zum Wunschort gegen Aufpreis</option>
+                    <option value="Lieferung & Abholung gegen Aufpreis">Lieferung & Abholung gegen Aufpreis</option>
+                    <option value="All4You soll Rücksprache halten">All4You soll Rücksprache halten</option>
                   </select>
                 </label>
-                <label class="delivery-field" id="trailerDeliveryAddressField">Wunschort / Lieferadresse
-                  <input name="deliveryAddress" placeholder="Adresse für Lieferung oder Abholung">
+                <label class="delivery-field is-hidden" id="trailerDeliveryAddressField">Wunschort / Lieferadresse
+                  <input name="deliveryAddress" id="trailerDeliveryAddress" placeholder="Adresse für Lieferung oder Übergabe">
                 </label>
-                <label>Abholung/Rückgabe
-                  <input value="Sachsenstraße Höhe 25, 81543 München" readonly>
+                <label id="trailerPickupReturnField">Abholung/Rückgabe
+                  <input name="pickupReturnAddress" id="trailerPickupReturnAddress" value="Sachsenstraße Höhe 25, 81543 München" readonly>
                 </label>
-                <label>Hinweis
-                  <input value="Lieferung/Abholung gegen Aufpreis möglich" readonly>
+                <label id="trailerHandoverNoteField">Hinweis
+                  <input name="handoverNote" id="trailerHandoverNote" value="Abholung und Rückgabe am Standort Sachsenstraße Höhe 25, 81543 München." readonly>
                 </label>
               </div>
             </div>
@@ -4141,29 +4146,64 @@ function pageDashboard() {
             </div>
 
             <p class="dashboard-calendar-intro">
-              Hier verwaltet das Team intern, wann der Anhänger bereits vermietet oder blockiert ist.
-              Kunden sehen diese Belegung nicht öffentlich; sie stellen weiterhin nur eine Mietanfrage.
+              Hier verwaltet das Team intern den echten Anhänger-Kalender. Kunden sehen diese Belegung nicht öffentlich;
+              sie wählen im Wizard nur ihren gewünschten Zeitraum und senden eine unverbindliche Mietanfrage.
             </p>
 
-            <form class="dashboard-calendar-form" id="dashboardTrailerCalendarForm">
-              <input type="hidden" name="status" value="booked">
-              <label>Von
-                <input type="date" name="start_date" required>
-              </label>
-              <label>Bis
-                <input type="date" name="end_date" required>
-              </label>
-              <label class="dashboard-calendar-note">Hinweis
-                <input type="text" name="note" placeholder="z. B. Vermietet, reserviert, Wartung">
-              </label>
-              <button class="btn primary" type="submit">Zeitraum als belegt speichern <span>›</span></button>
-            </form>
+            <div class="dashboard-calendar-workbench">
+              <aside class="dashboard-calendar-side">
+                <div class="dashboard-calendar-selection-card">
+                  <span>Ausgewählter Zeitraum</span>
+                  <strong id="dashboardTrailerSelectedRange">Noch kein Zeitraum gewählt</strong>
+                  <p>Ersten Tag anklicken, danach zweiten Tag anklicken. Anschließend Status und Notiz speichern.</p>
+                </div>
 
-            <div class="dashboard-calendar-list" id="dashboardTrailerCalendarList">
-              <div class="dashboard-mini-empty">
-                <strong>Kalender wird geladen …</strong>
-                <p>Nach dem Login werden vorhandene Zeiträume aus Supabase angezeigt.</p>
-              </div>
+                <form class="dashboard-calendar-form" id="dashboardTrailerCalendarForm">
+                  <input type="hidden" name="start_date" id="dashboardTrailerCalendarStart" required>
+                  <input type="hidden" name="end_date" id="dashboardTrailerCalendarEnd" required>
+
+                  <label>Status
+                    <select name="status" id="dashboardTrailerCalendarStatusSelect">
+                      <option value="free">frei</option>
+                      <option value="rented">vermietet</option>
+                      <option value="reserved">reserviert</option>
+                      <option value="maintenance">in Wartung</option>
+                    </select>
+                  </label>
+                  <label class="dashboard-calendar-note">Notiz
+                    <input type="text" name="note" placeholder="z. B. Kunde Müller, Wartung, reserviert bis Rückruf">
+                  </label>
+                  <div class="dashboard-calendar-form-actions">
+                    <button class="btn ghost" type="button" id="dashboardTrailerCalendarClear">Auswahl löschen</button>
+                    <button class="btn primary" type="submit">Zeitraum speichern <span>›</span></button>
+                  </div>
+                </form>
+
+                <div class="dashboard-calendar-list" id="dashboardTrailerCalendarList">
+                  <div class="dashboard-mini-empty">
+                    <strong>Kalender wird geladen …</strong>
+                    <p>Bestehende Einträge erscheinen hier.</p>
+                  </div>
+                </div>
+              </aside>
+
+              <section class="dashboard-calendar-board">
+                <div class="trailer-calendar-toolbar dashboard-calendar-toolbar">
+                  <button class="calendar-nav-button" type="button" id="dashboardTrailerCalendarPrevMonth">‹ Vorheriger Monat</button>
+                  <strong id="dashboardTrailerCalendarHeadline">Anhänger-Kalender</strong>
+                  <button class="calendar-nav-button" type="button" id="dashboardTrailerCalendarNextMonth">Nächster Monat ›</button>
+                </div>
+
+                <div class="dashboard-trailer-calendar-grid" id="dashboardTrailerCalendarGrid" aria-live="polite"></div>
+
+                <div class="calendar-legend dashboard-calendar-legend">
+                  <span><i class="legend-dot status-free"></i> frei</span>
+                  <span><i class="legend-dot status-rented"></i> vermietet</span>
+                  <span><i class="legend-dot status-reserved"></i> reserviert</span>
+                  <span><i class="legend-dot status-maintenance"></i> in Wartung</span>
+                  <span><i class="legend-dot status-selected"></i> ausgewählt</span>
+                </div>
+              </section>
             </div>
           </section>
 
@@ -6532,55 +6572,45 @@ function bindRollerWizard() {
 
 
 
-/* ==========================================================================
+/* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
+   DBG: ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
    ========================================================================== */
-
-let all4youTrailerCalendarRules = {
-  booked: [],
-  requested: [],
-  manualReview: []
-};
 
 let all4youTrailerCalendarRows = [];
 let all4youTrailerCalendarLoadPromise = null;
 
-function emptyTrailerCalendarRules() {
-  return { booked: [], requested: [], manualReview: [] };
-}
+const TRAILER_DASHBOARD_WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const TRAILER_DASHBOARD_MONTHS = [
+  "Januar", "Februar", "März", "April", "Mai", "Juni",
+  "Juli", "August", "September", "Oktober", "November", "Dezember"
+];
 
 function normalizeTrailerCalendarStatus(status) {
-  const clean = String(status || "").toLowerCase();
-  if (clean === "booked" || clean === "busy" || clean === "belegt") return "booked";
-  return "booked";
+  const clean = String(status || "").trim().toLowerCase();
+  if (["free", "frei", "open"].includes(clean)) return "free";
+  if (["reserved", "request", "requested", "reserviert", "angefragt"].includes(clean)) return "reserved";
+  if (["maintenance", "manual_review", "wartung", "in wartung", "werkstatt"].includes(clean)) return "maintenance";
+  if (["rented", "booked", "busy", "belegt", "vermietet"].includes(clean)) return "rented";
+  return "rented";
 }
 
 function trailerCalendarStatusLabel(status) {
-  return "belegt";
+  const normalized = normalizeTrailerCalendarStatus(status);
+  return {
+    free: "frei",
+    rented: "vermietet",
+    reserved: "reserviert",
+    maintenance: "in Wartung"
+  }[normalized] || "vermietet";
 }
 
-function buildTrailerCalendarRules(rows) {
-  const rules = emptyTrailerCalendarRules();
-  (rows || []).forEach(row => {
-    const from = row.start_date || row.from;
-    const to = row.end_date || row.to || from;
-    if (!from || !to) return;
-
-    rules.booked.push({
-      id: row.id || "",
-      from,
-      to,
-      note: row.note || "Anhänger belegt",
-      status: "booked"
-    });
-  });
-  return rules;
+function trailerCalendarStatusRank(status) {
+  return { free: 1, reserved: 2, rented: 3, maintenance: 4 }[normalizeTrailerCalendarStatus(status)] || 0;
 }
 
 function applyTrailerCalendarRows(rows) {
   all4youTrailerCalendarRows = Array.isArray(rows) ? rows : [];
-  all4youTrailerCalendarRules = buildTrailerCalendarRules(all4youTrailerCalendarRows);
   window.dispatchEvent(new CustomEvent("all4you:trailer-calendar-updated"));
 }
 
@@ -6610,18 +6640,7 @@ async function fetchTrailerCalendarRows(session = null) {
 }
 
 async function loadPublicTrailerCalendarRules() {
-  if (all4youTrailerCalendarLoadPromise) return all4youTrailerCalendarLoadPromise;
-  all4youTrailerCalendarLoadPromise = fetchTrailerCalendarRows()
-    .then(rows => {
-      applyTrailerCalendarRows(rows);
-      return rows;
-    })
-    .catch(error => {
-      console.warn("Anhänger-Kalender konnte öffentlich nicht geladen werden:", error.message || error);
-      applyTrailerCalendarRows([]);
-      return [];
-    });
-  return all4youTrailerCalendarLoadPromise;
+  return [];
 }
 
 async function createTrailerCalendarRule(session, payload) {
@@ -6673,6 +6692,47 @@ function formatGermanDate(value) {
   return `${day}.${month}.${year}`;
 }
 
+function dashboardPadDatePart(value) {
+  return String(value).padStart(2, "0");
+}
+
+function dashboardToYmd(date) {
+  return `${date.getFullYear()}-${dashboardPadDatePart(date.getMonth() + 1)}-${dashboardPadDatePart(date.getDate())}`;
+}
+
+function dashboardParseYmd(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  return date;
+}
+
+function dashboardGetMonthStart(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function dashboardGetTodayYmd() {
+  return dashboardToYmd(new Date());
+}
+
+function findDashboardTrailerDayRule(ymd, rows = all4youTrailerCalendarRows) {
+  const matches = (rows || []).filter(row => {
+    const from = row.start_date || row.from;
+    const to = row.end_date || row.to || from;
+    return from && to && ymd >= from && ymd <= to;
+  });
+
+  if (!matches.length) return null;
+
+  return matches.sort((a, b) => {
+    const dateA = Date.parse(a.created_at || "") || 0;
+    const dateB = Date.parse(b.created_at || "") || 0;
+    if (dateA !== dateB) return dateA - dateB;
+    return trailerCalendarStatusRank(a.status) - trailerCalendarStatusRank(b.status);
+  }).at(-1);
+}
+
 function renderDashboardTrailerCalendarList(rows) {
   const list = document.querySelector("#dashboardTrailerCalendarList");
   const status = document.querySelector("#dashboardTrailerCalendarStatus");
@@ -6686,22 +6746,25 @@ function renderDashboardTrailerCalendarList(rows) {
   if (!rows?.length) {
     list.innerHTML = `
       <div class="dashboard-mini-empty">
-        <strong>Noch keine belegten Zeiträume</strong>
-        <p>Noch keine belegten Zeiträume hinterlegt.</p>
+        <strong>Noch keine Kalendereinträge</strong>
+        <p>Der Kalender ist intern leer. Ohne Eintrag gilt der Anhänger im Dashboard als frei.</p>
       </div>
     `;
     return;
   }
 
-  list.innerHTML = rows.map(row => `
-    <article class="dashboard-calendar-item status-${escapeHtml(normalizeTrailerCalendarStatus(row.status))}">
-      <div>
-        <strong>${escapeHtml(formatGermanDate(row.start_date))} bis ${escapeHtml(formatGermanDate(row.end_date))}</strong>
-        <span>${escapeHtml(trailerCalendarStatusLabel(row.status))}${row.note ? ` · ${escapeHtml(row.note)}` : ""}</span>
-      </div>
-      <button class="dashboard-calendar-delete" type="button" data-calendar-rule-id="${escapeHtml(row.id)}">Löschen</button>
-    </article>
-  `).join("");
+  list.innerHTML = rows.map(row => {
+    const normalized = normalizeTrailerCalendarStatus(row.status);
+    return `
+      <article class="dashboard-calendar-item status-${escapeHtml(normalized)}">
+        <div>
+          <strong>${escapeHtml(formatGermanDate(row.start_date))} bis ${escapeHtml(formatGermanDate(row.end_date))}</strong>
+          <span>${escapeHtml(trailerCalendarStatusLabel(row.status))}${row.note ? ` · ${escapeHtml(row.note)}` : ""}</span>
+        </div>
+        <button class="dashboard-calendar-delete" type="button" data-calendar-rule-id="${escapeHtml(row.id)}">Löschen</button>
+      </article>
+    `;
+  }).join("");
 }
 
 async function refreshDashboardTrailerCalendar() {
@@ -6716,6 +6779,7 @@ async function refreshDashboardTrailerCalendar() {
     const rows = await fetchTrailerCalendarRows(session);
     applyTrailerCalendarRows(rows);
     renderDashboardTrailerCalendarList(rows);
+    renderDashboardTrailerCalendarBoard();
   } catch (error) {
     if (status) {
       status.textContent = "Setup nötig";
@@ -6733,18 +6797,122 @@ async function refreshDashboardTrailerCalendar() {
   }
 }
 
+let dashboardTrailerCalendarCursor = dashboardGetMonthStart(new Date());
+let dashboardTrailerSelectedStart = "";
+let dashboardTrailerSelectedEnd = "";
+
+function updateDashboardTrailerCalendarSelection() {
+  const startInput = document.querySelector("#dashboardTrailerCalendarStart");
+  const endInput = document.querySelector("#dashboardTrailerCalendarEnd");
+  const label = document.querySelector("#dashboardTrailerSelectedRange");
+
+  if (startInput) startInput.value = dashboardTrailerSelectedStart || "";
+  if (endInput) endInput.value = dashboardTrailerSelectedEnd || "";
+
+  if (!label) return;
+  if (!dashboardTrailerSelectedStart) {
+    label.textContent = "Noch kein Zeitraum gewählt";
+  } else if (!dashboardTrailerSelectedEnd) {
+    label.textContent = `Start: ${formatGermanDate(dashboardTrailerSelectedStart)} – bitte Enddatum wählen`;
+  } else {
+    label.textContent = `${formatGermanDate(dashboardTrailerSelectedStart)} bis ${formatGermanDate(dashboardTrailerSelectedEnd)}`;
+  }
+}
+
+function renderDashboardTrailerSingleMonth(monthDate) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const leadingEmpty = (first.getDay() + 6) % 7;
+  const todayYmd = dashboardGetTodayYmd();
+  const startYmd = dashboardTrailerSelectedStart || "";
+  const endYmd = dashboardTrailerSelectedEnd || dashboardTrailerSelectedStart || "";
+
+  let cells = "";
+  for (let i = 0; i < leadingEmpty; i += 1) {
+    cells += `<span class="calendar-day empty" aria-hidden="true"></span>`;
+  }
+
+  for (let day = 1; day <= last.getDate(); day += 1) {
+    const date = new Date(year, month, day);
+    const ymd = dashboardToYmd(date);
+    const rule = findDashboardTrailerDayRule(ymd);
+    const normalized = normalizeTrailerCalendarStatus(rule?.status || "free");
+    const inRange = startYmd && endYmd && ymd >= startYmd && ymd <= endYmd;
+    const classes = [
+      "calendar-day",
+      "dashboard-calendar-day",
+      `status-${normalized}`,
+      ymd < todayYmd ? "is-past" : "",
+      ymd === todayYmd ? "is-today" : "",
+      inRange ? "is-selected" : "",
+      ymd === startYmd ? "is-start" : "",
+      ymd === endYmd ? "is-end" : "",
+      "is-clickable"
+    ].filter(Boolean).join(" ");
+    const label = rule ? `${trailerCalendarStatusLabel(rule.status)}${rule.note ? ` · ${rule.note}` : ""}` : "frei";
+
+    cells += `<button class="${classes}" type="button" data-dashboard-calendar-date="${ymd}" title="${escapeHtml(label)}"><em>${day}</em></button>`;
+  }
+
+  return `
+    <div class="calendar-month dashboard-calendar-month">
+      <div class="calendar-month-title">${TRAILER_DASHBOARD_MONTHS[month]} ${year}</div>
+      <div class="calendar-weekdays">${TRAILER_DASHBOARD_WEEKDAYS.map(day => `<span>${day}</span>`).join("")}</div>
+      <div class="calendar-days">${cells}</div>
+    </div>
+  `;
+}
+
+function renderDashboardTrailerCalendarBoard() {
+  const grid = document.querySelector("#dashboardTrailerCalendarGrid");
+  const headline = document.querySelector("#dashboardTrailerCalendarHeadline");
+  if (!grid) return;
+
+  const firstMonth = dashboardGetMonthStart(dashboardTrailerCalendarCursor || new Date());
+  const secondMonth = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + 1, 1);
+
+  if (headline) {
+    headline.textContent = `${TRAILER_DASHBOARD_MONTHS[firstMonth.getMonth()]} ${firstMonth.getFullYear()} – ${TRAILER_DASHBOARD_MONTHS[secondMonth.getMonth()]} ${secondMonth.getFullYear()}`;
+  }
+
+  grid.innerHTML = `${renderDashboardTrailerSingleMonth(firstMonth)}${renderDashboardTrailerSingleMonth(secondMonth)}`;
+  updateDashboardTrailerCalendarSelection();
+}
+
+function chooseDashboardTrailerCalendarDate(ymd) {
+  if (!dashboardParseYmd(ymd)) return;
+
+  if (!dashboardTrailerSelectedStart || dashboardTrailerSelectedEnd) {
+    dashboardTrailerSelectedStart = ymd;
+    dashboardTrailerSelectedEnd = "";
+  } else if (ymd < dashboardTrailerSelectedStart) {
+    dashboardTrailerSelectedEnd = dashboardTrailerSelectedStart;
+    dashboardTrailerSelectedStart = ymd;
+  } else {
+    dashboardTrailerSelectedEnd = ymd;
+  }
+
+  dashboardTrailerCalendarCursor = dashboardGetMonthStart(dashboardParseYmd(dashboardTrailerSelectedStart) || new Date());
+  renderDashboardTrailerCalendarBoard();
+}
+
+function clearDashboardTrailerCalendarSelection() {
+  dashboardTrailerSelectedStart = "";
+  dashboardTrailerSelectedEnd = "";
+  renderDashboardTrailerCalendarBoard();
+}
+
 function bindDashboardTrailerCalendarManager() {
   const manager = document.querySelector("#dashboardTrailerCalendarManager");
   const form = document.querySelector("#dashboardTrailerCalendarForm");
   const list = document.querySelector("#dashboardTrailerCalendarList");
+  const grid = document.querySelector("#dashboardTrailerCalendarGrid");
+  const prevMonth = document.querySelector("#dashboardTrailerCalendarPrevMonth");
+  const nextMonth = document.querySelector("#dashboardTrailerCalendarNextMonth");
+  const clearButton = document.querySelector("#dashboardTrailerCalendarClear");
   if (!manager || !form || !list) return;
-
-  const startInput = form.querySelector('input[name="start_date"]');
-  const endInput = form.querySelector('input[name="end_date"]');
-  const today = new Date();
-  const todayYmd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  if (startInput && !startInput.value) startInput.value = todayYmd;
-  if (endInput && !endInput.value) endInput.value = todayYmd;
 
   if (manager.dataset.bound === "true") {
     refreshDashboardTrailerCalendar();
@@ -6752,22 +6920,34 @@ function bindDashboardTrailerCalendarManager() {
   }
   manager.dataset.bound = "true";
 
-  startInput?.addEventListener("change", () => {
-    if (endInput && startInput.value && (!endInput.value || endInput.value < startInput.value)) {
-      endInput.value = startInput.value;
-    }
+  grid?.addEventListener("click", event => {
+    const button = event.target.closest("[data-dashboard-calendar-date]");
+    if (!button) return;
+    chooseDashboardTrailerCalendarDate(button.dataset.dashboardCalendarDate);
   });
+
+  prevMonth?.addEventListener("click", () => {
+    dashboardTrailerCalendarCursor = new Date(dashboardTrailerCalendarCursor.getFullYear(), dashboardTrailerCalendarCursor.getMonth() - 1, 1);
+    renderDashboardTrailerCalendarBoard();
+  });
+
+  nextMonth?.addEventListener("click", () => {
+    dashboardTrailerCalendarCursor = new Date(dashboardTrailerCalendarCursor.getFullYear(), dashboardTrailerCalendarCursor.getMonth() + 1, 1);
+    renderDashboardTrailerCalendarBoard();
+  });
+
+  clearButton?.addEventListener("click", clearDashboardTrailerCalendarSelection);
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
     const session = getStoredEmployeeSession();
     const data = new FormData(form);
-    const start = String(data.get("start_date") || "");
-    const end = String(data.get("end_date") || "");
+    const start = String(data.get("start_date") || dashboardTrailerSelectedStart || "");
+    const end = String(data.get("end_date") || dashboardTrailerSelectedEnd || "");
     const button = form.querySelector('button[type="submit"]');
 
     if (!start || !end || end < start) {
-      alert("Bitte einen gültigen Zeitraum auswählen.");
+      alert("Bitte im Kalender zuerst einen gültigen Zeitraum auswählen.");
       return;
     }
 
@@ -6782,9 +6962,8 @@ function bindDashboardTrailerCalendarManager() {
     try {
       if (button) button.disabled = true;
       await createTrailerCalendarRule(session, payload);
-      form.reset();
-      if (startInput) startInput.value = todayYmd;
-      if (endInput) endInput.value = todayYmd;
+      const note = form.querySelector('input[name="note"]');
+      if (note) note.value = "";
       await refreshDashboardTrailerCalendar();
     } catch (error) {
       alert(error.message || "Kalendereintrag konnte nicht gespeichert werden.");
@@ -6810,6 +6989,7 @@ function bindDashboardTrailerCalendarManager() {
     }
   });
 
+  renderDashboardTrailerCalendarBoard();
   refreshDashboardTrailerCalendar();
 }
 
@@ -7149,10 +7329,59 @@ function bindTrailerWizard() {
   }
 
   function updateDeliveryField() {
-    if (!handover || !deliveryAddressField) return;
+    if (!handover) return;
+
     const value = handover.value.toLowerCase();
-    const show = value.includes("lieferung") || value.includes("wunschort");
-    deliveryAddressField.classList.toggle("is-hidden", !show);
+    const deliveryInput = document.querySelector("#trailerDeliveryAddress");
+    const pickupField = document.querySelector("#trailerPickupReturnField");
+    const pickupInput = document.querySelector("#trailerPickupReturnAddress");
+    const noteInput = document.querySelector("#trailerHandoverNote");
+
+    const setDelivery = (visible, label, placeholder, required = false) => {
+      if (!deliveryAddressField || !deliveryInput) return;
+      deliveryAddressField.classList.toggle("is-hidden", !visible);
+      const labelNode = Array.from(deliveryAddressField.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+      if (labelNode) labelNode.textContent = label + "\n                  ";
+      deliveryInput.placeholder = placeholder;
+      deliveryInput.required = required;
+      if (!visible) deliveryInput.value = "";
+    };
+
+    const setPickup = (label, value, placeholder, readonly = true, required = false) => {
+      if (!pickupField || !pickupInput) return;
+      const labelNode = Array.from(pickupField.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+      if (labelNode) labelNode.textContent = label + "\n                  ";
+      pickupInput.readOnly = readonly;
+      pickupInput.required = required;
+      pickupInput.placeholder = placeholder || "";
+      if (value !== null) pickupInput.value = value;
+      pickupField.classList.toggle("field-editable", !readonly);
+    };
+
+    if (value.includes("lieferung & abholung")) {
+      setDelivery(true, "Lieferadresse", "Adresse, an die der Anhänger geliefert werden soll", true);
+      setPickup("Abhol-/Rückgabeadresse", "", "Adresse, an der All4You den Anhänger wieder abholen soll", false, true);
+      if (noteInput) noteInput.value = "Lieferung und spätere Abholung erfolgen gegen Aufpreis nach Bestätigung durch All4You.";
+      return;
+    }
+
+    if (value.includes("lieferung")) {
+      setDelivery(true, "Wunschort / Lieferadresse", "Adresse für die Lieferung des Anhängers", true);
+      setPickup("Rückgabe / Abholung", "Sachsenstraße Höhe 25, 81543 München", "", true, false);
+      if (noteInput) noteInput.value = "Lieferung zum Wunschort gegen Aufpreis. Rückgabe/Abholung wird final durch All4You bestätigt.";
+      return;
+    }
+
+    if (value.includes("rücksprache")) {
+      setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
+      setPickup("Gewünschter Ort / Hinweis zur Übergabe", "", "z. B. Adresse, Stadtteil oder kurzer Hinweis zur Übergabe", false, false);
+      if (noteInput) noteInput.value = "All4You soll zur Übergabe Rücksprache halten.";
+      return;
+    }
+
+    setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
+    setPickup("Abholung/Rückgabe", "Sachsenstraße Höhe 25, 81543 München", "", true, false);
+    if (noteInput) noteInput.value = "Abholung und Rückgabe am Standort Sachsenstraße Höhe 25, 81543 München.";
   }
 
   function collectSummary() {
@@ -7169,6 +7398,8 @@ function bindTrailerWizard() {
       availabilityNote: data.get("availabilityNote") || evaluateTrailerAvailability().text,
       handover: data.get("handover") || "",
       deliveryAddress: data.get("deliveryAddress") || "",
+      pickupReturnAddress: data.get("pickupReturnAddress") || "",
+      handoverNote: data.get("handoverNote") || "",
       cargo: data.get("cargo") || "",
       cargoSize: data.get("cargoSize") || "",
       towVehicle: data.get("towVehicle") || "",
@@ -7194,6 +7425,8 @@ function bindTrailerWizard() {
       <div class="summary-wide"><strong>Hinweis</strong><span>${escapeHtml(summary.availabilityNote || "—")}</span></div>
       <div><strong>Übergabe</strong><span>${escapeHtml(summary.handover || "—")}</span></div>
       ${summary.deliveryAddress ? `<div><strong>Wunschort</strong><span>${escapeHtml(summary.deliveryAddress)}</span></div>` : ""}
+      ${summary.pickupReturnAddress ? `<div><strong>Abholung/Rückgabe</strong><span>${escapeHtml(summary.pickupReturnAddress)}</span></div>` : ""}
+      ${summary.handoverNote ? `<div class="summary-wide"><strong>Übergabe-Hinweis</strong><span>${escapeHtml(summary.handoverNote)}</span></div>` : ""}
       <div><strong>Transportgut</strong><span>${escapeHtml(summary.cargo || "—")}</span></div>
       <div><strong>Menge / Größe</strong><span>${escapeHtml(summary.cargoSize || "—")}</span></div>
       <div><strong>Zugfahrzeug</strong><span>${escapeHtml(summary.towVehicle || "—")}</span></div>
@@ -7350,7 +7583,9 @@ function bindTrailerWizard() {
       `Hinweis: ${summary.availabilityNote}\n` +
       `Kaution: nach Absprache\n\n` +
       `Übergabe: ${summary.handover}\n` +
-      `Wunschort: ${summary.deliveryAddress}\n\n` +
+      `Wunschort / Lieferadresse: ${summary.deliveryAddress}\n` +
+      `Abholung/Rückgabeort: ${summary.pickupReturnAddress}\n` +
+      `Übergabe-Hinweis: ${summary.handoverNote}\n\n` +
       `Transportgut: ${summary.cargo}\n` +
       `Menge / Größe: ${summary.cargoSize}\n` +
       `Zugfahrzeug: ${summary.towVehicle}\n` +
@@ -7388,6 +7623,8 @@ function bindTrailerWizard() {
           deposit: "nach Absprache",
           handover: summary.handover,
           delivery_address: summary.deliveryAddress,
+          pickup_return_address: summary.pickupReturnAddress,
+          handover_note: summary.handoverNote,
           cargo: summary.cargo,
           cargo_size: summary.cargoSize,
           tow_vehicle: summary.towVehicle,
@@ -8126,7 +8363,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
+   DBG: ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

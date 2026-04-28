@@ -1,37 +1,23 @@
-## ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
+## ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
 
 Patch für All4You Service München.
 
-### Ziel
-Der Anhänger-Kalender wurde nach dem gewünschten Ablauf angepasst:
+Enthalten:
 
-- Kunden wählen im Anhänger-Wizard nur einen Mietzeitraum aus.
-- Keine öffentlichen Statusanzeigen wie „angefragt“, „nur auf Anfrage“ oder interne Belegungen.
-- Vergangene Tage bleiben im Kundenkalender blockiert.
-- Zukünftige Tage sind grundsätzlich auswählbar und werden als Mietanfrage gesendet.
-- Preis und Mietdauer werden weiterhin automatisch berechnet.
-- Die Anfrage landet weiterhin wie gewohnt im Mitarbeiter-Dashboard.
-- Interne Belegungen werden nur im Mitarbeiterportal über den neuen Menüpunkt „Anhänger-Kalender“ verwaltet.
-- Im Dashboard können Zeiträume als belegt gespeichert und gelöscht werden.
-- Der Menüpunkt „Anhänger-Kalender“ sitzt links in der Dashboard-Navigation.
+- Anhänger-Wizard Übergabe/Standort dynamisch verbessert
+- bei Selbstabholung bleibt Sachsenstraße fest
+- bei Lieferung & Abholung ist der Abhol-/Rückgabeort frei editierbar
+- bei Rücksprache ist der gewünschte Ort/Hinweis frei editierbar
+- neue Felder werden in Zusammenfassung, Mailtext, Supabase-Details und Dashboard mitgespeichert
+- interner Anhänger-Kalender im Mitarbeiterportal als klickbarer Kalender
+- Status intern speicherbar: frei, vermietet, reserviert, in Wartung
+- Kalenderfarben: frei grün, vermietet blau, reserviert gelb, Wartung rot
+- Kunden sehen interne Belegungen nicht öffentlich und senden weiterhin nur Mietanfragen
 
-### Wichtig
-Die öffentliche Kundenseite liest keine internen Kalenderbelegungen aus Supabase aus. Kunden sollen bewusst nur eine Anfrage stellen und keine internen Belegungs-/Verfügbarkeitsdaten sehen.
+Wichtig:
 
-### Supabase SQL
-Falls die Tabelle `trailer_calendar_rules` noch nicht existiert oder aus V5.6.1 noch alte Statuswerte enthält, bitte einmal diese Datei im Supabase SQL Editor ausführen:
+- Die SQL-Datei `supabase/sql/trailer_calendar_rules.sql` bitte einmal im Supabase SQL Editor ausführen, damit die Statuswerte frei/vermietet/reserviert/Wartung gespeichert werden können.
+- Keine Änderungen an Impressum, Datenschutz, AGB, Cookie-Banner, Resend, Auth oder bestehenden Anfrage-Flows außerhalb des Anhänger-Wizards/Kalenders.
 
-`supabase/sql/trailer_calendar_rules.sql`
-
-### Nicht verändert
-- Impressum
-- Datenschutzerklärung
-- AGB
-- Cookie-Banner
-- Resend/Mail-Function
-- Auth/Login-Flow
-- bestehende Anfrage-Speicherung
-- andere Wizard-Flows
-
-### Sichtbare DBG
-`ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL`
+DBG:
+`ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR`

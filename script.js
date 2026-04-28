@@ -793,6 +793,14 @@ function dashboardFieldLabel(key) {
     dropoff: "Zielort",
     distance: "Distanz",
     duration: "Fahrzeit",
+    pickup_verified_address: "Bestätigter Abholort",
+    dropoff_verified_address: "Bestätigter Zielort",
+    pickup_place_id: "Google Place-ID Abholort",
+    dropoff_place_id: "Google Place-ID Zielort",
+    distance_meters: "Distanz in Metern",
+    duration_seconds: "Fahrzeit in Sekunden",
+    route_provider: "Berechnung",
+    google_address_route_active: "Google-Adressprüfung aktiv",
     vehicle: "Fahrzeugart",
     condition: "Zustand",
     has_key: "Schlüssel",
@@ -875,6 +883,14 @@ function getDashboardDetailGroups(ticket) {
     "dropoff",
     "distance",
     "duration",
+    "pickup_verified_address",
+    "dropoff_verified_address",
+    "pickup_place_id",
+    "dropoff_place_id",
+    "distance_meters",
+    "duration_seconds",
+    "route_provider",
+    "google_address_route_active",
     "delivery_address",
     "handover",
     "no_parking_zone",
@@ -2243,8 +2259,10 @@ function buildClearanceSummaryText(summary) {
 
 function buildRollerSummaryText(summary) {
   const parts = [
-    summary.pickup ? `Abholort: ${summary.pickup}` : "",
-    summary.dropoff ? `Zielort: ${summary.dropoff}` : "",
+    summary.pickupLabel ? `Abholort: ${summary.pickupLabel}` : (summary.pickup ? `Abholort: ${summary.pickup}` : ""),
+    summary.dropoffLabel ? `Zielort: ${summary.dropoffLabel}` : (summary.dropoff ? `Zielort: ${summary.dropoff}` : ""),
+    summary.distance && summary.distance !== "Noch nicht berechnet" ? `Distanz: ${summary.distance}` : "",
+    summary.duration && summary.duration !== "Noch nicht berechnet" ? `Fahrzeit: ${summary.duration}` : "",
     summary.vehicle,
     summary.condition,
     summary.access ? `Zugang: ${summary.access}` : "",
@@ -2306,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.3.3-SERVICE-IMAGE-SWAP-GLOW
+// DBG: ALL4YOU-ROUTER-V5.4.0-GOOGLE-ADDRESS-ROUTE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2532,8 +2550,8 @@ function rollerPage() {
         <p class="eyebrow">Preis & Strecke</p>
         <h2>Distanz als Grundlage für die Einschätzung.</h2>
         <p>
-          Später sollen Abholort und Zielort mit Google Maps verbunden werden. Dann kann die Strecke automatisch geprüft
-          und als Distanz mit in die Anfrage übernommen werden. Der Preis bleibt trotzdem individuell, weil Zustand,
+          Abholort und Zielort werden über bestätigte Google-Adressvorschläge ausgewählt. Danach wird die Strecke automatisch geprüft
+          und als Distanz mit in die Anfrage übernommen. Der Preis bleibt trotzdem individuell, weil Zustand,
           Zugänglichkeit und Aufwand ebenfalls wichtig sind.
         </p>
       </aside>
@@ -2544,8 +2562,8 @@ function rollerPage() {
         <p class="eyebrow">Roller-Assistent</p>
         <h2>Rollerabholservice Schritt für Schritt anfragen.</h2>
         <p class="lead">
-          Der Assistent fragt erst Abholort und Zielort ab, bereitet später die Distanzmessung per Google Maps vor
-          und sammelt danach Fahrzeugzustand, Zugänglichkeit und Kontaktangaben.
+          Der Assistent fragt erst bestätigte Abhol- und Zieladressen ab, berechnet danach Distanz und Fahrzeit
+          und sammelt anschließend Fahrzeugzustand, Zugänglichkeit und Kontaktangaben.
         </p>
 
         <div class="roller-wizard" id="rollerWizard" data-current-step="0">
@@ -2563,19 +2581,21 @@ function rollerPage() {
             <div class="wizard-step active" data-title="Strecke & Distanz">
               <div class="form-grid">
                 <label>Abholort
-                  <input name="pickup" id="rollerPickup" placeholder="z. B. Musterstraße 1, München" required>
+                  <input name="pickup" id="rollerPickup" placeholder="z. B. Sachsenstraße 25, München" autocomplete="off" required>
+                  <span class="address-confirmation" id="rollerPickupStatus">Bitte Adresse eingeben und Vorschlag auswählen.</span>
                 </label>
                 <label>Zielort
-                  <input name="dropoff" id="rollerDropoff" placeholder="z. B. Werkstattstraße 12, München" required>
+                  <input name="dropoff" id="rollerDropoff" placeholder="z. B. Werkstattstraße 12, München" autocomplete="off" required>
+                  <span class="address-confirmation" id="rollerDropoffStatus">Bitte Adresse eingeben und Vorschlag auswählen.</span>
                 </label>
               </div>
 
               <div class="route-preview-box" id="rollerRoutePreview">
                 <div>
-                  <strong>Distanzmessung aktiv</strong>
+                  <strong>Adressprüfung & Distanzmessung aktiv</strong>
                   <p>
-                    Abholort und Zielort können für die Präsentation über eine kostenlose OpenStreetMap/OSRM-Demo berechnet werden.
-                    Für den produktiven Betrieb kann später Google Maps oder ein eigener Routing-Anbieter angebunden werden.
+                    Bitte Abholort und Zielort aus den vorgeschlagenen Adressen auswählen. Danach werden Distanz und Fahrzeit
+                    über die Google-Routenanbindung berechnet und mit der Anfrage gespeichert.
                   </p>
                 </div>
                 <button class="btn ghost" type="button" id="rollerMockDistance">Strecke berechnen</button>
@@ -2587,7 +2607,7 @@ function rollerPage() {
               </div>
 
               <p class="form-note roller-route-note" id="rollerRouteNote">
-                Bitte Abholort und Zielort eintragen und anschließend „Strecke berechnen“ klicken.
+                Bitte Abholort und Zielort eingeben, jeweils einen Vorschlag auswählen und anschließend „Strecke berechnen“ klicken.
               </p>
             </div>
 
@@ -2731,7 +2751,7 @@ function rollerPage() {
       <p class="eyebrow">Ablauf</p>
       <h2>So läuft der Rollerabholservice ab.</h2>
       <div class="steps five-steps">
-        <article class="step"><span>1</span><h3>Strecke eintragen</h3><p>Abholort und Zielort werden angegeben und später per Google Maps geprüft.</p></article>
+        <article class="step"><span>1</span><h3>Strecke bestätigen</h3><p>Abholort und Zielort werden über Google-Adressvorschläge ausgewählt und als Route geprüft.</p></article>
         <article class="step"><span>2</span><h3>Roller beschreiben</h3><p>Fahrzeugart, Zustand und Rollbarkeit werden erfasst.</p></article>
         <article class="step"><span>3</span><h3>Zugang klären</h3><p>Standort, Garage, Tiefgarage oder besondere Situationen werden angegeben.</p></article>
         <article class="step"><span>4</span><h3>Kontakt senden</h3><p>All4You erhält die vorbereitete Anfrage mit allen wichtigen Daten.</p></article>
@@ -5034,8 +5054,14 @@ function bindCleaningWizard() {
     updateWizard();
   });
 
-  next.addEventListener("click", () => {
+  next.addEventListener("click", async () => {
     if (!validateStep()) return;
+
+    if (current === 0 && !hasConfirmedRoute()) {
+      const calculated = await runRollerRouteCalculation();
+      if (!calculated) return;
+    }
+
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
   });
@@ -5257,8 +5283,14 @@ function bindClearanceWizard() {
     updateWizard();
   });
 
-  next.addEventListener("click", () => {
+  next.addEventListener("click", async () => {
     if (!validateStep()) return;
+
+    if (current === 0 && !hasConfirmedRoute()) {
+      const calculated = await runRollerRouteCalculation();
+      if (!calculated) return;
+    }
+
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
   });
@@ -5358,8 +5390,40 @@ function bindClearanceWizard() {
 
 
 /* ==========================================================================
-   Roller Distanzmessung Demo
+   Roller Google-Adressvorschläge & Distanzmessung
    ========================================================================== */
+
+const ALL4YOU_ROUTE_FUNCTION = "calculate-route";
+const ALL4YOU_PLACES_FUNCTION = "places-autocomplete";
+
+function createRouteSessionToken() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `all4you-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function callPublicEdgeFunction(functionName, payload) {
+  if (!isSupabaseConfigured()) {
+    throw new Error("Supabase ist nicht konfiguriert.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload || {})
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.error || "Anfrage konnte nicht verarbeitet werden.");
+  }
+
+  return data;
+}
 
 function formatRouteDistance(meters) {
   const km = Number(meters || 0) / 1000;
@@ -5380,72 +5444,216 @@ function formatRouteDuration(seconds) {
   return `${minutes} Min.`;
 }
 
-async function geocodeRollerAddress(address) {
-  const query = String(address || "").trim();
-  if (!query) throw new Error("Adresse fehlt.");
-
-  const params = new URLSearchParams({
-    format: "jsonv2",
-    q: `${query}, München, Deutschland`,
-    countrycodes: "de",
-    limit: "1",
-    addressdetails: "1"
-  });
-
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-    method: "GET",
-    headers: {
-      "Accept": "application/json"
-    }
-  });
-
-  const data = await response.json().catch(() => []);
-
-  if (!response.ok || !Array.isArray(data) || !data.length) {
-    throw new Error(`Adresse konnte nicht gefunden werden: ${query}`);
-  }
-
-  const place = data[0];
+function normalizeRoutePlace(place, fallbackAddress = "") {
+  if (!place || typeof place !== "object") return null;
+  const placeId = String(place.placeId || place.place_id || "").trim();
+  const address = String(place.address || place.description || place.text || fallbackAddress || "").trim();
+  if (!placeId || !address) return null;
   return {
-    lat: Number(place.lat),
-    lon: Number(place.lon),
-    label: place.display_name || query
+    placeId,
+    address,
+    mainText: String(place.mainText || place.main_text || address).trim(),
+    secondaryText: String(place.secondaryText || place.secondary_text || "").trim()
   };
 }
 
-async function calculateRollerRoute(pickup, dropoff) {
-  const [from, to] = await Promise.all([
-    geocodeRollerAddress(pickup),
-    geocodeRollerAddress(dropoff)
-  ]);
+async function fetchRollerAddressSuggestions(input, sessionToken) {
+  const query = String(input || "").trim();
+  if (query.length < 3) return [];
 
-  if (!Number.isFinite(from.lat) || !Number.isFinite(from.lon) || !Number.isFinite(to.lat) || !Number.isFinite(to.lon)) {
-    throw new Error("Koordinaten konnten nicht sauber gelesen werden.");
+  const data = await callPublicEdgeFunction(ALL4YOU_PLACES_FUNCTION, {
+    input: query,
+    sessionToken
+  });
+
+  return Array.isArray(data?.suggestions) ? data.suggestions : [];
+}
+
+async function calculateRollerRoute(pickupPlace, dropoffPlace) {
+  const pickup = normalizeRoutePlace(pickupPlace);
+  const dropoff = normalizeRoutePlace(dropoffPlace);
+
+  if (!pickup || !dropoff) {
+    throw new Error("Bitte Abholort und Zielort zuerst aus den Vorschlägen bestätigen.");
   }
 
-  const coords = `${from.lon},${from.lat};${to.lon},${to.lat}`;
-  const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=false&alternatives=false&steps=false`, {
-    method: "GET",
-    headers: {
-      "Accept": "application/json"
+  const data = await callPublicEdgeFunction(ALL4YOU_ROUTE_FUNCTION, {
+    pickup: {
+      placeId: pickup.placeId,
+      address: pickup.address
+    },
+    dropoff: {
+      placeId: dropoff.placeId,
+      address: dropoff.address
     }
   });
 
-  const data = await response.json().catch(() => null);
-  const route = data?.routes?.[0];
-
-  if (!response.ok || !route) {
-    throw new Error("Route konnte nicht berechnet werden.");
-  }
+  const distanceMeters = Number(data?.distanceMeters || data?.rawDistanceMeters || 0);
+  const durationSeconds = Number(data?.durationSeconds || data?.rawDurationSeconds || 0);
 
   return {
-    distance: formatRouteDistance(route.distance),
-    duration: formatRouteDuration(route.duration),
-    rawDistanceMeters: Math.round(route.distance || 0),
-    rawDurationSeconds: Math.round(route.duration || 0),
-    pickupLabel: from.label,
-    dropoffLabel: to.label,
-    provider: "OpenStreetMap / OSRM Demo"
+    distance: data?.distanceText || formatRouteDistance(distanceMeters),
+    duration: data?.durationText || formatRouteDuration(durationSeconds),
+    rawDistanceMeters: Number.isFinite(distanceMeters) && distanceMeters > 0 ? Math.round(distanceMeters) : null,
+    rawDurationSeconds: Number.isFinite(durationSeconds) && durationSeconds > 0 ? Math.round(durationSeconds) : null,
+    pickupLabel: data?.pickupAddress || pickup.address,
+    dropoffLabel: data?.dropoffAddress || dropoff.address,
+    pickupPlaceId: pickup.placeId,
+    dropoffPlaceId: dropoff.placeId,
+    provider: data?.provider || "Google Routes API"
+  };
+}
+
+function resetRollerRouteInfo() {
+  return {
+    distance: "Noch nicht berechnet",
+    duration: "Noch nicht berechnet",
+    rawDistanceMeters: null,
+    rawDurationSeconds: null,
+    pickupLabel: "",
+    dropoffLabel: "",
+    pickupPlaceId: "",
+    dropoffPlaceId: "",
+    provider: ""
+  };
+}
+
+function updateAddressConfirmation(statusElement, type, text) {
+  if (!statusElement) return;
+  statusElement.classList.remove("success", "error", "loading");
+  if (type) statusElement.classList.add(type);
+  statusElement.textContent = text || "";
+}
+
+function bindGoogleAddressAutocomplete(input, statusElement, options = {}) {
+  if (!input) return null;
+
+  const sessionToken = createRouteSessionToken();
+  const label = input.closest("label");
+  const dropdown = document.createElement("div");
+  dropdown.className = "address-suggestions";
+  dropdown.hidden = true;
+
+  if (label) {
+    label.classList.add("address-autocomplete-field");
+    label.appendChild(dropdown);
+  } else {
+    input.insertAdjacentElement("afterend", dropdown);
+  }
+
+  let selectedPlace = null;
+  let debounceTimer = null;
+  let requestIndex = 0;
+
+  function setSelectedPlace(place) {
+    selectedPlace = normalizeRoutePlace(place, input.value);
+    input.classList.toggle("address-confirmed", Boolean(selectedPlace));
+
+    if (selectedPlace) {
+      input.value = selectedPlace.address;
+      input.setCustomValidity("");
+      updateAddressConfirmation(statusElement, "success", "Adresse bestätigt.");
+      options.onSelect?.(selectedPlace);
+    }
+  }
+
+  function clearSelection(message = "Bitte Adresse aus den Vorschlägen auswählen.") {
+    selectedPlace = null;
+    input.classList.remove("address-confirmed");
+    input.setCustomValidity(message);
+    updateAddressConfirmation(statusElement, "error", message);
+    options.onDirty?.();
+  }
+
+  function hideSuggestions() {
+    dropdown.hidden = true;
+    dropdown.innerHTML = "";
+  }
+
+  function renderSuggestions(suggestions) {
+    if (!suggestions.length) {
+      dropdown.innerHTML = `<div class="address-suggestion-empty">Keine passende Adresse gefunden.</div>`;
+      dropdown.hidden = false;
+      return;
+    }
+
+    dropdown.innerHTML = `
+      ${suggestions.map((item, index) => {
+        const text = escapeHtml(item.text || item.address || "Adresse");
+        const main = escapeHtml(item.mainText || item.main_text || item.text || item.address || "Adresse");
+        const secondary = escapeHtml(item.secondaryText || item.secondary_text || "");
+        return `
+          <button class="address-suggestion-item" type="button" data-index="${index}">
+            <strong>${main}</strong>
+            ${secondary ? `<span>${secondary}</span>` : `<span>${text}</span>`}
+          </button>
+        `;
+      }).join("")}
+      <div class="address-suggestion-powered">Vorschläge von Google</div>
+    `;
+
+    Array.from(dropdown.querySelectorAll(".address-suggestion-item")).forEach(button => {
+      button.addEventListener("mousedown", event => event.preventDefault());
+      button.addEventListener("click", () => {
+        const index = Number(button.dataset.index);
+        const selected = suggestions[index];
+        if (!selected) return;
+        setSelectedPlace(selected);
+        hideSuggestions();
+      });
+    });
+
+    dropdown.hidden = false;
+  }
+
+  async function loadSuggestions() {
+    const query = input.value.trim();
+    const currentRequest = ++requestIndex;
+
+    if (query.length < 3) {
+      hideSuggestions();
+      updateAddressConfirmation(statusElement, null, "Mindestens 3 Zeichen eingeben, dann Vorschlag auswählen.");
+      return;
+    }
+
+    updateAddressConfirmation(statusElement, "loading", "Adressvorschläge werden geladen …");
+
+    try {
+      const suggestions = await fetchRollerAddressSuggestions(query, sessionToken);
+      if (currentRequest !== requestIndex) return;
+      renderSuggestions(suggestions);
+      if (!suggestions.length) input.setCustomValidity("Bitte eine echte Adresse auswählen.");
+    } catch (error) {
+      if (currentRequest !== requestIndex) return;
+      dropdown.innerHTML = `<div class="address-suggestion-empty">${escapeHtml(error.message || "Adressvorschläge konnten nicht geladen werden.")}</div>`;
+      dropdown.hidden = false;
+      input.setCustomValidity("Adressvorschläge konnten nicht geladen werden.");
+      updateAddressConfirmation(statusElement, "error", error.message || "Adressvorschläge konnten nicht geladen werden.");
+    }
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    clearSelection(input.value.trim().length ? "Bitte Adresse aus den Vorschlägen auswählen." : "Bitte Adresse eingeben und Vorschlag auswählen.");
+    debounceTimer = setTimeout(loadSuggestions, 320);
+  });
+
+  input.addEventListener("focus", () => {
+    if (dropdown.innerHTML.trim()) dropdown.hidden = false;
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(hideSuggestions, 140);
+  });
+
+  input.setCustomValidity("Bitte Adresse eingeben und Vorschlag auswählen.");
+  updateAddressConfirmation(statusElement, null, "Bitte Adresse eingeben und Vorschlag auswählen.");
+
+  return {
+    getSelectedPlace: () => selectedPlace,
+    setSelectedPlace,
+    clearSelection,
+    hideSuggestions
   };
 }
 
@@ -5472,20 +5680,18 @@ function bindRollerWizard() {
   const distanceValue = document.querySelector("#rollerDistanceValue");
   const durationValue = document.querySelector("#rollerDurationValue");
   const routeNote = document.querySelector("#rollerRouteNote");
+  const pickupInput = document.querySelector("#rollerPickup");
+  const dropoffInput = document.querySelector("#rollerDropoff");
+  const pickupStatus = document.querySelector("#rollerPickupStatus");
+  const dropoffStatus = document.querySelector("#rollerDropoffStatus");
 
   if (!wizard || !form || !result || !prev || !next || !submit) return;
 
   const steps = Array.from(form.querySelectorAll(".wizard-step"));
   let current = 0;
-  let routeInfo = {
-    distance: "Noch nicht berechnet",
-    duration: "Noch nicht berechnet",
-    rawDistanceMeters: null,
-    rawDurationSeconds: null,
-    pickupLabel: "",
-    dropoffLabel: "",
-    provider: ""
-  };
+  let routeInfo = resetRollerRouteInfo();
+  let autoRouteTimer = null;
+  let routeCalculationRunning = false;
 
   function collectSummary() {
     const data = new FormData(form);
@@ -5494,6 +5700,13 @@ function bindRollerWizard() {
       dropoff: data.get("dropoff") || "",
       distance: routeInfo.distance,
       duration: routeInfo.duration,
+      rawDistanceMeters: routeInfo.rawDistanceMeters,
+      rawDurationSeconds: routeInfo.rawDurationSeconds,
+      pickupLabel: routeInfo.pickupLabel || "",
+      dropoffLabel: routeInfo.dropoffLabel || "",
+      pickupPlaceId: routeInfo.pickupPlaceId || "",
+      dropoffPlaceId: routeInfo.dropoffPlaceId || "",
+      routeProvider: routeInfo.provider || "",
       vehicle: data.get("vehicle") || "",
       condition: data.get("condition") || "",
       hasKey: data.get("hasKey") || "",
@@ -5514,6 +5727,8 @@ function bindRollerWizard() {
     summaryBox.innerHTML = `
       <div><strong>Abholort</strong><span>${escapeHtml(summary.pickup || "—")}</span></div>
       <div><strong>Zielort</strong><span>${escapeHtml(summary.dropoff || "—")}</span></div>
+      <div><strong>Bestätigter Abholort</strong><span>${escapeHtml(summary.pickupLabel || "—")}</span></div>
+      <div><strong>Bestätigter Zielort</strong><span>${escapeHtml(summary.dropoffLabel || "—")}</span></div>
       <div><strong>Distanz</strong><span>${escapeHtml(summary.distance || "—")}</span></div>
       <div><strong>Fahrzeit</strong><span>${escapeHtml(summary.duration || "—")}</span></div>
       <div><strong>Berechnung</strong><span>${escapeHtml(summary.routeProvider || "—")}</span></div>
@@ -5548,6 +5763,102 @@ function bindRollerWizard() {
     if (current === steps.length - 1) renderSummary();
   }
 
+  function clearCalculatedRoute(message = "Bitte Strecke nach der Adressauswahl neu berechnen.") {
+    routeInfo = resetRollerRouteInfo();
+    if (distanceValue) distanceValue.textContent = routeInfo.distance;
+    if (durationValue) durationValue.textContent = routeInfo.duration;
+    setRollerRouteState(routeNote, null, message);
+  }
+
+  function getConfirmedPickupPlace() {
+    return pickupController?.getSelectedPlace?.() || null;
+  }
+
+  function getConfirmedDropoffPlace() {
+    return dropoffController?.getSelectedPlace?.() || null;
+  }
+
+  function hasConfirmedRoute() {
+    return Boolean(routeInfo.rawDistanceMeters && routeInfo.rawDurationSeconds && routeInfo.pickupPlaceId && routeInfo.dropoffPlaceId);
+  }
+
+  function scheduleAutoRouteCalculation() {
+    clearTimeout(autoRouteTimer);
+    if (!getConfirmedPickupPlace() || !getConfirmedDropoffPlace()) return;
+    autoRouteTimer = setTimeout(() => {
+      runRollerRouteCalculation({ automatic: true }).catch(() => null);
+    }, 450);
+  }
+
+  const pickupController = bindGoogleAddressAutocomplete(pickupInput, pickupStatus, {
+    onSelect: () => {
+      clearCalculatedRoute("Abholort bestätigt. Bitte Zielort bestätigen, danach wird die Strecke berechnet.");
+      scheduleAutoRouteCalculation();
+    },
+    onDirty: () => clearCalculatedRoute("Abholort wurde geändert. Bitte Adresse erneut aus den Vorschlägen bestätigen.")
+  });
+
+  const dropoffController = bindGoogleAddressAutocomplete(dropoffInput, dropoffStatus, {
+    onSelect: () => {
+      clearCalculatedRoute("Zielort bestätigt. Sobald beide Adressen bestätigt sind, wird die Strecke berechnet.");
+      scheduleAutoRouteCalculation();
+    },
+    onDirty: () => clearCalculatedRoute("Zielort wurde geändert. Bitte Adresse erneut aus den Vorschlägen bestätigen.")
+  });
+
+  async function runRollerRouteCalculation(options = {}) {
+    const pickupPlace = getConfirmedPickupPlace();
+    const dropoffPlace = getConfirmedDropoffPlace();
+
+    if (!pickupPlace || !dropoffPlace) {
+      setRollerRouteState(routeNote, "error", "Bitte Abholort und Zielort aus den Vorschlägen auswählen und bestätigen.");
+      if (!pickupPlace && pickupInput) pickupInput.reportValidity();
+      if (pickupPlace && !dropoffPlace && dropoffInput) dropoffInput.reportValidity();
+      return false;
+    }
+
+    if (routeCalculationRunning) return false;
+
+    routeCalculationRunning = true;
+    if (mockDistanceButton) {
+      mockDistanceButton.disabled = true;
+      mockDistanceButton.textContent = options.automatic ? "Berechne automatisch …" : "Berechne …";
+    }
+    if (distanceValue) distanceValue.textContent = "Berechnung läuft …";
+    if (durationValue) durationValue.textContent = "Berechnung läuft …";
+    setRollerRouteState(routeNote, "loading", "Bestätigte Adressen und Route werden geprüft …");
+
+    try {
+      routeInfo = await calculateRollerRoute(pickupPlace, dropoffPlace);
+
+      if (distanceValue) distanceValue.textContent = routeInfo.distance;
+      if (durationValue) durationValue.textContent = routeInfo.duration;
+
+      setRollerRouteState(
+        routeNote,
+        "success",
+        `Strecke berechnet: ${routeInfo.distance}, ca. ${routeInfo.duration}. Die bestätigten Adressen und Werte werden gespeichert.`
+      );
+      return true;
+    } catch (error) {
+      routeInfo = resetRollerRouteInfo();
+      routeInfo.distance = "nicht berechnet";
+      routeInfo.duration = "nicht berechnet";
+      routeInfo.provider = "Google Routes API";
+
+      if (distanceValue) distanceValue.textContent = routeInfo.distance;
+      if (durationValue) durationValue.textContent = routeInfo.duration;
+      setRollerRouteState(routeNote, "error", error.message || "Strecke konnte nicht berechnet werden.");
+      return false;
+    } finally {
+      routeCalculationRunning = false;
+      if (mockDistanceButton) {
+        mockDistanceButton.disabled = false;
+        mockDistanceButton.textContent = "Strecke berechnen";
+      }
+    }
+  }
+
   function validateStep() {
     const activeInputs = Array.from(steps[current].querySelectorAll("input, select, textarea"));
     for (const field of activeInputs) {
@@ -5556,51 +5867,19 @@ function bindRollerWizard() {
         return false;
       }
     }
+
+    if (current === 0) {
+      if (!getConfirmedPickupPlace() || !getConfirmedDropoffPlace()) {
+        setRollerRouteState(routeNote, "error", "Bitte beide Adressen aus den Vorschlägen auswählen. Nur bestätigte Adressen können übernommen werden.");
+        return false;
+      }
+    }
+
     return true;
   }
 
-  mockDistanceButton?.addEventListener("click", async () => {
-    const summary = collectSummary();
-    if (!summary.pickup || !summary.dropoff) {
-      setRollerRouteState(routeNote, "error", "Bitte zuerst Abholort und Zielort eintragen.");
-      return;
-    }
-
-    mockDistanceButton.disabled = true;
-    mockDistanceButton.textContent = "Berechne …";
-    if (distanceValue) distanceValue.textContent = "Berechnung läuft …";
-    if (durationValue) durationValue.textContent = "Berechnung läuft …";
-    setRollerRouteState(routeNote, "loading", "Adresse und Route werden geprüft …");
-
-    try {
-      routeInfo = await calculateRollerRoute(summary.pickup, summary.dropoff);
-
-      if (distanceValue) distanceValue.textContent = routeInfo.distance;
-      if (durationValue) durationValue.textContent = routeInfo.duration;
-
-      setRollerRouteState(
-        routeNote,
-        "success",
-        `Strecke berechnet: ${routeInfo.distance}, ca. ${routeInfo.duration}. Die Werte werden mit der Anfrage gespeichert.`
-      );
-    } catch (error) {
-      routeInfo = {
-        distance: "nicht berechnet",
-        duration: "nicht berechnet",
-        rawDistanceMeters: null,
-        rawDurationSeconds: null,
-        pickupLabel: "",
-        dropoffLabel: "",
-        provider: "OpenStreetMap / OSRM Demo"
-      };
-
-      if (distanceValue) distanceValue.textContent = routeInfo.distance;
-      if (durationValue) durationValue.textContent = routeInfo.duration;
-      setRollerRouteState(routeNote, "error", error.message || "Strecke konnte nicht berechnet werden.");
-    } finally {
-      mockDistanceButton.disabled = false;
-      mockDistanceButton.textContent = "Strecke berechnen";
-    }
+  mockDistanceButton?.addEventListener("click", () => {
+    runRollerRouteCalculation().catch(() => null);
   });
 
   prev.addEventListener("click", () => {
@@ -5608,8 +5887,14 @@ function bindRollerWizard() {
     updateWizard();
   });
 
-  next.addEventListener("click", () => {
+  next.addEventListener("click", async () => {
     if (!validateStep()) return;
+
+    if (current === 0 && !hasConfirmedRoute()) {
+      const calculated = await runRollerRouteCalculation();
+      if (!calculated) return;
+    }
+
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
   });
@@ -5665,6 +5950,11 @@ function bindRollerWizard() {
           route_provider: summary.routeProvider,
           pickup_verified_address: summary.pickupLabel,
           dropoff_verified_address: summary.dropoffLabel,
+          pickup_place_id: summary.pickupPlaceId,
+          dropoff_place_id: summary.dropoffPlaceId,
+          distance_meters: summary.rawDistanceMeters,
+          duration_seconds: summary.rawDurationSeconds,
+          google_address_route_active: true,
           vehicle: summary.vehicle,
           condition: summary.condition,
           has_key: summary.hasKey,
@@ -5673,8 +5963,7 @@ function bindRollerWizard() {
           rollable: summary.rollable,
           special_situation: summary.specialSituation,
           desired_date: summary.desiredDate,
-          message: summary.message,
-          distance_demo_active: true
+          message: summary.message
         },
         p_initial_message: summary.message
       });
@@ -5683,7 +5972,7 @@ function bindRollerWizard() {
         result,
         "Roller-Anfrage",
         response?.ticket_number,
-        "Falls die Strecke berechnet wurde, sind Distanz und Fahrzeit direkt in der Anfrage gespeichert."
+        "Bestätigte Adressen, Distanz und Fahrzeit wurden direkt in der Anfrage gespeichert."
       );
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
@@ -5874,8 +6163,14 @@ function bindTrailerWizard() {
     updateWizard();
   });
 
-  next.addEventListener("click", () => {
+  next.addEventListener("click", async () => {
     if (!validateStep()) return;
+
+    if (current === 0 && !hasConfirmedRoute()) {
+      const calculated = await runRollerRouteCalculation();
+      if (!calculated) return;
+    }
+
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
   });

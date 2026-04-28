@@ -2325,7 +2325,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+// DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3007,16 +3007,19 @@ function trailerPage() {
 
           <form id="trailerWizardForm" class="wizard-form">
             <div class="wizard-step active" data-title="Mietzeitraum & Preis">
-              <div class="form-grid">
-                <label>Mietbeginn
-                  <input name="rentalStart" id="trailerStartDate" type="date" required>
-                </label>
-                <label>Mietende
-                  <input name="rentalEnd" id="trailerEndDate" type="date" required>
-                </label>
+              <div class="trailer-period-control">
+                <div class="trailer-period-info">
+                  <strong>Gewählter Zeitraum</strong>
+                  <span id="trailerSelectedRangeText">Noch kein Zeitraum gewählt</span>
+                  <small>Bitte wählen Sie Start- und Enddatum direkt im Kalender aus.</small>
+                </div>
+                <button class="btn primary trailer-calendar-open" type="button" id="trailerOpenCalendarButton">Zeitraum wählen <span>›</span></button>
               </div>
 
-              <div class="calendar-hint-box trailer-calendar-panel">
+              <input name="rentalStart" id="trailerStartDate" type="hidden" required>
+              <input name="rentalEnd" id="trailerEndDate" type="hidden" required>
+
+              <div class="calendar-hint-box trailer-calendar-panel is-open" id="trailerCalendarPanel">
                 <div class="calendar-status-head">
                   <div>
                     <strong>Kalenderstatus</strong>
@@ -3027,6 +3030,12 @@ function trailerPage() {
                   <span class="calendar-status-badge status-open" id="trailerAvailabilityBadge">Bitte Zeitraum wählen</span>
                 </div>
 
+                <div class="trailer-calendar-toolbar">
+                  <button class="calendar-nav-button" type="button" id="trailerCalendarPrevMonth">‹ Vorheriger Monat</button>
+                  <strong id="trailerCalendarHeadline">Kalender</strong>
+                  <button class="calendar-nav-button" type="button" id="trailerCalendarNextMonth">Nächster Monat ›</button>
+                </div>
+
                 <div class="trailer-calendar-grid" id="trailerCalendarGrid" aria-live="polite"></div>
 
                 <div class="calendar-legend">
@@ -3034,6 +3043,11 @@ function trailerPage() {
                   <span><i class="legend-dot status-request"></i> angefragt</span>
                   <span><i class="legend-dot status-busy"></i> belegt</span>
                   <span><i class="legend-dot status-review"></i> nur auf Anfrage</span>
+                </div>
+
+                <div class="trailer-calendar-actions">
+                  <button class="btn ghost" type="button" id="trailerClearPeriodButton">Zeitraum löschen</button>
+                  <button class="btn primary" type="button" id="trailerConfirmPeriodButton">Auswahl übernehmen <span>›</span></button>
                 </div>
 
                 <input type="hidden" name="availabilityStatus" id="trailerAvailabilityStatusInput" value="Verfügbarkeit wird geprüft">
@@ -4115,6 +4129,48 @@ function pageDashboard() {
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
+          </section>
+
+          <section class="dashboard-panel trailer-calendar-manager" id="dashboardTrailerCalendarManager">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Anhänger-Kalender</p>
+                <h2>Verfügbarkeit steuern</h2>
+              </div>
+              <span class="status-pill" id="dashboardTrailerCalendarStatus">Nicht geladen</span>
+            </div>
+
+            <p class="dashboard-calendar-intro">
+              Hier können Zeiträume für die Anhängervermietung als angefragt, belegt oder nur auf Anfrage markiert werden.
+              Diese Einträge werden auf der öffentlichen Anhänger-Seite aus Supabase geladen.
+            </p>
+
+            <form class="dashboard-calendar-form" id="dashboardTrailerCalendarForm">
+              <label>Status
+                <select name="status" required>
+                  <option value="booked">belegt</option>
+                  <option value="requested">angefragt</option>
+                  <option value="manual_review">nur auf Anfrage</option>
+                </select>
+              </label>
+              <label>Von
+                <input type="date" name="start_date" required>
+              </label>
+              <label>Bis
+                <input type="date" name="end_date" required>
+              </label>
+              <label class="dashboard-calendar-note">Hinweis
+                <input type="text" name="note" placeholder="z. B. Reserviert, Wartung, Rücksprache nötig">
+              </label>
+              <button class="btn primary" type="submit">Zeitraum speichern <span>›</span></button>
+            </form>
+
+            <div class="dashboard-calendar-list" id="dashboardTrailerCalendarList">
+              <div class="dashboard-mini-empty">
+                <strong>Kalender wird geladen …</strong>
+                <p>Nach dem Login werden vorhandene Zeiträume aus Supabase angezeigt.</p>
+              </div>
+            </div>
           </section>
 
           <section class="dashboard-grid">
@@ -6481,6 +6537,298 @@ function bindRollerWizard() {
 
 
 
+
+/* ==========================================================================
+   Anhänger-Kalender / Supabase Sync
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
+   ========================================================================== */
+
+let all4youTrailerCalendarRules = {
+  booked: [],
+  requested: [],
+  manualReview: []
+};
+
+let all4youTrailerCalendarRows = [];
+let all4youTrailerCalendarLoadPromise = null;
+
+function emptyTrailerCalendarRules() {
+  return { booked: [], requested: [], manualReview: [] };
+}
+
+function normalizeTrailerCalendarStatus(status) {
+  const clean = String(status || "").toLowerCase();
+  if (clean === "booked" || clean === "busy" || clean === "belegt") return "booked";
+  if (clean === "requested" || clean === "request" || clean === "angefragt") return "requested";
+  if (clean === "manual_review" || clean === "review" || clean === "nur_auf_anfrage") return "manual_review";
+  return "manual_review";
+}
+
+function trailerCalendarStatusLabel(status) {
+  const clean = normalizeTrailerCalendarStatus(status);
+  if (clean === "booked") return "belegt";
+  if (clean === "requested") return "angefragt";
+  return "nur auf Anfrage";
+}
+
+function buildTrailerCalendarRules(rows) {
+  const rules = emptyTrailerCalendarRules();
+  (rows || []).forEach(row => {
+    const from = row.start_date || row.from;
+    const to = row.end_date || row.to || from;
+    if (!from || !to) return;
+
+    const item = {
+      id: row.id || "",
+      from,
+      to,
+      note: row.note || trailerCalendarStatusLabel(row.status),
+      status: normalizeTrailerCalendarStatus(row.status)
+    };
+
+    if (item.status === "booked") rules.booked.push(item);
+    else if (item.status === "requested") rules.requested.push(item);
+    else rules.manualReview.push(item);
+  });
+  return rules;
+}
+
+function applyTrailerCalendarRows(rows) {
+  all4youTrailerCalendarRows = Array.isArray(rows) ? rows : [];
+  all4youTrailerCalendarRules = buildTrailerCalendarRules(all4youTrailerCalendarRows);
+  window.dispatchEvent(new CustomEvent("all4you:trailer-calendar-updated"));
+}
+
+async function fetchTrailerCalendarRows(session = null) {
+  if (!isSupabaseConfigured()) return [];
+
+  const headers = {
+    "apikey": SUPABASE_PUBLISHABLE_KEY,
+    "Content-Type": "application/json"
+  };
+
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/trailer_calendar_rules?select=id,start_date,end_date,status,note,created_at&order=start_date.asc`, {
+    method: "GET",
+    headers
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Anhänger-Kalender konnte nicht geladen werden.");
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+async function loadPublicTrailerCalendarRules() {
+  if (all4youTrailerCalendarLoadPromise) return all4youTrailerCalendarLoadPromise;
+  all4youTrailerCalendarLoadPromise = fetchTrailerCalendarRows()
+    .then(rows => {
+      applyTrailerCalendarRows(rows);
+      return rows;
+    })
+    .catch(error => {
+      console.warn("Anhänger-Kalender konnte öffentlich nicht geladen werden:", error.message || error);
+      applyTrailerCalendarRows([]);
+      return [];
+    });
+  return all4youTrailerCalendarLoadPromise;
+}
+
+async function createTrailerCalendarRule(session, payload) {
+  if (!session?.access_token) throw new Error("Bitte erneut im Dashboard einloggen.");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/trailer_calendar_rules`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Kalendereintrag konnte nicht gespeichert werden.");
+  }
+
+  return Array.isArray(data) ? data[0] : data;
+}
+
+async function deleteTrailerCalendarRule(session, id) {
+  if (!session?.access_token) throw new Error("Bitte erneut im Dashboard einloggen.");
+  if (!id) throw new Error("Kalendereintrag fehlt.");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/trailer_calendar_rules?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = await response.text().catch(() => "");
+  if (!response.ok) {
+    let parsed = null;
+    try { parsed = JSON.parse(data); } catch {}
+    throw new Error(parsed?.message || parsed?.hint || parsed?.details || "Kalendereintrag konnte nicht gelöscht werden.");
+  }
+}
+
+function formatGermanDate(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value || "—";
+  const [year, month, day] = value.split("-");
+  return `${day}.${month}.${year}`;
+}
+
+function renderDashboardTrailerCalendarList(rows) {
+  const list = document.querySelector("#dashboardTrailerCalendarList");
+  const status = document.querySelector("#dashboardTrailerCalendarStatus");
+  if (!list) return;
+
+  if (status) {
+    status.textContent = `${(rows || []).length} Einträge`;
+    status.className = "status-pill success";
+  }
+
+  if (!rows?.length) {
+    list.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Noch keine Kalenderregeln</strong>
+        <p>Der Anhänger ist aktuell grundsätzlich frei/anfragbar. Feiertage und Sonntage bleiben automatisch „nur auf Anfrage“.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = rows.map(row => `
+    <article class="dashboard-calendar-item status-${escapeHtml(normalizeTrailerCalendarStatus(row.status))}">
+      <div>
+        <strong>${escapeHtml(formatGermanDate(row.start_date))} bis ${escapeHtml(formatGermanDate(row.end_date))}</strong>
+        <span>${escapeHtml(trailerCalendarStatusLabel(row.status))}${row.note ? ` · ${escapeHtml(row.note)}` : ""}</span>
+      </div>
+      <button class="dashboard-calendar-delete" type="button" data-calendar-rule-id="${escapeHtml(row.id)}">Löschen</button>
+    </article>
+  `).join("");
+}
+
+async function refreshDashboardTrailerCalendar() {
+  const session = getStoredEmployeeSession();
+  const status = document.querySelector("#dashboardTrailerCalendarStatus");
+  if (status) {
+    status.textContent = "Lädt …";
+    status.className = "status-pill";
+  }
+
+  try {
+    const rows = await fetchTrailerCalendarRows(session);
+    applyTrailerCalendarRows(rows);
+    renderDashboardTrailerCalendarList(rows);
+  } catch (error) {
+    if (status) {
+      status.textContent = "Setup nötig";
+      status.className = "status-pill warning";
+    }
+    const list = document.querySelector("#dashboardTrailerCalendarList");
+    if (list) {
+      list.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Kalender-Tabelle noch nicht bereit</strong>
+          <p>${escapeHtml(error.message || "Bitte SQL-Datei aus dem Patch einmal in Supabase ausführen.")}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+function bindDashboardTrailerCalendarManager() {
+  const manager = document.querySelector("#dashboardTrailerCalendarManager");
+  const form = document.querySelector("#dashboardTrailerCalendarForm");
+  const list = document.querySelector("#dashboardTrailerCalendarList");
+  if (!manager || !form || !list) return;
+
+  const startInput = form.querySelector('input[name="start_date"]');
+  const endInput = form.querySelector('input[name="end_date"]');
+  const today = new Date();
+  const todayYmd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  if (startInput && !startInput.value) startInput.value = todayYmd;
+  if (endInput && !endInput.value) endInput.value = todayYmd;
+
+  if (manager.dataset.bound === "true") {
+    refreshDashboardTrailerCalendar();
+    return;
+  }
+  manager.dataset.bound = "true";
+
+  startInput?.addEventListener("change", () => {
+    if (endInput && startInput.value && (!endInput.value || endInput.value < startInput.value)) {
+      endInput.value = startInput.value;
+    }
+  });
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const session = getStoredEmployeeSession();
+    const data = new FormData(form);
+    const start = String(data.get("start_date") || "");
+    const end = String(data.get("end_date") || "");
+    const button = form.querySelector('button[type="submit"]');
+
+    if (!start || !end || end < start) {
+      alert("Bitte einen gültigen Zeitraum auswählen.");
+      return;
+    }
+
+    const payload = {
+      start_date: start,
+      end_date: end,
+      status: normalizeTrailerCalendarStatus(data.get("status")),
+      note: String(data.get("note") || "").trim(),
+      created_by: session?.user?.id || null
+    };
+
+    try {
+      if (button) button.disabled = true;
+      await createTrailerCalendarRule(session, payload);
+      form.reset();
+      if (startInput) startInput.value = todayYmd;
+      if (endInput) endInput.value = todayYmd;
+      await refreshDashboardTrailerCalendar();
+    } catch (error) {
+      alert(error.message || "Kalendereintrag konnte nicht gespeichert werden.");
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+
+  list.addEventListener("click", async event => {
+    const button = event.target.closest("[data-calendar-rule-id]");
+    if (!button) return;
+    const id = button.dataset.calendarRuleId;
+    if (!id) return;
+    if (!confirm("Kalendereintrag wirklich löschen?")) return;
+
+    try {
+      button.disabled = true;
+      await deleteTrailerCalendarRule(getStoredEmployeeSession(), id);
+      await refreshDashboardTrailerCalendar();
+    } catch (error) {
+      alert(error.message || "Kalendereintrag konnte nicht gelöscht werden.");
+      button.disabled = false;
+    }
+  });
+
+  refreshDashboardTrailerCalendar();
+}
+
+
 function bindTrailerWizard() {
   const wizard = document.querySelector("#trailerWizard");
   const form = document.querySelector("#trailerWizardForm");
@@ -6494,6 +6842,7 @@ function bindTrailerWizard() {
   const summaryBox = document.querySelector("#trailerWizardSummary");
   const startDate = document.querySelector("#trailerStartDate");
   const endDate = document.querySelector("#trailerEndDate");
+  const selectedRangeText = document.querySelector("#trailerSelectedRangeText");
   const daysValue = document.querySelector("#trailerDaysValue");
   const priceValue = document.querySelector("#trailerPriceValue");
   const availabilityValue = document.querySelector("#trailerAvailabilityValue");
@@ -6501,7 +6850,14 @@ function bindTrailerWizard() {
   const availabilityBadge = document.querySelector("#trailerAvailabilityBadge");
   const availabilityStatusInput = document.querySelector("#trailerAvailabilityStatusInput");
   const availabilityNoteInput = document.querySelector("#trailerAvailabilityNoteInput");
+  const calendarPanel = document.querySelector("#trailerCalendarPanel");
   const calendarGrid = document.querySelector("#trailerCalendarGrid");
+  const calendarHeadline = document.querySelector("#trailerCalendarHeadline");
+  const openCalendarButton = document.querySelector("#trailerOpenCalendarButton");
+  const confirmPeriodButton = document.querySelector("#trailerConfirmPeriodButton");
+  const clearPeriodButton = document.querySelector("#trailerClearPeriodButton");
+  const prevMonthButton = document.querySelector("#trailerCalendarPrevMonth");
+  const nextMonthButton = document.querySelector("#trailerCalendarNextMonth");
   const handover = document.querySelector("#trailerHandover");
   const deliveryAddressField = document.querySelector("#trailerDeliveryAddressField");
 
@@ -6509,6 +6865,144 @@ function bindTrailerWizard() {
 
   const steps = Array.from(form.querySelectorAll(".wizard-step"));
   let current = 0;
+
+  const trailerWeekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  const trailerMonthNames = [
+    "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Juli", "August", "September", "Oktober", "November", "Dezember"
+  ];
+
+  let calendarMonthCursor = getMonthStart(new Date());
+
+  function padDatePart(value) {
+    return String(value).padStart(2, "0");
+  }
+
+  function toYmd(date) {
+    return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+  }
+
+  function parseYmd(value) {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+    return date;
+  }
+
+  function addDays(date, amount) {
+    const copy = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    copy.setDate(copy.getDate() + amount);
+    return copy;
+  }
+
+  function getTodayYmd() {
+    return toYmd(new Date());
+  }
+
+  function getMonthStart(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  function getEasterDate(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day);
+  }
+
+  function getHolidayOrSpecialDayName(date) {
+    const monthDay = `${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+    const fixed = {
+      "01-01": "Neujahr",
+      "01-06": "Heilige Drei Könige",
+      "05-01": "Tag der Arbeit",
+      "08-15": "Mariä Himmelfahrt",
+      "10-03": "Tag der Deutschen Einheit",
+      "11-01": "Allerheiligen",
+      "12-24": "Heiligabend",
+      "12-25": "1. Weihnachtsfeiertag",
+      "12-26": "2. Weihnachtsfeiertag",
+      "12-31": "Silvester"
+    };
+
+    if (fixed[monthDay]) return fixed[monthDay];
+
+    const easter = getEasterDate(date.getFullYear());
+    const movable = {
+      [toYmd(addDays(easter, -2))]: "Karfreitag",
+      [toYmd(addDays(easter, 1))]: "Ostermontag",
+      [toYmd(addDays(easter, 39))]: "Christi Himmelfahrt",
+      [toYmd(addDays(easter, 50))]: "Pfingstmontag",
+      [toYmd(addDays(easter, 60))]: "Fronleichnam"
+    };
+
+    return movable[toYmd(date)] || "";
+  }
+
+  function isDateInRuleRange(ymd, ranges) {
+    return (ranges || []).find(range => {
+      if (!range?.from || !range?.to) return false;
+      return ymd >= range.from && ymd <= range.to;
+    }) || null;
+  }
+
+  function getCalendarDayStatus(date) {
+    const ymd = toYmd(date);
+    const today = getTodayYmd();
+
+    if (ymd < today) {
+      return { key: "past", label: "vergangen", note: "Datum liegt in der Vergangenheit", blocksRequest: true };
+    }
+
+    const booked = isDateInRuleRange(ymd, all4youTrailerCalendarRules.booked);
+    if (booked) {
+      return { key: "busy", label: "belegt", note: booked.note || "Anhänger ist an diesem Tag belegt", blocksRequest: true };
+    }
+
+    const requested = isDateInRuleRange(ymd, all4youTrailerCalendarRules.requested);
+    if (requested) {
+      return { key: "request", label: "angefragt", note: requested.note || "Für diesen Tag liegt bereits eine Anfrage vor", blocksRequest: false };
+    }
+
+    const manualReview = isDateInRuleRange(ymd, all4youTrailerCalendarRules.manualReview);
+    if (manualReview) {
+      return { key: "review", label: "nur auf Anfrage", note: manualReview.note || "Dieser Tag wird nur nach Rücksprache bestätigt", blocksRequest: false };
+    }
+
+    const holiday = getHolidayOrSpecialDayName(date);
+    if (holiday) {
+      return { key: "review", label: "nur auf Anfrage", note: `${holiday} – Verfügbarkeit nur nach Rücksprache`, blocksRequest: false };
+    }
+
+    if (date.getDay() === 0) {
+      return { key: "review", label: "nur auf Anfrage", note: "Sonntag – Verfügbarkeit nur nach Rücksprache", blocksRequest: false };
+    }
+
+    return { key: "free", label: "frei", note: "Zeitraum ist grundsätzlich anfragbar", blocksRequest: false };
+  }
+
+  function getDatesBetween(start, end) {
+    const dates = [];
+    if (!start || !end || end < start) return dates;
+    let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    while (cursor <= end) {
+      dates.push(new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return dates;
+  }
 
   function getRentalPrice(days) {
     if (!days || days < 1) return { label: "—", price: "", daysText: "Bitte Zeitraum wählen" };
@@ -6528,10 +7022,10 @@ function bindTrailerWizard() {
   }
 
   function calculateRental() {
-    const start = startDate?.value ? new Date(`${startDate.value}T00:00:00`) : null;
-    const end = endDate?.value ? new Date(`${endDate.value}T00:00:00`) : null;
+    const start = parseYmd(startDate?.value || "");
+    const end = parseYmd(endDate?.value || "");
 
-    if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    if (!start || !end) {
       return { days: 0, daysText: "Bitte Zeitraum wählen", price: "—" };
     }
 
@@ -6543,6 +7037,160 @@ function bindTrailerWizard() {
     const days = Math.floor(diffMs / 86400000) + 1;
     const price = getRentalPrice(days);
     return { days, daysText: price.daysText, price: price.price };
+  }
+
+  function evaluateTrailerAvailability() {
+    const start = parseYmd(startDate?.value || "");
+    const end = parseYmd(endDate?.value || "");
+
+    if (!start || !end) {
+      return {
+        key: "open",
+        label: "Bitte Zeitraum wählen",
+        value: "Verfügbarkeit wird geprüft",
+        text: "Bitte wählen Sie den Mietzeitraum direkt im Kalender aus.",
+        blocksRequest: false,
+        note: ""
+      };
+    }
+
+    if (end < start) {
+      return {
+        key: "busy",
+        label: "Zeitraum prüfen",
+        value: "Zeitraum ungültig",
+        text: "Das Mietende darf nicht vor dem Mietbeginn liegen.",
+        blocksRequest: true,
+        note: "Mietende liegt vor Mietbeginn"
+      };
+    }
+
+    const dates = getDatesBetween(start, end);
+    const blocking = dates.map(date => ({ date, status: getCalendarDayStatus(date) })).filter(item => item.status.blocksRequest);
+    const requested = dates.map(date => ({ date, status: getCalendarDayStatus(date) })).filter(item => item.status.key === "request");
+    const review = dates.map(date => ({ date, status: getCalendarDayStatus(date) })).filter(item => item.status.key === "review");
+
+    if (blocking.length) {
+      const first = blocking[0];
+      return {
+        key: "busy",
+        label: "Nicht verfügbar",
+        value: "Nicht verfügbar",
+        text: `${formatGermanDate(toYmd(first.date))}: ${first.status.note}. Bitte einen anderen Zeitraum wählen.`,
+        blocksRequest: true,
+        note: first.status.note
+      };
+    }
+
+    if (requested.length) {
+      const first = requested[0];
+      return {
+        key: "request",
+        label: "Bereits angefragt",
+        value: "Bereits angefragt",
+        text: `${formatGermanDate(toYmd(first.date))} ist bereits angefragt. Eine weitere Anfrage ist möglich, die finale Rückmeldung erfolgt durch All4You.`,
+        blocksRequest: false,
+        note: first.status.note
+      };
+    }
+
+    if (review.length) {
+      const names = [...new Set(review.map(item => item.status.note))].slice(0, 2).join(" · ");
+      return {
+        key: "review",
+        label: "Nur auf Anfrage",
+        value: "Nur auf Anfrage",
+        text: `${names}. Die Anfrage kann gesendet werden, die finale Bestätigung erfolgt durch All4You.`,
+        blocksRequest: false,
+        note: names
+      };
+    }
+
+    return {
+      key: "free",
+      label: "Frei / anfragbar",
+      value: "Frei / anfragbar",
+      text: "Der ausgewählte Zeitraum ist grundsätzlich frei/anfragbar. Die finale Bestätigung erfolgt durch All4You.",
+      blocksRequest: false,
+      note: "Grundsätzlich frei/anfragbar"
+    };
+  }
+
+  function updateSelectedRangeText() {
+    const start = startDate?.value || "";
+    const end = endDate?.value || "";
+    if (!selectedRangeText) return;
+    if (!start && !end) {
+      selectedRangeText.textContent = "Noch kein Zeitraum gewählt";
+      return;
+    }
+    if (start && !end) {
+      selectedRangeText.textContent = `Start: ${formatGermanDate(start)} – bitte Enddatum wählen`;
+      return;
+    }
+    selectedRangeText.textContent = `${formatGermanDate(start)} bis ${formatGermanDate(end)}`;
+  }
+
+  function renderSingleMonth(monthDate, start, end) {
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const leadingEmpty = (first.getDay() + 6) % 7;
+    const todayYmd = getTodayYmd();
+    const startYmd = start ? toYmd(start) : "";
+    const endYmd = end ? toYmd(end) : "";
+
+    let cells = "";
+    for (let i = 0; i < leadingEmpty; i += 1) {
+      cells += `<span class="calendar-day empty" aria-hidden="true"></span>`;
+    }
+
+    for (let day = 1; day <= last.getDate(); day += 1) {
+      const date = new Date(year, month, day);
+      const ymd = toYmd(date);
+      const status = getCalendarDayStatus(date);
+      const rangeStart = startYmd || "";
+      const rangeEnd = endYmd || startYmd || "";
+      const inRange = rangeStart && rangeEnd && ymd >= rangeStart && ymd <= rangeEnd;
+      const classes = [
+        "calendar-day",
+        `status-${status.key}`,
+        ymd === todayYmd ? "is-today" : "",
+        inRange ? "is-selected" : "",
+        ymd === startYmd ? "is-start" : "",
+        ymd === endYmd ? "is-end" : "",
+        status.blocksRequest ? "is-blocked" : "is-clickable"
+      ].filter(Boolean).join(" ");
+
+      cells += `<button class="${classes}" type="button" data-calendar-date="${ymd}" ${status.blocksRequest ? "disabled" : ""} title="${escapeHtml(status.note)}"><em>${day}</em></button>`;
+    }
+
+    return `
+      <div class="calendar-month">
+        <div class="calendar-month-title">${trailerMonthNames[month]} ${year}</div>
+        <div class="calendar-weekdays">${trailerWeekdays.map(day => `<span>${day}</span>`).join("")}</div>
+        <div class="calendar-days">${cells}</div>
+      </div>
+    `;
+  }
+
+  function renderTrailerCalendar() {
+    if (!calendarGrid) return;
+
+    const selectedStart = parseYmd(startDate?.value || "");
+    const selectedEnd = parseYmd(endDate?.value || "");
+    const firstMonth = getMonthStart(calendarMonthCursor || selectedStart || new Date());
+    const secondMonth = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + 1, 1);
+
+    if (calendarHeadline) {
+      calendarHeadline.textContent = `${trailerMonthNames[firstMonth.getMonth()]} ${firstMonth.getFullYear()} – ${trailerMonthNames[secondMonth.getMonth()]} ${secondMonth.getFullYear()}`;
+    }
+
+    calendarGrid.innerHTML = `
+      ${renderSingleMonth(firstMonth, selectedStart, selectedEnd)}
+      ${renderSingleMonth(secondMonth, selectedStart, selectedEnd)}
+    `;
   }
 
   function updateRentalBox() {
@@ -6561,6 +7209,7 @@ function bindTrailerWizard() {
       availabilityBadge.className = `calendar-status-badge status-${availability.key}`;
     }
 
+    updateSelectedRangeText();
     renderTrailerCalendar();
   }
 
@@ -6601,8 +7250,8 @@ function bindTrailerWizard() {
     if (!summaryBox) return;
     const summary = collectSummary();
     summaryBox.innerHTML = `
-      <div><strong>Mietbeginn</strong><span>${escapeHtml(summary.rentalStart || "—")}</span></div>
-      <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd || "—")}</span></div>
+      <div><strong>Mietbeginn</strong><span>${escapeHtml(summary.rentalStart ? formatGermanDate(summary.rentalStart) : "—")}</span></div>
+      <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd ? formatGermanDate(summary.rentalEnd) : "—")}</span></div>
       <div><strong>Mietdauer</strong><span>${escapeHtml(summary.rentalDays || "—")}</span></div>
       <div><strong>Mietpreis</strong><span>${escapeHtml(summary.rentalPrice || "—")}</span></div>
       <div><strong>Kalenderstatus</strong><span>${escapeHtml(summary.availabilityStatus || "—")}</span></div>
@@ -6655,12 +7304,14 @@ function bindTrailerWizard() {
       const rental = calculateRental();
       const availability = evaluateTrailerAvailability();
       if (!rental.days || rental.daysText === "Enddatum prüfen") {
-        alert("Bitte einen gültigen Mietzeitraum auswählen.");
+        alert("Bitte einen gültigen Mietzeitraum im Kalender auswählen.");
+        calendarPanel?.classList.add("is-open");
         return false;
       }
 
       if (availability.blocksRequest) {
         alert(availability.text || "Dieser Zeitraum ist nicht verfügbar. Bitte wählen Sie einen anderen Zeitraum.");
+        calendarPanel?.classList.add("is-open");
         return false;
       }
     }
@@ -6668,24 +7319,71 @@ function bindTrailerWizard() {
     return true;
   }
 
-  const todayForInput = getTodayYmd();
-  if (startDate && !startDate.min) startDate.min = todayForInput;
-  if (endDate && !endDate.min) endDate.min = todayForInput;
+  function chooseCalendarDate(ymd) {
+    const clicked = parseYmd(ymd);
+    if (!clicked) return;
+    const status = getCalendarDayStatus(clicked);
+    if (status.blocksRequest) return;
 
-  startDate?.addEventListener("change", () => {
-    if (endDate && startDate.value) {
-      endDate.min = startDate.value;
-      if (!endDate.value || endDate.value < startDate.value) {
-        endDate.value = startDate.value;
-      }
+    const currentStart = startDate?.value || "";
+    const currentEnd = endDate?.value || "";
+
+    if (!currentStart || currentEnd) {
+      if (startDate) startDate.value = ymd;
+      if (endDate) endDate.value = "";
+    } else if (ymd < currentStart) {
+      if (startDate) startDate.value = ymd;
+      if (endDate) endDate.value = currentStart;
+    } else {
+      if (endDate) endDate.value = ymd;
     }
+
+    calendarMonthCursor = getMonthStart(parseYmd(startDate?.value || ymd) || new Date());
+    updateRentalBox();
+  }
+
+  calendarGrid?.addEventListener("click", event => {
+    const dayButton = event.target.closest("[data-calendar-date]");
+    if (!dayButton || dayButton.disabled) return;
+    chooseCalendarDate(dayButton.dataset.calendarDate);
+  });
+
+  openCalendarButton?.addEventListener("click", () => {
+    calendarPanel?.classList.add("is-open");
+    calendarPanel?.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  confirmPeriodButton?.addEventListener("click", () => {
+    if (!startDate?.value || !endDate?.value) {
+      alert("Bitte Start- und Enddatum im Kalender auswählen.");
+      return;
+    }
+    calendarPanel?.classList.remove("is-open");
     updateRentalBox();
   });
 
-  endDate?.addEventListener("change", updateRentalBox);
-  startDate?.addEventListener("input", updateRentalBox);
-  endDate?.addEventListener("input", updateRentalBox);
+  clearPeriodButton?.addEventListener("click", () => {
+    if (startDate) startDate.value = "";
+    if (endDate) endDate.value = "";
+    calendarMonthCursor = getMonthStart(new Date());
+    calendarPanel?.classList.add("is-open");
+    updateRentalBox();
+  });
+
+  prevMonthButton?.addEventListener("click", () => {
+    calendarMonthCursor = new Date(calendarMonthCursor.getFullYear(), calendarMonthCursor.getMonth() - 1, 1);
+    renderTrailerCalendar();
+  });
+
+  nextMonthButton?.addEventListener("click", () => {
+    calendarMonthCursor = new Date(calendarMonthCursor.getFullYear(), calendarMonthCursor.getMonth() + 1, 1);
+    renderTrailerCalendar();
+  });
+
   handover?.addEventListener("change", updateDeliveryField);
+
+  window.addEventListener("all4you:trailer-calendar-updated", updateRentalBox);
+  loadPublicTrailerCalendarRules().then(updateRentalBox).catch(() => updateRentalBox());
 
   prev.addEventListener("click", () => {
     current = Math.max(0, current - 1);
@@ -6694,7 +7392,6 @@ function bindTrailerWizard() {
 
   next.addEventListener("click", async () => {
     if (!validateStep()) return;
-
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
   });
@@ -6785,10 +7482,6 @@ function bindTrailerWizard() {
 
   updateWizard();
 }
-
-
-
-
 
 function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
@@ -6964,6 +7657,7 @@ function bindDashboardAuth() {
     if (employeeMeta) employeeMeta.textContent = `${profile.email || "angemeldet"} · ${profile.role || "mitarbeiter"}`;
 
     loadDashboardRequests(session);
+    bindDashboardTrailerCalendarManager();
   }
 
   async function validateStoredSession() {
@@ -7469,7 +8163,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .price-table-card {
@@ -2402,7 +2402,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2578,7 +2578,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2606,7 +2606,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2703,7 +2703,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2983,7 +2983,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .mail-preview-btn {
@@ -2997,7 +2997,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-shell {
@@ -3454,7 +3454,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .is-hidden {
@@ -3608,7 +3608,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .auth-message.success {
@@ -3628,7 +3628,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3683,7 +3683,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3760,7 +3760,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-detail {
@@ -3907,7 +3907,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .site-header {
@@ -4051,7 +4051,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .site-header {
@@ -4109,7 +4109,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-messages {
@@ -4229,7 +4229,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4320,7 +4320,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4365,7 +4365,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .email-notification-note {
@@ -4390,7 +4390,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .customer-status-link {
@@ -4585,7 +4585,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .customer-reply-form {
@@ -4656,7 +4656,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4808,7 +4808,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4872,7 +4872,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4928,7 +4928,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5003,7 +5003,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5043,7 +5043,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5076,7 +5076,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .footer-employee-login {
@@ -5118,7 +5118,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5167,7 +5167,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .youbot-widget {
@@ -5373,7 +5373,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .youbot-widget {
@@ -5479,7 +5479,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .roller-route-note {
@@ -5612,7 +5612,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5697,7 +5697,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ========================================================================== */
 
 .service-icon {
@@ -5745,7 +5745,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-ROUTER-V5.6.0-TRAILER-CALENDAR-LOGIC
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -5911,5 +5911,237 @@ label {
 
   .cookie-btn {
     width: 100%;
+  }
+}
+
+
+/* ==========================================================================
+   V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
+   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
+   ========================================================================== */
+
+.trailer-period-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(10, 169, 155, .18);
+  background: rgba(255, 255, 255, .72);
+  box-shadow: 0 14px 35px rgba(19, 35, 58, .06);
+}
+
+.trailer-period-info {
+  display: grid;
+  gap: 5px;
+}
+
+.trailer-period-info strong {
+  color: var(--navy);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.trailer-period-info span {
+  color: var(--teal-2);
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.trailer-period-info small {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.trailer-calendar-panel {
+  display: none;
+}
+
+.trailer-calendar-panel.is-open {
+  display: grid;
+}
+
+.trailer-calendar-toolbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.trailer-calendar-toolbar strong {
+  color: var(--navy);
+  text-align: center;
+  font-weight: 950;
+}
+
+.calendar-nav-button,
+.dashboard-calendar-delete {
+  min-height: 36px;
+  border: 1px solid rgba(10, 169, 155, .2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  color: var(--navy);
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0 13px;
+}
+
+.calendar-nav-button:hover,
+.dashboard-calendar-delete:hover {
+  border-color: rgba(10, 169, 155, .45);
+  box-shadow: 0 0 0 4px rgba(10, 169, 155, .08);
+}
+
+.calendar-day {
+  cursor: default;
+  font-family: inherit;
+}
+
+button.calendar-day {
+  cursor: pointer;
+}
+
+.calendar-day.is-clickable:hover {
+  transform: translateY(-1px);
+  border-color: rgba(10, 169, 155, .45);
+  box-shadow: 0 8px 20px rgba(10, 169, 155, .11), inset 0 -3px 0 rgba(16, 185, 129, .22);
+}
+
+.calendar-day.is-blocked {
+  cursor: not-allowed;
+  opacity: .72;
+}
+
+.trailer-calendar-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.trailer-calendar-manager {
+  margin-bottom: 24px;
+}
+
+.dashboard-calendar-intro {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.dashboard-calendar-form {
+  display: grid;
+  grid-template-columns: minmax(130px, .9fr) repeat(2, minmax(140px, .9fr)) minmax(220px, 1.4fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.dashboard-calendar-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.dashboard-calendar-form input,
+.dashboard-calendar-form select {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(19, 35, 58, .13);
+  background: rgba(255, 255, 255, .9);
+  color: var(--navy);
+  font: inherit;
+  font-weight: 800;
+  padding: 0 12px;
+}
+
+.dashboard-calendar-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-calendar-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(19, 35, 58, .1);
+  background: rgba(255, 255, 255, .72);
+}
+
+.dashboard-calendar-item div {
+  display: grid;
+  gap: 4px;
+}
+
+.dashboard-calendar-item strong {
+  color: var(--navy);
+}
+
+.dashboard-calendar-item span {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.dashboard-calendar-item.status-booked {
+  border-color: rgba(239, 68, 68, .22);
+  background: rgba(254, 242, 242, .78);
+}
+
+.dashboard-calendar-item.status-requested {
+  border-color: rgba(245, 158, 11, .24);
+  background: rgba(255, 251, 235, .78);
+}
+
+.dashboard-calendar-item.status-manual_review {
+  border-color: rgba(14, 165, 233, .24);
+  background: rgba(240, 249, 255, .78);
+}
+
+.status-pill.warning {
+  background: rgba(255, 251, 235, .88);
+  color: #92400e;
+  border-color: rgba(245, 158, 11, .25);
+}
+
+@media (max-width: 1100px) {
+  .dashboard-calendar-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-calendar-note,
+  .dashboard-calendar-form button {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .trailer-period-control,
+  .calendar-status-head,
+  .dashboard-calendar-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trailer-calendar-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-calendar-form {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-calendar-note,
+  .dashboard-calendar-form button {
+    grid-column: auto;
   }
 }

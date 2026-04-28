@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.0-SEO-FOUNDATION
+// DBG: ALL4YOU-ROUTER-V5.5.1-IMPRESSUM-FINAL
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2378,7 +2378,7 @@ const SEO_ROUTES = {
     description: "All4You Service München steht für regionale, zuverlässige und unkomplizierte Dienstleistungen in München und Umgebung.",
     canonicalPath: "/ueber-uns"
   },
-  "/impressum": { title: "Impressum | All4You Service München", description: "Impressum von All4You Service München.", canonicalPath: "/impressum" },
+  "/impressum": { title: "Impressum | All4You Service München", description: "Impressum von All4You Service München mit Anbieterkennzeichnung, Kontakt und Verantwortlichkeit.", canonicalPath: "/impressum" },
   "/datenschutz": { title: "Datenschutz | All4You Service München", description: "Datenschutzhinweise von All4You Service München.", canonicalPath: "/datenschutz" },
   "/dashboard": { title: "Mitarbeiter-Dashboard | All4You Service München", description: "Geschützter Mitarbeiterbereich von All4You Service München.", canonicalPath: "/dashboard", noindex: true },
   "/status": { title: "Anfragestatus prüfen | All4You Service München", description: "Status einer bestehenden All4You-Anfrage prüfen.", canonicalPath: "/status", noindex: true }
@@ -4527,20 +4527,18 @@ function legalPage(type) {
         <p class="eyebrow">Rechtliches</p>
         <h1>Impressum</h1>
         <p class="lead">
-          Die folgenden Angaben sind als sauberer Zwischenstand vorbereitet. Fehlende Kontaktdaten und rechtliche Details
-          müssen vor der endgültigen Veröffentlichung noch ergänzt und geprüft werden.
+          Anbieterkennzeichnung und Kontaktdaten von All4You Service München.
         </p>
       </section>
 
       <section class="section-pad legal-layout">
         <div class="legal-main">
           <article class="legal-card">
-            <p class="eyebrow">Anbieter / Verantwortlich</p>
+            <p class="eyebrow">Anbieter / Diensteanbieter</p>
             <h2>Angaben gemäß § 5 DDG</h2>
             <div class="legal-data">
-              <p><strong>Anhänger Werkzeug Verleih München</strong></p>
-              <p>Inhaberin: Silvija Vardijan</p>
-              <p>Einzelunternehmen</p>
+              <p><strong>All4You Service München</strong></p>
+              <p>Silvija Vardijan</p>
               <p>Schönstraße 23<br>81543 München<br>Deutschland</p>
             </div>
           </article>
@@ -4548,57 +4546,51 @@ function legalPage(type) {
           <article class="legal-card">
             <p class="eyebrow">Kontakt</p>
             <h2>Kontaktangaben</h2>
-            <div class="legal-placeholder-list">
-              <p><strong>Telefon:</strong> <span>[bitte ergänzen]</span></p>
-              <p><strong>E-Mail:</strong> <span>[bitte ergänzen]</span></p>
-              <p><strong>Website:</strong> <span>[bitte ergänzen]</span></p>
-            </div>
-          </article>
-
-          <article class="legal-card">
-            <p class="eyebrow">Steuer / Register</p>
-            <h2>Weitere Angaben</h2>
-            <div class="legal-placeholder-list">
-              <p><strong>Umsatzsteuer-ID:</strong> <span>[falls vorhanden bitte ergänzen]</span></p>
-              <p><strong>Steuernummer:</strong> <span>[nicht zwingend öffentlich eintragen, vorher prüfen]</span></p>
-              <p><strong>Registereintrag:</strong> <span>[falls vorhanden bitte ergänzen]</span></p>
+            <div class="legal-data">
+              <p><strong>Telefon:</strong> <a href="tel:+4915124017683">0151 24017683</a></p>
+              <p><strong>E-Mail:</strong> <a href="mailto:info@all4you-muenchen.de">info@all4you-muenchen.de</a></p>
+              <p><strong>Website:</strong> <a href="https://all4you-muenchen.de" target="_blank" rel="noopener">https://all4you-muenchen.de</a></p>
             </div>
           </article>
 
           <article class="legal-card">
             <p class="eyebrow">Inhaltlich verantwortlich</p>
-            <h2>Verantwortung für Inhalte</h2>
-            <p>
-              Verantwortlich für die Inhalte dieser Webseite ist, soweit rechtlich erforderlich:
-              Silvija Vardijan, Anschrift wie oben.
-            </p>
-            <p class="legal-note">
-              Bitte vor Veröffentlichung prüfen, ob weitere Pflichtangaben, berufsrechtliche Angaben,
-              Streitbeilegungshinweise oder zusätzliche Informationen erforderlich sind.
-            </p>
+            <h2>Verantwortlich nach § 18 Abs. 2 MStV</h2>
+            <div class="legal-data">
+              <p>Silvija Vardijan</p>
+              <p>Adresse wie oben</p>
+            </div>
+          </article>
+
+          <article class="legal-card">
+            <p class="eyebrow">Dienstleistungen</p>
+            <h2>Leistungen von All4You Service München</h2>
+            <ul class="list">
+              <li>Vermietung von Anhängern</li>
+              <li>Transport von Rollern</li>
+              <li>Besenreine Räumungen</li>
+              <li>Reinigungsservice</li>
+            </ul>
           </article>
 
           <article class="legal-card">
             <p class="eyebrow">Hinweis</p>
-            <h2>Platzhalterstatus</h2>
+            <h2>Haftung für Inhalte und Links</h2>
             <p>
-              Dieses Impressum ist noch kein final geprüfter Rechtstext. Es enthält die aktuell bekannten Angaben
-              und Platzhalter für fehlende Daten.
+              Die Inhalte dieser Webseite wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte
+              kann jedoch keine Gewähr übernommen werden. Für externe Links zu fremden Inhalten ist stets der jeweilige Anbieter
+              oder Betreiber der verlinkten Seiten verantwortlich.
             </p>
           </article>
         </div>
 
         <aside class="legal-sidebar">
           <div class="check-card">
-            <p class="eyebrow">Noch ergänzen</p>
-            <ul class="list">
-              <li>Telefonnummer</li>
-              <li>E-Mail-Adresse</li>
-              <li>finale Website-Domain</li>
-              <li>USt-ID, falls vorhanden</li>
-              <li>ggf. weitere Pflichtangaben prüfen</li>
-              <li>Datenschutz final prüfen lassen</li>
-            </ul>
+            <p class="eyebrow">Kontakt</p>
+            <h2>All4You Service München</h2>
+            <p>Schönstraße 23<br>81543 München</p>
+            <p><a href="tel:+4915124017683">0151 24017683</a></p>
+            <p><a href="mailto:info@all4you-muenchen.de">info@all4you-muenchen.de</a></p>
           </div>
         </aside>
       </section>

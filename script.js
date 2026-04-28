@@ -2324,11 +2324,154 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
+// DBG: ALL4YOU-ROUTER-V5.5.0-SEO-FOUNDATION
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
 const mainNav = document.querySelector(".main-nav");
+
+const SITE_ORIGIN = "https://all4you-muenchen.de";
+
+const SEO_ROUTES = {
+  "/": {
+    title: "All4You Service München | Rollerabholservice, Entrümpelung & Reinigung",
+    description: "All4You Service München: Rollerabholservice, Anhängervermietung, Entrümpelung und Reinigungsservice für München und Umgebung – schnell, regional und zuverlässig.",
+    canonicalPath: "/",
+    schemaType: "LocalBusiness"
+  },
+  "/leistungen": {
+    title: "Leistungen in München | All4You Service München",
+    description: "Vier Leistungen aus einer Hand: Rollerabholservice, Anhängervermietung, Entrümpelung und Reinigungsservice in München und Umgebung.",
+    canonicalPath: "/leistungen"
+  },
+  "/leistungen/rollerabholservice": {
+    title: "Rollerabholservice München | Roller abholen lassen | All4You",
+    description: "Rollerabholservice in München und Umgebung: All4You holt Roller ab, auch defekt, und übernimmt Werkstattfahrten oder Standortwechsel.",
+    canonicalPath: "/leistungen/rollerabholservice",
+    serviceName: "Rollerabholservice München"
+  },
+  "/leistungen/anhaenger": {
+    title: "Anhängervermietung München | Kofferanhänger mieten | All4You",
+    description: "Kofferanhänger in München mieten: Wörmann Multicase 750 kg, flexibel für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
+    canonicalPath: "/leistungen/anhaenger",
+    serviceName: "Anhängervermietung München"
+  },
+  "/leistungen/entruempelung": {
+    title: "Entrümpelung München | Wohnung, Keller & Garage | All4You",
+    description: "Entrümpelung in München und Umgebung: Wohnungen, Häuser, Keller und Garagen inklusive Entsorgung, Besichtigung und auf Wunsch besenrein.",
+    canonicalPath: "/leistungen/entruempelung",
+    serviceName: "Entrümpelung München"
+  },
+  "/leistungen/reinigung": {
+    title: "Reinigungsservice München | Gebäudereinigung | All4You",
+    description: "Reinigungsservice in München: Gebäudereinigung für private und gewerbliche Objekte, einmalig oder regelmäßig, Material wird mitgebracht.",
+    canonicalPath: "/leistungen/reinigung",
+    serviceName: "Reinigungsservice München"
+  },
+  "/kontakt": {
+    title: "Kontakt & Anfrage | All4You Service München",
+    description: "Kontakt zu All4You Service München aufnehmen und Anfrage für Rollerabholung, Anhängervermietung, Entrümpelung oder Reinigung stellen.",
+    canonicalPath: "/kontakt"
+  },
+  "/ueber-uns": {
+    title: "Über All4You Service München | Regionaler Service aus München",
+    description: "All4You Service München steht für regionale, zuverlässige und unkomplizierte Dienstleistungen in München und Umgebung.",
+    canonicalPath: "/ueber-uns"
+  },
+  "/impressum": { title: "Impressum | All4You Service München", description: "Impressum von All4You Service München.", canonicalPath: "/impressum" },
+  "/datenschutz": { title: "Datenschutz | All4You Service München", description: "Datenschutzhinweise von All4You Service München.", canonicalPath: "/datenschutz" },
+  "/dashboard": { title: "Mitarbeiter-Dashboard | All4You Service München", description: "Geschützter Mitarbeiterbereich von All4You Service München.", canonicalPath: "/dashboard", noindex: true },
+  "/status": { title: "Anfragestatus prüfen | All4You Service München", description: "Status einer bestehenden All4You-Anfrage prüfen.", canonicalPath: "/status", noindex: true }
+};
+
+function canonicalSeoPath(path) {
+  if (path === "/leistungen/rollertransport") return "/leistungen/rollerabholservice";
+  if (path === "/leistungen/raeumungen") return "/leistungen/entruempelung";
+  if (path === "/mitarbeiter" || path === "/portal") return "/dashboard";
+  if (path === "/kundenstatus" || path === "/ticketstatus") return "/status";
+  return path || "/";
+}
+
+function upsertHeadTag(selector, createTag, attributes) {
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement(createTag);
+    document.head.appendChild(element);
+  }
+  Object.entries(attributes).forEach(([key, value]) => {
+    if (value === null || value === undefined) element.removeAttribute(key);
+    else element.setAttribute(key, String(value));
+  });
+  return element;
+}
+
+function setMetaName(name, content) {
+  upsertHeadTag(`meta[name="${name}"]`, "meta", { name, content });
+}
+
+function setMetaProperty(property, content) {
+  upsertHeadTag(`meta[property="${property}"]`, "meta", { property, content });
+}
+
+function updateJsonLd(id, data) {
+  let script = document.getElementById(id);
+  if (!script) {
+    script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = id;
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(data, null, 2);
+}
+
+function applySeoForPath(path) {
+  const seoPath = canonicalSeoPath(path);
+  const seo = SEO_ROUTES[seoPath] || {
+    title: "All4You Service München",
+    description: "All4You Service München: Rollerabholservice, Anhängervermietung, Entrümpelung und Reinigungsservice in München und Umgebung.",
+    canonicalPath: seoPath
+  };
+  const canonicalUrl = `${SITE_ORIGIN}${seo.canonicalPath === "/" ? "/" : seo.canonicalPath}`;
+  const imageUrl = `${SITE_ORIGIN}/assets/all4you-reference-hero-clean-v532.png`;
+
+  document.title = seo.title;
+  setMetaName("description", seo.description);
+  setMetaName("robots", seo.noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large");
+  upsertHeadTag("link[rel='canonical']", "link", { rel: "canonical", href: canonicalUrl });
+
+  setMetaProperty("og:type", seo.serviceName ? "article" : "website");
+  setMetaProperty("og:locale", "de_DE");
+  setMetaProperty("og:site_name", "All4You Service München");
+  setMetaProperty("og:title", seo.title);
+  setMetaProperty("og:description", seo.description);
+  setMetaProperty("og:url", canonicalUrl);
+  setMetaProperty("og:image", imageUrl);
+  setMetaName("twitter:card", "summary_large_image");
+  setMetaName("twitter:title", seo.title);
+  setMetaName("twitter:description", seo.description);
+  setMetaName("twitter:image", imageUrl);
+
+  if (seo.serviceName) {
+    updateJsonLd("seo-page-schema", {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": seo.serviceName,
+      "url": canonicalUrl,
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "All4You Service München",
+        "url": SITE_ORIGIN,
+        "email": "info@all4you-muenchen.de"
+      },
+      "areaServed": ["München", "München und Umgebung"],
+      "description": seo.description
+    });
+  } else {
+    const pageSchema = document.getElementById("seo-page-schema");
+    if (pageSchema) pageSchema.remove();
+  }
+}
+
 
 const icons = {
   check: `<svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7L9 18l-5-5"/></svg>`,
@@ -4621,6 +4764,7 @@ function renderRoute() {
 
   app.innerHTML = html;
   setActiveNav(path);
+  applySeoForPath(path);
   bindForms();
   bindRouteTool();
   bindTrailerTool();

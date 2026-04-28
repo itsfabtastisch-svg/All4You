@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /mitarbeiter
+Disallow: /portal
+Disallow: /status
+Disallow: /kundenstatus
+Disallow: /ticketstatus
+
+Sitemap: https://all4you-muenchen.de/sitemap.xml

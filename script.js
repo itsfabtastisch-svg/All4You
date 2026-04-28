@@ -2306,7 +2306,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.2.1-INFO-EMAIL-SWITCH
+// DBG: ALL4YOU-ROUTER-V5.3-VISUAL-HERO-ICONS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2319,34 +2319,13 @@ const icons = {
   euro: `<svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 8h-4a4 4 0 0 0 0 8h4"/><path d="M8 11h7"/><path d="M8 14h7"/></svg>`,
 };
 
-const serviceIconTruck = `
-  <svg viewBox="0 0 120 88" aria-hidden="true">
-    <path d="M10 58h50V35h27l13 17h10v6"/><path d="M66 58h18"/>
-    <circle cx="38" cy="68" r="9"/><circle cx="91" cy="68" r="9"/>
-    <path d="M20 72H5"/><path d="M27 46h26"/>
-    <circle cx="45" cy="27" r="6"/><circle cx="68" cy="28" r="6"/>
-    <path d="M51 27h10l5-11"/><path d="M56 28l7 14"/>
-  </svg>`;
+const serviceIconTruck = `<img src="/assets/service-rollertransport-v53.svg" alt="" loading="lazy">`;
 
-const serviceIconTrailer = `
-  <svg viewBox="0 0 120 88" aria-hidden="true">
-    <path d="M18 25h65c8 0 13 5 13 13v25H18z"/><path d="M96 55h18"/>
-    <path d="M113 55v8"/><circle cx="63" cy="66" r="11"/><path d="M28 25v38"/>
-  </svg>`;
+const serviceIconTrailer = `<img src="/assets/service-anhaenger-v53.svg" alt="" loading="lazy">`;
 
-const serviceIconClearance = `
-  <svg viewBox="0 0 120 88" aria-hidden="true">
-    <path d="M25 65h70V40c0-10-7-17-17-17H66"/><path d="M35 65V39c0-8 6-14 14-14h21"/>
-    <path d="M75 40h19c8 0 13 5 13 13v12"/><path d="M20 65V50c0-8 6-14 14-14h8"/>
-    <path d="M35 65l27-18 27 18"/><path d="M42 50h40v28H42z"/><path d="M62 50v28"/>
-  </svg>`;
+const serviceIconClearance = `<img src="/assets/service-entruempelung-v53.svg" alt="" loading="lazy">`;
 
-const serviceIconCleaning = `
-  <svg viewBox="0 0 120 88" aria-hidden="true">
-    <path d="M73 15L62 70"/><path d="M62 70h35"/><path d="M78 18l27 52"/>
-    <path d="M20 46h38"/><path d="M27 46v25h26V46"/><path d="M31 46c2-11 15-11 17 0"/>
-    <path d="M14 25l7 7"/><path d="M23 16v12"/><path d="M12 36h12"/>
-  </svg>`;
+const serviceIconCleaning = `<img src="/assets/service-reinigung-v53.svg" alt="" loading="lazy">`;
 
 const services = [
   {
@@ -2385,38 +2364,9 @@ const services = [
 
 function heroVisual() {
   return `
-    <div class="hero-visual" aria-hidden="true">
-      <span class="sun"></span>
-      <div class="skyline"><span class="s1"></span><span class="s2"></span><span class="s3"></span><span class="s4"></span><span class="s5"></span></div>
-      <span class="road"></span>
-
-      <div class="truck">
-        <div class="scooter">
-          <span class="scooter-body"></span>
-          <span class="scooter-seat"></span>
-          <span class="scooter-front"></span>
-          <span class="scooter-wheel w1"></span>
-          <span class="scooter-wheel w2"></span>
-        </div>
-        <span class="truck-bed"></span>
-        <span class="truck-cab"></span>
-        <span class="truck-front"></span>
-        <span class="truck-wheel left"></span>
-        <span class="truck-wheel right"></span>
-      </div>
-
-      <div class="trailer-art">
-        <span class="trailer-box"></span>
-        <span class="trailer-hitch"></span>
-        <span class="trailer-wheel"></span>
-      </div>
-
-      <div class="cleaning-art">
-        <span class="bucket"></span>
-        <span class="broom-stick"></span>
-        <span class="broom-head"></span>
-      </div>
-    </div>
+    <figure class="hero-visual hero-visual-v53" aria-label="All4You Services in München">
+      <img src="/assets/all4you-hero-munich-services-v53.svg" alt="Illustration von Rollertransport, Anhänger, Entrümpelung und Reinigung in München">
+    </figure>
   `;
 }
 

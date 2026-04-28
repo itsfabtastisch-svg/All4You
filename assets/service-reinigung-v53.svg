@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" role="img" aria-label="Reinigungsservice">
+  <defs><filter id="s" x="-20%" y="-30%" width="140%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#10243b" flood-opacity=".18"/></filter></defs>
+  <g filter="url(#s)">
+    <path d="M101 17L85 112" stroke="#10243b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M83 113h44" stroke="#10243b" stroke-width="9" stroke-linecap="round"/>
+    <path d="M121 35l30 79" stroke="#10243b" stroke-width="7" stroke-linecap="round"/>
+    <path d="M138 113h32" stroke="#10243b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M24 71h59l-8 47H33z" fill="#dceff6" stroke="#10243b" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M33 71c3-26 39-26 43 0" fill="none" stroke="#0aa99b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M35 91h40" stroke="#0aa99b" stroke-width="5" stroke-linecap="round"/>
+    <path d="M145 25l7 14 14 7-14 7-7 14-7-14-14-7 14-7z" fill="#0aa99b"/>
+    <circle cx="152" cy="12" r="4" fill="#0aa99b"/>
+  </g>
+</svg>

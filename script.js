@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE
+// DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7131,7 +7131,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.5.8-FOOTER-CONTACT-PHONE
+   DBG: ALL4YOU-ROUTER-V5.5.9-FAVICON-TAB-ICON
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

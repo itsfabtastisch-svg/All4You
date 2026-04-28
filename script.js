@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.2-DATENSCHUTZ-FINAL
+// DBG: ALL4YOU-ROUTER-V5.5.3-WIZARD-NEXT-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -5268,11 +5268,6 @@ function bindCleaningWizard() {
   next.addEventListener("click", async () => {
     if (!validateStep()) return;
 
-    if (current === 0 && !hasConfirmedRoute()) {
-      const calculated = await runRollerRouteCalculation();
-      if (!calculated) return;
-    }
-
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
   });
@@ -5496,11 +5491,6 @@ function bindClearanceWizard() {
 
   next.addEventListener("click", async () => {
     if (!validateStep()) return;
-
-    if (current === 0 && !hasConfirmedRoute()) {
-      const calculated = await runRollerRouteCalculation();
-      if (!calculated) return;
-    }
 
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();
@@ -6376,11 +6366,6 @@ function bindTrailerWizard() {
 
   next.addEventListener("click", async () => {
     if (!validateStep()) return;
-
-    if (current === 0 && !hasConfirmedRoute()) {
-      const calculated = await runRollerRouteCalculation();
-      if (!calculated) return;
-    }
 
     current = Math.min(steps.length - 1, current + 1);
     updateWizard();

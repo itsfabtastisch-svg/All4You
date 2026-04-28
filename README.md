@@ -1,24 +1,26 @@
-## ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
+## ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS
 
 Patch für All4You Service München.
 
 Enthalten:
 
-- neues Archiv im Mitarbeiter-Dashboard über linken Menüpunkt **Archiv**
-- aktive Ticketliste zeigt nur noch nicht archivierte Anfragen
-- manuelles Archivieren direkt aus den Ticket-Aktionen
-- Status **Abgeschlossen** archiviert Aufträge automatisch
-- Archivierte Aufträge bleiben vollständig einsehbar
-- Auftrag kann aus dem Archiv zurückgeholt werden
-- SQL-Datei 1 legt die Archiv-Spalten in Supabase an
-- SQL-Datei 2 archiviert optional alle aktuellen Alt-/Testanfragen, damit das aktive Dashboard sauber startet
-- bestehender Anhänger-Kalender-Fix aus V5.6.4 bleibt enthalten
+- Upload-Hinweise im letzten Wizard-Schritt direkt vor „Dateien anhängen“
+- Rollerabholservice: Fahrzeugschein Teil I, schriftliche Transportfreigabe und bei abweichendem Namen Vollmacht
+- Anhängervermietung: Bild vom gültigen Führerschein Klasse B
+- Entrümpelung: optionaler Hinweis, dass Fotos der zu räumenden Bereiche hilfreich sind
+- Reinigung: optionaler Hinweis, dass Fotos der zu reinigenden Bereiche hilfreich sind
+- keine Pflichtlogik für Uploads verändert, nur klare Hinweise im bestehenden Upload-Bereich
+- Archiv-System aus V5.6.5 bleibt enthalten
+- Anhänger-Kalender/Dashboard-Logik bleibt enthalten
 
-Wichtig:
+Nicht geändert:
 
-1. Zuerst `SUPABASE-SQL-1-ARCHIV-SYSTEM.sql` im Supabase SQL Editor ausführen.
-2. Danach optional `SUPABASE-SQL-2-ALT-ANFRAGEN-ARCHIVIEREN.sql` ausführen, wenn alle bisherigen Anfragen aus der aktiven Liste ins Archiv sollen.
-3. Es wird nichts hart gelöscht. Die bisherigen Anfragen werden nur archiviert.
+- Supabase-Tabellen
+- Resend/Mailversand
+- Auth/Login
+- Dashboard-Grundlogik
+- Cookie-Banner
+- Impressum, Datenschutz, AGB
 
 DBG:
-`ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM`
+`ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS`

@@ -2199,6 +2199,49 @@ function validateAttachmentFiles(files) {
   return files;
 }
 
+function buildWizardUploadRequirementBox(serviceKey) {
+  const requirements = {
+    roller: {
+      kicker: "Benötigte Unterlagen",
+      title: "Für den Rollertransport erforderlich",
+      text: "Bitte Fahrzeugschein Teil I und eine schriftliche Transportfreigabe hochladen. Falls der Name auf dem Fahrzeugschein nicht zur anfragenden Person passt, wird zusätzlich eine Vollmacht benötigt.",
+      items: ["Fahrzeugschein Teil I", "schriftliche Transportfreigabe", "Vollmacht, falls der Name abweicht"]
+    },
+    trailer: {
+      kicker: "Benötigte Unterlage",
+      title: "Für die Anhängervermietung erforderlich",
+      text: "Bitte ein Bild des gültigen Führerscheins Klasse B hochladen, wenn Sie den Anhänger selbst ziehen möchten.",
+      items: ["gültiger Führerschein Klasse B"]
+    },
+    clearance: {
+      kicker: "Optional hilfreich",
+      title: "Fotos helfen bei der Einschätzung",
+      text: "Fotos der zu räumenden Bereiche helfen dabei, Aufwand und Umfang schneller einzuschätzen.",
+      items: ["Fotos der zu räumenden Bereiche"]
+    },
+    cleaning: {
+      kicker: "Optional hilfreich",
+      title: "Fotos helfen bei der Einschätzung",
+      text: "Fotos der zu reinigenden Bereiche helfen dabei, Umfang und Besonderheiten schneller einzuschätzen.",
+      items: ["Fotos der zu reinigenden Bereiche"]
+    }
+  };
+
+  const requirement = requirements[serviceKey];
+  if (!requirement) return "";
+
+  return `
+    <div class="wizard-upload-requirement ${escapeHtml(serviceKey)}">
+      <span>${escapeHtml(requirement.kicker)}</span>
+      <strong>${escapeHtml(requirement.title)}</strong>
+      <p>${escapeHtml(requirement.text)}</p>
+      <ul>
+        ${requirement.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
 function buildAttachmentUploadBox(context = "wizard") {
   const subtitle = context === "status"
     ? "Hier können Sie Fotos oder PDF-Dokumente zur bestehenden Anfrage nachreichen."
@@ -2548,7 +2591,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
+// DBG: ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3064,6 +3107,7 @@ function rollerPage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="rollerWizardSummary"></div>
+              ${buildWizardUploadRequirementBox("roller")}
               ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Die Distanz dient später zur Einschätzung. Der endgültige Preis wird nach Strecke,
@@ -3383,6 +3427,7 @@ function trailerPage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="trailerWizardSummary"></div>
+              ${buildWizardUploadRequirementBox("trailer")}
               ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Verfügbarkeit, Kaution und eventuelle Liefer-/Abholkosten werden nach Prüfung bestätigt.
@@ -3707,6 +3752,7 @@ function clearancePage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="clearanceWizardSummary"></div>
+              ${buildWizardUploadRequirementBox("clearance")}
               ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Fotos helfen bei der Einschätzung des Aufwands.
@@ -4060,6 +4106,7 @@ function cleaningPage() {
 
             <div class="wizard-step" data-title="Zusammenfassung prüfen">
               <div class="wizard-summary" id="cleaningWizardSummary"></div>
+              ${buildWizardUploadRequirementBox("cleaning")}
               ${buildAttachmentUploadBox("wizard")}
               <p class="form-note">
                 Die Anfrage ist unverbindlich. Der genaue Umfang und Preis werden nach Prüfung von Objekt, Fläche,
@@ -6844,7 +6891,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
+   DBG: ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8700,7 +8747,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
+   DBG: ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

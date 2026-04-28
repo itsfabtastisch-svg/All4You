@@ -2324,7 +2324,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.5.6-COOKIE-CONSENT
+// DBG: ALL4YOU-ROUTER-V5.5.7-AGB-FINAL
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2380,6 +2380,7 @@ const SEO_ROUTES = {
   },
   "/impressum": { title: "Impressum | All4You Service München", description: "Impressum von All4You Service München mit Anbieterkennzeichnung, Kontakt und Verantwortlichkeit.", canonicalPath: "/impressum" },
   "/datenschutz": { title: "Datenschutz | All4You Service München", description: "Datenschutzhinweise von All4You Service München.", canonicalPath: "/datenschutz" },
+  "/agb": { title: "AGB | All4You Service München", description: "Allgemeine Geschäftsbedingungen von All4You Service München für Anhängervermietung, Transportdienstleistungen, Entrümpelung und Reinigungsservice.", canonicalPath: "/agb" },
   "/dashboard": { title: "Mitarbeiter-Dashboard | All4You Service München", description: "Geschützter Mitarbeiterbereich von All4You Service München.", canonicalPath: "/dashboard", noindex: true },
   "/status": { title: "Anfragestatus prüfen | All4You Service München", description: "Status einer bestehenden All4You-Anfrage prüfen.", canonicalPath: "/status", noindex: true }
 };
@@ -4704,6 +4705,89 @@ function legalPage(type) {
   `;
 }
 
+
+function agbPage() {
+  document.title = "AGB | All4You Service München";
+
+  return `
+    <section class="page page-head">
+      <div class="breadcrumb"><a href="/" data-link>Startseite</a><span>›</span><span>AGB</span></div>
+      <p class="eyebrow">Rechtliches</p>
+      <h1>AGB</h1>
+      <p class="lead">
+        Allgemeine Geschäftsbedingungen für Dienstleistungen von All4You Service München.
+      </p>
+    </section>
+
+    <section class="section-pad legal-layout legal-only">
+      <div class="legal-main">
+        <article class="legal-card">
+          <p class="eyebrow">Geltungsbereich</p>
+          <h2>Geltungsbereich</h2>
+          <p>Diese AGB gelten für alle Dienstleistungen von Silvija Vardijan.</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Leistungen</p>
+          <h2>Leistungen</h2>
+          <p>Angeboten werden:</p>
+          <ul class="list">
+            <li>Anhängervermietung</li>
+            <li>Transportdienstleistungen</li>
+            <li>Entrümpelung</li>
+            <li>Reinigungsservice</li>
+          </ul>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Vertragsschluss</p>
+          <h2>Vertragsschluss</h2>
+          <p>Ein Vertrag kommt durch Anfrage und Bestätigung zustande.</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Preise</p>
+          <h2>Preise</h2>
+          <p>Alle Preise werden individuell vereinbart oder vorab mitgeteilt.</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Zahlung</p>
+          <h2>Zahlung</h2>
+          <p>Die Zahlung erfolgt nach Vereinbarung (Bar, Überweisung oder andere vereinbarte Methoden).</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Haftung</p>
+          <h2>Haftung</h2>
+          <p>Für Schäden haften wir nur bei Vorsatz oder grober Fahrlässigkeit.</p>
+          <p>Bei Vermietung haftet der Kunde für Schäden am Anhänger während der Mietdauer.</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Stornierung</p>
+          <h2>Stornierung</h2>
+          <p>Vereinbarte Termine können nach Absprache storniert werden.</p>
+          <p>Kurzfristige Absagen können kostenpflichtig sein.</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Nutzung von Mietgegenständen</p>
+          <h2>Nutzung von Mietgegenständen</h2>
+          <p>Anhänger dürfen nur ordnungsgemäß und gesetzeskonform genutzt werden.</p>
+        </article>
+
+        <article class="legal-card">
+          <p class="eyebrow">Schlussbestimmungen</p>
+          <h2>Schlussbestimmungen</h2>
+          <p>Es gilt deutsches Recht.</p>
+          <p>Gerichtsstand ist München, soweit gesetzlich zulässig.</p>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
 function pageNotFound() {
   document.title = "Seite nicht gefunden | All4You Service München";
   return `
@@ -4735,6 +4819,7 @@ function renderRoute() {
   else if (path === "/ueber-uns") html = pageAbout();
   else if (path === "/impressum") html = legalPage("impressum");
   else if (path === "/datenschutz") html = legalPage("datenschutz");
+  else if (path === "/agb") html = agbPage();
   else html = pageNotFound();
 
   app.innerHTML = html;
@@ -7046,7 +7131,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.5.6-COOKIE-CONSENT
+   DBG: ALL4YOU-ROUTER-V5.5.7-AGB-FINAL
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

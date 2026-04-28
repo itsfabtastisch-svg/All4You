@@ -5,7 +5,7 @@ title All4You Google Maps Edge Functions deployen
 
 echo =====================================================
 echo All4You V5.4.0 - Google Places + Routes deploy
-echo DBG: ALL4YOU-ROUTER-V5.4.0-GOOGLE-ADDRESS-ROUTE
+echo DBG: ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
 echo =====================================================
 echo.
 
@@ -85,6 +85,6 @@ if errorlevel 1 (
 echo.
 echo Fertig. Google-Adressvorschlaege und Routenberechnung sind deployed.
 echo Danach Webseite neu deployen/Cloudflare Pages aktualisieren und DBG pruefen:
-echo ALL4YOU-ROUTER-V5.4.0-GOOGLE-ADDRESS-ROUTE
+echo ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
 echo.
 pause

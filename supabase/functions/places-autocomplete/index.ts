@@ -2,7 +2,7 @@
 // All4You Service München
 // Supabase Edge Function: places-autocomplete
 // Liefert Google Places Adressvorschläge für den Roller-Assistenten
-// DBG: ALL4YOU-ROUTER-V5.4.0-GOOGLE-ADDRESS-ROUTE
+// DBG: ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
 // =========================================================
 
 const corsHeaders = {
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
               latitude: 48.137154,
               longitude: 11.576124,
             },
-            radius: 80000,
+            radius: 50000,
           },
         },
       }),

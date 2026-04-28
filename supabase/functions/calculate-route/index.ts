@@ -2,7 +2,7 @@
 // All4You Service München
 // Supabase Edge Function: calculate-route
 // Berechnet Distanz/Fahrzeit über Google Routes API
-// DBG: ALL4YOU-ROUTER-V5.4.0-GOOGLE-ADDRESS-ROUTE
+// DBG: ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
 // =========================================================
 
 const corsHeaders = {

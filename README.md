@@ -1,23 +1,24 @@
-## ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
+## ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
 
 Patch für All4You Service München.
 
 Enthalten:
 
-- Anhänger-Wizard Übergabe/Standort dynamisch verbessert
-- bei Selbstabholung bleibt Sachsenstraße fest
-- bei Lieferung & Abholung ist der Abhol-/Rückgabeort frei editierbar
-- bei Rücksprache ist der gewünschte Ort/Hinweis frei editierbar
-- neue Felder werden in Zusammenfassung, Mailtext, Supabase-Details und Dashboard mitgespeichert
-- interner Anhänger-Kalender im Mitarbeiterportal als klickbarer Kalender
-- Status intern speicherbar: frei, vermietet, reserviert, in Wartung
-- Kalenderfarben: frei grün, vermietet blau, reserviert gelb, Wartung rot
-- Kunden sehen interne Belegungen nicht öffentlich und senden weiterhin nur Mietanfragen
+- neues Archiv im Mitarbeiter-Dashboard über linken Menüpunkt **Archiv**
+- aktive Ticketliste zeigt nur noch nicht archivierte Anfragen
+- manuelles Archivieren direkt aus den Ticket-Aktionen
+- Status **Abgeschlossen** archiviert Aufträge automatisch
+- Archivierte Aufträge bleiben vollständig einsehbar
+- Auftrag kann aus dem Archiv zurückgeholt werden
+- SQL-Datei 1 legt die Archiv-Spalten in Supabase an
+- SQL-Datei 2 archiviert optional alle aktuellen Alt-/Testanfragen, damit das aktive Dashboard sauber startet
+- bestehender Anhänger-Kalender-Fix aus V5.6.4 bleibt enthalten
 
 Wichtig:
 
-- Die SQL-Datei `supabase/sql/trailer_calendar_rules.sql` bitte einmal im Supabase SQL Editor ausführen, damit die Statuswerte frei/vermietet/reserviert/Wartung gespeichert werden können.
-- Keine Änderungen an Impressum, Datenschutz, AGB, Cookie-Banner, Resend, Auth oder bestehenden Anfrage-Flows außerhalb des Anhänger-Wizards/Kalenders.
+1. Zuerst `SUPABASE-SQL-1-ARCHIV-SYSTEM.sql` im Supabase SQL Editor ausführen.
+2. Danach optional `SUPABASE-SQL-2-ALT-ANFRAGEN-ARCHIVIEREN.sql` ausführen, wenn alle bisherigen Anfragen aus der aktiven Liste ins Archiv sollen.
+3. Es wird nichts hart gelöscht. Die bisherigen Anfragen werden nur archiviert.
 
 DBG:
-`ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR`
+`ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM`

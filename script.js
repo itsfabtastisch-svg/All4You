@@ -122,6 +122,8 @@ async function fetchEmployeeProfile(session) {
 
 let dashboardRequestCache = [];
 let dashboardAllRequestCache = [];
+let dashboardArchiveCache = [];
+let dashboardSelectedArchiveId = null;
 
 
 function serviceAccentClass(service) {
@@ -155,7 +157,7 @@ function statusLabel(status) {
     termin_vorgeschlagen: "Termin vorgeschlagen",
     termin_bestaetigt: "Termin bestätigt",
     in_bearbeitung: "In Bearbeitung",
-    erledigt: "Erledigt",
+    erledigt: "Abgeschlossen",
     storniert: "Storniert"
   };
 
@@ -220,9 +222,9 @@ async function fetchDashboardRequests(session) {
   }
 
   const query = [
-    "select=id,ticket_number,service,source,status,priority,customer_name,customer_email,customer_phone,subject,summary,details,created_at,updated_at",
+    "select=id,ticket_number,service,source,status,priority,customer_name,customer_email,customer_phone,subject,summary,details,created_at,updated_at,archived_at,archived_by,archive_reason",
     "order=created_at.desc",
-    "limit=50"
+    "limit=250"
   ].join("&");
 
   const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?${query}`, {
@@ -487,12 +489,14 @@ function updateDashboardStats(tickets) {
   const inReview = list.filter(ticket => ticket.status === "in_pruefung").length;
   const openQuestions = list.filter(ticket => ticket.status === "rueckfrage_offen").length;
   const done = list.filter(ticket => ticket.status === "erledigt").length;
+  const archived = dashboardArchiveCache.length;
 
   const stats = {
     dashboardStatNew: totalNew,
     dashboardStatReview: inReview,
     dashboardStatQuestions: openQuestions,
-    dashboardStatDone: done
+    dashboardStatDone: done,
+    dashboardStatArchive: archived
   };
 
   Object.entries(stats).forEach(([id, value]) => {
@@ -522,11 +526,14 @@ async function loadDashboardRequests(session) {
 
   try {
     const requests = await fetchDashboardRequests(session);
-    dashboardAllRequestCache = requests;
-    await fetchDashboardActivitySummary(session, requests);
+    dashboardArchiveCache = requests.filter(ticket => Boolean(ticket.archived_at));
+    dashboardAllRequestCache = requests.filter(ticket => !ticket.archived_at);
+    await fetchDashboardActivitySummary(session, dashboardAllRequestCache);
     applyDashboardFilters();
-    updateDashboardStats(requests);
-    updateDashboardActivityStats(requests);
+    renderDashboardArchiveList(dashboardArchiveCache);
+    renderDashboardArchiveDetail(null);
+    updateDashboardStats(dashboardAllRequestCache);
+    updateDashboardActivityStats(dashboardAllRequestCache);
 
     if (liveStatus) {
       liveStatus.textContent = "Live verbunden";
@@ -668,9 +675,210 @@ function setDashboardTicketActionsEnabled(isEnabled) {
   });
 }
 
+function setDashboardArchiveMessage(type, text) {
+  const message = document.querySelector("#dashboardArchiveMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function ticketArchiveMetaText(ticket) {
+  if (!ticket?.archived_at) return "Nicht archiviert";
+  const reason = ticket.archive_reason ? ` · ${ticket.archive_reason}` : "";
+  return `Archiviert am ${formatDashboardDate(ticket.archived_at)}${reason}`;
+}
+
+function filterDashboardArchiveTickets() {
+  const input = document.querySelector("#dashboardArchiveSearchInput");
+  const query = String(input?.value || "").trim().toLowerCase();
+  let list = [...(dashboardArchiveCache || [])];
+
+  if (query) {
+    list = list.filter(ticket => ticketMatchesDashboardSearch(ticket, query));
+  }
+
+  list.sort((a, b) => new Date(b.archived_at || b.updated_at || b.created_at || 0) - new Date(a.archived_at || a.updated_at || a.created_at || 0));
+  renderDashboardArchiveList(list);
+}
+
+function renderDashboardArchiveList(tickets = dashboardArchiveCache) {
+  const list = document.querySelector("#dashboardArchiveList");
+  const count = document.querySelector("#dashboardArchiveCount");
+  if (!list) return;
+
+  const rows = Array.isArray(tickets) ? tickets : [];
+  if (count) count.textContent = `${rows.length} archivierte Aufträge`;
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Noch keine archivierten Aufträge</strong>
+        <p>Abgeschlossene oder manuell archivierte Aufträge erscheinen hier.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = rows.map((ticket, index) => `
+    <button class="dashboard-ticket archive-ticket ${serviceAccentClass(ticket.service)} ${index === 0 ? "active" : ""}" type="button" data-archive-ticket-id="${escapeHtml(ticket.id)}">
+      <span class="ticket-topline">
+        <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+        <em>${escapeHtml(statusLabel(ticket.status))}</em>
+      </span>
+      <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
+      <span class="ticket-meta">${escapeHtml(ticket.customer_name || "Ohne Namen")} · ${escapeHtml(formatDashboardDate(ticket.archived_at || ticket.updated_at || ticket.created_at))}</span>
+      <span class="ticket-summary">${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</span>
+    </button>
+  `).join("");
+
+  if (!dashboardSelectedArchiveId && rows[0]) {
+    renderDashboardArchiveDetail(rows[0]);
+  }
+}
+
+function renderDashboardArchiveDetail(ticket) {
+  const title = document.querySelector("#dashboardArchiveDetailTitle");
+  const body = document.querySelector("#dashboardArchiveDetailBody");
+  const status = document.querySelector("#dashboardArchiveDetailStatus");
+  const restoreButton = document.querySelector("#dashboardArchiveRestoreButton");
+
+  if (!title || !body) return;
+
+  if (!ticket) {
+    dashboardSelectedArchiveId = null;
+    title.textContent = "Archiv auswählen";
+    if (status) status.textContent = "—";
+    if (restoreButton) restoreButton.disabled = true;
+    body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen archivierten Auftrag aus.</span></div>`;
+    return;
+  }
+
+  dashboardSelectedArchiveId = ticket.id;
+  title.textContent = ticket.ticket_number || "Archivauftrag";
+  if (status) status.textContent = statusLabel(ticket.status);
+  if (restoreButton) restoreButton.disabled = false;
+
+  const groups = getDashboardDetailGroups(ticket);
+  body.innerHTML = `
+    ${renderDashboardDetailHero(ticket)}
+    <section class="detail-summary-block ${serviceAccentClass(ticket.service)}">
+      <span>Archiv</span>
+      <p>${escapeHtml(ticketArchiveMetaText(ticket))}</p>
+    </section>
+    ${renderDashboardSummaryBlock(ticket)}
+    ${renderDashboardDetailSection("Kunde & Kontakt", groups["Kunde & Kontakt"])}
+    ${renderDashboardDetailSection("Ticket", groups["Ticket"])}
+    ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+    ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
+    ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"])}
+    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+  `;
+}
+
+async function archiveDashboardRequest(session, requestId, reason = "Manuell archiviert") {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  if (!requestId) {
+    throw new Error("Kein Ticket ausgewählt.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify({
+      archived_at: new Date().toISOString(),
+      archived_by: session.user?.id || null,
+      archive_reason: reason
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Ticket konnte nicht archiviert werden.");
+  }
+
+  if (!Array.isArray(data) || !data.length) {
+    throw new Error("Archivierung wurde nicht bestätigt.");
+  }
+
+  return data[0];
+}
+
+async function restoreDashboardRequestFromArchive(session, requestId) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  if (!requestId) {
+    throw new Error("Kein Archiv-Ticket ausgewählt.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify({
+      archived_at: null,
+      archived_by: null,
+      archive_reason: null
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Ticket konnte nicht zurückgeholt werden.");
+  }
+
+  if (!Array.isArray(data) || !data.length) {
+    throw new Error("Wiederherstellung wurde nicht bestätigt.");
+  }
+
+  return data[0];
+}
+
+function moveTicketToArchiveCache(ticket) {
+  if (!ticket?.id) return;
+  dashboardAllRequestCache = dashboardAllRequestCache.filter(item => item.id !== ticket.id);
+  dashboardRequestCache = dashboardRequestCache.filter(item => item.id !== ticket.id);
+  dashboardArchiveCache = [ticket, ...dashboardArchiveCache.filter(item => item.id !== ticket.id)];
+  renderDashboardArchiveList(dashboardArchiveCache);
+}
+
+function moveTicketToActiveCache(ticket) {
+  if (!ticket?.id) return;
+  dashboardArchiveCache = dashboardArchiveCache.filter(item => item.id !== ticket.id);
+  dashboardAllRequestCache = [ticket, ...dashboardAllRequestCache.filter(item => item.id !== ticket.id)];
+  renderDashboardArchiveList(dashboardArchiveCache);
+}
+
 async function applyDashboardTicketStatusUpdate(requestId, status) {
   const session = getStoredEmployeeSession();
   const updatedTicket = await updateDashboardRequestStatus(session, requestId, status);
+
+  if (updatedTicket.archived_at) {
+    moveTicketToArchiveCache(updatedTicket);
+    applyDashboardFilters();
+    updateDashboardStats(dashboardAllRequestCache);
+    updateDashboardActivityStats(dashboardAllRequestCache);
+    renderDashboardDetail(null);
+    setDashboardActionMessage("success", "Ticket wurde abgeschlossen und automatisch archiviert.");
+    return updatedTicket;
+  }
 
   dashboardAllRequestCache = dashboardAllRequestCache.map(ticket =>
     ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket
@@ -711,6 +919,16 @@ async function updateDashboardRequestStatus(session, requestId, newStatus) {
     throw new Error("Kein Ticket ausgewählt.");
   }
 
+  const patchPayload = {
+    status: newStatus
+  };
+
+  if (newStatus === "erledigt") {
+    patchPayload.archived_at = new Date().toISOString();
+    patchPayload.archived_by = session.user?.id || null;
+    patchPayload.archive_reason = "Automatisch archiviert nach Status abgeschlossen.";
+  }
+
   const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
     method: "PATCH",
     headers: {
@@ -719,9 +937,7 @@ async function updateDashboardRequestStatus(session, requestId, newStatus) {
       "Content-Type": "application/json",
       "Prefer": "return=representation"
     },
-    body: JSON.stringify({
-      status: newStatus
-    })
+    body: JSON.stringify(patchPayload)
   });
 
   const data = await response.json().catch(() => null);
@@ -757,6 +973,8 @@ function dashboardFieldLabel(key) {
     source: "Quelle",
     created_at: "Erstellt",
     updated_at: "Aktualisiert",
+    archived_at: "Archiviert am",
+    archive_reason: "Archivgrund",
     customer_name: "Kunde",
     customer_email: "E-Mail",
     customer_phone: "Telefon",
@@ -2330,7 +2548,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
+// DBG: ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4096,6 +4314,7 @@ function pageDashboard() {
           <nav class="dashboard-menu" aria-label="Dashboard Navigation">
             <a class="active" href="#dashboard-overview" data-dashboard-view-trigger="overview">Übersicht</a>
             <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
+            <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="overview">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
@@ -4132,8 +4351,58 @@ function pageDashboard() {
           <section class="dashboard-stats" data-dashboard-view="overview">
             <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
+            <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
+          </section>
+
+          <section class="dashboard-panel dashboard-archive-manager is-hidden" id="dashboardArchiveManager" data-dashboard-view="archive">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Archiv</p>
+                <h2>Abgeschlossene Aufträge</h2>
+              </div>
+              <span class="status-pill" id="dashboardArchiveCount">0 archivierte Aufträge</span>
+            </div>
+
+            <p class="dashboard-calendar-intro">
+              Archivierte Aufträge bleiben einsehbar, verschwinden aber aus der aktiven Ticketliste.
+              Wird ein Auftrag auf „Abgeschlossen“ gestellt, wird er automatisch archiviert.
+            </p>
+
+            <div class="dashboard-archive-layout">
+              <div class="dashboard-panel dashboard-archive-list-panel">
+                <div class="dashboard-search-row">
+                  <input id="dashboardArchiveSearchInput" type="search" placeholder="Archiv durchsuchen: Ticketnummer, Kunde, Leistung, Telefon …">
+                </div>
+                <div class="dashboard-ticket-list dashboard-archive-list" id="dashboardArchiveList">
+                  <div class="dashboard-empty-state">
+                    <strong>Archiv wird geladen …</strong>
+                    <p>Archivierte Aufträge erscheinen nach dem Login hier.</p>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="dashboard-panel dashboard-detail dashboard-archive-detail">
+                <div class="panel-head">
+                  <div>
+                    <p class="eyebrow">Archivdetails</p>
+                    <h2 id="dashboardArchiveDetailTitle">Archiv auswählen</h2>
+                  </div>
+                  <span class="status-pill" id="dashboardArchiveDetailStatus">—</span>
+                </div>
+                <div class="dashboard-detail-body" id="dashboardArchiveDetailBody">
+                  <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen archivierten Auftrag aus.</span></div>
+                </div>
+                <div class="dashboard-ticket-actions">
+                  <p class="eyebrow">Archiv-Aktionen</p>
+                  <div class="dashboard-ticket-action-grid">
+                    <button class="btn ghost" type="button" id="dashboardArchiveRestoreButton" disabled>Aus Archiv zurückholen</button>
+                  </div>
+                  <p class="dashboard-ticket-action-message" id="dashboardArchiveMessage">Archivierte Aufträge können bei Bedarf zurückgeholt werden.</p>
+                </div>
+              </aside>
+            </div>
           </section>
 
           <section class="dashboard-panel trailer-calendar-manager is-hidden" id="dashboardTrailerCalendarManager" data-dashboard-view="trailer-calendar">
@@ -4242,7 +4511,7 @@ function pageDashboard() {
                   <option value="termin_vorgeschlagen">Termin vorgeschlagen</option>
                   <option value="termin_bestaetigt">Termin bestätigt</option>
                   <option value="in_bearbeitung">In Bearbeitung</option>
-                  <option value="erledigt">Erledigt</option>
+                  <option value="erledigt">Abgeschlossen</option>
                   <option value="storniert">Storniert</option>
                 </select>
                 <select id="dashboardSortSelect" aria-label="Sortierung">
@@ -4299,7 +4568,8 @@ function pageDashboard() {
                   <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
                   <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
                   <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
-                  <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als erledigt markieren</button>
+                  <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
+                  <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
                 </div>
                 <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
                   Bitte zuerst ein Ticket auswählen.
@@ -6574,7 +6844,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
+   DBG: ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -7657,18 +7927,23 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const normalized = view === "trailer-calendar" ? "trailer-calendar" : "overview";
+  const allowedViews = ["overview", "archive", "trailer-calendar"];
+  const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
   });
   document.querySelectorAll("[data-dashboard-view-trigger]").forEach(link => {
-    const isActive = normalized === "trailer-calendar"
-      ? link.dataset.dashboardViewTrigger === "trailer-calendar"
-      : link.textContent.trim() === "Übersicht";
+    const trigger = link.dataset.dashboardViewTrigger || "overview";
+    const isActive = normalized === "overview"
+      ? link.textContent.trim() === "Übersicht"
+      : trigger === normalized;
     link.classList.toggle("active", isActive);
   });
   if (normalized === "trailer-calendar") {
     refreshDashboardTrailerCalendar();
+  }
+  if (normalized === "archive") {
+    renderDashboardArchiveList(dashboardArchiveCache);
   }
 }
 
@@ -7680,6 +7955,9 @@ function bindDashboardShell() {
   const noteText = document.querySelector("#dashboardInternalNoteText");
   const noteButton = document.querySelector("#dashboardInternalNoteButton");
   const ticketActions = document.querySelector(".dashboard-ticket-actions");
+  const archiveList = document.querySelector("#dashboardArchiveList");
+  const archiveSearch = document.querySelector("#dashboardArchiveSearchInput");
+  const archiveRestoreButton = document.querySelector("#dashboardArchiveRestoreButton");
   const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
 
   dashboardViewLinks.forEach(link => {
@@ -7713,6 +7991,44 @@ function bindDashboardShell() {
       }
     });
   }
+
+  archiveList?.addEventListener("click", event => {
+    const ticketButton = event.target.closest("[data-archive-ticket-id]");
+    if (!ticketButton) return;
+
+    archiveList.querySelectorAll(".dashboard-ticket").forEach(button => button.classList.remove("active"));
+    ticketButton.classList.add("active");
+
+    const ticket = dashboardArchiveCache.find(item => item.id === ticketButton.dataset.archiveTicketId);
+    renderDashboardArchiveDetail(ticket || null);
+  });
+
+  archiveSearch?.addEventListener("input", filterDashboardArchiveTickets);
+
+  archiveRestoreButton?.addEventListener("click", async () => {
+    if (!dashboardSelectedArchiveId) {
+      setDashboardArchiveMessage("error", "Bitte zuerst einen archivierten Auftrag auswählen.");
+      return;
+    }
+
+    if (!confirm("Diesen Auftrag wirklich aus dem Archiv zurückholen?")) return;
+
+    archiveRestoreButton.disabled = true;
+    setDashboardArchiveMessage("loading", "Auftrag wird aus dem Archiv zurückgeholt …");
+
+    try {
+      const restoredTicket = await restoreDashboardRequestFromArchive(getStoredEmployeeSession(), dashboardSelectedArchiveId);
+      moveTicketToActiveCache(restoredTicket);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
+      updateDashboardActivityStats(dashboardAllRequestCache);
+      renderDashboardArchiveDetail(null);
+      setDashboardArchiveMessage("success", "Auftrag wurde zurück in die aktive Ticketliste verschoben.");
+    } catch (error) {
+      setDashboardArchiveMessage("error", error.message || "Auftrag konnte nicht zurückgeholt werden.");
+      archiveRestoreButton.disabled = false;
+    }
+  });
 
   saveStatusButton?.addEventListener("click", async () => {
     const session = getStoredEmployeeSession();
@@ -7767,21 +8083,41 @@ function bindDashboardShell() {
         return;
       }
 
+      if (action === "archive-ticket") {
+        if (ticket.archived_at) {
+          setDashboardTicketActionMessage("success", "Ticket ist bereits archiviert.");
+          return;
+        }
+
+        if (!confirm("Dieses Ticket wirklich archivieren? Es verschwindet aus der aktiven Ticketliste und bleibt im Archiv sichtbar.")) return;
+
+        button.disabled = true;
+        setDashboardTicketActionMessage("loading", "Ticket wird archiviert …");
+        const archivedTicket = await archiveDashboardRequest(getStoredEmployeeSession(), ticket.id, "Manuell archiviert.");
+        moveTicketToArchiveCache(archivedTicket);
+        applyDashboardFilters();
+        updateDashboardStats(dashboardAllRequestCache);
+        updateDashboardActivityStats(dashboardAllRequestCache);
+        renderDashboardDetail(null);
+        setDashboardTicketActionMessage("success", `Ticket ${archivedTicket.ticket_number || ""} wurde archiviert.`);
+        return;
+      }
+
       if (action === "mark-done") {
         if (ticket.status === "erledigt") {
-          setDashboardTicketActionMessage("success", "Ticket ist bereits erledigt.");
+          setDashboardTicketActionMessage("success", "Ticket ist bereits abgeschlossen.");
           return;
         }
 
         button.disabled = true;
-        setDashboardTicketActionMessage("loading", "Ticket wird als erledigt markiert …");
+        setDashboardTicketActionMessage("loading", "Ticket wird als abgeschlossen markiert …");
         const updatedTicket = await applyDashboardTicketStatusUpdate(ticket.id, "erledigt");
-        setDashboardTicketActionMessage("success", `Ticket ${updatedTicket.ticket_number || ""} wurde als erledigt markiert.`);
+        setDashboardTicketActionMessage("success", `Ticket ${updatedTicket.ticket_number || ""} wurde abgeschlossen und archiviert.`);
         return;
       }
     } catch (error) {
       setDashboardTicketActionMessage("error", error.message || "Aktion konnte nicht ausgeführt werden.");
-      if (action === "mark-done") button.disabled = false;
+      if (action === "mark-done" || action === "archive-ticket") button.disabled = false;
     }
   });
 
@@ -7913,6 +8249,7 @@ function bindDashboardAuth() {
     clearEmployeeSession();
     dashboardRequestCache = [];
     dashboardAllRequestCache = [];
+    dashboardArchiveCache = [];
     dashboardCurrentSession = null;
     dashboardCurrentEmployeeProfile = null;
     clearTicketExtras();
@@ -8363,7 +8700,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.6.3-TRAILER-HANDOVER-DASHBOARD-CALENDAR
+   DBG: ALL4YOU-ROUTER-V5.6.5-DASHBOARD-ARCHIVE-SYSTEM
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

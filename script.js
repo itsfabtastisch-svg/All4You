@@ -2279,7 +2279,7 @@ function buildTrailerSummaryText(summary) {
     summary.rentalStart && summary.rentalEnd ? `${summary.rentalStart} bis ${summary.rentalEnd}` : "",
     summary.rentalDays ? `Mietdauer: ${summary.rentalDays}` : "",
     summary.rentalPrice ? `Preis: ${summary.rentalPrice}` : "",
-    summary.availabilityStatus ? `Kalenderstatus: ${summary.availabilityStatus}` : "",
+    summary.availabilityStatus ? `Anfragestatus: ${summary.availabilityStatus}` : "",
     summary.handover,
     summary.cargo ? `Transportgut: ${summary.cargo}` : ""
   ].filter(Boolean);
@@ -2325,7 +2325,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
+// DBG: ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2990,8 +2990,8 @@ function trailerPage() {
         <p class="eyebrow">Anhänger-Assistent</p>
         <h2>Verfügbarkeit & Preis Schritt für Schritt prüfen.</h2>
         <p class="lead">
-          Wählen Sie zuerst den gewünschten Mietzeitraum. Der Preis wird automatisch anhand der Mietdauer berechnet.
-          Die finale Verfügbarkeit, Kaution und Übergabe werden durch All4You bestätigt.
+          Wählen Sie den gewünschten Mietzeitraum direkt im Kalender aus. Der Preis wird automatisch anhand der Mietdauer berechnet.
+          Die Anfrage wird anschließend im Mitarbeiterportal geprüft und durch All4You bestätigt.
         </p>
 
         <div class="trailer-wizard" id="trailerWizard" data-current-step="0">
@@ -3022,12 +3022,12 @@ function trailerPage() {
               <div class="calendar-hint-box trailer-calendar-panel is-open" id="trailerCalendarPanel">
                 <div class="calendar-status-head">
                   <div>
-                    <strong>Kalenderstatus</strong>
+                    <strong>Mietzeitraum auswählen</strong>
                     <p id="trailerAvailabilityText">
-                      Zeitraum wählen – der Assistent prüft Preis, Mietdauer und Kalenderstatus.
+                      Wählen Sie zuerst das Von-Datum und danach das Bis-Datum. Vergangene Tage sind nicht auswählbar.
                     </p>
                   </div>
-                  <span class="calendar-status-badge status-open" id="trailerAvailabilityBadge">Bitte Zeitraum wählen</span>
+                  <span class="calendar-status-badge status-open" id="trailerAvailabilityBadge">Zeitraum wählen</span>
                 </div>
 
                 <div class="trailer-calendar-toolbar">
@@ -3040,9 +3040,8 @@ function trailerPage() {
 
                 <div class="calendar-legend">
                   <span><i class="legend-dot status-free"></i> frei</span>
-                  <span><i class="legend-dot status-request"></i> angefragt</span>
-                  <span><i class="legend-dot status-busy"></i> belegt</span>
-                  <span><i class="legend-dot status-review"></i> nur auf Anfrage</span>
+                  <span><i class="legend-dot status-busy"></i> vergangen</span>
+                  <span><i class="legend-dot status-selected"></i> ausgewählt</span>
                 </div>
 
                 <div class="trailer-calendar-actions">
@@ -3050,7 +3049,7 @@ function trailerPage() {
                   <button class="btn primary" type="button" id="trailerConfirmPeriodButton">Auswahl übernehmen <span>›</span></button>
                 </div>
 
-                <input type="hidden" name="availabilityStatus" id="trailerAvailabilityStatusInput" value="Verfügbarkeit wird geprüft">
+                <input type="hidden" name="availabilityStatus" id="trailerAvailabilityStatusInput" value="Anfrage wird geprüft">
                 <input type="hidden" name="availabilityNote" id="trailerAvailabilityNoteInput" value="">
               </div>
 
@@ -3058,7 +3057,7 @@ function trailerPage() {
                 <div><strong>Mietdauer</strong><span id="trailerDaysValue">Bitte Zeitraum wählen</span></div>
                 <div><strong>Mietpreis</strong><span id="trailerPriceValue">—</span></div>
                 <div><strong>Kaution</strong><span>nach Absprache</span></div>
-                <div><strong>Status</strong><span id="trailerAvailabilityValue">Verfügbarkeit wird geprüft</span></div>
+                <div><strong>Anfrage</strong><span id="trailerAvailabilityValue">wird geprüft</span></div>
               </div>
 
               <p class="form-note">
@@ -4090,11 +4089,12 @@ function pageDashboard() {
           </a>
 
           <nav class="dashboard-menu" aria-label="Dashboard Navigation">
-            <a class="active" href="/dashboard" data-link>Übersicht</a>
-            <a href="/dashboard" data-link>Tickets</a>
-            <a href="/dashboard" data-link>Nachrichten</a>
-            <a href="/dashboard" data-link>Anhänge</a>
-            <a href="/dashboard" data-link>Statusverlauf</a>
+            <a class="active" href="#dashboard-overview" data-dashboard-view-trigger="overview">Übersicht</a>
+            <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
+            <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
+            <a href="#dashboard-messages" data-dashboard-view-trigger="overview">Nachrichten</a>
+            <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
+            <a href="#dashboard-status-history" data-dashboard-view-trigger="overview">Statusverlauf</a>
           </nav>
 
           <div class="dashboard-user-card">
@@ -4110,7 +4110,7 @@ function pageDashboard() {
         </aside>
 
         <main class="dashboard-main">
-          <section class="dashboard-hero">
+          <section class="dashboard-hero" data-dashboard-view="overview">
             <div>
               <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
               <h1>Anfragen zentral verwalten.</h1>
@@ -4124,14 +4124,14 @@ function pageDashboard() {
             </div>
           </section>
 
-          <section class="dashboard-stats">
+          <section class="dashboard-stats" data-dashboard-view="overview">
             <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
           </section>
 
-          <section class="dashboard-panel trailer-calendar-manager" id="dashboardTrailerCalendarManager">
+          <section class="dashboard-panel trailer-calendar-manager is-hidden" id="dashboardTrailerCalendarManager" data-dashboard-view="trailer-calendar">
             <div class="panel-head">
               <div>
                 <p class="eyebrow">Anhänger-Kalender</p>
@@ -4141,18 +4141,12 @@ function pageDashboard() {
             </div>
 
             <p class="dashboard-calendar-intro">
-              Hier können Zeiträume für die Anhängervermietung als angefragt, belegt oder nur auf Anfrage markiert werden.
-              Diese Einträge werden auf der öffentlichen Anhänger-Seite aus Supabase geladen.
+              Hier verwaltet das Team intern, wann der Anhänger bereits vermietet oder blockiert ist.
+              Kunden sehen diese Belegung nicht öffentlich; sie stellen weiterhin nur eine Mietanfrage.
             </p>
 
             <form class="dashboard-calendar-form" id="dashboardTrailerCalendarForm">
-              <label>Status
-                <select name="status" required>
-                  <option value="booked">belegt</option>
-                  <option value="requested">angefragt</option>
-                  <option value="manual_review">nur auf Anfrage</option>
-                </select>
-              </label>
+              <input type="hidden" name="status" value="booked">
               <label>Von
                 <input type="date" name="start_date" required>
               </label>
@@ -4160,9 +4154,9 @@ function pageDashboard() {
                 <input type="date" name="end_date" required>
               </label>
               <label class="dashboard-calendar-note">Hinweis
-                <input type="text" name="note" placeholder="z. B. Reserviert, Wartung, Rücksprache nötig">
+                <input type="text" name="note" placeholder="z. B. Vermietet, reserviert, Wartung">
               </label>
-              <button class="btn primary" type="submit">Zeitraum speichern <span>›</span></button>
+              <button class="btn primary" type="submit">Zeitraum als belegt speichern <span>›</span></button>
             </form>
 
             <div class="dashboard-calendar-list" id="dashboardTrailerCalendarList">
@@ -4173,7 +4167,7 @@ function pageDashboard() {
             </div>
           </section>
 
-          <section class="dashboard-grid">
+          <section class="dashboard-grid" data-dashboard-view="overview">
             <div class="dashboard-panel">
               <div class="panel-head">
                 <div>
@@ -6540,7 +6534,7 @@ function bindRollerWizard() {
 
 /* ==========================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
+   DBG: ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
    ========================================================================== */
 
 let all4youTrailerCalendarRules = {
@@ -6559,16 +6553,11 @@ function emptyTrailerCalendarRules() {
 function normalizeTrailerCalendarStatus(status) {
   const clean = String(status || "").toLowerCase();
   if (clean === "booked" || clean === "busy" || clean === "belegt") return "booked";
-  if (clean === "requested" || clean === "request" || clean === "angefragt") return "requested";
-  if (clean === "manual_review" || clean === "review" || clean === "nur_auf_anfrage") return "manual_review";
-  return "manual_review";
+  return "booked";
 }
 
 function trailerCalendarStatusLabel(status) {
-  const clean = normalizeTrailerCalendarStatus(status);
-  if (clean === "booked") return "belegt";
-  if (clean === "requested") return "angefragt";
-  return "nur auf Anfrage";
+  return "belegt";
 }
 
 function buildTrailerCalendarRules(rows) {
@@ -6578,17 +6567,13 @@ function buildTrailerCalendarRules(rows) {
     const to = row.end_date || row.to || from;
     if (!from || !to) return;
 
-    const item = {
+    rules.booked.push({
       id: row.id || "",
       from,
       to,
-      note: row.note || trailerCalendarStatusLabel(row.status),
-      status: normalizeTrailerCalendarStatus(row.status)
-    };
-
-    if (item.status === "booked") rules.booked.push(item);
-    else if (item.status === "requested") rules.requested.push(item);
-    else rules.manualReview.push(item);
+      note: row.note || "Anhänger belegt",
+      status: "booked"
+    });
   });
   return rules;
 }
@@ -6701,8 +6686,8 @@ function renderDashboardTrailerCalendarList(rows) {
   if (!rows?.length) {
     list.innerHTML = `
       <div class="dashboard-mini-empty">
-        <strong>Noch keine Kalenderregeln</strong>
-        <p>Der Anhänger ist aktuell grundsätzlich frei/anfragbar. Feiertage und Sonntage bleiben automatisch „nur auf Anfrage“.</p>
+        <strong>Noch keine belegten Zeiträume</strong>
+        <p>Noch keine belegten Zeiträume hinterlegt.</p>
       </div>
     `;
     return;
@@ -6963,34 +6948,10 @@ function bindTrailerWizard() {
     const today = getTodayYmd();
 
     if (ymd < today) {
-      return { key: "past", label: "vergangen", note: "Datum liegt in der Vergangenheit", blocksRequest: true };
+      return { key: "past", label: "vergangen", note: "Vergangene Tage können nicht ausgewählt werden.", blocksRequest: true };
     }
 
-    const booked = isDateInRuleRange(ymd, all4youTrailerCalendarRules.booked);
-    if (booked) {
-      return { key: "busy", label: "belegt", note: booked.note || "Anhänger ist an diesem Tag belegt", blocksRequest: true };
-    }
-
-    const requested = isDateInRuleRange(ymd, all4youTrailerCalendarRules.requested);
-    if (requested) {
-      return { key: "request", label: "angefragt", note: requested.note || "Für diesen Tag liegt bereits eine Anfrage vor", blocksRequest: false };
-    }
-
-    const manualReview = isDateInRuleRange(ymd, all4youTrailerCalendarRules.manualReview);
-    if (manualReview) {
-      return { key: "review", label: "nur auf Anfrage", note: manualReview.note || "Dieser Tag wird nur nach Rücksprache bestätigt", blocksRequest: false };
-    }
-
-    const holiday = getHolidayOrSpecialDayName(date);
-    if (holiday) {
-      return { key: "review", label: "nur auf Anfrage", note: `${holiday} – Verfügbarkeit nur nach Rücksprache`, blocksRequest: false };
-    }
-
-    if (date.getDay() === 0) {
-      return { key: "review", label: "nur auf Anfrage", note: "Sonntag – Verfügbarkeit nur nach Rücksprache", blocksRequest: false };
-    }
-
-    return { key: "free", label: "frei", note: "Zeitraum ist grundsätzlich anfragbar", blocksRequest: false };
+    return { key: "free", label: "frei", note: "Datum ist für eine Anfrage auswählbar.", blocksRequest: false };
   }
 
   function getDatesBetween(start, end) {
@@ -7046,11 +7007,11 @@ function bindTrailerWizard() {
     if (!start || !end) {
       return {
         key: "open",
-        label: "Bitte Zeitraum wählen",
-        value: "Verfügbarkeit wird geprüft",
-        text: "Bitte wählen Sie den Mietzeitraum direkt im Kalender aus.",
+        label: "Zeitraum wählen",
+        value: "wird geprüft",
+        text: "Wählen Sie zuerst das Von-Datum und danach das Bis-Datum direkt im Kalender aus.",
         blocksRequest: false,
-        note: ""
+        note: "Zeitraum noch nicht gewählt"
       };
     }
 
@@ -7067,52 +7028,26 @@ function bindTrailerWizard() {
 
     const dates = getDatesBetween(start, end);
     const blocking = dates.map(date => ({ date, status: getCalendarDayStatus(date) })).filter(item => item.status.blocksRequest);
-    const requested = dates.map(date => ({ date, status: getCalendarDayStatus(date) })).filter(item => item.status.key === "request");
-    const review = dates.map(date => ({ date, status: getCalendarDayStatus(date) })).filter(item => item.status.key === "review");
 
     if (blocking.length) {
       const first = blocking[0];
       return {
         key: "busy",
-        label: "Nicht verfügbar",
-        value: "Nicht verfügbar",
-        text: `${formatGermanDate(toYmd(first.date))}: ${first.status.note}. Bitte einen anderen Zeitraum wählen.`,
+        label: "Zeitraum prüfen",
+        value: "Zeitraum prüfen",
+        text: `${formatGermanDate(toYmd(first.date))}: ${first.status.note} Bitte wählen Sie einen aktuellen Zeitraum.`,
         blocksRequest: true,
         note: first.status.note
       };
     }
 
-    if (requested.length) {
-      const first = requested[0];
-      return {
-        key: "request",
-        label: "Bereits angefragt",
-        value: "Bereits angefragt",
-        text: `${formatGermanDate(toYmd(first.date))} ist bereits angefragt. Eine weitere Anfrage ist möglich, die finale Rückmeldung erfolgt durch All4You.`,
-        blocksRequest: false,
-        note: first.status.note
-      };
-    }
-
-    if (review.length) {
-      const names = [...new Set(review.map(item => item.status.note))].slice(0, 2).join(" · ");
-      return {
-        key: "review",
-        label: "Nur auf Anfrage",
-        value: "Nur auf Anfrage",
-        text: `${names}. Die Anfrage kann gesendet werden, die finale Bestätigung erfolgt durch All4You.`,
-        blocksRequest: false,
-        note: names
-      };
-    }
-
     return {
       key: "free",
-      label: "Frei / anfragbar",
-      value: "Frei / anfragbar",
-      text: "Der ausgewählte Zeitraum ist grundsätzlich frei/anfragbar. Die finale Bestätigung erfolgt durch All4You.",
+      label: "Anfrage möglich",
+      value: "wird geprüft",
+      text: "Der ausgewählte Zeitraum wird als Mietanfrage gesendet. Die finale Bestätigung erfolgt durch All4You.",
       blocksRequest: false,
-      note: "Grundsätzlich frei/anfragbar"
+      note: "Mietanfrage wird im Mitarbeiterportal geprüft"
     };
   }
 
@@ -7254,9 +7189,9 @@ function bindTrailerWizard() {
       <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd ? formatGermanDate(summary.rentalEnd) : "—")}</span></div>
       <div><strong>Mietdauer</strong><span>${escapeHtml(summary.rentalDays || "—")}</span></div>
       <div><strong>Mietpreis</strong><span>${escapeHtml(summary.rentalPrice || "—")}</span></div>
-      <div><strong>Kalenderstatus</strong><span>${escapeHtml(summary.availabilityStatus || "—")}</span></div>
+      <div><strong>Anfrage</strong><span>${escapeHtml(summary.availabilityStatus || "—")}</span></div>
       <div><strong>Kaution</strong><span>nach Absprache</span></div>
-      <div class="summary-wide"><strong>Kalenderhinweis</strong><span>${escapeHtml(summary.availabilityNote || "—")}</span></div>
+      <div class="summary-wide"><strong>Hinweis</strong><span>${escapeHtml(summary.availabilityNote || "—")}</span></div>
       <div><strong>Übergabe</strong><span>${escapeHtml(summary.handover || "—")}</span></div>
       ${summary.deliveryAddress ? `<div><strong>Wunschort</strong><span>${escapeHtml(summary.deliveryAddress)}</span></div>` : ""}
       <div><strong>Transportgut</strong><span>${escapeHtml(summary.cargo || "—")}</span></div>
@@ -7382,8 +7317,9 @@ function bindTrailerWizard() {
 
   handover?.addEventListener("change", updateDeliveryField);
 
-  window.addEventListener("all4you:trailer-calendar-updated", updateRentalBox);
-  loadPublicTrailerCalendarRules().then(updateRentalBox).catch(() => updateRentalBox());
+  // Öffentliche Anhänger-Seite zeigt keine internen Belegungen aus dem Mitarbeiterkalender.
+  // Kunden wählen nur einen Zeitraum und senden eine unverbindliche Anfrage.
+  updateRentalBox();
 
   prev.addEventListener("click", () => {
     current = Math.max(0, current - 1);
@@ -7410,8 +7346,8 @@ function bindTrailerWizard() {
       `Mietende: ${summary.rentalEnd}\n` +
       `Mietdauer: ${summary.rentalDays}\n` +
       `Berechneter Mietpreis: ${summary.rentalPrice}\n` +
-      `Kalenderstatus: ${summary.availabilityStatus}\n` +
-      `Kalenderhinweis: ${summary.availabilityNote}\n` +
+      `Anfragestatus: ${summary.availabilityStatus}\n` +
+      `Hinweis: ${summary.availabilityNote}\n` +
       `Kaution: nach Absprache\n\n` +
       `Übergabe: ${summary.handover}\n` +
       `Wunschort: ${summary.deliveryAddress}\n\n` +
@@ -7483,6 +7419,22 @@ function bindTrailerWizard() {
   updateWizard();
 }
 
+function setDashboardView(view = "overview") {
+  const normalized = view === "trailer-calendar" ? "trailer-calendar" : "overview";
+  document.querySelectorAll("[data-dashboard-view]").forEach(section => {
+    section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
+  });
+  document.querySelectorAll("[data-dashboard-view-trigger]").forEach(link => {
+    const isActive = normalized === "trailer-calendar"
+      ? link.dataset.dashboardViewTrigger === "trailer-calendar"
+      : link.textContent.trim() === "Übersicht";
+    link.classList.toggle("active", isActive);
+  });
+  if (normalized === "trailer-calendar") {
+    refreshDashboardTrailerCalendar();
+  }
+}
+
 function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
   const saveStatusButton = document.querySelector("#dashboardSaveStatusButton");
@@ -7491,6 +7443,17 @@ function bindDashboardShell() {
   const noteText = document.querySelector("#dashboardInternalNoteText");
   const noteButton = document.querySelector("#dashboardInternalNoteButton");
   const ticketActions = document.querySelector(".dashboard-ticket-actions");
+  const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
+
+  dashboardViewLinks.forEach(link => {
+    if (link.dataset.dashboardViewBound === "true") return;
+    link.dataset.dashboardViewBound = "true";
+    link.addEventListener("click", event => {
+      event.preventDefault();
+      setDashboardView(link.dataset.dashboardViewTrigger || "overview");
+    });
+  });
+  setDashboardView("overview");
 
   if (list) {
     list.addEventListener("click", event => {
@@ -8163,7 +8126,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.6.1-TRAILER-CALENDAR-PICKER-DASHBOARD
+   DBG: ALL4YOU-ROUTER-V5.6.2-TRAILER-CALENDAR-INTERNAL
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

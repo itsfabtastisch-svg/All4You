@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .price-table-card {
@@ -2417,7 +2417,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2593,7 +2593,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2621,7 +2621,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2718,7 +2718,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2734,48 +2734,6 @@ label {
     linear-gradient(135deg, rgba(255,255,255,.95), rgba(238,246,250,.86));
   box-shadow: 0 18px 44px rgba(16, 38, 60, .11);
   overflow: hidden;
-}
-
-.trailer-side-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-self: start;
-}
-
-.trailer-visual-card {
-  margin: 0;
-  padding: 14px;
-  border: 1px solid rgba(19,35,58,.12);
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(238,246,250,.9));
-  box-shadow: 0 18px 44px rgba(16, 38, 60, .10);
-  overflow: hidden;
-}
-
-.trailer-visual-card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
-  box-shadow: 0 14px 34px rgba(16, 38, 60, .12);
-}
-
-.trailer-visual-card figcaption {
-  margin-top: 12px;
-  color: var(--muted);
-  font-weight: 800;
-  line-height: 1.45;
-}
-
-@media (max-width: 900px) {
-  .trailer-side-stack {
-    gap: 16px;
-  }
-
-  .trailer-visual-card {
-    padding: 12px;
-  }
 }
 
 .calendar-hint-box {
@@ -3040,7 +2998,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .mail-preview-btn {
@@ -3054,7 +3012,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-shell {
@@ -3511,7 +3469,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .is-hidden {
@@ -3665,7 +3623,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .auth-message.success {
@@ -3685,7 +3643,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3740,7 +3698,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3817,7 +3775,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-detail {
@@ -3964,7 +3922,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .site-header {
@@ -4108,7 +4066,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .site-header {
@@ -4166,7 +4124,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-messages {
@@ -4286,7 +4244,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4377,7 +4335,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4422,7 +4380,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .email-notification-note {
@@ -4447,7 +4405,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .customer-status-link {
@@ -4642,7 +4600,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .customer-reply-form {
@@ -4713,7 +4671,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4865,7 +4823,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4929,7 +4887,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4985,7 +4943,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5060,7 +5018,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5100,7 +5058,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5133,7 +5091,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .footer-employee-login {
@@ -5175,7 +5133,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5224,7 +5182,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .youbot-widget {
@@ -5430,7 +5388,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .youbot-widget {
@@ -5536,7 +5494,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .roller-route-note {
@@ -5669,7 +5627,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5754,7 +5712,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .service-icon {
@@ -5802,7 +5760,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -5974,7 +5932,7 @@ label {
 
 /* ==========================================================================
    V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .trailer-period-control {
@@ -6205,7 +6163,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Trailer Kalender intern / Kundenansicht vereinfacht
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .legend-dot.status-selected {
@@ -6242,7 +6200,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Anhänger Übergabe + interner Dashboard-Kalender
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 #trailerPickupReturnField.field-editable input,
@@ -6413,7 +6371,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Archiv-System
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 .dashboard-archive-layout {
@@ -6465,7 +6423,7 @@ button.calendar-day {
 
 /* ========================================================================
    Wizard Upload Requirement Hints
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ======================================================================== */
 
 .wizard-upload-requirement {

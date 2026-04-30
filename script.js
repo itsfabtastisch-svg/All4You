@@ -2593,7 +2593,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+// DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3466,28 +3466,21 @@ function trailerPage() {
         </div>
       </div>
 
-      <aside class="trailer-side-stack">
-        <div class="check-card">
-          <p class="eyebrow">Was Sie beachten sollten</p>
-          <h2>Passt Ihr Fahrzeug zum Anhänger?</h2>
-          <p class="lead">
-            Damit der Anhänger sicher genutzt werden kann, sollten Zugfahrzeug, Anhängerkupplung, Steckeranschluss und Transportvorhaben zusammenpassen.
-            Falls Sie unsicher sind, helfen wir bei der Einschätzung.
-          </p>
-          <ul class="list">
-            <li>Hat Ihr Fahrzeug eine Anhängerkupplung?</li>
-            <li>Ist die zulässige Anhängelast ausreichend?</li>
-            <li>Welcher Steckeranschluss ist vorhanden: 7-polig oder 13-polig?</li>
-            <li>Führerscheinklasse B ist ausreichend</li>
-            <li>Ist das Transportgut sicher verladbar?</li>
-            <li>Wird Zubehör wie Spanngurte oder Plane benötigt?</li>
-          </ul>
-        </div>
-
-        <figure class="trailer-visual-card">
-          <img src="/assets/trailer-motorcycle-transport-v574.png" alt="Motorrad sicher im All4You Anhänger verzurrt" loading="lazy">
-          <figcaption>Auch für Motorradtransporte geeignet – sicher verzurrt im geschlossenen Anhänger.</figcaption>
-        </figure>
+      <aside class="check-card">
+        <p class="eyebrow">Was Sie beachten sollten</p>
+        <h2>Passt Ihr Fahrzeug zum Anhänger?</h2>
+        <p class="lead">
+          Damit der Anhänger sicher genutzt werden kann, sollten Zugfahrzeug, Anhängerkupplung, Steckeranschluss und Transportvorhaben zusammenpassen.
+          Falls Sie unsicher sind, helfen wir bei der Einschätzung.
+        </p>
+        <ul class="list">
+          <li>Hat Ihr Fahrzeug eine Anhängerkupplung?</li>
+          <li>Ist die zulässige Anhängelast ausreichend?</li>
+          <li>Welcher Steckeranschluss ist vorhanden: 7-polig oder 13-polig?</li>
+          <li>Führerscheinklasse B ist ausreichend</li>
+          <li>Ist das Transportgut sicher verladbar?</li>
+          <li>Wird Zubehör wie Spanngurte oder Plane benötigt?</li>
+        </ul>
       </aside>
     </section>
 
@@ -6917,7 +6910,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8790,7 +8783,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.4-TRAILER-MOTORCYCLE-VISUAL
+   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

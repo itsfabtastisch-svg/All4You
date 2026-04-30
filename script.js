@@ -2593,7 +2593,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
+// DBG: ALL4YOU-ROUTER-V5.7.3-TRAILER-NEW-PRICES
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3239,19 +3239,27 @@ function trailerPage() {
       <p class="eyebrow">Mietpreise</p>
       <h2>Transparente Preise nach Mietdauer.</h2>
       <div class="price-table-card">
+        <h3 class="price-table-title">Mietpreise</h3>
         <div class="price-grid">
           <div><strong>1 Tag</strong><span>29 €</span></div>
           <div><strong>2 Tage</strong><span>56 €</span></div>
-          <div><strong>3 Tage</strong><span>75 €</span></div>
-          <div><strong>4 Tage</strong><span>88 €</span></div>
-          <div><strong>5 Tage</strong><span>100 €</span></div>
-          <div><strong>6 Tage</strong><span>114 €</span></div>
-          <div><strong>7 Tage</strong><span>126 €</span></div>
-          <div><strong>8 Tage</strong><span>136 €</span></div>
-          <div><strong>9 Tage</strong><span>144 €</span></div>
-          <div><strong>10–13 Tage</strong><span>200 €</span></div>
-          <div><strong>14–21 Tage</strong><span>250 €</span></div>
-          <div><strong>22–31 Tage</strong><span>300 €</span></div>
+          <div><strong>3 Tage</strong><span>79 €</span></div>
+          <div><strong>4 Tage</strong><span>99 €</span></div>
+          <div><strong>5 Tage</strong><span>119 €</span></div>
+          <div><strong>6 Tage</strong><span>135 €</span></div>
+          <div><strong>7 Tage</strong><span>149 €</span></div>
+          <div><strong>8 Tage</strong><span>164 €</span></div>
+          <div><strong>9 Tage</strong><span>179 €</span></div>
+          <div><strong>10–13 Tage</strong><span>220 €</span></div>
+          <div><strong>14–18 Tage</strong><span>285 €</span></div>
+          <div><strong>19–24 Tage</strong><span>345 €</span></div>
+          <div><strong>25–31 Tage</strong><span>399 €</span></div>
+        </div>
+        <h3 class="price-table-title price-table-title-secondary">Wochenendtarif</h3>
+        <div class="price-grid price-grid-weekend">
+          <div><strong>Samstag bis Sonntag</strong><span>55 €</span></div>
+          <div><strong>Freitag bis Sonntag</strong><span>75 €</span></div>
+          <div><strong>Freitag bis Montag</strong><span>95 €</span></div>
         </div>
         <p class="form-note">
           Kaution je nach Mietdauer und Absprache. Lieferung oder Abholung zum Wunschort ist gegen Aufpreis möglich.
@@ -6902,7 +6910,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
+   DBG: ALL4YOU-ROUTER-V5.7.3-TRAILER-NEW-PRICES
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -7473,20 +7481,37 @@ function bindTrailerWizard() {
     return dates;
   }
 
-  function getRentalPrice(days) {
+  function getRentalPrice(days, start = null, end = null) {
     if (!days || days < 1) return { label: "—", price: "", daysText: "Bitte Zeitraum wählen" };
+
+    const startDay = start instanceof Date ? start.getDay() : null;
+    const endDay = end instanceof Date ? end.getDay() : null;
+
+    if (days === 2 && startDay === 6 && endDay === 0) {
+      return { label: "55 €", price: "55 €", daysText: "2 Tage · Wochenendtarif" };
+    }
+
+    if (days === 3 && startDay === 5 && endDay === 0) {
+      return { label: "75 €", price: "75 €", daysText: "3 Tage · Wochenendtarif" };
+    }
+
+    if (days === 4 && startDay === 5 && endDay === 1) {
+      return { label: "95 €", price: "95 €", daysText: "4 Tage · Wochenendtarif" };
+    }
+
     if (days === 1) return { label: "29 €", price: "29 €", daysText: "1 Tag" };
     if (days === 2) return { label: "56 €", price: "56 €", daysText: "2 Tage" };
-    if (days === 3) return { label: "75 €", price: "75 €", daysText: "3 Tage" };
-    if (days === 4) return { label: "88 €", price: "88 €", daysText: "4 Tage" };
-    if (days === 5) return { label: "100 €", price: "100 €", daysText: "5 Tage" };
-    if (days === 6) return { label: "114 €", price: "114 €", daysText: "6 Tage" };
-    if (days === 7) return { label: "126 €", price: "126 €", daysText: "7 Tage" };
-    if (days === 8) return { label: "136 €", price: "136 €", daysText: "8 Tage" };
-    if (days === 9) return { label: "144 €", price: "144 €", daysText: "9 Tage" };
-    if (days >= 10 && days <= 13) return { label: "200 €", price: "200 €", daysText: `${days} Tage` };
-    if (days >= 14 && days <= 21) return { label: "250 €", price: "250 €", daysText: `${days} Tage` };
-    if (days >= 22 && days <= 31) return { label: "300 €", price: "300 €", daysText: `${days} Tage` };
+    if (days === 3) return { label: "79 €", price: "79 €", daysText: "3 Tage" };
+    if (days === 4) return { label: "99 €", price: "99 €", daysText: "4 Tage" };
+    if (days === 5) return { label: "119 €", price: "119 €", daysText: "5 Tage" };
+    if (days === 6) return { label: "135 €", price: "135 €", daysText: "6 Tage" };
+    if (days === 7) return { label: "149 €", price: "149 €", daysText: "7 Tage" };
+    if (days === 8) return { label: "164 €", price: "164 €", daysText: "8 Tage" };
+    if (days === 9) return { label: "179 €", price: "179 €", daysText: "9 Tage" };
+    if (days >= 10 && days <= 13) return { label: "220 €", price: "220 €", daysText: `${days} Tage` };
+    if (days >= 14 && days <= 18) return { label: "285 €", price: "285 €", daysText: `${days} Tage` };
+    if (days >= 19 && days <= 24) return { label: "345 €", price: "345 €", daysText: `${days} Tage` };
+    if (days >= 25 && days <= 31) return { label: "399 €", price: "399 €", daysText: `${days} Tage` };
     return { label: "auf Anfrage", price: "auf Anfrage", daysText: `${days} Tage` };
   }
 
@@ -7504,7 +7529,7 @@ function bindTrailerWizard() {
 
     const diffMs = end.getTime() - start.getTime();
     const days = Math.floor(diffMs / 86400000) + 1;
-    const price = getRentalPrice(days);
+    const price = getRentalPrice(days, start, end);
     return { days, daysText: price.daysText, price: price.price };
   }
 
@@ -8758,7 +8783,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
+   DBG: ALL4YOU-ROUTER-V5.7.3-TRAILER-NEW-PRICES
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

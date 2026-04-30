@@ -1,33 +1,39 @@
-## ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
+ALL4YOU V5.7.3 - ANHÄNGER NEUE PREISE
+DBG: ALL4YOU-ROUTER-V5.7.3-TRAILER-NEW-PRICES
 
-Patch für All4You Service München.
+Inhalt:
+- Die alten Mietpreise der Anhängervermietung wurden durch die neuen Preise ersetzt.
+- Die sichtbare Preistabelle auf der Anhänger-Leistungsseite wurde angepasst.
+- Die automatische Preisberechnung im Anhänger-Wizard wurde angepasst.
+- Wochenendtarife wurden ergänzt:
+  - Samstag bis Sonntag: 55 €
+  - Freitag bis Sonntag: 75 €
+  - Freitag bis Montag: 95 €
+- Die berechneten Preise werden weiterhin in Zusammenfassung, Mailtext und Supabase-Details übernommen.
 
-Enthalten:
+Neue Mietpreise:
+- 1 Tag: 29 €
+- 2 Tage: 56 €
+- 3 Tage: 79 €
+- 4 Tage: 99 €
+- 5 Tage: 119 €
+- 6 Tage: 135 €
+- 7 Tage: 149 €
+- 8 Tage: 164 €
+- 9 Tage: 179 €
+- 10 bis 13 Tage: 220 €
+- 14 bis 18 Tage: 285 €
+- 19 bis 24 Tage: 345 €
+- 25 bis 31 Tage: 399 €
 
-- Upload-Hinweise im letzten Wizard-Schritt direkt vor „Dateien anhängen“
-- Motorrad- & Rollertransport: Fahrzeugschein Teil I, schriftliche Transportfreigabe und bei abweichendem Namen Vollmacht
-- Anhängervermietung: Bild vom gültigen Führerschein Klasse B
-- Entrümpelung: optionaler Hinweis, dass Fotos der zu räumenden Bereiche hilfreich sind
-- Reinigung: optionaler Hinweis, dass Fotos der zu reinigenden Bereiche hilfreich sind
-- keine Pflichtlogik für Uploads verändert, nur klare Hinweise im bestehenden Upload-Bereich
-- Archiv-System aus V5.6.5 bleibt enthalten
-- Anhänger-Kalender/Dashboard-Logik bleibt enthalten
+Nicht verändert:
+- Supabase Functions
+- Resend/Mail-Backend
+- Dashboard/Archiv/Anhänger-Kalender
+- Impressum, Datenschutz, AGB, Cookie-Banner
+- Motorrad- & Rollertransport / Entrümpelung / Reinigung
 
-Nicht geändert:
-
-- Supabase-Tabellen
-- Resend/Mailversand
-- Auth/Login
-- Dashboard-Grundlogik
-- Cookie-Banner
-- Impressum, Datenschutz, AGB
-
-DBG:
-`ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP`
-
-
-V5.7.2:
-- Fahrzeuggewicht-Feld optisch bereinigt.
-- Hinweistext unter dem Feld entfernt.
-- Placeholder ohne "unbekannt" gesetzt.
-- Speicherung des Fahrzeuggewichts bleibt unverändert.
+Anwendung:
+1. ZIP entpacken.
+2. ALL4YOU-V5.7.3-TRAILER-NEW-PRICES-LOCAL-PATCH.bat starten.
+3. Danach den Inhalt von UPLOAD_TO_GITHUB_ROOT in GitHub hochladen/ersetzen.

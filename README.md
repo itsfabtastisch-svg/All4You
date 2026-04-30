@@ -1,11 +1,11 @@
-## ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS
+## ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT
 
 Patch für All4You Service München.
 
 Enthalten:
 
 - Upload-Hinweise im letzten Wizard-Schritt direkt vor „Dateien anhängen“
-- Rollerabholservice: Fahrzeugschein Teil I, schriftliche Transportfreigabe und bei abweichendem Namen Vollmacht
+- Motorrad- & Rollertransport: Fahrzeugschein Teil I, schriftliche Transportfreigabe und bei abweichendem Namen Vollmacht
 - Anhängervermietung: Bild vom gültigen Führerschein Klasse B
 - Entrümpelung: optionaler Hinweis, dass Fotos der zu räumenden Bereiche hilfreich sind
 - Reinigung: optionaler Hinweis, dass Fotos der zu reinigenden Bereiche hilfreich sind
@@ -23,4 +23,4 @@ Nicht geändert:
 - Impressum, Datenschutz, AGB
 
 DBG:
-`ALL4YOU-ROUTER-V5.6.8-REQUIRED-UPLOAD-HINTS`
+`ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT`

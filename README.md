@@ -1,4 +1,4 @@
-## ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
+## ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
 
 Patch für All4You Service München.
 
@@ -23,9 +23,11 @@ Nicht geändert:
 - Impressum, Datenschutz, AGB
 
 DBG:
-`ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT`
+`ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP`
 
 
-V5.7.1:
-- Roller-/Motorrad-Wizard fragt jetzt im Schritt Fahrzeugdaten das Fahrzeuggewicht ab.
-- Fahrzeuggewicht wird in Zusammenfassung, Mailtext und Supabase-Details gespeichert.
+V5.7.2:
+- Fahrzeuggewicht-Feld optisch bereinigt.
+- Hinweistext unter dem Feld entfernt.
+- Placeholder ohne "unbekannt" gesetzt.
+- Speicherung des Fahrzeuggewichts bleibt unverändert.

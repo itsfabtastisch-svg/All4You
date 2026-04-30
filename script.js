@@ -2593,7 +2593,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
+// DBG: ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3037,8 +3037,7 @@ function rollerPage() {
                   </select>
                 </label>
                 <label>Fahrzeuggewicht
-                  <input name="vehicleWeight" placeholder="z. B. ca. 180 kg / 350 kg / unbekannt" required>
-                  <span class="input-hint">Bitte Gewicht in kg eintragen oder realistisch schätzen, damit der Transport besser eingeschätzt werden kann.</span>
+                  <input name="vehicleWeight" placeholder="z. B. 100 kg / 350 kg" required>
                 </label>
                 <label>Zustand
                   <select name="condition">
@@ -6903,7 +6902,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
+   DBG: ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8759,7 +8758,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
+   DBG: ALL4YOU-ROUTER-V5.7.2-ROLLER-GEWICHT-CLEANUP
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

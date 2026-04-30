@@ -1020,6 +1020,7 @@ function dashboardFieldLabel(key) {
     route_provider: "Berechnung",
     google_address_route_active: "Google-Adressprüfung aktiv",
     vehicle: "Fahrzeugart",
+    vehicle_weight: "Fahrzeuggewicht",
     condition: "Zustand",
     has_key: "Schlüssel",
     registered: "Angemeldet",
@@ -2529,6 +2530,7 @@ function buildRollerSummaryText(summary) {
     summary.distance && summary.distance !== "Noch nicht berechnet" ? `Distanz: ${summary.distance}` : "",
     summary.duration && summary.duration !== "Noch nicht berechnet" ? `Fahrzeit: ${summary.duration}` : "",
     summary.vehicle,
+    summary.vehicleWeight ? `Gewicht: ${summary.vehicleWeight}` : "",
     summary.condition,
     summary.access ? `Zugang: ${summary.access}` : "",
     summary.desiredDate ? `Wunschtermin: ${summary.desiredDate}` : ""
@@ -2591,7 +2593,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT
+// DBG: ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3033,6 +3035,10 @@ function rollerPage() {
                     <option>Moped / Mokick</option>
                     <option>Anderes Fahrzeug / Zweirad</option>
                   </select>
+                </label>
+                <label>Fahrzeuggewicht
+                  <input name="vehicleWeight" placeholder="z. B. ca. 180 kg / 350 kg / unbekannt" required>
+                  <span class="input-hint">Bitte Gewicht in kg eintragen oder realistisch schätzen, damit der Transport besser eingeschätzt werden kann.</span>
                 </label>
                 <label>Zustand
                   <select name="condition">
@@ -6608,6 +6614,7 @@ function bindRollerWizard() {
       dropoffPlaceId: routeInfo.dropoffPlaceId || "",
       routeProvider: routeInfo.provider || "",
       vehicle: data.get("vehicle") || "",
+      vehicleWeight: data.get("vehicleWeight") || "",
       condition: data.get("condition") || "",
       hasKey: data.get("hasKey") || "",
       registered: data.get("registered") || "",
@@ -6633,6 +6640,7 @@ function bindRollerWizard() {
       <div><strong>Fahrzeit</strong><span>${escapeHtml(summary.duration || "—")}</span></div>
       <div><strong>Berechnung</strong><span>${escapeHtml(summary.routeProvider || "—")}</span></div>
       <div><strong>Fahrzeugart</strong><span>${escapeHtml(summary.vehicle || "—")}</span></div>
+      <div><strong>Fahrzeuggewicht</strong><span>${escapeHtml(summary.vehicleWeight || "—")}</span></div>
       <div><strong>Zustand</strong><span>${escapeHtml(summary.condition || "—")}</span></div>
       <div><strong>Schlüssel</strong><span>${escapeHtml(summary.hasKey || "—")}</span></div>
       <div><strong>Angemeldet</strong><span>${escapeHtml(summary.registered || "—")}</span></div>
@@ -6814,6 +6822,7 @@ function bindRollerWizard() {
       `Distanz: ${summary.distance}\n` +
       `Fahrzeit: ${summary.duration}\n\n` +
       `Fahrzeugart: ${summary.vehicle}\n` +
+      `Fahrzeuggewicht: ${summary.vehicleWeight}\n` +
       `Zustand: ${summary.condition}\n` +
       `Schlüssel vorhanden: ${summary.hasKey}\n` +
       `Angemeldet: ${summary.registered}\n` +
@@ -6856,6 +6865,7 @@ function bindRollerWizard() {
           duration_seconds: summary.rawDurationSeconds,
           google_address_route_active: true,
           vehicle: summary.vehicle,
+          vehicle_weight: summary.vehicleWeight,
           condition: summary.condition,
           has_key: summary.hasKey,
           registered: summary.registered,
@@ -6893,7 +6903,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT
+   DBG: ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8749,7 +8759,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT
+   DBG: ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

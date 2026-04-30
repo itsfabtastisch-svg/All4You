@@ -1,4 +1,4 @@
-## ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT
+## ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT
 
 Patch für All4You Service München.
 
@@ -23,4 +23,9 @@ Nicht geändert:
 - Impressum, Datenschutz, AGB
 
 DBG:
-`ALL4YOU-ROUTER-V5.7.0-MOTORRAD-ROLLERTRANSPORT`
+`ALL4YOU-ROUTER-V5.7.1-ROLLER-FAHRZEUGGEWICHT`
+
+
+V5.7.1:
+- Roller-/Motorrad-Wizard fragt jetzt im Schritt Fahrzeugdaten das Fahrzeuggewicht ab.
+- Fahrzeuggewicht wird in Zusammenfassung, Mailtext und Supabase-Details gespeichert.

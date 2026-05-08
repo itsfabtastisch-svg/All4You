@@ -2593,7 +2593,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.7-FOOTER-FIRST-CONTACT-PHONE
+// DBG: ALL4YOU-ROUTER-V5.7.8-KONTAKT-PHONE-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4717,7 +4717,7 @@ function pageContact() {
           Für Motorrad- und Rollertransport, Anhängervermietung, Entrümpelung und Reinigungsservice in München und Umgebung.
         </p>
         <div class="contact-list">
-          <a href="tel:+498912345678">☎ 089 123 456 78</a>
+          <a href="tel:+4915167616573">☎ +49 151 67616573</a>
           <a href="mailto:info@all4you-muenchen.de">✉ info@all4you-muenchen.de</a>
           <span>⌖ München und Umgebung</span>
         </div>
@@ -6910,7 +6910,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.7-FOOTER-FIRST-CONTACT-PHONE
+   DBG: ALL4YOU-ROUTER-V5.7.8-KONTAKT-PHONE-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8783,7 +8783,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.7-FOOTER-FIRST-CONTACT-PHONE
+   DBG: ALL4YOU-ROUTER-V5.7.8-KONTAKT-PHONE-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -1,5 +1,5 @@
 ALL4YOU V5.7.6 - KOMBI-ANGEBOTE BADGE
-DBG: ALL4YOU-ROUTER-V5.7.6-KOMBI-ANGEBOTE-BADGE
+DBG: ALL4YOU-ROUTER-V5.7.7-FOOTER-FIRST-CONTACT-PHONE
 
 Dieses Patch ändert auf der Startseite in der Vorteil-Leiste den Text unter „Alles aus einer Hand“.
 

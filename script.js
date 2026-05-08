@@ -2593,7 +2593,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
+// DBG: ALL4YOU-ROUTER-V5.7.6-KOMBI-ANGEBOTE-BADGE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2817,7 +2817,7 @@ function featureBand() {
   return `
     <section class="feature-band" aria-label="Vorteile">
       <div class="feature">${icons.shield}<div><strong>Zuverlässig</strong><span>Pünktlich und sorgfältig.</span></div></div>
-      <div class="feature">${icons.check}<div><strong>Alles aus einer Hand</strong><span>Ein Kontakt für mehrere Services.</span></div></div>
+      <div class="feature">${icons.check}<div><strong>Alles aus einer Hand</strong><span>Profitiere von unseren Kombi-Angeboten.</span></div></div>
       <div class="feature">${icons.euro}<div><strong>Faire Angebote</strong><span>Preis nach Aufwand und Strecke.</span></div></div>
       <div class="feature">${icons.map}<div><strong>Aus München</strong><span>Schnell in der Umgebung.</span></div></div>
     </section>
@@ -6910,7 +6910,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
+   DBG: ALL4YOU-ROUTER-V5.7.6-KOMBI-ANGEBOTE-BADGE
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8783,7 +8783,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
+   DBG: ALL4YOU-ROUTER-V5.7.6-KOMBI-ANGEBOTE-BADGE
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -1,20 +1,20 @@
-ALL4YOU V5.7.5 - ANHÄNGER-BILD WIEDER ENTFERNT
-DBG: ALL4YOU-ROUTER-V5.7.5-TRAILER-VISUAL-REMOVED
+ALL4YOU V5.7.6 - KOMBI-ANGEBOTE BADGE
+DBG: ALL4YOU-ROUTER-V5.7.6-KOMBI-ANGEBOTE-BADGE
 
-Dieses Patch entfernt die rechts neben dem Anhänger-Wizard eingefügte Motorradtransport-Bildkarte wieder.
+Dieses Patch ändert auf der Startseite in der Vorteil-Leiste den Text unter „Alles aus einer Hand“.
 
-Wichtig:
-- Der Anhänger-Bereich zeigt wieder nur die vorherige Hinweis-Karte „Was Sie beachten sollten“.
-- Das Bild assets/trailer-motorcycle-transport-v574.png wird lokal durch die BAT gelöscht, falls es vorhanden ist.
-- Wenn die Datei bereits in GitHub hochgeladen wurde, kann sie dort zusätzlich aus dem Ordner assets gelöscht werden. Die Webseite referenziert sie aber nicht mehr.
+Geändert:
+- „Ein Kontakt für mehrere Services.“ wurde ersetzt durch:
+  „Profitiere von unseren Kombi-Angeboten.“
 
 Beibehalten:
-- neue Anhänger-Preise aus V5.7.3
-- Motorrad- & Rollertransport-Texte
-- Fahrzeuggewicht im Motorrad-/Rollertransport
-- Gewicht-Cleanup
-- Archiv/Dashboard/Kalender-System
-- Cookie/Impressum/Datenschutz/AGB
+- Stand V5.7.5 als Basis
+- Anhänger-Bild bleibt entfernt
+- neue Anhängerpreise bleiben erhalten
+- Motorrad- & Rollertransport-Texte bleiben erhalten
+- Fahrzeuggewicht im Motorrad-/Rollertransport bleibt erhalten
+- Archiv/Dashboard/Kalender-System bleibt erhalten
+- Cookie/Impressum/Datenschutz/AGB bleiben erhalten
 
 Nicht geändert:
 - keine Supabase-Änderungen
@@ -24,5 +24,5 @@ Nicht geändert:
 
 Installation lokal:
 1. ZIP entpacken.
-2. ALL4YOU-V5.7.5-TRAILER-VISUAL-REMOVED-LOCAL-PATCH.bat starten.
+2. ALL4YOU-V5.7.6-KOMBI-ANGEBOTE-BADGE-LOCAL-PATCH.bat starten.
 3. Für Cloudflare/GitHub den Inhalt von UPLOAD_TO_GITHUB_ROOT hochladen/ersetzen.

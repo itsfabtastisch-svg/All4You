@@ -1781,7 +1781,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -1821,21 +1821,35 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
 function appendTeamNotificationNote(result, notificationResult) {
   const note = document.createElement("p");
   const teamOk = Boolean(notificationResult?.success);
-  const customerSent = Boolean(notificationResult?.customer_email_id);
-  const customerTo = notificationResult?.customer_to || "";
+
+  // V5.8.13: Das Backend gibt die Kundenadresse als customer_email_to zurück.
+  // Ältere Frontend-Versionen haben nur customer_to geprüft und dadurch trotz Versand
+  // fälschlich „Kundenbestätigung nicht gesendet“ angezeigt.
+  const customerSent = Boolean(
+    notificationResult?.customer_email_id ||
+    notificationResult?.customer_confirmation_sent ||
+    notificationResult?.customer_mail_sent
+  );
+  const customerTo =
+    notificationResult?.customer_to ||
+    notificationResult?.customer_email_to ||
+    notificationResult?.customerEmailTo ||
+    "";
   const customerError = notificationResult?.customer_confirmation_error || "";
 
-  note.className = `form-note email-notification-note ${teamOk && !customerError ? "success" : "warning"}`;
+  note.className = `form-note email-notification-note ${teamOk && (customerSent || customerTo) && !customerError ? "success" : (teamOk && !customerError ? "success" : "warning")}`;
 
   if (teamOk) {
     let html = `Team-Benachrichtigung wurde an <b>${escapeHtml(TEAM_NOTIFICATION_EMAIL)}</b> gesendet.`;
 
     if (customerSent && customerTo) {
       html += `<br>Kundenbestätigung wurde an <b>${escapeHtml(customerTo)}</b> gesendet.`;
+    } else if (customerSent) {
+      html += `<br>Kundenbestätigung wurde gesendet.`;
+    } else if (customerTo && !customerError) {
+      html += `<br>Kundenbestätigung wurde für <b>${escapeHtml(customerTo)}</b> angestoßen. Bitte Resend prüfen, falls sie nicht ankommt.`;
     } else if (customerTo && customerError) {
       html += `<br><b>Kundenbestätigung nicht gesendet:</b> ${escapeHtml(customerError)}`;
-    } else if (customerTo) {
-      html += `<br>Kundenbestätigung: Versand wurde vom Backend nicht bestätigt. Bitte Resend prüfen.`;
     } else {
       html += `<br>Kundenbestätigung nicht gesendet: Im Ticket wurde keine Kunden-E-Mail gefunden.`;
     }
@@ -2780,7 +2794,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7141,7 +7155,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -9059,7 +9073,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

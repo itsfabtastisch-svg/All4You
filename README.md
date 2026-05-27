@@ -1,6 +1,6 @@
 # ALL4YOU-V5.8.7-CONTACT-FIELDS-CACHE-HARD-FIX
 
-DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
+DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
 Backend: ALL4YOU-BACKEND-V5.8.7-CONTACT-FIELDS-CACHE-HARD-FIX
 
 Fix: Erzwingt getrennte Kontaktfelder im Anhänger-Wizard und bricht alte Browser-/Cloudflare-Script-Caches durch Versionierung von script.js/styles.css in index.html.
@@ -13,7 +13,7 @@ Die alte Beschriftung „Telefon oder E-Mail“ darf dort nicht mehr erscheinen.
 
 # ALL4YOU-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
 
-DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
+DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
 Backend: ALL4YOU-BACKEND-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
 
 ## Zweck
@@ -51,7 +51,7 @@ Die Kundenmail bekommt jetzt die Kunden-E-Mail zusätzlich direkt aus dem Formul
 - Keine SQL-Änderung.
 
 
-## V5.8.8 CUSTOMER MAIL FORM FORCE FIX
+## V5.8.13 CUSTOMER MAIL SUCCESS NOTE
 
 - Kunden-E-Mail wird beim Benachrichtigen hart direkt aus dem Formular an `notify-new-request` uebergeben.
 - Edge Function `notify-new-request` wurde bereinigt, damit nur eine `Deno.serve`-Funktion vorhanden ist.

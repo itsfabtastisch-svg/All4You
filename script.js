@@ -444,8 +444,10 @@ function renderDashboardDetail(ticket) {
     `;
     clearTicketExtras();
     setDashboardInternalNoteEnabled(false);
+    setDashboardCustomerReplyEnabled(false);
     setDashboardTicketActionsEnabled(false);
     setDashboardTicketActionMessage("", "");
+    setDashboardCustomerReplyMessage("", "");
     setDashboardInternalNoteMessage("", "");
     setDashboardActionMessage("", "");
     return;
@@ -477,8 +479,10 @@ function renderDashboardDetail(ticket) {
   `;
 
   setDashboardInternalNoteEnabled(true);
+  setDashboardCustomerReplyEnabled(true);
   setDashboardTicketActionsEnabled(true);
   setDashboardTicketActionMessage("", "Schnellaktionen gelten für das ausgewählte Ticket.");
+  setDashboardCustomerReplyMessage("", "Antworten sind für Kunden auf der Statusseite sichtbar.");
   setDashboardInternalNoteMessage("", "Interne Notizen sind nur im Mitarbeiter-Dashboard sichtbar.");
   setDashboardActionMessage("", "Statusänderungen werden automatisch im Verlauf dokumentiert.");
   loadDashboardTicketExtras(ticket);
@@ -1254,6 +1258,51 @@ async function createDashboardInternalNote(session, requestId, message, profile)
   return data[0];
 }
 
+async function createDashboardCustomerReply(session, requestId, message, profile) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Sitzung vorhanden.");
+  }
+
+  if (!requestId) {
+    throw new Error("Kein Ticket ausgewählt.");
+  }
+
+  const cleanMessage = String(message || "").trim();
+
+  if (cleanMessage.length < 2) {
+    throw new Error("Bitte eine Antwort an den Kunden eintragen.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/request_messages`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify({
+      request_id: requestId,
+      sender_type: "team",
+      sender_name: profile?.display_name || profile?.email || "All4You Team",
+      message: cleanMessage,
+      is_internal: false
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Antwort konnte nicht gespeichert werden.");
+  }
+
+  if (!Array.isArray(data) || !data.length) {
+    throw new Error("Antwort wurde nicht bestätigt.");
+  }
+
+  return data[0];
+}
+
 function setDashboardInternalNoteMessage(type, text) {
   const message = document.querySelector("#dashboardInternalNoteMessage");
   if (!message) return;
@@ -1266,6 +1315,23 @@ function setDashboardInternalNoteMessage(type, text) {
 function setDashboardInternalNoteEnabled(isEnabled) {
   const text = document.querySelector("#dashboardInternalNoteText");
   const button = document.querySelector("#dashboardInternalNoteButton");
+
+  if (text) text.disabled = !isEnabled;
+  if (button) button.disabled = !isEnabled;
+}
+
+function setDashboardCustomerReplyMessage(type, text) {
+  const message = document.querySelector("#dashboardCustomerReplyMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function setDashboardCustomerReplyEnabled(isEnabled) {
+  const text = document.querySelector("#dashboardCustomerReplyText");
+  const button = document.querySelector("#dashboardCustomerReplyButton");
 
   if (text) text.disabled = !isEnabled;
   if (button) button.disabled = !isEnabled;
@@ -1839,8 +1905,35 @@ function publicStatusStepLabel(status) {
   return labels[status] || statusLabel(status);
 }
 
-function renderCustomerStatusResult(result, ticket) {
+function renderPublicStatusMessageList(messages) {
+  const list = Array.isArray(messages) ? messages : [];
+
+  if (!list.length) {
+    return `
+      <div class="dashboard-mini-empty">
+        <strong>Noch keine Nachrichten</strong>
+        <p>Antworten und Kundennachrichten zu diesem Ticket erscheinen hier.</p>
+      </div>
+    `;
+  }
+
+  return list.map(message => {
+    const isTeam = message.sender_type === "team";
+    return `
+      <article class="customer-public-message ${isTeam ? "team" : "customer"}">
+        <div>
+          <strong>${escapeHtml(isTeam ? "All4You Team" : "Kunde")}</strong>
+          <span>${escapeHtml(formatDashboardDate(message.created_at))}</span>
+        </div>
+        <p>${escapeHtml(message.message || "—")}</p>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderCustomerStatusResult(result, ticket, options = {}) {
   const history = Array.isArray(ticket.history) ? ticket.history : [];
+  const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
 
   result.classList.add("show");
   result.innerHTML = `
@@ -1852,6 +1945,8 @@ function renderCustomerStatusResult(result, ticket) {
         </div>
         <span class="status-pill">${escapeHtml(publicStatusStepLabel(ticket.status))}</span>
       </div>
+
+      ${options.replyNotice ? `<p class="customer-status-inline-note success">${escapeHtml(options.replyNotice)}</p>` : ""}
 
       <div class="customer-status-main">
         <article>
@@ -1893,8 +1988,15 @@ function renderCustomerStatusResult(result, ticket) {
         }
       </div>
 
+      <div class="customer-public-chat">
+        <p class="eyebrow">Nachrichten zum Ticket</p>
+        <div class="customer-public-message-list">
+          ${renderPublicStatusMessageList(messages)}
+        </div>
+      </div>
+
       <p class="customer-status-privacy">
-        Interne Notizen und Team-Kommentare bleiben geschützt und sind hier nicht sichtbar.
+        Interne Notizen bleiben geschützt und sind hier nicht sichtbar.
       </p>
 
       <form class="customer-reply-form" id="customerReplyForm">
@@ -2028,7 +2130,10 @@ function bindCustomerStatusPage() {
     try {
       await sendPublicRequestMessage(currentTicketNumber, currentVerification, messageText);
       if (textarea) textarea.value = "";
-      setCustomerReplyMessage("success", "Ihre Nachricht wurde gesendet und dem Ticket zugeordnet.");
+      const updatedTicket = await fetchPublicRequestStatus(currentTicketNumber, currentVerification);
+      renderCustomerStatusResult(result, updatedTicket, {
+        replyNotice: "Ihre Nachricht wurde gesendet und dem Ticket zugeordnet."
+      });
     } catch (error) {
       setCustomerReplyMessage("error", error.message || "Nachricht konnte nicht gesendet werden.");
     } finally {
@@ -2593,7 +2698,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.7.8-KONTAKT-PHONE-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.0-STATUS-MESSAGE-PORTAL
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4646,6 +4751,14 @@ function pageDashboard() {
                     <p>Kundennachrichten und interne Notizen erscheinen hier.</p>
                   </div>
                 </div>
+
+                <form class="dashboard-customer-reply" id="dashboardCustomerReplyForm">
+                  <label>Antwort an Kunden
+                    <textarea id="dashboardCustomerReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde auf der Statusseite sehen kann …" disabled></textarea>
+                  </label>
+                  <button class="btn primary" type="submit" id="dashboardCustomerReplyButton" disabled>Antwort senden <span>›</span></button>
+                  <p class="dashboard-note-message" id="dashboardCustomerReplyMessage">Bitte zuerst ein Ticket auswählen.</p>
+                </form>
 
                 <form class="dashboard-internal-note" id="dashboardInternalNoteForm">
                   <label>Interne Notiz
@@ -6910,7 +7023,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.7.8-KONTAKT-PHONE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.0-STATUS-MESSAGE-PORTAL
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8037,6 +8150,9 @@ function bindDashboardShell() {
   const noteForm = document.querySelector("#dashboardInternalNoteForm");
   const noteText = document.querySelector("#dashboardInternalNoteText");
   const noteButton = document.querySelector("#dashboardInternalNoteButton");
+  const customerReplyForm = document.querySelector("#dashboardCustomerReplyForm");
+  const customerReplyText = document.querySelector("#dashboardCustomerReplyText");
+  const customerReplyButton = document.querySelector("#dashboardCustomerReplyButton");
   const ticketActions = document.querySelector(".dashboard-ticket-actions");
   const archiveList = document.querySelector("#dashboardArchiveList");
   const archiveSearch = document.querySelector("#dashboardArchiveSearchInput");
@@ -8201,6 +8317,43 @@ function bindDashboardShell() {
     } catch (error) {
       setDashboardTicketActionMessage("error", error.message || "Aktion konnte nicht ausgeführt werden.");
       if (action === "mark-done" || action === "archive-ticket") button.disabled = false;
+    }
+  });
+
+  customerReplyForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const text = String(customerReplyText?.value || "").trim();
+
+    if (!dashboardSelectedRequestId) {
+      setDashboardCustomerReplyMessage("error", "Bitte zuerst ein Ticket auswählen.");
+      return;
+    }
+
+    if (!text) {
+      setDashboardCustomerReplyMessage("error", "Bitte eine Antwort an den Kunden eintragen.");
+      return;
+    }
+
+    if (customerReplyButton) customerReplyButton.disabled = true;
+    setDashboardCustomerReplyMessage("loading", "Antwort wird gespeichert …");
+
+    try {
+      await createDashboardCustomerReply(
+        dashboardCurrentSession,
+        dashboardSelectedRequestId,
+        text,
+        dashboardCurrentEmployeeProfile
+      );
+
+      if (customerReplyText) customerReplyText.value = "";
+      setDashboardCustomerReplyMessage("success", "Antwort wurde gespeichert und ist für den Kunden sichtbar.");
+      const ticket = dashboardRequestCache.find(item => item.id === dashboardSelectedRequestId);
+      await loadDashboardTicketExtras(ticket);
+    } catch (error) {
+      setDashboardCustomerReplyMessage("error", error.message || "Antwort konnte nicht gespeichert werden.");
+    } finally {
+      if (customerReplyButton) customerReplyButton.disabled = !dashboardSelectedRequestId;
     }
   });
 
@@ -8783,7 +8936,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.7.8-KONTAKT-PHONE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.0-STATUS-MESSAGE-PORTAL
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -2,7 +2,7 @@
 // All4You Service München
 // Supabase Edge Function: notify-new-request
 // Sendet Team-Mail UND Kundenbestätigung bei neuer Anfrage über Resend
-// V5.8.5: Kundenmail mit Pflicht-E-Mail-Feld und robustem Frontend-Override
+// V5.8.8: Kundenmail mit hartem Formular-Override plus bereinigter Function-Datei
 // =========================================================
 
 const corsHeaders = {
@@ -11,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX";
+const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX";
 
 function serviceLabel(service: string | null): string {
   const labels: Record<string, string> = {

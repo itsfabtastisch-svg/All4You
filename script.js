@@ -1742,10 +1742,53 @@ function updateDashboardActivityStats(tickets) {
 
 const TEAM_NOTIFICATION_EMAIL = "info@all4you-muenchen.de";
 
-async function notifyTeamAboutRequest(requestResult) {
+function buildNotificationFallbacks(summary = {}, service = "") {
+  const contact = splitContactValue(summary.contact || "");
+  return {
+    customerEmail: summary.email || contact.email || "",
+    customerPhone: contact.phone || summary.contact || "",
+    customerName: summary.name || "",
+    service: service || ""
+  };
+}
+
+async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
   if (!requestResult?.id || !requestResult?.public_status_token) {
     throw new Error("Ticketdaten für E-Mail-Benachrichtigung fehlen.");
   }
+
+  const directCustomerEmail =
+    fallbacks.customerEmail ||
+    requestResult.__notification_customer_email ||
+    requestResult.customer_email ||
+    null;
+
+  const directCustomerPhone =
+    fallbacks.customerPhone ||
+    requestResult.__notification_customer_phone ||
+    requestResult.customer_phone ||
+    null;
+
+  const directCustomerName =
+    fallbacks.customerName ||
+    requestResult.__notification_customer_name ||
+    requestResult.customer_name ||
+    null;
+
+  const directService =
+    fallbacks.service ||
+    requestResult.__notification_service ||
+    requestResult.service ||
+    null;
+
+  console.log("ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX notify payload", {
+    requestId: requestResult.id,
+    ticket: requestResult.ticket_number || null,
+    customerEmailOverride: directCustomerEmail || null,
+    customerPhoneOverride: directCustomerPhone || null,
+    customerNameOverride: directCustomerName || null,
+    serviceOverride: directService || null
+  });
 
   const response = await fetch(`${SUPABASE_URL}/functions/v1/notify-new-request`, {
     method: "POST",
@@ -1757,13 +1800,12 @@ async function notifyTeamAboutRequest(requestResult) {
     body: JSON.stringify({
       request_id: requestResult.id,
       public_status_token: requestResult.public_status_token,
-      // V5.8.4: Direkte Fallback-Daten aus dem Formular.
-      // Falls die RPC-Funktion/DB-Rueckgabe customer_email nicht sauber liefert,
-      // kann die Edge Function trotzdem die Kundenbestaetigung senden.
-      customer_email_override: requestResult.__notification_customer_email || requestResult.customer_email || null,
-      customer_phone_override: requestResult.__notification_customer_phone || requestResult.customer_phone || null,
-      customer_name_override: requestResult.__notification_customer_name || requestResult.customer_name || null,
-      service_override: requestResult.__notification_service || requestResult.service || null
+      // V5.8.8: Harte Übergabe direkt aus dem aktuell ausgefüllten Formular.
+      // Damit ist die Kundenmail nicht mehr davon abhängig, ob RPC/DB customer_email korrekt zurückgibt.
+      customer_email_override: directCustomerEmail,
+      customer_phone_override: directCustomerPhone,
+      customer_name_override: directCustomerName,
+      service_override: directService
     })
   });
 
@@ -1810,9 +1852,9 @@ function appendTeamNotificationNote(result, notificationResult) {
   result.appendChild(note);
 }
 
-async function tryNotifyTeam(result, response) {
+async function tryNotifyTeam(result, response, fallbacks = {}) {
   try {
-    const notification = await notifyTeamAboutRequest(response);
+    const notification = await notifyTeamAboutRequest(response, fallbacks);
     appendTeamNotificationNote(result, notification);
   } catch (error) {
     appendTeamNotificationNote(result, {
@@ -2738,7 +2780,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3560,7 +3602,7 @@ function trailerPage() {
               </div>
             </div>
 
-            <div class="wizard-step" data-title="Zubehör & Kontakt">
+            <div class="wizard-step" data-title="Zubehör & Kontakt" data-contact-split="v5.8.7">
               <fieldset class="option-fieldset">
                 <legend>Zubehör gewünscht?</legend>
                 <div class="checkbox-grid">
@@ -6248,7 +6290,7 @@ function bindCleaningWizard() {
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, ticketNumber);
       await uploadPublicRequestAttachments(response, form, result);
-      await tryNotifyTeam(result, response);
+      await tryNotifyTeam(result, response, buildNotificationFallbacks(summary, "reinigung"));
     } catch (error) {
       result.innerHTML = `
         <strong>Supabase-Speicherung fehlgeschlagen</strong>
@@ -6472,7 +6514,7 @@ function bindClearanceWizard() {
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
       await uploadPublicRequestAttachments(response, form, result);
-      await tryNotifyTeam(result, response);
+      await tryNotifyTeam(result, response, buildNotificationFallbacks(summary, "entruempelung"));
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
     }
@@ -7083,7 +7125,7 @@ function bindRollerWizard() {
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
       await uploadPublicRequestAttachments(response, form, result);
-      await tryNotifyTeam(result, response);
+      await tryNotifyTeam(result, response, buildNotificationFallbacks(summary, "rollerabholservice"));
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
     }
@@ -7099,7 +7141,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8192,7 +8234,7 @@ function bindTrailerWizard() {
       appendMailPreviewButton(result, mailHref);
       appendCustomerStatusLink(result, response?.ticket_number);
       await uploadPublicRequestAttachments(response, form, result);
-      await tryNotifyTeam(result, response);
+      await tryNotifyTeam(result, response, buildNotificationFallbacks(summary, "anhaenger"));
     } catch (error) {
       renderSupabaseError(result, error, mailHref);
     }
@@ -8704,7 +8746,7 @@ function youBotReplyFor(input) {
 
   if (text.includes("telefon") || text.includes("email") || text.includes("e-mail") || text.includes("kontakt") || text.includes("adresse")) {
     return {
-      text: `Du kannst All4You direkt über Telefon oder E-Mail erreichen. Für strukturierte Anfragen ist aber der passende Assistent am bequemsten, weil dort direkt alle wichtigen Infos abgefragt werden. ${youBotServiceButton("/kontakt", "Kontakt öffnen")}`,
+      text: `Du kannst All4You direkt telefonisch oder per E-Mail erreichen. Für strukturierte Anfragen ist aber der passende Assistent am bequemsten, weil dort direkt alle wichtigen Infos abgefragt werden. ${youBotServiceButton("/kontakt", "Kontakt öffnen")}`,
       actions: [
         { label: "Kontakt öffnen", href: "/kontakt" },
         { label: "Leistungen ansehen", href: "/leistungen" }
@@ -9017,7 +9059,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

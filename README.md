@@ -1,6 +1,19 @@
+# ALL4YOU-V5.8.7-CONTACT-FIELDS-CACHE-HARD-FIX
+
+DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
+Backend: ALL4YOU-BACKEND-V5.8.7-CONTACT-FIELDS-CACHE-HARD-FIX
+
+Fix: Erzwingt getrennte Kontaktfelder im Anhänger-Wizard und bricht alte Browser-/Cloudflare-Script-Caches durch Versionierung von script.js/styles.css in index.html.
+
+Erwartung in Anhängervermietung Schritt 4:
+- E-Mail-Adresse für Bestätigung
+- Telefonnummer für Rückfragen (optional)
+
+Die alte Beschriftung „Telefon oder E-Mail“ darf dort nicht mehr erscheinen.
+
 # ALL4YOU-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
 
-DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
+DBG: ALL4YOU-ROUTER-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX
 Backend: ALL4YOU-BACKEND-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
 
 ## Zweck
@@ -36,3 +49,10 @@ Die Kundenmail bekommt jetzt die Kunden-E-Mail zusätzlich direkt aus dem Formul
 - Telefonnummer ist separat als optionale Rückfrage-Nummer beschriftet.
 - Allgemeine Kurzanfragen nutzen ebenfalls getrennte Felder für E-Mail und Telefon.
 - Keine SQL-Änderung.
+
+
+## V5.8.8 CUSTOMER MAIL FORM FORCE FIX
+
+- Kunden-E-Mail wird beim Benachrichtigen hart direkt aus dem Formular an `notify-new-request` uebergeben.
+- Edge Function `notify-new-request` wurde bereinigt, damit nur eine `Deno.serve`-Funktion vorhanden ist.
+- Ziel: Team-Mail und Kundenbestaetigung muessen bei jeder Anfrage zusammen in Resend sichtbar sein.

@@ -1,8 +1,8 @@
 // =========================================================
 // All4You Service München
 // Supabase Edge Function: notify-new-request
-// Sendet Team-E-Mail bei neuer Anfrage über Resend
-// v4.4: Statuslink wird direkt in die E-Mail eingebaut
+// Sendet Team- und Kundenbestätigung bei neuer Anfrage über Resend
+// V5.8.2: Kundenbestätigung standardmäßig aktiv, sofern Kunden-E-Mail vorhanden ist
 // =========================================================
 
 const corsHeaders = {
@@ -11,11 +11,13 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.2-CUSTOMER-CONFIRMATION-MAIL";
+
 function serviceLabel(service: string | null): string {
   const labels: Record<string, string> = {
     reinigung: "Reinigung",
     entruempelung: "Entrümpelung",
-    rollerabholservice: "Rollerabholservice",
+    rollerabholservice: "Motorrad- & Rollertransport",
     anhaenger: "Anhängervermietung",
     allgemein: "Allgemein",
   };
@@ -115,7 +117,7 @@ Deno.serve(async (req) => {
     const teamEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "itsfabtastisch@gmail.com";
     const fromEmail = Deno.env.get("EMAIL_FROM") || "All4You <onboarding@resend.dev>";
     const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://all4you.pages.dev";
-    const sendCustomerConfirmation = (Deno.env.get("SEND_CUSTOMER_CONFIRMATION") || "false").toLowerCase() === "true";
+    const sendCustomerConfirmation = (Deno.env.get("SEND_CUSTOMER_CONFIRMATION") || "true").toLowerCase() !== "false";
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
@@ -282,15 +284,19 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log(BACKEND_BUILD, "notify-new-request finished", { ticket: ticket.ticket_number, teamEmailSent: Boolean(teamEmailData?.id), customerEmailSent: Boolean(customerEmailData?.id), customerConfirmationError });
+
     return new Response(JSON.stringify({
       success: true,
-      message: "Team-E-Mail wurde gesendet.",
+      message: customerEmailData?.id ? "Team- und Kunden-E-Mail wurden gesendet." : "Team-E-Mail wurde gesendet. Kunden-E-Mail wurde nicht gesendet oder nicht angefordert.",
       ticket_number: ticket.ticket_number,
       status_url: statusUrl,
       email_id: teamEmailData?.id || null,
       customer_email_id: customerEmailData?.id || null,
       customer_confirmation_error: customerConfirmationError,
       to: teamEmail,
+      customer_to: ticket.customer_email || null,
+      backend_build: BACKEND_BUILD,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -2319,7 +2319,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -3332,7 +3332,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE
+// DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -6073,45 +6073,59 @@ function pageCustomerPortal() {
   return `
     <section class="customer-portal-page page">
       <div class="customer-portal-gate" id="customerPortalAuthGate">
-        <div class="auth-card customer-auth-card">
-          <a class="auth-logo" href="/" data-link>
-            <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
-          </a>
-
-          <p class="eyebrow">Kundenportal</p>
-          <h1>Aufträge und Nachrichten einsehen.</h1>
-          <p class="lead">
-            Dieser Bereich ist für freigeschaltete Bestandskunden. Einmalige Anfragen können weiterhin über den Statuslink geprüft werden.
-          </p>
-
-          <form class="auth-form" id="customerPortalLoginForm">
-            <label>E-Mail
-              <input type="email" name="email" autocomplete="email" placeholder="kunde@example.de" required>
-            </label>
-            <label>Passwort
-              <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
-            </label>
-            <button class="btn primary" type="submit">Einloggen <span>›</span></button>
-          </form>
-
-          <form class="auth-form is-hidden" id="customerPortalPasswordSetupForm">
-            <label>Neues Passwort
-              <input type="password" name="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" minlength="8" required>
-            </label>
-            <label>Passwort wiederholen
-              <input type="password" name="password_repeat" autocomplete="new-password" placeholder="Passwort erneut eingeben" minlength="8" required>
-            </label>
-            <button class="btn primary" type="submit">Passwort speichern <span>›</span></button>
-          </form>
-
-          <div class="auth-message" id="customerPortalAuthMessage">
-            <strong>Hinweis</strong>
-            <p>Bitte mit einem freigeschalteten Kundenkonto anmelden.</p>
+        <div class="customer-login-wrap">
+          <div class="customer-login-brand-panel">
+            <a class="auth-logo" href="/" data-link>
+              <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+            </a>
+            <p class="eyebrow">Kundenportal</p>
+            <h1>Ihr direkter Blick auf Aufträge, Status und Rückfragen.</h1>
+            <p class="lead">
+              Für freigeschaltete Bestandskunden: übersichtlich anmelden, laufende Aufträge prüfen und direkt mit All4You kommunizieren.
+            </p>
+            <div class="customer-login-benefits">
+              <article><strong>01</strong><span>Aufträge gesammelt an einem Ort</span></article>
+              <article><strong>02</strong><span>Status & Rückfragen nachvollziehbar</span></article>
+              <article><strong>03</strong><span>Nachrichten direkt zum Auftrag senden</span></article>
+            </div>
           </div>
 
-          <div class="inline-actions auth-inline-actions">
-            <a class="btn ghost" href="/status" data-link>Statuslink nutzen</a>
-            <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
+          <div class="auth-card customer-auth-card">
+            <p class="eyebrow">Anmelden</p>
+            <h2>Kundenkonto öffnen</h2>
+            <p class="auth-soft-copy">
+              Einmalige Anfragen können weiterhin bequem über den Statuslink geprüft werden.
+            </p>
+
+            <form class="auth-form" id="customerPortalLoginForm">
+              <label>E-Mail
+                <input type="email" name="email" autocomplete="email" placeholder="kunde@example.de" required>
+              </label>
+              <label>Passwort
+                <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
+              </label>
+              <button class="btn primary" type="submit">Einloggen <span>›</span></button>
+            </form>
+
+            <form class="auth-form is-hidden" id="customerPortalPasswordSetupForm">
+              <label>Neues Passwort
+                <input type="password" name="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" minlength="8" required>
+              </label>
+              <label>Passwort wiederholen
+                <input type="password" name="password_repeat" autocomplete="new-password" placeholder="Passwort erneut eingeben" minlength="8" required>
+              </label>
+              <button class="btn primary" type="submit">Passwort speichern <span>›</span></button>
+            </form>
+
+            <div class="auth-message" id="customerPortalAuthMessage">
+              <strong>Hinweis</strong>
+              <p>Bitte mit einem freigeschalteten Kundenkonto anmelden.</p>
+            </div>
+
+            <div class="inline-actions auth-inline-actions">
+              <a class="btn ghost" href="/status" data-link>Statuslink nutzen</a>
+              <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
+            </div>
           </div>
         </div>
       </div>
@@ -6122,11 +6136,26 @@ function pageCustomerPortal() {
             <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
             <span>Kundenportal</span>
           </a>
-          <div class="dashboard-user-card">
+
+          <div class="dashboard-user-card customer-user-card">
+            <span class="user-card-kicker">Angemeldet als</span>
             <strong id="customerPortalName">Kunde</strong>
             <span id="customerPortalMeta">angemeldet</span>
             <button class="btn ghost" type="button" id="customerPortalLogoutButton">Abmelden</button>
           </div>
+
+          <nav class="customer-portal-mini-nav" aria-label="Kundenportal Bereiche">
+            <span>Übersicht</span>
+            <span>Aufträge</span>
+            <span>Nachrichten</span>
+            <span>Status</span>
+          </nav>
+
+          <div class="customer-portal-side-summary" id="customerPortalSideSummary">
+            <strong>Portal wird geladen …</strong>
+            <span>Ihre Aufträge erscheinen gleich.</span>
+          </div>
+
           <div class="dashboard-security-note">
             <strong>Privater Bereich</strong>
             <p>Hier erscheinen nur Aufträge, die Ihrem Kundenkonto zugeordnet wurden.</p>
@@ -6137,16 +6166,24 @@ function pageCustomerPortal() {
           <section class="dashboard-hero customer-portal-hero">
             <div>
               <p class="eyebrow">All4You Kundenportal</p>
-              <h1>Ihre Aufträge im Überblick.</h1>
-              <p class="lead">Status, öffentliche Nachrichten und Auftragsdetails werden live aus dem System geladen.</p>
+              <h1 id="customerPortalWelcomeTitle">Willkommen im Kundenportal.</h1>
+              <p class="lead" id="customerPortalHeroText">Status, öffentliche Nachrichten und Auftragsdetails werden live aus dem System geladen.</p>
             </div>
-            <div class="dashboard-hero-actions">
+            <div class="dashboard-hero-actions customer-portal-actions">
               <span class="status-pill success" id="customerPortalLiveStatus">Live verbunden</span>
+              <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
             </div>
           </section>
 
+          <section class="customer-portal-overview" id="customerPortalOverviewStats" aria-label="Kundenportal Übersicht">
+            <article><span>Aufträge</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>Aktiv</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>Rückfragen</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>Abgeschlossen</span><strong>—</strong><small>werden geladen</small></article>
+          </section>
+
           <section class="customer-portal-grid">
-            <div class="dashboard-panel">
+            <div class="dashboard-panel customer-request-panel">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Aufträge</p>
@@ -6154,7 +6191,11 @@ function pageCustomerPortal() {
                 </div>
                 <span class="status-pill" id="customerPortalRequestCount">0 Aufträge</span>
               </div>
-              <div class="dashboard-ticket-list" id="customerPortalRequestList">
+              <div class="customer-request-hint" id="customerPortalRequestHint">
+                <strong>Hinweis</strong>
+                <span>Wählen Sie einen Auftrag aus, um Details und Nachrichten zu sehen.</span>
+              </div>
+              <div class="dashboard-ticket-list customer-portal-request-list" id="customerPortalRequestList">
                 <div class="dashboard-empty-state">
                   <strong>Aufträge werden geladen …</strong>
                   <p>Ihre zugeordneten Aufträge erscheinen hier.</p>
@@ -6163,26 +6204,37 @@ function pageCustomerPortal() {
             </div>
 
             <aside class="dashboard-panel dashboard-detail customer-portal-detail">
-              <div class="panel-head">
+              <div class="panel-head customer-detail-head">
                 <div>
                   <p class="eyebrow">Auftragsdetails</p>
                   <h2 id="customerPortalDetailTitle">Auftrag auswählen</h2>
                 </div>
                 <span class="status-pill" id="customerPortalDetailStatus">—</span>
               </div>
-              <div class="dashboard-detail-body" id="customerPortalDetailBody">
+
+              <div class="customer-detail-progress" id="customerPortalProgressTimeline">
+                <div class="summary-wide"><strong>Status</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
+              </div>
+
+              <div class="dashboard-detail-body customer-detail-body" id="customerPortalDetailBody">
                 <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
               </div>
 
-              <div class="dashboard-messages">
-                <p class="eyebrow">Nachrichten</p>
+              <div class="dashboard-messages customer-portal-messages">
+                <div class="customer-message-head">
+                  <div>
+                    <p class="eyebrow">Nachrichten</p>
+                    <h3>Öffentlicher Verlauf</h3>
+                  </div>
+                  <span class="status-pill" id="customerPortalMessageCount">0</span>
+                </div>
                 <div class="dashboard-messages-list" id="customerPortalMessagesList">
                   <div class="dashboard-mini-empty">
                     <strong>Keine Nachrichten geladen</strong>
                     <p>Nachrichten erscheinen nach Auswahl eines Auftrags.</p>
                   </div>
                 </div>
-                <form class="dashboard-customer-reply" id="customerPortalMessageForm">
+                <form class="dashboard-customer-reply customer-portal-reply" id="customerPortalMessageForm">
                   <label>Nachricht an All4You
                     <textarea id="customerPortalMessageText" rows="3" placeholder="Nachricht zu diesem Auftrag schreiben …" disabled></textarea>
                   </label>
@@ -7904,7 +7956,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE
+   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -9533,36 +9585,150 @@ function setCustomerPortalMessage(type, text) {
   message.textContent = text || "";
 }
 
+function isCustomerPortalDoneStatus(status) {
+  return ["erledigt", "storniert"].includes(String(status || ""));
+}
+
+function isCustomerPortalActiveStatus(status) {
+  return Boolean(status) && !isCustomerPortalDoneStatus(status);
+}
+
+function getCustomerPortalStats(requests = customerPortalRequests) {
+  const rows = Array.isArray(requests) ? requests : [];
+  const active = rows.filter(ticket => isCustomerPortalActiveStatus(ticket.status)).length;
+  const review = rows.filter(ticket => ["neu", "in_pruefung", "angebot_vorbereitet"].includes(String(ticket.status || ""))).length;
+  const openQuestions = rows.filter(ticket => String(ticket.status || "") === "rueckfrage_offen").length;
+  const done = rows.filter(ticket => isCustomerPortalDoneStatus(ticket.status)).length;
+  const latest = rows
+    .map(ticket => ticket.updated_at || ticket.created_at)
+    .filter(Boolean)
+    .sort((a, b) => new Date(b) - new Date(a))[0] || null;
+
+  return { total: rows.length, active, review, openQuestions, done, latest };
+}
+
+function renderCustomerPortalOverviewStats(requests = customerPortalRequests) {
+  const box = document.querySelector("#customerPortalOverviewStats");
+  if (!box) return;
+  const stats = getCustomerPortalStats(requests);
+
+  box.innerHTML = `
+    <article><span>Aufträge</span><strong>${stats.total}</strong><small>gesamt zugeordnet</small></article>
+    <article><span>Aktiv</span><strong>${stats.active}</strong><small>laufende Vorgänge</small></article>
+    <article class="${stats.openQuestions ? "attention" : ""}"><span>Rückfragen</span><strong>${stats.openQuestions}</strong><small>${stats.openQuestions ? "bitte prüfen" : "keine offen"}</small></article>
+    <article><span>Abgeschlossen</span><strong>${stats.done}</strong><small>${stats.latest ? "letzte Änderung: " + escapeHtml(formatDashboardDate(stats.latest)) : "noch keine Daten"}</small></article>
+  `;
+}
+
+function renderCustomerPortalSideSummary(requests = customerPortalRequests) {
+  const box = document.querySelector("#customerPortalSideSummary");
+  if (!box) return;
+  const stats = getCustomerPortalStats(requests);
+  const nextAction = stats.openQuestions > 0
+    ? `${stats.openQuestions} Rückfrage${stats.openQuestions === 1 ? "" : "n"} offen`
+    : stats.active > 0
+      ? `${stats.active} aktive${stats.active === 1 ? "r" : ""} Auftrag${stats.active === 1 ? "" : "e"}`
+      : stats.total > 0
+        ? "Alle Aufträge im Blick"
+        : "Noch keine Aufträge";
+
+  box.innerHTML = `
+    <strong>${escapeHtml(nextAction)}</strong>
+    <span>${stats.latest ? `Letzte Änderung: ${escapeHtml(formatDashboardDate(stats.latest))}` : "Sobald All4You ein Ticket zuordnet, erscheint es hier."}</span>
+  `;
+}
+
+function getCustomerPortalStageIndex(status) {
+  const clean = String(status || "");
+  if (clean === "storniert") return -1;
+  if (["neu"].includes(clean)) return 0;
+  if (["in_pruefung", "rueckfrage_offen"].includes(clean)) return 1;
+  if (["angebot_vorbereitet", "angebot_gesendet", "termin_vorgeschlagen"].includes(clean)) return 2;
+  if (["termin_bestaetigt", "in_bearbeitung"].includes(clean)) return 3;
+  if (["erledigt"].includes(clean)) return 4;
+  return 0;
+}
+
+function renderCustomerPortalProgress(ticket) {
+  const box = document.querySelector("#customerPortalProgressTimeline");
+  if (!box) return;
+
+  if (!ticket?.id) {
+    box.innerHTML = `<div class="summary-wide"><strong>Status</strong><span>Wählen Sie links einen Auftrag aus.</span></div>`;
+    return;
+  }
+
+  const current = getCustomerPortalStageIndex(ticket.status);
+  const isCancelled = String(ticket.status || "") === "storniert";
+  const steps = isCancelled
+    ? ["Eingegangen", "Geprüft", "Storniert"]
+    : ["Eingang", "Prüfung", "Abstimmung", "Bearbeitung", "Abschluss"];
+
+  box.innerHTML = `
+    <div class="customer-progress-head">
+      <strong>${escapeHtml(statusLabel(ticket.status))}</strong>
+      <span>${ticket.updated_at ? `Aktualisiert: ${escapeHtml(formatDashboardDate(ticket.updated_at))}` : "Status wird laufend aktualisiert"}</span>
+    </div>
+    <div class="customer-progress-steps ${isCancelled ? "is-cancelled" : ""}">
+      ${steps.map((label, index) => `
+        <div class="customer-progress-step ${index <= current || isCancelled ? "done" : ""} ${index === current ? "current" : ""}">
+          <i>${index + 1}</i>
+          <span>${escapeHtml(label)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderCustomerPortalRequests(requests = customerPortalRequests) {
   const list = document.querySelector("#customerPortalRequestList");
   const count = document.querySelector("#customerPortalRequestCount");
+  const hint = document.querySelector("#customerPortalRequestHint");
   if (!list) return;
 
   const rows = Array.isArray(requests) ? requests : [];
   if (count) count.textContent = `${rows.length} Auftrag${rows.length === 1 ? "" : "e"}`;
+  renderCustomerPortalOverviewStats(rows);
+  renderCustomerPortalSideSummary(rows);
 
   if (!rows.length) {
+    if (hint) hint.innerHTML = `<strong>Noch leer</strong><span>All4You kann bestehende Tickets Ihrem Kundenkonto zuordnen.</span>`;
     list.innerHTML = `
-      <div class="dashboard-empty-state">
+      <div class="dashboard-empty-state customer-empty-state">
         <strong>Noch keine zugeordneten Aufträge</strong>
         <p>Wenn Sie ein Bestandskunde sind, kann All4You Ihre bestehenden Anfragen Ihrem Kundenkonto zuordnen.</p>
+        <a class="btn primary" href="/kontakt" data-link>Neue Anfrage starten <span>›</span></a>
       </div>
     `;
     renderCustomerPortalDetail(null);
     return;
   }
 
+  if (hint) {
+    const stats = getCustomerPortalStats(rows);
+    hint.innerHTML = stats.openQuestions
+      ? `<strong>Rückfrage offen</strong><span>${stats.openQuestions} Auftrag${stats.openQuestions === 1 ? "" : "e"} benötigen Ihre Aufmerksamkeit.</span>`
+      : `<strong>Alles im Blick</strong><span>Wählen Sie einen Auftrag aus, um Details und Nachrichten zu sehen.</span>`;
+  }
+
+  if (!rows.some(ticket => ticket.id === customerPortalSelectedRequestId)) {
+    customerPortalSelectedRequestId = rows[0]?.id || null;
+  }
+
   list.innerHTML = rows.map(ticket => {
     const isActive = ticket.id === customerPortalSelectedRequestId;
+    const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
     return `
-      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" type="button" data-customer-portal-request-id="${escapeHtml(ticket.id)}">
-        <span>
+      <button class="dashboard-ticket customer-portal-ticket ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" type="button" data-customer-portal-request-id="${escapeHtml(ticket.id)}">
+        <span class="customer-ticket-main">
+          <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
           <strong>${escapeHtml(ticket.ticket_number || "Auftrag")}</strong>
-          <small>${escapeHtml(serviceLabel(ticket.service))}</small>
+          <small>${escapeHtml(ticket.summary || ticket.subject || "Ihre Anfrage bei All4You")}</small>
         </span>
-        <span class="ticket-meta">
-          <small>${escapeHtml(statusLabel(ticket.status))}</small>
-          <small>${escapeHtml(formatDashboardDate(ticket.created_at))}</small>
+        <span class="customer-ticket-foot">
+          <em class="customer-status-badge status-${escapeHtml(String(ticket.status || "unknown").replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(statusLabel(ticket.status))}</em>
+          <small>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</small>
+          ${publicMessages.length ? `<small>${publicMessages.length} Nachricht${publicMessages.length === 1 ? "" : "en"}</small>` : ""}
         </span>
       </button>
     `;
@@ -9572,11 +9738,22 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
   renderCustomerPortalDetail(selected);
 }
 
+function renderCustomerDetailFact(label, value) {
+  if (value === null || value === undefined || value === "") return "";
+  return `
+    <div class="customer-detail-fact">
+      <strong>${escapeHtml(label)}</strong>
+      <span>${escapeHtml(detailValue(value))}</span>
+    </div>
+  `;
+}
+
 function renderCustomerPortalDetail(ticket) {
   const title = document.querySelector("#customerPortalDetailTitle");
   const status = document.querySelector("#customerPortalDetailStatus");
   const body = document.querySelector("#customerPortalDetailBody");
   const messagesList = document.querySelector("#customerPortalMessagesList");
+  const messageCount = document.querySelector("#customerPortalMessageCount");
   const text = document.querySelector("#customerPortalMessageText");
   const button = document.querySelector("#customerPortalMessageButton");
 
@@ -9586,8 +9763,10 @@ function renderCustomerPortalDetail(ticket) {
     customerPortalSelectedRequestId = null;
     title.textContent = "Auftrag auswählen";
     if (status) status.textContent = "—";
+    renderCustomerPortalProgress(null);
     body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>`;
     if (messagesList) messagesList.innerHTML = `<div class="dashboard-mini-empty"><strong>Keine Nachrichten geladen</strong><p>Nachrichten erscheinen nach Auswahl eines Auftrags.</p></div>`;
+    if (messageCount) messageCount.textContent = "0";
     if (text) text.disabled = true;
     if (button) button.disabled = true;
     setCustomerPortalMessage("", "Bitte zuerst einen Auftrag auswählen.");
@@ -9596,19 +9775,39 @@ function renderCustomerPortalDetail(ticket) {
 
   customerPortalSelectedRequestId = ticket.id;
   title.textContent = ticket.ticket_number || "Auftrag";
-  if (status) status.textContent = statusLabel(ticket.status);
+  if (status) {
+    status.textContent = statusLabel(ticket.status);
+    status.className = `status-pill customer-status-badge status-${String(ticket.status || "unknown").replace(/[^a-z0-9_-]/gi, "")}`;
+  }
+
+  renderCustomerPortalProgress(ticket);
 
   const groups = getDashboardDetailGroups(ticket);
+  const details = ticket.details || {};
+  const summary = ticket.summary || ticket.subject || details.message || "Noch keine kurze Zusammenfassung vorhanden.";
+  const contactFacts = [
+    renderCustomerDetailFact("Leistung", serviceLabel(ticket.service)),
+    renderCustomerDetailFact("Status", statusLabel(ticket.status)),
+    renderCustomerDetailFact("Erstellt", formatDashboardDate(ticket.created_at)),
+    renderCustomerDetailFact("Aktualisiert", formatDashboardDate(ticket.updated_at || ticket.created_at))
+  ].join("");
+
   body.innerHTML = `
-    ${renderDashboardDetailHero(ticket)}
-    ${renderDashboardSummaryBlock(ticket)}
-    ${renderDashboardDetailSection("Auftrag", groups["Ticket"])}
+    <section class="customer-detail-summary-card ${serviceAccentClass(ticket.service)}">
+      <span>Zusammenfassung</span>
+      <p>${escapeHtml(summary)}</p>
+    </section>
+    <section class="customer-detail-fact-grid">
+      ${contactFacts}
+    </section>
     ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
     ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
-    ${renderDashboardDetailSection("Details", groups["Anfrage-Details"], { fullWidth: true })}
+    ${renderDashboardDetailSection("Weitere Angaben", groups["Anfrage-Details"], { fullWidth: true })}
+    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
   `;
 
   const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
+  if (messageCount) messageCount.textContent = String(publicMessages.length);
   if (messagesList) renderCustomerPortalMessages(publicMessages, messagesList);
   if (text) text.disabled = false;
   if (button) button.disabled = false;
@@ -9623,10 +9822,10 @@ function renderCustomerPortalMessages(messages, list) {
   }
 
   list.innerHTML = messages.map(message => `
-    <article class="message-card ${message.sender_type === "kunde" ? "customer-message" : "team-message"}">
+    <article class="message-card customer-portal-message ${message.sender_type === "kunde" ? "customer-message" : "team-message"}">
       <div class="message-meta">
-        <strong>${escapeHtml(senderTypeLabel(message.sender_type))}</strong>
-        <span>${escapeHtml(message.sender_name || "")}${message.created_at ? " · " + escapeHtml(formatDashboardDate(message.created_at)) : ""}</span>
+        <strong>${escapeHtml(message.sender_type === "kunde" ? "Sie" : "All4You")}</strong>
+        <span>${message.created_at ? escapeHtml(formatDashboardDate(message.created_at)) : ""}</span>
       </div>
       <p>${escapeHtml(message.message || "")}</p>
     </article>
@@ -9645,10 +9844,21 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   customerPortalAccount = data.account;
   customerPortalRequests = Array.isArray(data.requests) ? data.requests : [];
 
+  const displayName = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
   const name = document.querySelector("#customerPortalName");
   const meta = document.querySelector("#customerPortalMeta");
-  if (name) name.textContent = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
+  const welcomeTitle = document.querySelector("#customerPortalWelcomeTitle");
+  const heroText = document.querySelector("#customerPortalHeroText");
+
+  if (name) name.textContent = displayName;
   if (meta) meta.textContent = customerPortalAccount?.email || "angemeldet";
+  if (welcomeTitle) welcomeTitle.textContent = `Willkommen, ${displayName}.`;
+  if (heroText) {
+    const stats = getCustomerPortalStats(customerPortalRequests);
+    heroText.textContent = stats.total
+      ? `Sie haben aktuell ${stats.total} zugeordnete${stats.total === 1 ? "n" : ""} Auftrag${stats.total === 1 ? "" : "e"}. Status, Details und Nachrichten bleiben hier gesammelt.`
+      : "Sobald All4You ein Ticket Ihrem Kundenkonto zuordnet, sehen Sie es hier übersichtlich gesammelt.";
+  }
 
   renderCustomerPortalRequests(customerPortalRequests);
 
@@ -10279,7 +10489,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE
+   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

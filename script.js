@@ -397,10 +397,15 @@ function renderDashboardTickets(tickets) {
     return;
   }
 
-  list.innerHTML = dashboardRequestCache.map((ticket, index) => {
+  const currentSelectionId = dashboardSelectedRequestId && dashboardRequestCache.some(ticket => ticket.id === dashboardSelectedRequestId)
+    ? dashboardSelectedRequestId
+    : dashboardRequestCache[0]?.id;
+
+  list.innerHTML = dashboardRequestCache.map((ticket) => {
     const activity = getTicketActivity(ticket.id);
+    const isActive = ticket.id === currentSelectionId;
     return `
-      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${index === 0 ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
         <span class="ticket-topline">
           <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
           <em>${escapeHtml(statusLabel(ticket.status))}</em>
@@ -413,7 +418,8 @@ function renderDashboardTickets(tickets) {
     `;
   }).join("");
 
-  renderDashboardDetail(dashboardRequestCache[0]);
+  const selectedTicket = dashboardRequestCache.find(ticket => ticket.id === currentSelectionId) || dashboardRequestCache[0];
+  renderDashboardDetail(selectedTicket);
   updateDashboardActivityStats(dashboardRequestCache);
   updateDashboardFilterMeta(dashboardRequestCache.length, dashboardAllRequestCache.length || dashboardRequestCache.length);
 }
@@ -590,78 +596,40 @@ function getDashboardStatusOptions(currentStatus) {
    Dashboard Ticket-Aktionen
    ========================================================================== */
 
-function getSelectedDashboardTicket() {
-  if (!dashboardSelectedRequestId) return null;
+function resolveDashboardSelectedRequestId() {
+  if (dashboardSelectedRequestId && (
+    dashboardAllRequestCache.some(ticket => ticket.id === dashboardSelectedRequestId) ||
+    dashboardRequestCache.some(ticket => ticket.id === dashboardSelectedRequestId)
+  )) {
+    return dashboardSelectedRequestId;
+  }
 
-  return (
-    dashboardAllRequestCache.find(ticket => ticket.id === dashboardSelectedRequestId) ||
-    dashboardRequestCache.find(ticket => ticket.id === dashboardSelectedRequestId) ||
+  const activeButton = document.querySelector("#dashboardTicketList .dashboard-ticket.active[data-ticket-id]");
+  const activeId = activeButton?.dataset?.ticketId || null;
+
+  if (activeId) {
+    dashboardSelectedRequestId = activeId;
+    return activeId;
+  }
+
+  return null;
+}
+
+function getSelectedDashboardTicket() {
+  const selectedId = resolveDashboardSelectedRequestId();
+  if (!selectedId) return null;
+
+  const ticket = (
+    dashboardAllRequestCache.find(item => item.id === selectedId) ||
+    dashboardRequestCache.find(item => item.id === selectedId) ||
     null
   );
-}
 
-function buildPublicStatusLink(ticket) {
-  if (!ticket?.ticket_number) return "";
-
-  return `${window.location.origin}/status?ticket=${encodeURIComponent(ticket.ticket_number)}`;
-}
-
-async function copyTextToClipboard(text) {
-  const value = String(text || "").trim();
-
-  if (!value) {
-    throw new Error("Nichts zum Kopieren vorhanden.");
+  if (ticket?.id) {
+    dashboardSelectedRequestId = ticket.id;
   }
 
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  textarea.remove();
-}
-
-function buildTicketContactText(ticket) {
-  return [
-    `Ticket: ${ticket.ticket_number || "—"}`,
-    `Kunde: ${ticket.customer_name || "—"}`,
-    `Telefon: ${ticket.customer_phone || "—"}`,
-    `E-Mail: ${ticket.customer_email || "—"}`
-  ].join("\n");
-}
-
-function buildTicketCompactText(ticket) {
-  const details = ticket.details || {};
-  const detailLines = Object.entries(details)
-    .filter(([_, value]) => value !== null && value !== undefined && value !== "")
-    .slice(0, 12)
-    .map(([key, value]) => `${dashboardFieldLabel(key)}: ${detailValue(value)}`);
-
-  return [
-    `Ticket: ${ticket.ticket_number || "—"}`,
-    `Leistung: ${serviceLabel(ticket.service)}`,
-    `Status: ${statusLabel(ticket.status)}`,
-    `Kunde: ${ticket.customer_name || "—"}`,
-    `Telefon: ${ticket.customer_phone || "—"}`,
-    `E-Mail: ${ticket.customer_email || "—"}`,
-    `Erstellt: ${formatDashboardDate(ticket.created_at)}`,
-    "",
-    "Zusammenfassung:",
-    ticket.summary || ticket.subject || "—",
-    "",
-    detailLines.length ? "Details:" : "",
-    ...detailLines,
-    "",
-    `Statuslink: ${buildPublicStatusLink(ticket)}`
-  ].filter(line => line !== "").join("\n");
+  return ticket;
 }
 
 function setDashboardTicketActionMessage(type, text) {
@@ -945,6 +913,113 @@ async function updateDashboardRequestStatus(session, requestId, newStatus) {
   return data.request;
 }
 
+
+
+
+function dashboardFieldLabel(key) {
+  const labels = {
+    ticket_number: "Ticketnummer",
+    service: "Leistung",
+    status: "Status",
+    priority: "Priorität",
+    source: "Quelle",
+    created_at: "Erstellt",
+    updated_at: "Aktualisiert",
+    archived_at: "Archiviert am",
+    archived_by: "Archiviert von",
+    archive_reason: "Archivgrund",
+    customer_name: "Kunde",
+    customer_email: "E-Mail",
+    customer_phone: "Telefon",
+
+    customer_type: "Kundentyp",
+    business_name: "Firma / Objekt",
+    cleaning_type: "Reinigungsart",
+    object_type: "Objektart",
+    address: "Adresse",
+    area: "Fläche",
+    rooms: "Räume",
+    interval: "Turnus",
+    desired_date: "Wunschtermin",
+    after_clearance: "Nach Entrümpelung",
+    materials: "Material",
+    photos: "Fotos",
+    price_model: "Preiswunsch",
+    special_areas: "Besondere Bereiche",
+
+    clearance_type: "Art der Entrümpelung",
+    floor: "Etage",
+    elevator: "Aufzug",
+    parking: "Parkmöglichkeit",
+    no_parking_zone: "Halteverbot / Ladezone",
+    scope: "Umfang",
+    disposal: "Entsorgung",
+    broom_clean: "Besenrein",
+    inspection: "Besichtigung",
+    fixed_price: "Festpreis",
+    extra_service: "Zusatzleistung",
+    clearance_items: "Was soll entrümpelt werden?",
+
+    pickup: "Abholort",
+    dropoff: "Zielort",
+    distance: "Distanz",
+    duration: "Fahrzeit",
+    pickup_verified_address: "Bestätigter Abholort",
+    dropoff_verified_address: "Bestätigter Zielort",
+    pickup_place_id: "Google Place-ID Abholort",
+    dropoff_place_id: "Google Place-ID Zielort",
+    distance_meters: "Distanz in Metern",
+    duration_seconds: "Fahrzeit in Sekunden",
+    route_provider: "Berechnung",
+    google_address_route_active: "Google-Adressprüfung aktiv",
+    vehicle: "Fahrzeugart",
+    vehicle_weight: "Fahrzeuggewicht",
+    condition: "Zustand",
+    has_key: "Schlüssel",
+    registered: "Angemeldet",
+    access: "Zugänglichkeit",
+    rollable: "Rollbar",
+    special_situation: "Besondere Situation",
+    google_maps_ready: "Google Maps vorbereitet",
+
+    rental_start: "Mietbeginn",
+    rental_end: "Mietende",
+    rental_days: "Mietdauer",
+    rental_price: "Mietpreis",
+    deposit: "Kaution",
+    handover: "Übergabe",
+    delivery_address: "Wunschort / Lieferung",
+    pickup_return_address: "Abholung/Rückgabeort",
+    handover_note: "Hinweis Übergabe",
+    cargo: "Transportgut",
+    cargo_size: "Menge / Größe",
+    tow_vehicle: "Zugfahrzeug",
+    trailer_hitch: "Anhängerkupplung",
+    plug_type: "Steckeranschluss",
+    extras: "Zubehör",
+    availability_note: "Verfügbarkeit",
+
+    message: "Nachricht"
+  };
+
+  return labels[key] || String(key || "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function isLongDashboardField(key, value) {
+  const longKeys = [
+    "summary",
+    "message",
+    "clearance_items",
+    "special_areas",
+    "availability_note",
+    "extra_service",
+    "handover_note"
+  ];
+
+  return longKeys.includes(key) || String(value || "").length > 80;
+}
 
 function getDashboardDetailGroups(ticket) {
   const details = ticket.details || {};
@@ -1656,7 +1731,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -2669,7 +2744,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7032,7 +7107,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8277,8 +8352,9 @@ function bindDashboardShell() {
   saveStatusButton?.addEventListener("click", async () => {
     const session = getStoredEmployeeSession();
     const selectedStatus = statusSelect?.value;
+    const selectedTicket = getSelectedDashboardTicket();
 
-    if (!dashboardSelectedRequestId || !selectedStatus) {
+    if (!selectedTicket?.id || !selectedStatus) {
       setDashboardActionMessage("error", "Bitte zuerst ein Ticket und einen Status auswählen.");
       return;
     }
@@ -8287,7 +8363,7 @@ function bindDashboardShell() {
     setDashboardActionMessage("loading", "Status wird gespeichert …");
 
     try {
-      const updatedTicket = await applyDashboardTicketStatusUpdate(dashboardSelectedRequestId, selectedStatus);
+      const updatedTicket = await applyDashboardTicketStatusUpdate(selectedTicket.id, selectedStatus);
       setDashboardActionMessage("success", `Status wurde auf „${statusLabel(updatedTicket.status)}“ geändert.`);
     } catch (error) {
       setDashboardActionMessage("error", error.message || "Status konnte nicht geändert werden.");
@@ -8301,7 +8377,17 @@ function bindDashboardShell() {
     if (!button) return;
 
     const action = button.dataset.ticketAction;
-    const ticket = getSelectedDashboardTicket();
+    let ticket = getSelectedDashboardTicket();
+
+    if (!ticket) {
+      const activeButton = document.querySelector("#dashboardTicketList .dashboard-ticket.active[data-ticket-id]");
+      const activeId = activeButton?.dataset?.ticketId || null;
+      ticket = dashboardAllRequestCache.find(item => item.id === activeId) || dashboardRequestCache.find(item => item.id === activeId) || null;
+      if (ticket) {
+        dashboardSelectedRequestId = ticket.id;
+        renderDashboardDetail(ticket);
+      }
+    }
 
     if (!ticket) {
       setDashboardTicketActionMessage("error", "Bitte zuerst ein Ticket auswählen.");
@@ -8997,7 +9083,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

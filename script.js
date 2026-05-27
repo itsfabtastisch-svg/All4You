@@ -2268,9 +2268,10 @@ async function createPublicRequest(payload) {
   }
 
   if (data && typeof data === "object") {
-    data.__notification_customer_email = payload?.p_customer_email || null;
-    data.__notification_customer_phone = payload?.p_customer_phone || null;
-    data.__notification_customer_name = payload?.p_customer_name || null;
+    const details = payload?.p_details && typeof payload.p_details === "object" ? payload.p_details : {};
+    data.__notification_customer_email = payload?.p_customer_email || details.email || details.customer_email || details.contact_email || null;
+    data.__notification_customer_phone = payload?.p_customer_phone || details.phone || details.customer_phone || details.contact_phone || null;
+    data.__notification_customer_name = payload?.p_customer_name || details.name || null;
     data.__notification_service = payload?.p_service || null;
   }
 
@@ -2737,7 +2738,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3247,8 +3248,11 @@ function rollerPage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>Telefon oder E-Mail
-                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                <label>E-Mail für Bestätigung
+                  <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
+                </label>
+                <label>Telefonnummer für Rückfragen
+                  <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Nachricht
                   <textarea name="message" rows="4" placeholder="z. B. Schlüsselübergabe, Werkstattname, Fahrzeug steht im Hof, Lenkschloss aktiv..."></textarea>
@@ -3575,8 +3579,11 @@ function trailerPage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>Telefon oder E-Mail
-                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                <label>E-Mail für Bestätigung
+                  <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
+                </label>
+                <label>Telefonnummer für Rückfragen
+                  <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Nachricht
                   <textarea name="message" rows="4" placeholder="z. B. genauer Transport, Besonderheiten, gewünschte Uhrzeit..."></textarea>
@@ -3775,8 +3782,11 @@ function clearancePage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>Telefon oder E-Mail
-                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                <label>E-Mail für Bestätigung
+                  <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
+                </label>
+                <label>Telefonnummer für Rückfragen
+                  <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Art der Entrümpelung
                   <select name="clearanceType" id="clearanceTypeSelect">
@@ -4137,8 +4147,11 @@ function cleaningPage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>Telefon oder E-Mail
-                  <input name="contact" placeholder="Wie dürfen wir Sie erreichen?" required>
+                <label>E-Mail für Bestätigung
+                  <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
+                </label>
+                <label>Telefonnummer für Rückfragen
+                  <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Privat oder gewerblich?
                   <select name="customerType" id="cleaningCustomerType">
@@ -5508,6 +5521,7 @@ function bindTrailerTool() {
     const extras = data.getAll("extras");
     const summary = {
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       rentalStart: data.get("rentalStart") || "",
       rentalEnd: data.get("rentalEnd") || "",
@@ -5545,7 +5559,8 @@ function bindTrailerTool() {
     const body = encodeURIComponent(
       `Neue Anhänger-Anfrage\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n` +
       `Mietbeginn: ${summary.rentalStart}\n` +
       `Mietende: ${summary.rentalEnd}\n` +
       `Transportgut: ${summary.cargo}\n` +
@@ -5580,6 +5595,7 @@ function bindClearanceTool() {
     const data = new FormData(clearanceForm);
     const summary = {
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       clearanceType: data.get("clearanceType") || "",
       address: data.get("address") || "",
@@ -5628,7 +5644,8 @@ function bindClearanceTool() {
     const body = encodeURIComponent(
       `Neue Entrümpelungs-Anfrage\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n` +
       `Art der Entrümpelung: ${summary.clearanceType}\n` +
       `Adresse / Ort: ${summary.address}\n` +
       `Etage: ${summary.floor}\n` +
@@ -5670,6 +5687,7 @@ function bindCleaningTool() {
     const specialAreas = data.getAll("specialAreas");
     const summary = {
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       cleaningType: data.get("cleaningType") || "",
       objectType: data.get("objectType") || "",
@@ -5714,7 +5732,8 @@ function bindCleaningTool() {
     const body = encodeURIComponent(
       `Neue Reinigungs-Anfrage\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n` +
       `Art der Reinigung: ${summary.cleaningType}\n` +
       `Objektart: ${summary.objectType}\n` +
       `Privat/Gewerblich: ${summary.customerType}\n` +
@@ -6045,6 +6064,7 @@ function bindCleaningWizard() {
     const specialAreas = data.getAll("specialAreas");
     return {
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       customerType: data.get("customerType") || "",
       businessName: data.get("businessName") || "",
@@ -6076,7 +6096,8 @@ function bindCleaningWizard() {
     const summary = collectSummary();
     summaryBox.innerHTML = `
       <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
-      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div><strong>E-Mail</strong><span>${escapeHtml(summary.email || "—")}</span></div>
+      <div><strong>Telefon</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
       <div><strong>Privat/Gewerblich</strong><span>${escapeHtml(summary.customerType || "—")}</span></div>
       ${summary.businessName ? `<div><strong>Firmenname</strong><span>${escapeHtml(summary.businessName)}</span></div>` : ""}
       <div><strong>Reinigungsart</strong><span>${escapeHtml(summary.cleaningType || "—")}</span></div>
@@ -6149,7 +6170,8 @@ function bindCleaningWizard() {
     const body = encodeURIComponent(
       `Neue Reinigungs-Anfrage\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n` +
       `Privat/Gewerblich: ${summary.customerType}\n` +
       `Firmenname: ${summary.businessName}\n` +
       `Art der Reinigung: ${summary.cleaningType}\n` +
@@ -6181,8 +6203,8 @@ function bindCleaningWizard() {
         p_service: "reinigung",
         p_source: "wizard",
         p_customer_name: summary.name,
-        p_customer_email: contact.email,
-        p_customer_phone: contact.phone,
+        p_customer_email: summary.email || contact.email,
+        p_customer_phone: contact.phone || summary.contact,
         p_subject: "Reinigungsanfrage",
         p_summary: buildCleaningSummaryText(summary),
         p_details: {
@@ -6200,6 +6222,8 @@ function bindCleaningWizard() {
           photos: summary.photos,
           price_model: summary.priceModel,
           special_areas: summary.specialAreas,
+          email: summary.email,
+          phone: summary.contact,
           message: summary.message
         },
         p_initial_message: summary.message
@@ -6265,6 +6289,7 @@ function bindClearanceWizard() {
     const data = new FormData(form);
     return {
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       clearanceType: data.get("clearanceType") || "",
       businessName: data.get("businessName") || "",
@@ -6298,7 +6323,8 @@ function bindClearanceWizard() {
     const summary = collectSummary();
     summaryBox.innerHTML = `
       <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
-      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div><strong>E-Mail</strong><span>${escapeHtml(summary.email || "—")}</span></div>
+      <div><strong>Telefon</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
       <div><strong>Art der Entrümpelung</strong><span>${escapeHtml(summary.clearanceType || "—")}</span></div>
       ${summary.businessName ? `<div><strong>Firma / Objekt</strong><span>${escapeHtml(summary.businessName)}</span></div>` : ""}
       <div><strong>Adresse / Ort</strong><span>${escapeHtml(summary.address || "—")}</span></div>
@@ -6373,7 +6399,8 @@ function bindClearanceWizard() {
     const body = encodeURIComponent(
       `Neue Entrümpelungs-Anfrage\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n` +
       `Art der Entrümpelung: ${summary.clearanceType}\n` +
       `Firma / Objekt: ${summary.businessName}\n` +
       `Adresse / Ort: ${summary.address}\n` +
@@ -6405,8 +6432,8 @@ function bindClearanceWizard() {
         p_service: "entruempelung",
         p_source: "wizard",
         p_customer_name: summary.name,
-        p_customer_email: contact.email,
-        p_customer_phone: contact.phone,
+        p_customer_email: summary.email || contact.email,
+        p_customer_phone: contact.phone || summary.contact,
         p_subject: "Entrümpelungsanfrage",
         p_summary: buildClearanceSummaryText(summary),
         p_details: {
@@ -6426,6 +6453,8 @@ function bindClearanceWizard() {
           photos: summary.photos,
           extra_service: summary.extraService,
           clearance_items: summary.clearanceItems,
+          email: summary.email,
+          phone: summary.contact,
           message: summary.message
         },
         p_initial_message: summary.message || summary.clearanceItems
@@ -6782,6 +6811,7 @@ function bindRollerWizard() {
       specialSituation: data.get("specialSituation") || "",
       desiredDate: data.get("desiredDate") || "",
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       message: data.get("message") || ""
     };
@@ -6808,7 +6838,8 @@ function bindRollerWizard() {
       <div><strong>Besondere Situation</strong><span>${escapeHtml(summary.specialSituation || "—")}</span></div>
       <div><strong>Wunschtermin</strong><span>${escapeHtml(summary.desiredDate || "—")}</span></div>
       <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
-      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div><strong>E-Mail</strong><span>${escapeHtml(summary.email || "—")}</span></div>
+      <div><strong>Telefon</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
       <div class="summary-wide"><strong>Nachricht</strong><span>${escapeHtml(summary.message || "—")}</span></div>
     `;
   }
@@ -6990,7 +7021,8 @@ function bindRollerWizard() {
       `Besondere Situation: ${summary.specialSituation}\n` +
       `Wunschtermin: ${summary.desiredDate}\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n\n` +
       `Nachricht:\n${summary.message}`
     );
     const mailHref = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
@@ -7006,8 +7038,8 @@ function bindRollerWizard() {
         p_service: "rollerabholservice",
         p_source: "wizard",
         p_customer_name: summary.name,
-        p_customer_email: contact.email,
-        p_customer_phone: contact.phone,
+        p_customer_email: summary.email || contact.email,
+        p_customer_phone: contact.phone || summary.contact,
         p_subject: "Motorrad- & Rollertransport-Anfrage",
         p_summary: buildRollerSummaryText(summary),
         p_details: {
@@ -7032,6 +7064,8 @@ function bindRollerWizard() {
           rollable: summary.rollable,
           special_situation: summary.specialSituation,
           desired_date: summary.desiredDate,
+          email: summary.email,
+          phone: summary.contact,
           message: summary.message
         },
         p_initial_message: summary.message
@@ -7062,7 +7096,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -7912,6 +7946,7 @@ function bindTrailerWizard() {
       plugType: data.get("plugType") || "",
       extras: extras.length ? extras.join(", ") : "keine Angabe",
       name: data.get("name") || "",
+      email: data.get("email") || "",
       contact: data.get("contact") || "",
       message: data.get("message") || ""
     };
@@ -7939,7 +7974,8 @@ function bindTrailerWizard() {
       <div><strong>Stecker</strong><span>${escapeHtml(summary.plugType || "—")}</span></div>
       <div><strong>Zubehör</strong><span>${escapeHtml(summary.extras || "—")}</span></div>
       <div><strong>Name</strong><span>${escapeHtml(summary.name || "—")}</span></div>
-      <div><strong>Kontakt</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
+      <div><strong>E-Mail</strong><span>${escapeHtml(summary.email || "—")}</span></div>
+      <div><strong>Telefon</strong><span>${escapeHtml(summary.contact || "—")}</span></div>
       <div class="summary-wide"><strong>Nachricht</strong><span>${escapeHtml(summary.message || "—")}</span></div>
     `;
   }
@@ -8098,7 +8134,8 @@ function bindTrailerWizard() {
       `Steckeranschluss: ${summary.plugType}\n` +
       `Zubehör: ${summary.extras}\n\n` +
       `Name: ${summary.name}\n` +
-      `Kontakt: ${summary.contact}\n\n` +
+      `E-Mail: ${summary.email}\n` +
+      `Telefon: ${summary.contact}\n\n` +
       `Nachricht:\n${summary.message}`
     );
     const mailHref = `mailto:info@all4you-muenchen.de?subject=${subject}&body=${body}`;
@@ -8114,8 +8151,8 @@ function bindTrailerWizard() {
         p_service: "anhaenger",
         p_source: "wizard",
         p_customer_name: summary.name,
-        p_customer_email: contact.email,
-        p_customer_phone: contact.phone,
+        p_customer_email: summary.email || contact.email,
+        p_customer_phone: contact.phone || summary.contact,
         p_subject: "Anhänger-Mietanfrage",
         p_summary: buildTrailerSummaryText(summary),
         p_details: {
@@ -8136,6 +8173,8 @@ function bindTrailerWizard() {
           trailer_hitch: summary.trailerHitch,
           plug_type: summary.plugType,
           extras: summary.extras,
+          email: summary.email,
+          phone: summary.contact,
           message: summary.message
         },
         p_initial_message: summary.message
@@ -8975,7 +9014,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

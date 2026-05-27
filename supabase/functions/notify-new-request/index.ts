@@ -2,7 +2,7 @@
 // All4You Service München
 // Supabase Edge Function: notify-new-request
 // Sendet Team-Mail UND Kundenbestätigung bei neuer Anfrage über Resend
-// V5.8.4: Kundenmail mit Frontend-Fallback/Override, falls RPC customer_email nicht liefert
+// V5.8.5: Kundenmail mit Pflicht-E-Mail-Feld und robustem Frontend-Override
 // =========================================================
 
 const corsHeaders = {
@@ -11,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX";
+const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX";
 
 function serviceLabel(service: string | null): string {
   const labels: Record<string, string> = {
@@ -74,6 +74,8 @@ function getCustomerEmail(ticket: Record<string, unknown>, fallbackEmail: unknow
     details.customer_email,
     details.kunden_email,
     details.contact_email,
+    details.contact_mail,
+    details.mail,
     details.contact,
     details.kontakt,
     details.contact_data,

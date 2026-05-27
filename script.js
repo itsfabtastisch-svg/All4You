@@ -647,6 +647,15 @@ function setDashboardTicketActionsEnabled(isEnabled) {
   });
 }
 
+function setDashboardActionMessage(type, text) {
+  const message = document.querySelector("#dashboardActionMessage");
+  if (!message) return;
+
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
 function setDashboardArchiveMessage(type, text) {
   const message = document.querySelector("#dashboardArchiveMessage");
   if (!message) return;
@@ -1731,7 +1740,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -2744,7 +2753,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7107,7 +7116,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -9083,7 +9092,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

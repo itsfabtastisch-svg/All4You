@@ -1,6 +1,6 @@
 # All4You Service München
 
-DBG: ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
+DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
 
 ## Inhalt
 
@@ -30,10 +30,10 @@ Vor dem Testen muss in Supabase einmal die SQL-Datei ausgeführt werden:
 
 Aktuelle sichtbare Build-Kennung:
 
-`ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX`
+`ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX`
 
 
-## ALL4YOU-ROUTER-V5.8.16-DASHBOARD-SELECTION-STATUS-FIX
+## ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
 
 Dashboard-Hotfix: fehlende JavaScript-Helferfunktion `dashboardFieldLabel` und `isLongDashboardField` wiederhergestellt, damit aktive Anfragen nach dem Archiv-/Lösch-Patch wieder geladen werden. Keine SQL-, Mail-, Supabase-Function- oder Formularänderungen.
 
@@ -42,3 +42,13 @@ Dashboard-Hotfix: fehlende JavaScript-Helferfunktion `dashboardFieldLabel` und `
 - Fehlende Dashboard-Statusmeldung wiederhergestellt.
 - Ticket-Auswahl robuster gemacht, damit Statusänderung und Ticket-Aktionen das aktive Ticket sauber erkennen.
 - Keine SQL-, Supabase-, Mail- oder Formularänderung.
+
+
+## V5.8.17 Dashboard ActionMessage Hotfix
+
+DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+
+- Fehlende Dashboard-Hilfsfunktion `setDashboardActionMessage` wiederhergestellt.
+- Status speichern kann wieder sichtbare Meldungen ausgeben.
+- Ticket-Aktionen werden nach Ticket-Auswahl wieder korrekt aktiviert.
+- Keine SQL-, Mail-, Supabase-Function- oder Formularänderungen.

@@ -109,6 +109,49 @@ async function supabaseLogout(accessToken) {
   }).catch(() => null);
 }
 
+async function supabaseGetUser(accessToken) {
+  if (!accessToken) throw new Error("Keine gültige Sitzung vorhanden.");
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: "GET",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message || data?.msg || "Benutzer konnte nicht geladen werden.");
+  }
+
+  return data;
+}
+
+async function supabaseSetPassword(accessToken, password) {
+  if (!accessToken) throw new Error("Der Einrichtungslink ist ungültig oder abgelaufen.");
+  if (!password || password.length < 8) throw new Error("Bitte ein Passwort mit mindestens 8 Zeichen wählen.");
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: "PUT",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ password })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.msg || "Passwort konnte nicht gesetzt werden.");
+  }
+
+  return data;
+}
+
 async function fetchEmployeeProfile(session) {
   if (!session?.access_token || !session?.user?.id) {
     throw new Error("Keine gültige Sitzung vorhanden.");
@@ -1038,6 +1081,37 @@ async function unlinkDashboardCustomerRequest(session, accountId, requestId) {
   return data;
 }
 
+async function inviteDashboardCustomerAccount(session, accountId) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Mitarbeitersitzung vorhanden.");
+  }
+
+  if (!accountId) {
+    throw new Error("Bitte zuerst ein Kundenkonto auswählen.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/invite-customer-account`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      account_id: accountId,
+      redirect_to: `${window.location.origin}/kundenportal`
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.error || "Einladung konnte nicht versendet werden.");
+  }
+
+  return data;
+}
+
 function dashboardCustomerDisplayName(account) {
   return account?.display_name || account?.company || account?.email || "Kundenkonto";
 }
@@ -1136,11 +1210,19 @@ function renderDashboardCustomerAccountDetail(account) {
       <span>${escapeHtml(account.email || "Keine E-Mail")}</span>
       <span>${escapeHtml(account.phone || "Keine Telefonnummer")}</span>
       ${account.company ? `<span>${escapeHtml(account.company)}</span>` : ""}
+      ${account.last_invite_sent_at ? `<span>Letzte Einladung: ${escapeHtml(formatDashboardDate(account.last_invite_sent_at))}</span>` : ""}
       ${account.notes ? `<p>${escapeHtml(account.notes)}</p>` : ""}
     </div>
     <div class="summary-wide">
       <strong>Login-Hinweis</strong>
-      <span>Der Kunde kann sich im Kundenportal einloggen, sobald in Supabase Auth ein Benutzer mit dieser E-Mail existiert. Diese Basis legt die Portal-Zuordnung und Ticketrechte an.</span>
+      <span>Der Kunde kann sich nach einer Einladung selbst ein Passwort setzen und sich danach im Kundenportal anmelden.</span>
+    </div>
+    <div class="dashboard-customer-invite-box">
+      <div>
+        <strong>${account.auth_user_id ? "Login verbunden" : "Einladung / Passwort einrichten"}</strong>
+        <span>${account.auth_user_id ? "Dieses Kundenkonto ist bereits mit einem Supabase-Login verbunden." : "Sendet dem Kunden einen sicheren Einrichtungslink per E-Mail."}</span>
+      </div>
+      <button class="btn primary" type="button" data-customer-send-invite="${escapeHtml(account.id)}">${account.auth_user_id ? "Passwortlink erneut senden" : "Einladung senden"} <span>›</span></button>
     </div>
     <div class="dashboard-linked-request-list">
       ${requests.length ? requests.map(ticket => `
@@ -1213,7 +1295,7 @@ function bindDashboardCustomerAccounts() {
       dashboardSelectedCustomerAccountId = account.id;
       createForm.reset();
       await loadDashboardCustomerAccounts(dashboardCurrentSession);
-      setDashboardCustomersMessage("success", "Kundenkonto wurde vorbereitet. Supabase-Auth-Benutzer mit gleicher E-Mail anlegen/prüfen.");
+      setDashboardCustomersMessage("success", "Kundenkonto wurde vorbereitet. Jetzt kann direkt eine Einladung bzw. ein Passwortlink gesendet werden.");
     } catch (error) {
       setDashboardCustomersMessage("error", error.message || "Kundenkonto konnte nicht gespeichert werden.");
     } finally {
@@ -1252,6 +1334,25 @@ function bindDashboardCustomerAccounts() {
   });
 
   detailBody?.addEventListener("click", async event => {
+    const inviteButton = event.target.closest("[data-customer-send-invite]");
+    if (inviteButton) {
+      const accountId = inviteButton.dataset.customerSendInvite;
+      if (!accountId) return;
+
+      inviteButton.disabled = true;
+      setDashboardCustomersMessage("loading", "Kundeneinladung wird gesendet …");
+      try {
+        const result = await inviteDashboardCustomerAccount(dashboardCurrentSession, accountId);
+        await loadDashboardCustomerAccounts(dashboardCurrentSession);
+        setDashboardCustomersMessage("success", result?.message || "Kundeneinladung wurde gesendet.");
+      } catch (error) {
+        setDashboardCustomersMessage("error", error.message || "Kundeneinladung konnte nicht gesendet werden.");
+      } finally {
+        inviteButton.disabled = false;
+      }
+      return;
+    }
+
     const button = event.target.closest("[data-customer-unlink-request]");
     if (!button || !dashboardSelectedCustomerAccountId) return;
     if (!confirm("Diese Ticket-Zuordnung wirklich entfernen? Das Ticket wird nicht gelöscht.")) return;
@@ -2218,7 +2319,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -3231,7 +3332,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+// DBG: ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -5110,7 +5211,7 @@ function pageDashboard() {
                   <button class="btn primary" type="submit">Kundenkonto speichern <span>›</span></button>
                 </form>
                 <p class="dashboard-ticket-action-message" id="dashboardCustomersMessage">
-                  Hinweis: Für den Login muss zusätzlich ein Supabase-Auth-Benutzer mit gleicher E-Mail existieren.
+                  Hinweis: Nach dem Speichern können Sie dem Kunden direkt einen Einrichtungslink per E-Mail senden.
                 </p>
               </aside>
 
@@ -5991,6 +6092,16 @@ function pageCustomerPortal() {
               <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
             </label>
             <button class="btn primary" type="submit">Einloggen <span>›</span></button>
+          </form>
+
+          <form class="auth-form is-hidden" id="customerPortalPasswordSetupForm">
+            <label>Neues Passwort
+              <input type="password" name="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" minlength="8" required>
+            </label>
+            <label>Passwort wiederholen
+              <input type="password" name="password_repeat" autocomplete="new-password" placeholder="Passwort erneut eingeben" minlength="8" required>
+            </label>
+            <button class="btn primary" type="submit">Passwort speichern <span>›</span></button>
           </form>
 
           <div class="auth-message" id="customerPortalAuthMessage">
@@ -7793,7 +7904,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -9552,6 +9663,7 @@ function bindCustomerPortalPage() {
   const gate = document.querySelector("#customerPortalAuthGate");
   const protectedArea = document.querySelector("#customerPortalProtectedArea");
   const form = document.querySelector("#customerPortalLoginForm");
+  const setupForm = document.querySelector("#customerPortalPasswordSetupForm");
   const logoutButton = document.querySelector("#customerPortalLogoutButton");
   const requestList = document.querySelector("#customerPortalRequestList");
   const messageForm = document.querySelector("#customerPortalMessageForm");
@@ -9563,6 +9675,15 @@ function bindCustomerPortalPage() {
   function showLogin() {
     gate.classList.remove("is-hidden");
     protectedArea.classList.add("is-hidden");
+    form.classList.remove("is-hidden");
+    setupForm?.classList.add("is-hidden");
+  }
+
+  function showPasswordSetup() {
+    gate.classList.remove("is-hidden");
+    protectedArea.classList.add("is-hidden");
+    form.classList.add("is-hidden");
+    setupForm?.classList.remove("is-hidden");
   }
 
   function showPortal(session) {
@@ -9576,7 +9697,33 @@ function bindCustomerPortalPage() {
     });
   }
 
+  function getCustomerPortalSetupParams() {
+    const hash = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
+    const search = new URLSearchParams(window.location.search || "");
+    const accessToken = hash.get("access_token") || search.get("access_token");
+    const refreshToken = hash.get("refresh_token") || search.get("refresh_token") || "";
+    const expiresIn = Number(hash.get("expires_in") || search.get("expires_in") || 3600);
+    const type = hash.get("type") || search.get("type") || "";
+    const error = hash.get("error_description") || hash.get("error") || search.get("error_description") || search.get("error") || "";
+
+    return { accessToken, refreshToken, expiresIn, type, error };
+  }
+
   async function validateStoredSession() {
+    const setup = getCustomerPortalSetupParams();
+
+    if (setup.error) {
+      showLogin();
+      setCustomerPortalAuthMessage("error", "Link konnte nicht geöffnet werden", setup.error);
+      return;
+    }
+
+    if (setup.accessToken && (!setup.type || ["invite", "recovery", "signup", "magiclink"].includes(setup.type))) {
+      showPasswordSetup();
+      setCustomerPortalAuthMessage("loading", "Passwort einrichten", "Bitte vergeben Sie jetzt Ihr persönliches Kundenportal-Passwort.");
+      return;
+    }
+
     const session = getStoredCustomerSession();
     if (!session) {
       showLogin();
@@ -9603,6 +9750,40 @@ function bindCustomerPortalPage() {
       clearCustomerSession();
       showLogin();
       setCustomerPortalAuthMessage("error", "Login fehlgeschlagen", error.message || "Bitte Zugangsdaten prüfen.");
+    }
+  });
+
+  setupForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const setup = getCustomerPortalSetupParams();
+    const data = new FormData(setupForm);
+    const password = String(data.get("password") || "");
+    const passwordRepeat = String(data.get("password_repeat") || "");
+
+    if (password !== passwordRepeat) {
+      setCustomerPortalAuthMessage("error", "Passwörter stimmen nicht überein", "Bitte beide Passwortfelder identisch ausfüllen.");
+      return;
+    }
+
+    setCustomerPortalAuthMessage("loading", "Passwort wird gespeichert", "Der Kundenportal-Zugang wird eingerichtet.");
+
+    try {
+      const userData = await supabaseSetPassword(setup.accessToken, password);
+      const user = userData?.user || await supabaseGetUser(setup.accessToken);
+      storeCustomerSession({
+        access_token: setup.accessToken,
+        refresh_token: setup.refreshToken,
+        expires_in: setup.expiresIn || 3600,
+        user
+      });
+      window.history.replaceState({}, "", "/kundenportal");
+      setupForm.reset();
+      setCustomerPortalAuthMessage("success", "Passwort gespeichert", "Kundenportal wird geladen.");
+      showPortal(getStoredCustomerSession());
+    } catch (error) {
+      clearCustomerSession();
+      showPasswordSetup();
+      setCustomerPortalAuthMessage("error", "Passwort konnte nicht gespeichert werden", error.message || "Bitte den Einrichtungslink erneut anfordern.");
     }
   });
 
@@ -10098,7 +10279,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-ROUTER-V5.9.1-CUSTOMER-INVITE
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

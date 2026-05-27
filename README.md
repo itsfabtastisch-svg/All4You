@@ -1,58 +1,33 @@
-# ALL4YOU-V5.8.7-CONTACT-FIELDS-CACHE-HARD-FIX
+# All4You Service München
 
-DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
-Backend: ALL4YOU-BACKEND-V5.8.7-CONTACT-FIELDS-CACHE-HARD-FIX
+DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
 
-Fix: Erzwingt getrennte Kontaktfelder im Anhänger-Wizard und bricht alte Browser-/Cloudflare-Script-Caches durch Versionierung von script.js/styles.css in index.html.
+## Inhalt
 
-Erwartung in Anhängervermietung Schritt 4:
-- E-Mail-Adresse für Bestätigung
-- Telefonnummer für Rückfragen (optional)
+Fix für Mitarbeiter-Dashboard: Archivieren, Wiederherstellen, Status „Abgeschlossen“ und endgültiges Löschen laufen jetzt über sichere Supabase-RPC-Funktionen statt direkter REST-PATCH/DELETE-Operationen.
 
-Die alte Beschriftung „Telefon oder E-Mail“ darf dort nicht mehr erscheinen.
+## Wichtig
 
-# ALL4YOU-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
+Vor dem Testen muss in Supabase einmal die SQL-Datei ausgeführt werden:
 
-DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
-Backend: ALL4YOU-BACKEND-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
+`supabase/SUPABASE-SQL-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX.sql`
 
-## Zweck
-Neue Anfragen sollen nicht nur eine Team-Mail an All4You senden, sondern zusätzlich eine Kundenbestätigung an die im Formular angegebene E-Mail-Adresse.
+## Geändert
 
-## Was geändert wurde
-- `notify-new-request` sendet Kundenbestätigung standardmäßig aktiv.
-- Kunden-E-Mail wird robuster erkannt (`customer_email`, Details, Kontaktfeld, Zusammenfassung/Nachricht als Fallback).
-- Frontend-Hinweis zeigt künftig, ob Team-Mail und Kundenmail bestätigt wurden oder warum die Kundenmail nicht gesendet wurde.
-- Keine Datenbank-/SQL-Änderung.
+- Archivieren per Dashboard-RPC
+- Aus Archiv zurückholen per Dashboard-RPC
+- Status „Abgeschlossen“ archiviert weiterhin automatisch
+- Neuer Button „Endgültig löschen“ in aktiven Tickets
+- Neuer Button „Endgültig löschen“ im Archiv
+- Löschfunktion entfernt zugehörige Nachrichten, Statusverlauf und Anhang-Zuordnungen aus der Datenbank
 
-## Nach dem Patch testen
-1. BAT ausführen.
-2. `UPLOAD_TO_GITHUB_ROOT` hochladen/ersetzen.
-3. Neue Testanfrage mit eigener externer E-Mail senden.
-4. In Resend → Emails prüfen: Es sollten zwei Mails erscheinen.
+## Nicht geändert
 
+- Keine Mail-/Resend-Function geändert
+- Keine Kundenportal-Phase weitergebaut
+- Keine Anfrage-Wizards geändert
+- Keine rechtlichen Seiten geändert
 
-## V5.8.4 Customer Mail Override Fix
+Aktuelle sichtbare Build-Kennung:
 
-Die Kundenmail bekommt jetzt die Kunden-E-Mail zusätzlich direkt aus dem Formular als Fallback an die Edge Function übergeben. Dadurch wird die Bestätigungsmail auch dann versendet, wenn die bestehende RPC-Rückgabe `customer_email` nicht sauber liefert.
-
-
-## V5.8.5 Customer Email Required Fix
-- In allen Anfrage-Wizards gibt es jetzt ein separates Pflichtfeld „E-Mail-Adresse für Bestätigung“.
-- Telefonnummer bleibt als eigenes Rückfragefeld erhalten.
-- Kundenbestätigung nutzt die separate E-Mail direkt als Backend-Override.
-- notify-new-request wurde erneut mit robusteren Fallbacks vorbereitet.
-
-
-## V5.8.6 Customer Email Label Fix
-- Anhänger- und alle Haupt-Wizards zeigen die E-Mail jetzt klar als eigenes Pflichtfeld.
-- Telefonnummer ist separat als optionale Rückfrage-Nummer beschriftet.
-- Allgemeine Kurzanfragen nutzen ebenfalls getrennte Felder für E-Mail und Telefon.
-- Keine SQL-Änderung.
-
-
-## V5.8.13 CUSTOMER MAIL SUCCESS NOTE
-
-- Kunden-E-Mail wird beim Benachrichtigen hart direkt aus dem Formular an `notify-new-request` uebergeben.
-- Edge Function `notify-new-request` wurde bereinigt, damit nur eine `Deno.serve`-Funktion vorhanden ist.
-- Ziel: Team-Mail und Kundenbestaetigung muessen bei jeder Anfrage zusammen in Resend sichtbar sein.
+`ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX`

@@ -747,6 +747,7 @@ function renderDashboardArchiveDetail(ticket) {
   const body = document.querySelector("#dashboardArchiveDetailBody");
   const status = document.querySelector("#dashboardArchiveDetailStatus");
   const restoreButton = document.querySelector("#dashboardArchiveRestoreButton");
+  const deleteButton = document.querySelector("#dashboardArchiveDeleteButton");
 
   if (!title || !body) return;
 
@@ -755,6 +756,7 @@ function renderDashboardArchiveDetail(ticket) {
     title.textContent = "Archiv auswählen";
     if (status) status.textContent = "—";
     if (restoreButton) restoreButton.disabled = true;
+    if (deleteButton) deleteButton.disabled = true;
     body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen archivierten Auftrag aus.</span></div>`;
     return;
   }
@@ -763,6 +765,7 @@ function renderDashboardArchiveDetail(ticket) {
   title.textContent = ticket.ticket_number || "Archivauftrag";
   if (status) status.textContent = statusLabel(ticket.status);
   if (restoreButton) restoreButton.disabled = false;
+  if (deleteButton) deleteButton.disabled = false;
 
   const groups = getDashboardDetailGroups(ticket);
   body.innerHTML = `
@@ -781,78 +784,81 @@ function renderDashboardArchiveDetail(ticket) {
   `;
 }
 
-async function archiveDashboardRequest(session, requestId, reason = "Manuell archiviert") {
+async function callDashboardRequestAdminRpc(session, functionName, payload = {}) {
   if (!session?.access_token) {
     throw new Error("Keine aktive Sitzung vorhanden.");
   }
 
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload || {})
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Dashboard-Aktion konnte nicht ausgeführt werden.");
+  }
+
+  if (data?.success === false) {
+    throw new Error(data?.message || "Dashboard-Aktion wurde abgelehnt.");
+  }
+
+  return data;
+}
+
+async function archiveDashboardRequest(session, requestId, reason = "Manuell archiviert") {
   if (!requestId) {
     throw new Error("Kein Ticket ausgewählt.");
   }
 
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
-    method: "PATCH",
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${session.access_token}`,
-      "Content-Type": "application/json",
-      "Prefer": "return=representation"
-    },
-    body: JSON.stringify({
-      archived_at: new Date().toISOString(),
-      archived_by: session.user?.id || null,
-      archive_reason: reason
-    })
+  const data = await callDashboardRequestAdminRpc(session, "admin_archive_request", {
+    p_request_id: requestId,
+    p_reason: reason
   });
 
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(data?.message || data?.hint || data?.details || "Ticket konnte nicht archiviert werden.");
-  }
-
-  if (!Array.isArray(data) || !data.length) {
+  if (!data?.request) {
     throw new Error("Archivierung wurde nicht bestätigt.");
   }
 
-  return data[0];
+  return data.request;
 }
 
 async function restoreDashboardRequestFromArchive(session, requestId) {
-  if (!session?.access_token) {
-    throw new Error("Keine aktive Sitzung vorhanden.");
-  }
-
   if (!requestId) {
     throw new Error("Kein Archiv-Ticket ausgewählt.");
   }
 
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
-    method: "PATCH",
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${session.access_token}`,
-      "Content-Type": "application/json",
-      "Prefer": "return=representation"
-    },
-    body: JSON.stringify({
-      archived_at: null,
-      archived_by: null,
-      archive_reason: null
-    })
+  const data = await callDashboardRequestAdminRpc(session, "admin_restore_request", {
+    p_request_id: requestId
   });
 
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(data?.message || data?.hint || data?.details || "Ticket konnte nicht zurückgeholt werden.");
-  }
-
-  if (!Array.isArray(data) || !data.length) {
+  if (!data?.request) {
     throw new Error("Wiederherstellung wurde nicht bestätigt.");
   }
 
-  return data[0];
+  return data.request;
+}
+
+async function deleteDashboardRequest(session, requestId) {
+  if (!requestId) {
+    throw new Error("Kein Ticket ausgewählt.");
+  }
+
+  const data = await callDashboardRequestAdminRpc(session, "admin_delete_request", {
+    p_request_id: requestId
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Ticket konnte nicht gelöscht werden.");
+  }
+
+  return data;
 }
 
 function moveTicketToArchiveCache(ticket) {
@@ -867,6 +873,14 @@ function moveTicketToActiveCache(ticket) {
   if (!ticket?.id) return;
   dashboardArchiveCache = dashboardArchiveCache.filter(item => item.id !== ticket.id);
   dashboardAllRequestCache = [ticket, ...dashboardAllRequestCache.filter(item => item.id !== ticket.id)];
+  renderDashboardArchiveList(dashboardArchiveCache);
+}
+
+function removeTicketFromDashboardCaches(requestId) {
+  if (!requestId) return;
+  dashboardArchiveCache = dashboardArchiveCache.filter(item => item.id !== requestId);
+  dashboardAllRequestCache = dashboardAllRequestCache.filter(item => item.id !== requestId);
+  dashboardRequestCache = dashboardRequestCache.filter(item => item.id !== requestId);
   renderDashboardArchiveList(dashboardArchiveCache);
 }
 
@@ -915,161 +929,22 @@ async function applyDashboardTicketStatusUpdate(requestId, status) {
 
 
 async function updateDashboardRequestStatus(session, requestId, newStatus) {
-  if (!session?.access_token) {
-    throw new Error("Keine aktive Sitzung vorhanden.");
-  }
-
   if (!requestId) {
     throw new Error("Kein Ticket ausgewählt.");
   }
 
-  const patchPayload = {
-    status: newStatus
-  };
-
-  if (newStatus === "erledigt") {
-    patchPayload.archived_at = new Date().toISOString();
-    patchPayload.archived_by = session.user?.id || null;
-    patchPayload.archive_reason = "Automatisch archiviert nach Status abgeschlossen.";
-  }
-
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`, {
-    method: "PATCH",
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${session.access_token}`,
-      "Content-Type": "application/json",
-      "Prefer": "return=representation"
-    },
-    body: JSON.stringify(patchPayload)
+  const data = await callDashboardRequestAdminRpc(session, "admin_update_request_status", {
+    p_request_id: requestId,
+    p_status: newStatus
   });
 
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(data?.message || data?.hint || data?.details || "Status konnte nicht geändert werden.");
-  }
-
-  if (!Array.isArray(data) || !data.length) {
+  if (!data?.request) {
     throw new Error("Statusänderung wurde nicht bestätigt.");
   }
 
-  return data[0];
+  return data.request;
 }
 
-function setDashboardActionMessage(type, text) {
-  const message = document.querySelector("#dashboardActionMessage");
-  if (!message) return;
-
-  message.classList.remove("success", "error", "loading");
-  if (type) message.classList.add(type);
-  message.textContent = text || "";
-}
-
-
-
-function dashboardFieldLabel(key) {
-  const labels = {
-    ticket_number: "Ticketnummer",
-    service: "Leistung",
-    status: "Status",
-    priority: "Priorität",
-    source: "Quelle",
-    created_at: "Erstellt",
-    updated_at: "Aktualisiert",
-    archived_at: "Archiviert am",
-    archive_reason: "Archivgrund",
-    customer_name: "Kunde",
-    customer_email: "E-Mail",
-    customer_phone: "Telefon",
-
-    customer_type: "Kundentyp",
-    business_name: "Firma / Objekt",
-    cleaning_type: "Reinigungsart",
-    object_type: "Objektart",
-    address: "Adresse",
-    area: "Fläche",
-    rooms: "Räume",
-    interval: "Turnus",
-    desired_date: "Wunschtermin",
-    after_clearance: "Nach Entrümpelung",
-    materials: "Material",
-    photos: "Fotos",
-    price_model: "Preiswunsch",
-    special_areas: "Besondere Bereiche",
-
-    clearance_type: "Art der Entrümpelung",
-    floor: "Etage",
-    elevator: "Aufzug",
-    parking: "Parkmöglichkeit",
-    no_parking_zone: "Halteverbot / Ladezone",
-    scope: "Umfang",
-    disposal: "Entsorgung",
-    broom_clean: "Besenrein",
-    inspection: "Besichtigung",
-    fixed_price: "Festpreis",
-    extra_service: "Zusatzleistung",
-    clearance_items: "Was soll entrümpelt werden?",
-
-    pickup: "Abholort",
-    dropoff: "Zielort",
-    distance: "Distanz",
-    duration: "Fahrzeit",
-    pickup_verified_address: "Bestätigter Abholort",
-    dropoff_verified_address: "Bestätigter Zielort",
-    pickup_place_id: "Google Place-ID Abholort",
-    dropoff_place_id: "Google Place-ID Zielort",
-    distance_meters: "Distanz in Metern",
-    duration_seconds: "Fahrzeit in Sekunden",
-    route_provider: "Berechnung",
-    google_address_route_active: "Google-Adressprüfung aktiv",
-    vehicle: "Fahrzeugart",
-    vehicle_weight: "Fahrzeuggewicht",
-    condition: "Zustand",
-    has_key: "Schlüssel",
-    registered: "Angemeldet",
-    access: "Zugänglichkeit",
-    rollable: "Rollbar",
-    special_situation: "Besondere Situation",
-    google_maps_ready: "Google Maps vorbereitet",
-
-    rental_start: "Mietbeginn",
-    rental_end: "Mietende",
-    rental_days: "Mietdauer",
-    rental_price: "Mietpreis",
-    deposit: "Kaution",
-    handover: "Übergabe",
-    delivery_address: "Wunschort / Lieferung",
-    pickup_return_address: "Abholung/Rückgabeort",
-    handover_note: "Hinweis Übergabe",
-    cargo: "Transportgut",
-    cargo_size: "Menge / Größe",
-    tow_vehicle: "Zugfahrzeug",
-    trailer_hitch: "Anhängerkupplung",
-    plug_type: "Steckeranschluss",
-    extras: "Zubehör",
-    availability_note: "Verfügbarkeit",
-
-    message: "Nachricht"
-  };
-
-  return labels[key] || key
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, char => char.toUpperCase());
-}
-
-function isLongDashboardField(key, value) {
-  const longKeys = [
-    "summary",
-    "message",
-    "clearance_items",
-    "special_areas",
-    "availability_note",
-    "extra_service"
-  ];
-
-  return longKeys.includes(key) || String(value || "").length > 80;
-}
 
 function getDashboardDetailGroups(ticket) {
   const details = ticket.details || {};
@@ -1781,7 +1656,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -2794,7 +2669,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
+// DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4676,6 +4551,7 @@ function pageDashboard() {
                   <p class="eyebrow">Archiv-Aktionen</p>
                   <div class="dashboard-ticket-action-grid">
                     <button class="btn ghost" type="button" id="dashboardArchiveRestoreButton" disabled>Aus Archiv zurückholen</button>
+                    <button class="btn ghost danger-action" type="button" id="dashboardArchiveDeleteButton" disabled>Endgültig löschen</button>
                   </div>
                   <p class="dashboard-ticket-action-message" id="dashboardArchiveMessage">Archivierte Aufträge können bei Bedarf zurückgeholt werden.</p>
                 </div>
@@ -4847,6 +4723,7 @@ function pageDashboard() {
                   <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
                   <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
                   <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
+                  <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
                   <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
                 </div>
                 <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
@@ -7155,7 +7032,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
+   DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8294,6 +8171,7 @@ function bindDashboardShell() {
   const archiveList = document.querySelector("#dashboardArchiveList");
   const archiveSearch = document.querySelector("#dashboardArchiveSearchInput");
   const archiveRestoreButton = document.querySelector("#dashboardArchiveRestoreButton");
+  const archiveDeleteButton = document.querySelector("#dashboardArchiveDeleteButton");
   const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
 
   dashboardViewLinks.forEach(link => {
@@ -8363,6 +8241,36 @@ function bindDashboardShell() {
     } catch (error) {
       setDashboardArchiveMessage("error", error.message || "Auftrag konnte nicht zurückgeholt werden.");
       archiveRestoreButton.disabled = false;
+    }
+  });
+
+
+  archiveDeleteButton?.addEventListener("click", async () => {
+    if (!dashboardSelectedArchiveId) {
+      setDashboardArchiveMessage("error", "Bitte zuerst einen archivierten Auftrag auswählen.");
+      return;
+    }
+
+    const selectedTicket = dashboardArchiveCache.find(item => item.id === dashboardSelectedArchiveId);
+    const ticketLabel = selectedTicket?.ticket_number ? ` ${selectedTicket.ticket_number}` : "";
+    if (!confirm(`Archivierten Auftrag${ticketLabel} endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+
+    archiveDeleteButton.disabled = true;
+    if (archiveRestoreButton) archiveRestoreButton.disabled = true;
+    setDashboardArchiveMessage("loading", "Auftrag wird endgültig gelöscht …");
+
+    try {
+      await deleteDashboardRequest(getStoredEmployeeSession(), dashboardSelectedArchiveId);
+      removeTicketFromDashboardCaches(dashboardSelectedArchiveId);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
+      updateDashboardActivityStats(dashboardAllRequestCache);
+      renderDashboardArchiveDetail(null);
+      setDashboardArchiveMessage("success", "Archivierter Auftrag wurde endgültig gelöscht.");
+    } catch (error) {
+      setDashboardArchiveMessage("error", error.message || "Auftrag konnte nicht gelöscht werden.");
+      archiveDeleteButton.disabled = false;
+      if (archiveRestoreButton) archiveRestoreButton.disabled = false;
     }
   });
 
@@ -8439,6 +8347,22 @@ function bindDashboardShell() {
         return;
       }
 
+      if (action === "delete-ticket") {
+        const ticketLabel = ticket.ticket_number ? ` ${ticket.ticket_number}` : "";
+        if (!confirm(`Ticket${ticketLabel} endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden. Für normale abgeschlossene Aufträge bitte lieber archivieren.`)) return;
+
+        button.disabled = true;
+        setDashboardTicketActionMessage("loading", "Ticket wird endgültig gelöscht …");
+        await deleteDashboardRequest(getStoredEmployeeSession(), ticket.id);
+        removeTicketFromDashboardCaches(ticket.id);
+        applyDashboardFilters();
+        updateDashboardStats(dashboardAllRequestCache);
+        updateDashboardActivityStats(dashboardAllRequestCache);
+        renderDashboardDetail(null);
+        setDashboardTicketActionMessage("success", `Ticket ${ticket.ticket_number || ""} wurde endgültig gelöscht.`);
+        return;
+      }
+
       if (action === "mark-done") {
         if (ticket.status === "erledigt") {
           setDashboardTicketActionMessage("success", "Ticket ist bereits abgeschlossen.");
@@ -8453,7 +8377,7 @@ function bindDashboardShell() {
       }
     } catch (error) {
       setDashboardTicketActionMessage("error", error.message || "Aktion konnte nicht ausgeführt werden.");
-      if (action === "mark-done" || action === "archive-ticket") button.disabled = false;
+      if (action === "mark-done" || action === "archive-ticket" || action === "delete-ticket") button.disabled = false;
     }
   });
 
@@ -9073,7 +8997,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.13-CUSTOMER-MAIL-SUCCESS-NOTE
+   DBG: ALL4YOU-ROUTER-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

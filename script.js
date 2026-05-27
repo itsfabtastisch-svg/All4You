@@ -1756,7 +1756,14 @@ async function notifyTeamAboutRequest(requestResult) {
     },
     body: JSON.stringify({
       request_id: requestResult.id,
-      public_status_token: requestResult.public_status_token
+      public_status_token: requestResult.public_status_token,
+      // V5.8.4: Direkte Fallback-Daten aus dem Formular.
+      // Falls die RPC-Funktion/DB-Rueckgabe customer_email nicht sauber liefert,
+      // kann die Edge Function trotzdem die Kundenbestaetigung senden.
+      customer_email_override: requestResult.__notification_customer_email || requestResult.customer_email || null,
+      customer_phone_override: requestResult.__notification_customer_phone || requestResult.customer_phone || null,
+      customer_name_override: requestResult.__notification_customer_name || requestResult.customer_name || null,
+      service_override: requestResult.__notification_service || requestResult.service || null
     })
   });
 
@@ -2260,6 +2267,13 @@ async function createPublicRequest(payload) {
     throw new Error(message);
   }
 
+  if (data && typeof data === "object") {
+    data.__notification_customer_email = payload?.p_customer_email || null;
+    data.__notification_customer_phone = payload?.p_customer_phone || null;
+    data.__notification_customer_name = payload?.p_customer_name || null;
+    data.__notification_service = payload?.p_service || null;
+  }
+
   return data;
 }
 
@@ -2723,7 +2737,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7048,7 +7062,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8961,7 +8975,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

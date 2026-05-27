@@ -2,7 +2,7 @@
 // All4You Service München
 // Supabase Edge Function: notify-new-request
 // Sendet Team-Mail UND Kundenbestätigung bei neuer Anfrage über Resend
-// V5.8.3: Kundenmail standardmäßig erzwungen + robuste E-Mail-Erkennung + klare Rückmeldung
+// V5.8.4: Kundenmail mit Frontend-Fallback/Override, falls RPC customer_email nicht liefert
 // =========================================================
 
 const corsHeaders = {
@@ -11,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX";
+const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX";
 
 function serviceLabel(service: string | null): string {
   const labels: Record<string, string> = {
@@ -57,7 +57,10 @@ function normalizeEmail(value: unknown): string {
   return match ? match[0].trim().toLowerCase() : "";
 }
 
-function getCustomerEmail(ticket: Record<string, unknown>): string {
+function getCustomerEmail(ticket: Record<string, unknown>, fallbackEmail: unknown = null): string {
+  const fallback = normalizeEmail(fallbackEmail);
+  if (fallback) return fallback;
+
   const direct = normalizeEmail(ticket.customer_email);
   if (direct) return direct;
 
@@ -167,6 +170,14 @@ Deno.serve(async (req) => {
     const requestId = body?.request_id;
     const publicStatusToken = body?.public_status_token;
 
+    // V5.8.4: Fallbacks direkt aus dem Formular/Frontend.
+    // Damit die Kundenmail auch dann rausgeht, wenn die bestehende RPC-Funktion
+    // die customer_email aus der DB nicht korrekt zurueckliefert.
+    const customerEmailOverride = body?.customer_email_override || null;
+    const customerPhoneOverride = body?.customer_phone_override || null;
+    const customerNameOverride = body?.customer_name_override || null;
+    const serviceOverride = body?.service_override || null;
+
     if (!requestId || !publicStatusToken) {
       throw new Error("request_id oder public_status_token fehlt.");
     }
@@ -192,10 +203,11 @@ Deno.serve(async (req) => {
 
     const ticket = rpcData as Record<string, unknown>;
     const ticketNumber = String(ticket.ticket_number || "");
-    const customerName = String(ticket.customer_name || "Kunde");
-    const customerEmail = getCustomerEmail(ticket);
+    const customerName = String(customerNameOverride || ticket.customer_name || "Kunde");
+    const customerEmail = getCustomerEmail(ticket, customerEmailOverride);
     const statusUrl = buildStatusUrl(siteUrl, ticketNumber);
-    const subject = `Neue Anfrage ${ticketNumber} – ${serviceLabel(String(ticket.service || ""))}`;
+    const serviceValue = String(serviceOverride || ticket.service || "");
+    const subject = `Neue Anfrage ${ticketNumber} – ${serviceLabel(serviceValue)}`;
 
     const detailsRows = formatDetails(ticket.details as Record<string, unknown> | null);
     const html = `
@@ -205,7 +217,7 @@ Deno.serve(async (req) => {
 
         <div style="padding:16px;border-radius:14px;background:#eef8fa;border:1px solid #d8e7ef;margin:18px 0">
           <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticketNumber)}</p>
-          <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(String(ticket.service || "")))}</p>
+          <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(serviceValue))}</p>
           <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(String(ticket.status || "")))}</p>
         </div>
 
@@ -227,7 +239,7 @@ Deno.serve(async (req) => {
         <p>
           <b>Name:</b> ${escapeHtml(customerName)}<br>
           <b>E-Mail:</b> ${escapeHtml(customerEmail || ticket.customer_email || "—")}<br>
-          <b>Telefon:</b> ${escapeHtml(ticket.customer_phone || "—")}
+          <b>Telefon:</b> ${escapeHtml(customerPhoneOverride || ticket.customer_phone || "—")}
         </p>
 
         <h3>Zusammenfassung</h3>
@@ -245,7 +257,7 @@ Deno.serve(async (req) => {
       "Neue Anfrage über All4You",
       "",
       `Ticket: ${ticketNumber}`,
-      `Leistung: ${serviceLabel(String(ticket.service || ""))}`,
+      `Leistung: ${serviceLabel(serviceValue)}`,
       `Status: ${publicStatusLabel(String(ticket.status || ""))}`,
       "",
       "Statuslink:",
@@ -255,7 +267,7 @@ Deno.serve(async (req) => {
       "Kunde:",
       `Name: ${customerName}`,
       `E-Mail: ${customerEmail || ticket.customer_email || "—"}`,
-      `Telefon: ${ticket.customer_phone || "—"}`,
+      `Telefon: ${customerPhoneOverride || ticket.customer_phone || "—"}`,
       "",
       "Zusammenfassung:",
       String(ticket.summary || ticket.subject || "Keine Zusammenfassung"),
@@ -288,7 +300,7 @@ Deno.serve(async (req) => {
           <p>wir haben Ihre Anfrage erhalten und prüfen diese zeitnah.</p>
           <div style="padding:16px;border-radius:14px;background:#eef8fa;border:1px solid #d8e7ef;margin:18px 0">
             <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticketNumber)}</p>
-            <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(String(ticket.service || "")))}</p>
+            <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(serviceValue))}</p>
             <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(String(ticket.status || "")))}</p>
           </div>
           <p>Über den folgenden Link können Sie den Status später prüfen:</p>
@@ -308,7 +320,7 @@ Deno.serve(async (req) => {
         "Ihre Anfrage ist eingegangen",
         "",
         `Ticket: ${ticketNumber}`,
-        `Leistung: ${serviceLabel(String(ticket.service || ""))}`,
+        `Leistung: ${serviceLabel(serviceValue)}`,
         `Status: ${publicStatusLabel(String(ticket.status || ""))}`,
         "",
         "Status prüfen:",
@@ -335,6 +347,7 @@ Deno.serve(async (req) => {
       ticket: ticketNumber,
       teamEmailSent: Boolean(teamEmailData?.id),
       customerEmail: customerEmail || null,
+      usedCustomerEmailOverride: Boolean(customerEmailOverride),
       customerEmailSent: Boolean(customerEmailData?.id),
       customerConfirmationError: customerConfirmationError || null,
     });

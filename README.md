@@ -1,7 +1,7 @@
 # ALL4YOU-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
 
-DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
-Backend: ALL4YOU-BACKEND-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
+DBG: ALL4YOU-ROUTER-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
+Backend: ALL4YOU-BACKEND-V5.8.4-CUSTOMER-MAIL-OVERRIDE-FIX
 
 ## Zweck
 Neue Anfragen sollen nicht nur eine Team-Mail an All4You senden, sondern zusätzlich eine Kundenbestätigung an die im Formular angegebene E-Mail-Adresse.
@@ -17,3 +17,8 @@ Neue Anfragen sollen nicht nur eine Team-Mail an All4You senden, sondern zusätz
 2. `UPLOAD_TO_GITHUB_ROOT` hochladen/ersetzen.
 3. Neue Testanfrage mit eigener externer E-Mail senden.
 4. In Resend → Emails prüfen: Es sollten zwei Mails erscheinen.
+
+
+## V5.8.4 Customer Mail Override Fix
+
+Die Kundenmail bekommt jetzt die Kunden-E-Mail zusätzlich direkt aus dem Formular als Fallback an die Edge Function übergeben. Dadurch wird die Bestätigungsmail auch dann versendet, wenn die bestehende RPC-Rückgabe `customer_email` nicht sauber liefert.

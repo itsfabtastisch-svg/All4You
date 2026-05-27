@@ -665,6 +665,189 @@ function setDashboardArchiveMessage(type, text) {
   message.textContent = text || "";
 }
 
+
+/* ==========================================================================
+   V5.8.18 Dashboard Action Direct Binding Guard
+   --------------------------------------------------------------------------
+   Sicherheitsnetz: Status- und Ticket-Aktionsbuttons werden zusätzlich direkt
+   auf Dokument-Ebene abgefangen. Dadurch funktionieren die Aktionen auch dann,
+   wenn ältere lokale Listener durch Cache/Route-Neurendering nicht sauber greifen.
+   ========================================================================== */
+
+function getDashboardTicketByIdOrNumber(identifier) {
+  if (!identifier) return null;
+  const needle = String(identifier).trim();
+  return (
+    dashboardAllRequestCache.find(item => item.id === needle || item.ticket_number === needle) ||
+    dashboardRequestCache.find(item => item.id === needle || item.ticket_number === needle) ||
+    dashboardArchiveCache.find(item => item.id === needle || item.ticket_number === needle) ||
+    null
+  );
+}
+
+function resolveDashboardSelectedTicketSafe() {
+  const candidates = [];
+
+  if (dashboardSelectedRequestId) candidates.push(dashboardSelectedRequestId);
+
+  const activeButton = document.querySelector("#dashboardTicketList .dashboard-ticket.active[data-ticket-id]");
+  if (activeButton?.dataset?.ticketId) candidates.push(activeButton.dataset.ticketId);
+
+  const detailTitle = document.querySelector("#dashboardDetailTitle")?.textContent?.trim();
+  if (detailTitle && detailTitle !== "Kein Ticket" && detailTitle !== "Ticket auswählen") {
+    candidates.push(detailTitle);
+  }
+
+  for (const candidate of candidates) {
+    const ticket = getDashboardTicketByIdOrNumber(candidate);
+    if (ticket?.id) {
+      dashboardSelectedRequestId = ticket.id;
+      return ticket;
+    }
+  }
+
+  const firstActiveTicket = dashboardRequestCache[0] || dashboardAllRequestCache[0] || null;
+  if (firstActiveTicket?.id) {
+    dashboardSelectedRequestId = firstActiveTicket.id;
+    return firstActiveTicket;
+  }
+
+  return null;
+}
+
+async function handleDashboardStatusButtonDirect(button) {
+  const statusSelect = document.querySelector("#dashboardStatusSelect");
+  const selectedStatus = statusSelect?.value;
+  const selectedTicket = resolveDashboardSelectedTicketSafe();
+
+  if (!selectedTicket?.id || !selectedStatus) {
+    setDashboardActionMessage("error", "Bitte zuerst ein Ticket und einen Status auswählen.");
+    return;
+  }
+
+  button.disabled = true;
+  setDashboardActionMessage("loading", "Status wird gespeichert …");
+
+  try {
+    const updatedTicket = await applyDashboardTicketStatusUpdate(selectedTicket.id, selectedStatus);
+    setDashboardActionMessage("success", `Status wurde auf „${statusLabel(updatedTicket.status)}“ geändert.`);
+  } catch (error) {
+    setDashboardActionMessage("error", error.message || "Status konnte nicht geändert werden.");
+    button.disabled = false;
+  }
+}
+
+async function handleDashboardTicketActionDirect(button) {
+  const action = button?.dataset?.ticketAction;
+  const ticket = resolveDashboardSelectedTicketSafe();
+
+  if (!action) return;
+
+  if (!ticket?.id) {
+    setDashboardTicketActionMessage("error", "Bitte zuerst ein Ticket auswählen.");
+    return;
+  }
+
+  try {
+    if (action === "copy-contact") {
+      await copyTextToClipboard(buildTicketContactText(ticket));
+      setDashboardTicketActionMessage("success", "Kontaktdaten wurden kopiert.");
+      return;
+    }
+
+    if (action === "copy-status-link") {
+      await copyTextToClipboard(buildPublicStatusLink(ticket));
+      setDashboardTicketActionMessage("success", "Statuslink wurde kopiert.");
+      return;
+    }
+
+    if (action === "copy-ticket") {
+      await copyTextToClipboard(buildTicketCompactText(ticket));
+      setDashboardTicketActionMessage("success", "Kompakte Ticketdaten wurden kopiert.");
+      return;
+    }
+
+    if (action === "archive-ticket") {
+      if (ticket.archived_at) {
+        setDashboardTicketActionMessage("success", "Ticket ist bereits archiviert.");
+        return;
+      }
+      if (!confirm("Dieses Ticket wirklich archivieren? Es verschwindet aus der aktiven Ticketliste und bleibt im Archiv sichtbar.")) return;
+
+      button.disabled = true;
+      setDashboardTicketActionMessage("loading", "Ticket wird archiviert …");
+      const archivedTicket = await archiveDashboardRequest(getStoredEmployeeSession(), ticket.id, "Manuell archiviert.");
+      moveTicketToArchiveCache(archivedTicket);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
+      updateDashboardActivityStats(dashboardAllRequestCache);
+      renderDashboardDetail(null);
+      setDashboardTicketActionMessage("success", `Ticket ${archivedTicket.ticket_number || ""} wurde archiviert.`);
+      return;
+    }
+
+    if (action === "delete-ticket") {
+      const ticketLabel = ticket.ticket_number ? ` ${ticket.ticket_number}` : "";
+      if (!confirm(`Ticket${ticketLabel} endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden. Für normale abgeschlossene Aufträge bitte lieber archivieren.`)) return;
+
+      button.disabled = true;
+      setDashboardTicketActionMessage("loading", "Ticket wird endgültig gelöscht …");
+      await deleteDashboardRequest(getStoredEmployeeSession(), ticket.id);
+      removeTicketFromDashboardCaches(ticket.id);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
+      updateDashboardActivityStats(dashboardAllRequestCache);
+      renderDashboardDetail(null);
+      setDashboardTicketActionMessage("success", `Ticket ${ticket.ticket_number || ""} wurde endgültig gelöscht.`);
+      return;
+    }
+
+    if (action === "mark-done") {
+      if (ticket.status === "erledigt") {
+        setDashboardTicketActionMessage("success", "Ticket ist bereits abgeschlossen.");
+        return;
+      }
+
+      button.disabled = true;
+      setDashboardTicketActionMessage("loading", "Ticket wird als abgeschlossen markiert …");
+      const updatedTicket = await applyDashboardTicketStatusUpdate(ticket.id, "erledigt");
+      setDashboardTicketActionMessage("success", `Ticket ${updatedTicket.ticket_number || ""} wurde abgeschlossen und archiviert.`);
+      return;
+    }
+  } catch (error) {
+    setDashboardTicketActionMessage("error", error.message || "Aktion konnte nicht ausgeführt werden.");
+    if (action === "mark-done" || action === "archive-ticket" || action === "delete-ticket") {
+      button.disabled = false;
+    }
+  }
+}
+
+function bindDashboardActionDirectGuard() {
+  if (window.__all4youDashboardActionDirectGuardBound) return;
+  window.__all4youDashboardActionDirectGuardBound = true;
+
+  document.addEventListener("click", async event => {
+    const saveStatusButton = event.target.closest?.("#dashboardSaveStatusButton");
+    const actionButton = event.target.closest?.("[data-ticket-action]");
+
+    if (!saveStatusButton && !actionButton) return;
+    if (!document.body.contains(event.target)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation?.();
+
+    if (saveStatusButton) {
+      await handleDashboardStatusButtonDirect(saveStatusButton);
+      return;
+    }
+
+    if (actionButton) {
+      await handleDashboardTicketActionDirect(actionButton);
+    }
+  }, true);
+}
+
 function ticketArchiveMetaText(ticket) {
   if (!ticket?.archived_at) return "Nicht archiviert";
   const reason = ticket.archive_reason ? ` · ${ticket.archive_reason}` : "";
@@ -1740,7 +1923,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -2753,7 +2936,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+// DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7116,7 +7299,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8258,6 +8441,8 @@ function bindDashboardShell() {
   const archiveDeleteButton = document.querySelector("#dashboardArchiveDeleteButton");
   const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
 
+  bindDashboardActionDirectGuard();
+
   dashboardViewLinks.forEach(link => {
     if (link.dataset.dashboardViewBound === "true") return;
     link.dataset.dashboardViewBound = "true";
@@ -9092,7 +9277,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

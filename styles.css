@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .price-table-card {
@@ -2417,7 +2417,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2593,7 +2593,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2621,7 +2621,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2718,7 +2718,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2998,7 +2998,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .mail-preview-btn {
@@ -3012,7 +3012,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-shell {
@@ -3469,7 +3469,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .is-hidden {
@@ -3623,7 +3623,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .auth-message.success {
@@ -3643,7 +3643,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3698,7 +3698,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3775,7 +3775,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-detail {
@@ -3922,7 +3922,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .site-header {
@@ -4066,7 +4066,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .site-header {
@@ -4124,7 +4124,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-messages {
@@ -4244,7 +4244,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4335,7 +4335,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4380,7 +4380,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .email-notification-note {
@@ -4405,7 +4405,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .customer-status-link {
@@ -4600,7 +4600,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .customer-reply-form {
@@ -4671,7 +4671,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4823,7 +4823,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4887,7 +4887,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4943,7 +4943,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5031,7 +5031,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5071,7 +5071,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5104,7 +5104,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .footer-employee-login {
@@ -5146,7 +5146,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5195,7 +5195,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .youbot-widget {
@@ -5401,7 +5401,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .youbot-widget {
@@ -5507,7 +5507,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .roller-route-note {
@@ -5640,7 +5640,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5725,7 +5725,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .service-icon {
@@ -5773,7 +5773,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -5945,7 +5945,7 @@ label {
 
 /* ==========================================================================
    V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .trailer-period-control {
@@ -6176,7 +6176,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Trailer Kalender intern / Kundenansicht vereinfacht
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .legend-dot.status-selected {
@@ -6213,7 +6213,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Anhänger Übergabe + interner Dashboard-Kalender
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 #trailerPickupReturnField.field-editable input,
@@ -6384,7 +6384,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Archiv-System
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ========================================================================== */
 
 .dashboard-archive-layout {
@@ -6436,7 +6436,7 @@ button.calendar-day {
 
 /* ========================================================================
    Wizard Upload Requirement Hints
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    ======================================================================== */
 
 .wizard-upload-requirement {
@@ -6508,7 +6508,7 @@ button.calendar-day {
 }
 
 /* ========================================================================== 
-   DBG: ALL4YOU-ROUTER-V5.8.17-DASHBOARD-ACTIONMESSAGE-HOTFIX
+   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
    Kundenstatus-Nachrichten & Dashboard-Kundenantworten
    ========================================================================== */
 .customer-public-chat {

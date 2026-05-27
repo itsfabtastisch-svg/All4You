@@ -1,6 +1,6 @@
 # All4You Service München
 
-DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
+DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
 
 ## Inhalt
 
@@ -30,10 +30,10 @@ Vor dem Testen muss in Supabase einmal die SQL-Datei ausgeführt werden:
 
 Aktuelle sichtbare Build-Kennung:
 
-`ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX`
+`ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS`
 
 
-## ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
+## ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
 
 Dashboard-Hotfix: fehlende JavaScript-Helferfunktion `dashboardFieldLabel` und `isLongDashboardField` wiederhergestellt, damit aktive Anfragen nach dem Archiv-/Lösch-Patch wieder geladen werden. Keine SQL-, Mail-, Supabase-Function- oder Formularänderungen.
 
@@ -46,9 +46,18 @@ Dashboard-Hotfix: fehlende JavaScript-Helferfunktion `dashboardFieldLabel` und `
 
 ## V5.8.18 Dashboard Actions Direct Fix
 
-DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
+DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
 
 - Fehlende Dashboard-Hilfsfunktion `setDashboardActionMessage` wiederhergestellt.
 - Status speichern kann wieder sichtbare Meldungen ausgeben.
 - Ticket-Aktionen werden nach Ticket-Auswahl wieder korrekt aktiviert.
 - Keine SQL-, Mail-, Supabase-Function- oder Formularänderungen.
+
+
+## ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+
+- Kundenportal-Basis unter `/kundenportal` ergänzt.
+- Dashboard-Bereich „Kundenkonten“ zum Vorbereiten von Kundenkonten und Zuordnen bestehender Tickets ergänzt.
+- Kunden sehen nach Login nur zugeordnete Aufträge, Status und öffentliche Nachrichten.
+- Kundennachrichten aus dem Portal werden als öffentliche Ticketnachrichten gespeichert.
+- Benötigt SQL-Datei `SUPABASE-SQL-V5.9.0-CUSTOMER-PORTAL-BASIS.sql`.

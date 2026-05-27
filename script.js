@@ -22,6 +22,7 @@ function isSupabaseConfigured() {
    ========================================================================== */
 
 const ALL4YOU_AUTH_STORAGE_KEY = "all4you_employee_session_v1";
+const ALL4YOU_CUSTOMER_AUTH_STORAGE_KEY = "all4you_customer_session_v1";
 
 function storeEmployeeSession(session) {
   localStorage.setItem(ALL4YOU_AUTH_STORAGE_KEY, JSON.stringify({
@@ -46,6 +47,31 @@ function getStoredEmployeeSession() {
 
 function clearEmployeeSession() {
   localStorage.removeItem(ALL4YOU_AUTH_STORAGE_KEY);
+}
+
+function storeCustomerSession(session) {
+  localStorage.setItem(ALL4YOU_CUSTOMER_AUTH_STORAGE_KEY, JSON.stringify({
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: Date.now() + ((session.expires_in || 3600) * 1000),
+    user: session.user
+  }));
+}
+
+function getStoredCustomerSession() {
+  try {
+    const raw = localStorage.getItem(ALL4YOU_CUSTOMER_AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (!session?.access_token || !session?.user?.id) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+function clearCustomerSession() {
+  localStorage.removeItem(ALL4YOU_CUSTOMER_AUTH_STORAGE_KEY);
 }
 
 async function supabasePasswordLogin(email, password) {
@@ -124,6 +150,8 @@ let dashboardRequestCache = [];
 let dashboardAllRequestCache = [];
 let dashboardArchiveCache = [];
 let dashboardSelectedArchiveId = null;
+let dashboardCustomerAccountsCache = [];
+let dashboardSelectedCustomerAccountId = null;
 
 
 function serviceAccentClass(service) {
@@ -970,6 +998,273 @@ async function callDashboardRequestAdminRpc(session, functionName, payload = {})
   }
 
   return data;
+}
+
+
+
+/* ==========================================================================
+   Dashboard Kundenkonten / Kundenportal Basis V5.9.0
+   --------------------------------------------------------------------------
+   Phase 2A: Mitarbeiter können Kundenportal-Datensätze vorbereiten und Tickets
+   zuordnen. Der eigentliche Login läuft über Supabase Auth mit gleicher E-Mail.
+   ========================================================================== */
+
+async function fetchDashboardCustomerAccounts(session) {
+  const data = await callDashboardRequestAdminRpc(session, "admin_list_customer_accounts", {});
+  return Array.isArray(data?.accounts) ? data.accounts : [];
+}
+
+async function upsertDashboardCustomerAccount(session, payload) {
+  const data = await callDashboardRequestAdminRpc(session, "admin_upsert_customer_account", payload);
+  if (!data?.account) throw new Error("Kundenkonto wurde nicht bestätigt.");
+  return data.account;
+}
+
+async function linkDashboardCustomerRequest(session, accountId, requestId) {
+  const data = await callDashboardRequestAdminRpc(session, "admin_link_customer_request", {
+    p_account_id: accountId,
+    p_request_id: requestId
+  });
+  if (!data?.success) throw new Error(data?.message || "Ticket konnte nicht zugeordnet werden.");
+  return data;
+}
+
+async function unlinkDashboardCustomerRequest(session, accountId, requestId) {
+  const data = await callDashboardRequestAdminRpc(session, "admin_unlink_customer_request", {
+    p_account_id: accountId,
+    p_request_id: requestId
+  });
+  if (!data?.success) throw new Error(data?.message || "Ticket-Zuordnung konnte nicht entfernt werden.");
+  return data;
+}
+
+function dashboardCustomerDisplayName(account) {
+  return account?.display_name || account?.company || account?.email || "Kundenkonto";
+}
+
+function getDashboardCustomerAvailableTickets(account) {
+  const linkedIds = new Set((account?.requests || []).map(ticket => ticket.id));
+  return [...(dashboardAllRequestCache || []), ...(dashboardArchiveCache || [])]
+    .filter(ticket => ticket?.id && !linkedIds.has(ticket.id))
+    .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+}
+
+function setDashboardCustomersMessage(type, text) {
+  const message = document.querySelector("#dashboardCustomersMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function renderDashboardCustomerAccounts(accounts = dashboardCustomerAccountsCache) {
+  const list = document.querySelector("#dashboardCustomerAccountsList");
+  const count = document.querySelector("#dashboardCustomerAccountsCount");
+  if (!list) return;
+
+  const rows = Array.isArray(accounts) ? accounts : [];
+  if (count) count.textContent = `${rows.length} Kundenkonten`;
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Noch keine Kundenkonten</strong>
+        <p>Lege ein Kundenkonto für Bestandskunden an und ordne anschließend Tickets zu.</p>
+      </div>
+    `;
+    renderDashboardCustomerAccountDetail(null);
+    return;
+  }
+
+  list.innerHTML = rows.map(account => {
+    const isActive = account.id === dashboardSelectedCustomerAccountId;
+    const requestCount = Number(account.request_count || account.requests?.length || 0);
+    return `
+      <button class="dashboard-ticket customer-account-card ${isActive ? "active" : ""}" type="button" data-customer-account-id="${escapeHtml(account.id)}">
+        <span>
+          <strong>${escapeHtml(dashboardCustomerDisplayName(account))}</strong>
+          <small>${escapeHtml(account.email || "Keine E-Mail")}</small>
+        </span>
+        <span class="ticket-meta">
+          <small>${escapeHtml(account.company || account.phone || "Bestandskunde")}</small>
+          <small>${requestCount} Auftrag${requestCount === 1 ? "" : "e"}</small>
+        </span>
+      </button>
+    `;
+  }).join("");
+
+  const selected = rows.find(account => account.id === dashboardSelectedCustomerAccountId) || rows[0];
+  renderDashboardCustomerAccountDetail(selected);
+}
+
+function renderDashboardCustomerAccountDetail(account) {
+  const title = document.querySelector("#dashboardCustomerDetailTitle");
+  const body = document.querySelector("#dashboardCustomerDetailBody");
+  const status = document.querySelector("#dashboardCustomerDetailStatus");
+  const linkForm = document.querySelector("#dashboardCustomerLinkForm");
+  const requestSelect = document.querySelector("#dashboardCustomerRequestSelect");
+  const linkButton = document.querySelector("#dashboardCustomerLinkButton");
+
+  if (!title || !body) return;
+
+  if (!account?.id) {
+    dashboardSelectedCustomerAccountId = null;
+    title.textContent = "Kundenkonto auswählen";
+    if (status) status.textContent = "—";
+    if (linkForm) linkForm.classList.add("is-hidden");
+    body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links ein Kundenkonto aus oder legen Sie ein neues an.</span></div>`;
+    return;
+  }
+
+  dashboardSelectedCustomerAccountId = account.id;
+  title.textContent = dashboardCustomerDisplayName(account);
+  if (status) status.textContent = account.is_active === false ? "Inaktiv" : "Aktiv";
+  if (linkForm) linkForm.classList.remove("is-hidden");
+
+  const requests = Array.isArray(account.requests) ? account.requests : [];
+  const availableTickets = getDashboardCustomerAvailableTickets(account);
+  if (requestSelect) {
+    requestSelect.innerHTML = availableTickets.length
+      ? availableTickets.map(ticket => `<option value="${escapeHtml(ticket.id)}">${escapeHtml(ticket.ticket_number || "Ticket")} · ${escapeHtml(serviceLabel(ticket.service))} · ${escapeHtml(ticket.customer_name || "Kunde")}</option>`).join("")
+      : `<option value="">Keine weiteren Tickets verfügbar</option>`;
+  }
+  if (linkButton) linkButton.disabled = !availableTickets.length;
+
+  body.innerHTML = `
+    <div class="dashboard-customer-profile-card">
+      <strong>${escapeHtml(account.display_name || "Kunde")}</strong>
+      <span>${escapeHtml(account.email || "Keine E-Mail")}</span>
+      <span>${escapeHtml(account.phone || "Keine Telefonnummer")}</span>
+      ${account.company ? `<span>${escapeHtml(account.company)}</span>` : ""}
+      ${account.notes ? `<p>${escapeHtml(account.notes)}</p>` : ""}
+    </div>
+    <div class="summary-wide">
+      <strong>Login-Hinweis</strong>
+      <span>Der Kunde kann sich im Kundenportal einloggen, sobald in Supabase Auth ein Benutzer mit dieser E-Mail existiert. Diese Basis legt die Portal-Zuordnung und Ticketrechte an.</span>
+    </div>
+    <div class="dashboard-linked-request-list">
+      ${requests.length ? requests.map(ticket => `
+        <article class="dashboard-linked-request">
+          <div>
+            <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+            <span>${escapeHtml(serviceLabel(ticket.service))} · ${escapeHtml(statusLabel(ticket.status))}</span>
+            <small>${escapeHtml(ticket.summary || ticket.subject || "Kein Kurztext")}</small>
+          </div>
+          <button class="btn ghost" type="button" data-customer-unlink-request="${escapeHtml(ticket.id)}">Zuordnung entfernen</button>
+        </article>
+      `).join("") : `
+        <div class="dashboard-mini-empty">
+          <strong>Noch keine zugeordneten Aufträge</strong>
+          <p>Ordnen Sie rechts ein bestehendes Ticket zu.</p>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+async function loadDashboardCustomerAccounts(session = dashboardCurrentSession) {
+  const list = document.querySelector("#dashboardCustomerAccountsList");
+  if (list) {
+    list.innerHTML = `<div class="dashboard-empty-state"><strong>Kundenkonten werden geladen …</strong><p>Portal-Daten werden aus Supabase abgerufen.</p></div>`;
+  }
+
+  try {
+    dashboardCustomerAccountsCache = await fetchDashboardCustomerAccounts(session);
+    renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
+    setDashboardCustomersMessage("success", "Kundenkonten geladen.");
+  } catch (error) {
+    dashboardCustomerAccountsCache = [];
+    if (list) {
+      list.innerHTML = `<div class="dashboard-empty-state error"><strong>Kundenkonten konnten nicht geladen werden</strong><p>${escapeHtml(error.message || "Unbekannter Fehler")}</p></div>`;
+    }
+    setDashboardCustomersMessage("error", error.message || "Kundenkonten konnten nicht geladen werden.");
+  }
+}
+
+function bindDashboardCustomerAccounts() {
+  const createForm = document.querySelector("#dashboardCustomerAccountForm");
+  const list = document.querySelector("#dashboardCustomerAccountsList");
+  const detailBody = document.querySelector("#dashboardCustomerDetailBody");
+  const linkForm = document.querySelector("#dashboardCustomerLinkForm");
+
+  createForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const data = new FormData(createForm);
+    const email = String(data.get("email") || "").trim().toLowerCase();
+    const displayName = String(data.get("display_name") || "").trim();
+
+    if (!email || !email.includes("@")) {
+      setDashboardCustomersMessage("error", "Bitte eine gültige Kunden-E-Mail eintragen.");
+      return;
+    }
+
+    setDashboardCustomersMessage("loading", "Kundenkonto wird vorbereitet …");
+    const submitButton = createForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      const account = await upsertDashboardCustomerAccount(dashboardCurrentSession, {
+        p_email: email,
+        p_display_name: displayName || email,
+        p_phone: String(data.get("phone") || "").trim(),
+        p_company: String(data.get("company") || "").trim(),
+        p_notes: String(data.get("notes") || "").trim()
+      });
+      dashboardSelectedCustomerAccountId = account.id;
+      createForm.reset();
+      await loadDashboardCustomerAccounts(dashboardCurrentSession);
+      setDashboardCustomersMessage("success", "Kundenkonto wurde vorbereitet. Supabase-Auth-Benutzer mit gleicher E-Mail anlegen/prüfen.");
+    } catch (error) {
+      setDashboardCustomersMessage("error", error.message || "Kundenkonto konnte nicht gespeichert werden.");
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+
+  list?.addEventListener("click", event => {
+    const button = event.target.closest("[data-customer-account-id]");
+    if (!button) return;
+    list.querySelectorAll(".dashboard-ticket").forEach(item => item.classList.remove("active"));
+    button.classList.add("active");
+    const account = dashboardCustomerAccountsCache.find(item => item.id === button.dataset.customerAccountId);
+    renderDashboardCustomerAccountDetail(account || null);
+  });
+
+  linkForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const select = document.querySelector("#dashboardCustomerRequestSelect");
+    const requestId = select?.value;
+    const accountId = dashboardSelectedCustomerAccountId;
+
+    if (!accountId || !requestId) {
+      setDashboardCustomersMessage("error", "Bitte Kundenkonto und Ticket auswählen.");
+      return;
+    }
+
+    setDashboardCustomersMessage("loading", "Ticket wird dem Kundenkonto zugeordnet …");
+    try {
+      await linkDashboardCustomerRequest(dashboardCurrentSession, accountId, requestId);
+      await loadDashboardCustomerAccounts(dashboardCurrentSession);
+      setDashboardCustomersMessage("success", "Ticket wurde dem Kundenkonto zugeordnet.");
+    } catch (error) {
+      setDashboardCustomersMessage("error", error.message || "Ticket konnte nicht zugeordnet werden.");
+    }
+  });
+
+  detailBody?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-customer-unlink-request]");
+    if (!button || !dashboardSelectedCustomerAccountId) return;
+    if (!confirm("Diese Ticket-Zuordnung wirklich entfernen? Das Ticket wird nicht gelöscht.")) return;
+
+    setDashboardCustomersMessage("loading", "Zuordnung wird entfernt …");
+    try {
+      await unlinkDashboardCustomerRequest(dashboardCurrentSession, dashboardSelectedCustomerAccountId, button.dataset.customerUnlinkRequest);
+      await loadDashboardCustomerAccounts(dashboardCurrentSession);
+      setDashboardCustomersMessage("success", "Ticket-Zuordnung wurde entfernt.");
+    } catch (error) {
+      setDashboardCustomersMessage("error", error.message || "Zuordnung konnte nicht entfernt werden.");
+    }
+  });
 }
 
 async function archiveDashboardRequest(session, requestId, reason = "Manuell archiviert") {
@@ -1923,7 +2218,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -2936,7 +3231,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
+// DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -2994,6 +3289,7 @@ const SEO_ROUTES = {
   "/datenschutz": { title: "Datenschutz | All4You Service München", description: "Datenschutzhinweise von All4You Service München.", canonicalPath: "/datenschutz" },
   "/agb": { title: "AGB | All4You Service München", description: "Allgemeine Geschäftsbedingungen von All4You Service München für Anhängervermietung, Transportdienstleistungen, Entrümpelung und Reinigungsservice.", canonicalPath: "/agb" },
   "/dashboard": { title: "Mitarbeiter-Dashboard | All4You Service München", description: "Geschützter Mitarbeiterbereich von All4You Service München.", canonicalPath: "/dashboard", noindex: true },
+  "/kundenportal": { title: "Kundenportal | All4You Service München", description: "Geschützter Kundenbereich für Bestandskunden von All4You Service München.", canonicalPath: "/kundenportal", noindex: true },
   "/status": { title: "Anfragestatus prüfen | All4You Service München", description: "Status einer bestehenden All4You-Anfrage prüfen.", canonicalPath: "/status", noindex: true }
 };
 
@@ -3001,6 +3297,7 @@ function canonicalSeoPath(path) {
   if (path === "/leistungen/rollertransport") return "/leistungen/rollerabholservice";
   if (path === "/leistungen/raeumungen") return "/leistungen/entruempelung";
   if (path === "/mitarbeiter" || path === "/portal") return "/dashboard";
+  if (path === "/kundenlogin" || path === "/kundenbereich") return "/kundenportal";
   if (path === "/kundenstatus" || path === "/ticketstatus") return "/status";
   return path || "/";
 }
@@ -4735,6 +5032,7 @@ function pageDashboard() {
             <a class="active" href="#dashboard-overview" data-dashboard-view-trigger="overview">Übersicht</a>
             <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
+            <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="overview">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
@@ -4774,6 +5072,79 @@ function pageDashboard() {
             <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
+          </section>
+
+          <section class="dashboard-panel dashboard-customers-manager is-hidden" id="dashboardCustomersManager" data-dashboard-view="customers">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Kundenportal</p>
+                <h2>Kundenkonten & Zuordnungen</h2>
+              </div>
+              <span class="status-pill" id="dashboardCustomerAccountsCount">0 Kundenkonten</span>
+            </div>
+
+            <p class="dashboard-calendar-intro">
+              Für Bestandskunden können hier Portal-Konten vorbereitet und bestehende Aufträge zugeordnet werden.
+              Der Kunde sieht im Kundenportal nur die ihm zugeordneten Tickets, Status und öffentlichen Nachrichten.
+            </p>
+
+            <div class="dashboard-customers-layout">
+              <aside class="dashboard-panel dashboard-customer-create-panel">
+                <p class="eyebrow">Kundenkonto vorbereiten</p>
+                <form class="dashboard-customer-account-form" id="dashboardCustomerAccountForm">
+                  <label>Name / Anzeigename
+                    <input type="text" name="display_name" placeholder="z. B. Herr Müller / Firma Muster">
+                  </label>
+                  <label>E-Mail für Login
+                    <input type="email" name="email" placeholder="kunde@example.de" required>
+                  </label>
+                  <label>Telefon
+                    <input type="tel" name="phone" placeholder="optional">
+                  </label>
+                  <label>Firma / Objekt
+                    <input type="text" name="company" placeholder="optional">
+                  </label>
+                  <label>Interne Notiz
+                    <textarea name="notes" rows="3" placeholder="z. B. Bestandskunde, regelmäßige Reinigung, Hausverwaltung …"></textarea>
+                  </label>
+                  <button class="btn primary" type="submit">Kundenkonto speichern <span>›</span></button>
+                </form>
+                <p class="dashboard-ticket-action-message" id="dashboardCustomersMessage">
+                  Hinweis: Für den Login muss zusätzlich ein Supabase-Auth-Benutzer mit gleicher E-Mail existieren.
+                </p>
+              </aside>
+
+              <div class="dashboard-panel dashboard-customer-list-panel">
+                <p class="eyebrow">Kundenkonten</p>
+                <div class="dashboard-ticket-list dashboard-customer-account-list" id="dashboardCustomerAccountsList">
+                  <div class="dashboard-empty-state">
+                    <strong>Kundenkonten werden nach Login geladen …</strong>
+                    <p>Bestandskunden erscheinen hier.</p>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="dashboard-panel dashboard-detail dashboard-customer-detail-panel">
+                <div class="panel-head">
+                  <div>
+                    <p class="eyebrow">Kundendetails</p>
+                    <h2 id="dashboardCustomerDetailTitle">Kundenkonto auswählen</h2>
+                  </div>
+                  <span class="status-pill" id="dashboardCustomerDetailStatus">—</span>
+                </div>
+
+                <div class="dashboard-detail-body" id="dashboardCustomerDetailBody">
+                  <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie ein Kundenkonto aus, um Aufträge zuzuordnen.</span></div>
+                </div>
+
+                <form class="dashboard-customer-link-form is-hidden" id="dashboardCustomerLinkForm">
+                  <label>Bestehendes Ticket zuordnen
+                    <select id="dashboardCustomerRequestSelect" name="request_id"></select>
+                  </label>
+                  <button class="btn primary" type="submit" id="dashboardCustomerLinkButton">Ticket zuordnen <span>›</span></button>
+                </form>
+              </aside>
+            </div>
           </section>
 
           <section class="dashboard-panel dashboard-archive-manager is-hidden" id="dashboardArchiveManager" data-dashboard-view="archive">
@@ -5595,6 +5966,127 @@ function agbPage() {
   `;
 }
 
+
+function pageCustomerPortal() {
+  document.title = "Kundenportal | All4You Service München";
+  return `
+    <section class="customer-portal-page page">
+      <div class="customer-portal-gate" id="customerPortalAuthGate">
+        <div class="auth-card customer-auth-card">
+          <a class="auth-logo" href="/" data-link>
+            <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+          </a>
+
+          <p class="eyebrow">Kundenportal</p>
+          <h1>Aufträge und Nachrichten einsehen.</h1>
+          <p class="lead">
+            Dieser Bereich ist für freigeschaltete Bestandskunden. Einmalige Anfragen können weiterhin über den Statuslink geprüft werden.
+          </p>
+
+          <form class="auth-form" id="customerPortalLoginForm">
+            <label>E-Mail
+              <input type="email" name="email" autocomplete="email" placeholder="kunde@example.de" required>
+            </label>
+            <label>Passwort
+              <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
+            </label>
+            <button class="btn primary" type="submit">Einloggen <span>›</span></button>
+          </form>
+
+          <div class="auth-message" id="customerPortalAuthMessage">
+            <strong>Hinweis</strong>
+            <p>Bitte mit einem freigeschalteten Kundenkonto anmelden.</p>
+          </div>
+
+          <div class="inline-actions auth-inline-actions">
+            <a class="btn ghost" href="/status" data-link>Statuslink nutzen</a>
+            <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="customer-portal-shell is-hidden" id="customerPortalProtectedArea">
+        <aside class="customer-portal-sidebar">
+          <a class="dashboard-brand" href="/" data-link>
+            <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+            <span>Kundenportal</span>
+          </a>
+          <div class="dashboard-user-card">
+            <strong id="customerPortalName">Kunde</strong>
+            <span id="customerPortalMeta">angemeldet</span>
+            <button class="btn ghost" type="button" id="customerPortalLogoutButton">Abmelden</button>
+          </div>
+          <div class="dashboard-security-note">
+            <strong>Privater Bereich</strong>
+            <p>Hier erscheinen nur Aufträge, die Ihrem Kundenkonto zugeordnet wurden.</p>
+          </div>
+        </aside>
+
+        <main class="customer-portal-main">
+          <section class="dashboard-hero customer-portal-hero">
+            <div>
+              <p class="eyebrow">All4You Kundenportal</p>
+              <h1>Ihre Aufträge im Überblick.</h1>
+              <p class="lead">Status, öffentliche Nachrichten und Auftragsdetails werden live aus dem System geladen.</p>
+            </div>
+            <div class="dashboard-hero-actions">
+              <span class="status-pill success" id="customerPortalLiveStatus">Live verbunden</span>
+            </div>
+          </section>
+
+          <section class="customer-portal-grid">
+            <div class="dashboard-panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Aufträge</p>
+                  <h2>Zugeordnete Anfragen</h2>
+                </div>
+                <span class="status-pill" id="customerPortalRequestCount">0 Aufträge</span>
+              </div>
+              <div class="dashboard-ticket-list" id="customerPortalRequestList">
+                <div class="dashboard-empty-state">
+                  <strong>Aufträge werden geladen …</strong>
+                  <p>Ihre zugeordneten Aufträge erscheinen hier.</p>
+                </div>
+              </div>
+            </div>
+
+            <aside class="dashboard-panel dashboard-detail customer-portal-detail">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Auftragsdetails</p>
+                  <h2 id="customerPortalDetailTitle">Auftrag auswählen</h2>
+                </div>
+                <span class="status-pill" id="customerPortalDetailStatus">—</span>
+              </div>
+              <div class="dashboard-detail-body" id="customerPortalDetailBody">
+                <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
+              </div>
+
+              <div class="dashboard-messages">
+                <p class="eyebrow">Nachrichten</p>
+                <div class="dashboard-messages-list" id="customerPortalMessagesList">
+                  <div class="dashboard-mini-empty">
+                    <strong>Keine Nachrichten geladen</strong>
+                    <p>Nachrichten erscheinen nach Auswahl eines Auftrags.</p>
+                  </div>
+                </div>
+                <form class="dashboard-customer-reply" id="customerPortalMessageForm">
+                  <label>Nachricht an All4You
+                    <textarea id="customerPortalMessageText" rows="3" placeholder="Nachricht zu diesem Auftrag schreiben …" disabled></textarea>
+                  </label>
+                  <button class="btn primary" type="submit" id="customerPortalMessageButton" disabled>Nachricht senden <span>›</span></button>
+                  <p class="dashboard-note-message" id="customerPortalMessageStatus">Bitte zuerst einen Auftrag auswählen.</p>
+                </form>
+              </div>
+            </aside>
+          </section>
+        </main>
+      </div>
+    </section>
+  `;
+}
+
 function pageNotFound() {
   document.title = "Seite nicht gefunden | All4You Service München";
   return `
@@ -5621,6 +6113,7 @@ function renderRoute() {
   else if (path === "/leistungen/reinigung") html = cleaningPage();
   else if (path.startsWith("/leistungen/")) html = genericServicePage(path.split("/").pop());
   else if (path === "/dashboard" || path === "/mitarbeiter" || path === "/portal") html = pageDashboard();
+  else if (path === "/kundenportal" || path === "/kundenlogin" || path === "/kundenbereich") html = pageCustomerPortal();
   else if (path === "/status" || path === "/kundenstatus" || path === "/ticketstatus") html = pageCustomerStatus();
   else if (path === "/kontakt") html = pageContact();
   else if (path === "/ueber-uns") html = pageAbout();
@@ -5642,6 +6135,7 @@ function renderRoute() {
   bindRollerWizard();
   bindTrailerWizard();
   bindDashboardShell();
+  bindCustomerPortalPage();
   bindCustomerStatusPage();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
@@ -7299,7 +7793,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
+   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8404,7 +8898,7 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "trailer-calendar"];
+  const allowedViews = ["overview", "archive", "customers", "trailer-calendar"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
@@ -8421,6 +8915,9 @@ function setDashboardView(view = "overview") {
   }
   if (normalized === "archive") {
     renderDashboardArchiveList(dashboardArchiveCache);
+  }
+  if (normalized === "customers") {
+    renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
   }
 }
 
@@ -8442,6 +8939,7 @@ function bindDashboardShell() {
   const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
 
   bindDashboardActionDirectGuard();
+  bindDashboardCustomerAccounts();
 
   dashboardViewLinks.forEach(link => {
     if (link.dataset.dashboardViewBound === "true") return;
@@ -8770,6 +9268,7 @@ function bindDashboardAuth() {
     if (employeeMeta) employeeMeta.textContent = `${profile.email || "angemeldet"} · ${profile.role || "mitarbeiter"}`;
 
     loadDashboardRequests(session);
+    loadDashboardCustomerAccounts(session);
     bindDashboardTrailerCalendarManager();
   }
 
@@ -8827,6 +9326,8 @@ function bindDashboardAuth() {
     dashboardRequestCache = [];
     dashboardAllRequestCache = [];
     dashboardArchiveCache = [];
+    dashboardCustomerAccountsCache = [];
+    dashboardSelectedCustomerAccountId = null;
     dashboardCurrentSession = null;
     dashboardCurrentEmployeeProfile = null;
     clearTicketExtras();
@@ -8837,6 +9338,326 @@ function bindDashboardAuth() {
   validateStoredSession();
 }
 
+
+
+
+/* ==========================================================================
+   Kundenportal Basis V5.9.0
+   ========================================================================== */
+
+let customerPortalCurrentSession = null;
+let customerPortalAccount = null;
+let customerPortalRequests = [];
+let customerPortalSelectedRequestId = null;
+
+async function fetchCustomerPortalData(session) {
+  if (!session?.access_token) {
+    throw new Error("Keine gültige Kundensitzung vorhanden.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_my_customer_portal`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({})
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Kundenportal konnte nicht geladen werden.");
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Kein freigeschaltetes Kundenkonto gefunden.");
+  }
+
+  return data;
+}
+
+async function sendCustomerPortalMessage(session, requestId, message) {
+  const cleanMessage = String(message || "").trim();
+  if (!requestId) throw new Error("Kein Auftrag ausgewählt.");
+  if (cleanMessage.length < 2) throw new Error("Bitte eine Nachricht eintragen.");
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/customer_portal_send_message`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_request_id: requestId,
+      p_message: cleanMessage
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Nachricht konnte nicht gesendet werden.");
+  }
+
+  if (!data?.success) throw new Error(data?.message || "Nachricht wurde nicht bestätigt.");
+  return data.message;
+}
+
+function setCustomerPortalAuthMessage(type, title, text) {
+  const message = document.querySelector("#customerPortalAuthMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(text)}</p>`;
+}
+
+function setCustomerPortalMessage(type, text) {
+  const message = document.querySelector("#customerPortalMessageStatus");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function renderCustomerPortalRequests(requests = customerPortalRequests) {
+  const list = document.querySelector("#customerPortalRequestList");
+  const count = document.querySelector("#customerPortalRequestCount");
+  if (!list) return;
+
+  const rows = Array.isArray(requests) ? requests : [];
+  if (count) count.textContent = `${rows.length} Auftrag${rows.length === 1 ? "" : "e"}`;
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Noch keine zugeordneten Aufträge</strong>
+        <p>Wenn Sie ein Bestandskunde sind, kann All4You Ihre bestehenden Anfragen Ihrem Kundenkonto zuordnen.</p>
+      </div>
+    `;
+    renderCustomerPortalDetail(null);
+    return;
+  }
+
+  list.innerHTML = rows.map(ticket => {
+    const isActive = ticket.id === customerPortalSelectedRequestId;
+    return `
+      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" type="button" data-customer-portal-request-id="${escapeHtml(ticket.id)}">
+        <span>
+          <strong>${escapeHtml(ticket.ticket_number || "Auftrag")}</strong>
+          <small>${escapeHtml(serviceLabel(ticket.service))}</small>
+        </span>
+        <span class="ticket-meta">
+          <small>${escapeHtml(statusLabel(ticket.status))}</small>
+          <small>${escapeHtml(formatDashboardDate(ticket.created_at))}</small>
+        </span>
+      </button>
+    `;
+  }).join("");
+
+  const selected = rows.find(ticket => ticket.id === customerPortalSelectedRequestId) || rows[0];
+  renderCustomerPortalDetail(selected);
+}
+
+function renderCustomerPortalDetail(ticket) {
+  const title = document.querySelector("#customerPortalDetailTitle");
+  const status = document.querySelector("#customerPortalDetailStatus");
+  const body = document.querySelector("#customerPortalDetailBody");
+  const messagesList = document.querySelector("#customerPortalMessagesList");
+  const text = document.querySelector("#customerPortalMessageText");
+  const button = document.querySelector("#customerPortalMessageButton");
+
+  if (!title || !body) return;
+
+  if (!ticket?.id) {
+    customerPortalSelectedRequestId = null;
+    title.textContent = "Auftrag auswählen";
+    if (status) status.textContent = "—";
+    body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>`;
+    if (messagesList) messagesList.innerHTML = `<div class="dashboard-mini-empty"><strong>Keine Nachrichten geladen</strong><p>Nachrichten erscheinen nach Auswahl eines Auftrags.</p></div>`;
+    if (text) text.disabled = true;
+    if (button) button.disabled = true;
+    setCustomerPortalMessage("", "Bitte zuerst einen Auftrag auswählen.");
+    return;
+  }
+
+  customerPortalSelectedRequestId = ticket.id;
+  title.textContent = ticket.ticket_number || "Auftrag";
+  if (status) status.textContent = statusLabel(ticket.status);
+
+  const groups = getDashboardDetailGroups(ticket);
+  body.innerHTML = `
+    ${renderDashboardDetailHero(ticket)}
+    ${renderDashboardSummaryBlock(ticket)}
+    ${renderDashboardDetailSection("Auftrag", groups["Ticket"])}
+    ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+    ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
+    ${renderDashboardDetailSection("Details", groups["Anfrage-Details"], { fullWidth: true })}
+  `;
+
+  const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
+  if (messagesList) renderCustomerPortalMessages(publicMessages, messagesList);
+  if (text) text.disabled = false;
+  if (button) button.disabled = false;
+  setCustomerPortalMessage("", "Nachrichten sind für All4You sichtbar und werden dem Auftrag zugeordnet.");
+}
+
+function renderCustomerPortalMessages(messages, list) {
+  if (!list) return;
+  if (!messages?.length) {
+    list.innerHTML = `<div class="dashboard-mini-empty"><strong>Noch keine Nachrichten</strong><p>Zu diesem Auftrag gibt es noch keinen öffentlichen Nachrichtenverlauf.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = messages.map(message => `
+    <article class="message-card ${message.sender_type === "kunde" ? "customer-message" : "team-message"}">
+      <div class="message-meta">
+        <strong>${escapeHtml(senderTypeLabel(message.sender_type))}</strong>
+        <span>${escapeHtml(message.sender_name || "")}${message.created_at ? " · " + escapeHtml(formatDashboardDate(message.created_at)) : ""}</span>
+      </div>
+      <p>${escapeHtml(message.message || "")}</p>
+    </article>
+  `).join("");
+}
+
+async function loadCustomerPortal(session = customerPortalCurrentSession) {
+  const liveStatus = document.querySelector("#customerPortalLiveStatus");
+  if (liveStatus) {
+    liveStatus.textContent = "Daten werden geladen";
+    liveStatus.classList.remove("success");
+    liveStatus.classList.add("warning");
+  }
+
+  const data = await fetchCustomerPortalData(session);
+  customerPortalAccount = data.account;
+  customerPortalRequests = Array.isArray(data.requests) ? data.requests : [];
+
+  const name = document.querySelector("#customerPortalName");
+  const meta = document.querySelector("#customerPortalMeta");
+  if (name) name.textContent = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
+  if (meta) meta.textContent = customerPortalAccount?.email || "angemeldet";
+
+  renderCustomerPortalRequests(customerPortalRequests);
+
+  if (liveStatus) {
+    liveStatus.textContent = "Live verbunden";
+    liveStatus.classList.remove("warning");
+    liveStatus.classList.add("success");
+  }
+}
+
+function bindCustomerPortalPage() {
+  const gate = document.querySelector("#customerPortalAuthGate");
+  const protectedArea = document.querySelector("#customerPortalProtectedArea");
+  const form = document.querySelector("#customerPortalLoginForm");
+  const logoutButton = document.querySelector("#customerPortalLogoutButton");
+  const requestList = document.querySelector("#customerPortalRequestList");
+  const messageForm = document.querySelector("#customerPortalMessageForm");
+  const messageText = document.querySelector("#customerPortalMessageText");
+  const messageButton = document.querySelector("#customerPortalMessageButton");
+
+  if (!gate || !protectedArea || !form) return;
+
+  function showLogin() {
+    gate.classList.remove("is-hidden");
+    protectedArea.classList.add("is-hidden");
+  }
+
+  function showPortal(session) {
+    customerPortalCurrentSession = session;
+    gate.classList.add("is-hidden");
+    protectedArea.classList.remove("is-hidden");
+    loadCustomerPortal(session).catch(error => {
+      clearCustomerSession();
+      showLogin();
+      setCustomerPortalAuthMessage("error", "Kundenportal nicht verfügbar", error.message || "Bitte Zugang prüfen.");
+    });
+  }
+
+  async function validateStoredSession() {
+    const session = getStoredCustomerSession();
+    if (!session) {
+      showLogin();
+      setCustomerPortalAuthMessage("loading", "Bereit", "Bitte mit Kundenkonto einloggen.");
+      return;
+    }
+    showPortal(session);
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const email = String(data.get("email") || "").trim();
+    const password = String(data.get("password") || "");
+    setCustomerPortalAuthMessage("loading", "Login läuft", "Kundenzugang wird geprüft.");
+
+    try {
+      const session = await supabasePasswordLogin(email, password);
+      storeCustomerSession(session);
+      setCustomerPortalAuthMessage("success", "Login erfolgreich", "Kundenportal wird geladen.");
+      showPortal(getStoredCustomerSession());
+      form.reset();
+    } catch (error) {
+      clearCustomerSession();
+      showLogin();
+      setCustomerPortalAuthMessage("error", "Login fehlgeschlagen", error.message || "Bitte Zugangsdaten prüfen.");
+    }
+  });
+
+  logoutButton?.addEventListener("click", async () => {
+    const session = getStoredCustomerSession();
+    await supabaseLogout(session?.access_token);
+    clearCustomerSession();
+    customerPortalCurrentSession = null;
+    customerPortalAccount = null;
+    customerPortalRequests = [];
+    customerPortalSelectedRequestId = null;
+    showLogin();
+    setCustomerPortalAuthMessage("success", "Abgemeldet", "Die Kundensitzung wurde beendet.");
+  });
+
+  requestList?.addEventListener("click", event => {
+    const button = event.target.closest("[data-customer-portal-request-id]");
+    if (!button) return;
+    requestList.querySelectorAll(".dashboard-ticket").forEach(item => item.classList.remove("active"));
+    button.classList.add("active");
+    const ticket = customerPortalRequests.find(item => item.id === button.dataset.customerPortalRequestId);
+    renderCustomerPortalDetail(ticket || null);
+  });
+
+  messageForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const text = String(messageText?.value || "").trim();
+    if (!customerPortalSelectedRequestId) {
+      setCustomerPortalMessage("error", "Bitte zuerst einen Auftrag auswählen.");
+      return;
+    }
+    if (!text) {
+      setCustomerPortalMessage("error", "Bitte eine Nachricht eintragen.");
+      return;
+    }
+
+    if (messageButton) messageButton.disabled = true;
+    setCustomerPortalMessage("loading", "Nachricht wird gesendet …");
+
+    try {
+      await sendCustomerPortalMessage(customerPortalCurrentSession, customerPortalSelectedRequestId, text);
+      if (messageText) messageText.value = "";
+      await loadCustomerPortal(customerPortalCurrentSession);
+      const ticket = customerPortalRequests.find(item => item.id === customerPortalSelectedRequestId) || null;
+      renderCustomerPortalDetail(ticket);
+      setCustomerPortalMessage("success", "Nachricht wurde an All4You gesendet.");
+    } catch (error) {
+      setCustomerPortalMessage("error", error.message || "Nachricht konnte nicht gesendet werden.");
+    } finally {
+      if (messageButton) messageButton.disabled = !customerPortalSelectedRequestId;
+    }
+  });
+
+  validateStoredSession();
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -9277,7 +10098,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.18-DASHBOARD-ACTIONS-DIRECT-FIX
+   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -1771,10 +1771,35 @@ async function notifyTeamAboutRequest(requestResult) {
 
 function appendTeamNotificationNote(result, notificationResult) {
   const note = document.createElement("p");
-  note.className = `form-note email-notification-note ${notificationResult?.success ? "success" : "warning"}`;
-  note.innerHTML = notificationResult?.success
-    ? `Team-Benachrichtigung wurde an <b>${escapeHtml(TEAM_NOTIFICATION_EMAIL)}</b> gesendet.${notificationResult?.status_url ? `<br>Statuslink: <a href="${escapeHtml(notificationResult.status_url)}" data-link>Status prüfen</a>` : ""}`
-    : `Anfrage wurde gespeichert. Team-E-Mail noch nicht gesendet: ${escapeHtml(notificationResult?.message || "Edge Function noch nicht aktiv.")}`;
+  const teamOk = Boolean(notificationResult?.success);
+  const customerSent = Boolean(notificationResult?.customer_email_id);
+  const customerTo = notificationResult?.customer_to || "";
+  const customerError = notificationResult?.customer_confirmation_error || "";
+
+  note.className = `form-note email-notification-note ${teamOk && !customerError ? "success" : "warning"}`;
+
+  if (teamOk) {
+    let html = `Team-Benachrichtigung wurde an <b>${escapeHtml(TEAM_NOTIFICATION_EMAIL)}</b> gesendet.`;
+
+    if (customerSent && customerTo) {
+      html += `<br>Kundenbestätigung wurde an <b>${escapeHtml(customerTo)}</b> gesendet.`;
+    } else if (customerTo && customerError) {
+      html += `<br><b>Kundenbestätigung nicht gesendet:</b> ${escapeHtml(customerError)}`;
+    } else if (customerTo) {
+      html += `<br>Kundenbestätigung: Versand wurde vom Backend nicht bestätigt. Bitte Resend prüfen.`;
+    } else {
+      html += `<br>Kundenbestätigung nicht gesendet: Im Ticket wurde keine Kunden-E-Mail gefunden.`;
+    }
+
+    if (notificationResult?.status_url) {
+      html += `<br>Statuslink: <a href="${escapeHtml(notificationResult.status_url)}" data-link>Status prüfen</a>`;
+    }
+
+    note.innerHTML = html;
+  } else {
+    note.innerHTML = `Anfrage wurde gespeichert. E-Mail-Benachrichtigung noch nicht gesendet: ${escapeHtml(notificationResult?.message || "Edge Function noch nicht aktiv.")}`;
+  }
+
   result.appendChild(note);
 }
 
@@ -2698,7 +2723,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.0-STATUS-MESSAGE-PORTAL
+// DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -7023,7 +7048,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.0-STATUS-MESSAGE-PORTAL
+   DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8936,7 +8961,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.0-STATUS-MESSAGE-PORTAL
+   DBG: ALL4YOU-ROUTER-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

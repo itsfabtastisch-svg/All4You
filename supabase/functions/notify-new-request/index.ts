@@ -1,8 +1,8 @@
 // =========================================================
 // All4You Service München
 // Supabase Edge Function: notify-new-request
-// Sendet Team- und Kundenbestätigung bei neuer Anfrage über Resend
-// V5.8.2: Kundenbestätigung standardmäßig aktiv, sofern Kunden-E-Mail vorhanden ist
+// Sendet Team-Mail UND Kundenbestätigung bei neuer Anfrage über Resend
+// V5.8.3: Kundenmail standardmäßig erzwungen + robuste E-Mail-Erkennung + klare Rückmeldung
 // =========================================================
 
 const corsHeaders = {
@@ -11,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.2-CUSTOMER-CONFIRMATION-MAIL";
+const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.3-CUSTOMER-MAIL-DELIVERY-FIX";
 
 function serviceLabel(service: string | null): string {
   const labels: Record<string, string> = {
@@ -35,6 +35,7 @@ function publicStatusLabel(status: string | null): string {
     termin_vorgeschlagen: "Termin vorgeschlagen",
     termin_bestaetigt: "Termin bestätigt",
     in_bearbeitung: "In Bearbeitung",
+    abgeschlossen: "Abgeschlossen",
     erledigt: "Erledigt",
     storniert: "Storniert",
   };
@@ -49,6 +50,40 @@ function escapeHtml(value: unknown): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function normalizeEmail(value: unknown): string {
+  const match = String(value ?? "").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match ? match[0].trim().toLowerCase() : "";
+}
+
+function getCustomerEmail(ticket: Record<string, unknown>): string {
+  const direct = normalizeEmail(ticket.customer_email);
+  if (direct) return direct;
+
+  const details = ticket.details && typeof ticket.details === "object"
+    ? ticket.details as Record<string, unknown>
+    : {};
+
+  const candidates = [
+    details.email,
+    details.e_mail,
+    details.customer_email,
+    details.kunden_email,
+    details.contact_email,
+    details.contact,
+    details.kontakt,
+    details.contact_data,
+    ticket.summary,
+    ticket.message,
+  ];
+
+  for (const candidate of candidates) {
+    const email = normalizeEmail(candidate);
+    if (email) return email;
+  }
+
+  return "";
 }
 
 function formatDetails(details: Record<string, unknown> | null): string {
@@ -106,7 +141,7 @@ Deno.serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ success: false, message: "Method not allowed" }), {
+    return new Response(JSON.stringify({ success: false, message: "Method not allowed", backend_build: BACKEND_BUILD }), {
       status: 405,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -114,10 +149,14 @@ Deno.serve(async (req) => {
 
   try {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const teamEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "itsfabtastisch@gmail.com";
-    const fromEmail = Deno.env.get("EMAIL_FROM") || "All4You <onboarding@resend.dev>";
-    const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://all4you.pages.dev";
-    const sendCustomerConfirmation = (Deno.env.get("SEND_CUSTOMER_CONFIRMATION") || "true").toLowerCase() !== "false";
+    const teamEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "info@all4you-muenchen.de";
+    const fromEmail = Deno.env.get("EMAIL_FROM") || "All4You Service München <info@all4you-muenchen.de>";
+    const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://all4you-muenchen.de";
+
+    // Standard ist jetzt TRUE. Nur wenn das Secret explizit auf false steht, wird sie deaktiviert.
+    const confirmationSetting = (Deno.env.get("SEND_CUSTOMER_CONFIRMATION") || "true").toLowerCase();
+    const sendCustomerConfirmation = confirmationSetting !== "false";
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
@@ -151,20 +190,23 @@ Deno.serve(async (req) => {
       throw new Error(rpcData?.message || "Anfrage konnte nicht geladen werden.");
     }
 
-    const ticket = rpcData;
-    const statusUrl = buildStatusUrl(siteUrl, ticket.ticket_number);
-    const subject = `Neue Anfrage ${ticket.ticket_number} – ${serviceLabel(ticket.service)}`;
+    const ticket = rpcData as Record<string, unknown>;
+    const ticketNumber = String(ticket.ticket_number || "");
+    const customerName = String(ticket.customer_name || "Kunde");
+    const customerEmail = getCustomerEmail(ticket);
+    const statusUrl = buildStatusUrl(siteUrl, ticketNumber);
+    const subject = `Neue Anfrage ${ticketNumber} – ${serviceLabel(String(ticket.service || ""))}`;
 
-    const detailsRows = formatDetails(ticket.details);
+    const detailsRows = formatDetails(ticket.details as Record<string, unknown> | null);
     const html = `
       <div style="font-family:Arial,sans-serif;line-height:1.55;color:#09213f;max-width:760px">
         <h2 style="margin-bottom:8px">Neue Anfrage über All4You</h2>
         <p style="margin-top:0;color:#5f7284">Dieses Ticket wurde automatisch über die Webseite erstellt.</p>
 
         <div style="padding:16px;border-radius:14px;background:#eef8fa;border:1px solid #d8e7ef;margin:18px 0">
-          <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticket.ticket_number)}</p>
-          <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(ticket.service))}</p>
-          <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(ticket.status))}</p>
+          <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticketNumber)}</p>
+          <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(String(ticket.service || "")))}</p>
+          <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(String(ticket.status || "")))}</p>
         </div>
 
         <div style="padding:16px;border-radius:14px;background:#f7fbfd;border:1px solid #d8e7ef;margin:18px 0">
@@ -183,8 +225,8 @@ Deno.serve(async (req) => {
 
         <h3>Kunde</h3>
         <p>
-          <b>Name:</b> ${escapeHtml(ticket.customer_name)}<br>
-          <b>E-Mail:</b> ${escapeHtml(ticket.customer_email || "—")}<br>
+          <b>Name:</b> ${escapeHtml(customerName)}<br>
+          <b>E-Mail:</b> ${escapeHtml(customerEmail || ticket.customer_email || "—")}<br>
           <b>Telefon:</b> ${escapeHtml(ticket.customer_phone || "—")}
         </p>
 
@@ -202,21 +244,21 @@ Deno.serve(async (req) => {
     const text = [
       "Neue Anfrage über All4You",
       "",
-      `Ticket: ${ticket.ticket_number}`,
-      `Leistung: ${serviceLabel(ticket.service)}`,
-      `Status: ${publicStatusLabel(ticket.status)}`,
+      `Ticket: ${ticketNumber}`,
+      `Leistung: ${serviceLabel(String(ticket.service || ""))}`,
+      `Status: ${publicStatusLabel(String(ticket.status || ""))}`,
       "",
       "Statuslink:",
       statusUrl,
       "Hinweis: Zur Sicherheit braucht der Kunde zusätzlich seine E-Mail-Adresse oder Telefonnummer aus der Anfrage.",
       "",
       "Kunde:",
-      `Name: ${ticket.customer_name}`,
-      `E-Mail: ${ticket.customer_email || "—"}`,
+      `Name: ${customerName}`,
+      `E-Mail: ${customerEmail || ticket.customer_email || "—"}`,
       `Telefon: ${ticket.customer_phone || "—"}`,
       "",
       "Zusammenfassung:",
-      ticket.summary || ticket.subject || "Keine Zusammenfassung",
+      String(ticket.summary || ticket.subject || "Keine Zusammenfassung"),
       "",
       ticket.message ? `Nachricht:\n${ticket.message}` : "",
     ].filter(Boolean).join("\n");
@@ -231,19 +273,23 @@ Deno.serve(async (req) => {
     );
 
     let customerEmailData = null;
-    let customerConfirmationError = null;
+    let customerConfirmationError = "";
 
-    if (sendCustomerConfirmation && ticket.customer_email) {
-      const customerSubject = `Ihre Anfrage ${ticket.ticket_number} bei All4You`;
+    if (!sendCustomerConfirmation) {
+      customerConfirmationError = "Kundenbestätigung ist per Secret SEND_CUSTOMER_CONFIRMATION=false deaktiviert.";
+    } else if (!customerEmail) {
+      customerConfirmationError = "Keine Kunden-E-Mail im Ticket gefunden.";
+    } else {
+      const customerSubject = `Ihre Anfrage ${ticketNumber} bei All4You`;
       const customerHtml = `
         <div style="font-family:Arial,sans-serif;line-height:1.55;color:#09213f;max-width:680px">
           <h2>Ihre Anfrage ist eingegangen</h2>
-          <p>Hallo ${escapeHtml(ticket.customer_name)},</p>
+          <p>Hallo ${escapeHtml(customerName)},</p>
           <p>wir haben Ihre Anfrage erhalten und prüfen diese zeitnah.</p>
           <div style="padding:16px;border-radius:14px;background:#eef8fa;border:1px solid #d8e7ef;margin:18px 0">
-            <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticket.ticket_number)}</p>
-            <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(ticket.service))}</p>
-            <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(ticket.status))}</p>
+            <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticketNumber)}</p>
+            <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(String(ticket.service || "")))}</p>
+            <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(String(ticket.status || "")))}</p>
           </div>
           <p>Über den folgenden Link können Sie den Status später prüfen:</p>
           <p>
@@ -254,15 +300,16 @@ Deno.serve(async (req) => {
           <p style="font-size:13px;color:#5f7284">
             Zur Sicherheit geben Sie dort zusätzlich Ihre E-Mail-Adresse oder Telefonnummer aus der Anfrage ein.
           </p>
+          <p style="font-size:13px;word-break:break-all;color:#5f7284">${escapeHtml(statusUrl)}</p>
         </div>
       `;
 
       const customerText = [
         "Ihre Anfrage ist eingegangen",
         "",
-        `Ticket: ${ticket.ticket_number}`,
-        `Leistung: ${serviceLabel(ticket.service)}`,
-        `Status: ${publicStatusLabel(ticket.status)}`,
+        `Ticket: ${ticketNumber}`,
+        `Leistung: ${serviceLabel(String(ticket.service || ""))}`,
+        `Status: ${publicStatusLabel(String(ticket.status || ""))}`,
         "",
         "Status prüfen:",
         statusUrl,
@@ -274,7 +321,7 @@ Deno.serve(async (req) => {
         customerEmailData = await sendResendEmail(
           resendApiKey,
           fromEmail,
-          ticket.customer_email,
+          customerEmail,
           customerSubject,
           customerHtml,
           customerText,
@@ -284,18 +331,24 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(BACKEND_BUILD, "notify-new-request finished", { ticket: ticket.ticket_number, teamEmailSent: Boolean(teamEmailData?.id), customerEmailSent: Boolean(customerEmailData?.id), customerConfirmationError });
+    console.log(BACKEND_BUILD, "notify-new-request finished", {
+      ticket: ticketNumber,
+      teamEmailSent: Boolean(teamEmailData?.id),
+      customerEmail: customerEmail || null,
+      customerEmailSent: Boolean(customerEmailData?.id),
+      customerConfirmationError: customerConfirmationError || null,
+    });
 
     return new Response(JSON.stringify({
       success: true,
-      message: customerEmailData?.id ? "Team- und Kunden-E-Mail wurden gesendet." : "Team-E-Mail wurde gesendet. Kunden-E-Mail wurde nicht gesendet oder nicht angefordert.",
-      ticket_number: ticket.ticket_number,
+      message: customerEmailData?.id ? "Team- und Kunden-E-Mail wurden gesendet." : "Team-E-Mail wurde gesendet. Kunden-E-Mail wurde nicht gesendet.",
+      ticket_number: ticketNumber,
       status_url: statusUrl,
       email_id: teamEmailData?.id || null,
       customer_email_id: customerEmailData?.id || null,
-      customer_confirmation_error: customerConfirmationError,
+      customer_confirmation_error: customerConfirmationError || null,
       to: teamEmail,
-      customer_to: ticket.customer_email || null,
+      customer_to: customerEmail || null,
       backend_build: BACKEND_BUILD,
     }), {
       status: 200,
@@ -305,6 +358,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       success: false,
       message: error instanceof Error ? error.message : "Unbekannter Fehler",
+      backend_build: BACKEND_BUILD,
     }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

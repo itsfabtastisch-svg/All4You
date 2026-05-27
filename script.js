@@ -2738,7 +2738,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX
+// DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3248,10 +3248,10 @@ function rollerPage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>E-Mail für Bestätigung
+                <label>E-Mail-Adresse für Bestätigung
                   <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
                 </label>
-                <label>Telefonnummer für Rückfragen
+                <label>Telefonnummer für Rückfragen (optional)
                   <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Nachricht
@@ -3579,10 +3579,10 @@ function trailerPage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>E-Mail für Bestätigung
+                <label>E-Mail-Adresse für Bestätigung
                   <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
                 </label>
-                <label>Telefonnummer für Rückfragen
+                <label>Telefonnummer für Rückfragen (optional)
                   <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Nachricht
@@ -3782,10 +3782,10 @@ function clearancePage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>E-Mail für Bestätigung
+                <label>E-Mail-Adresse für Bestätigung
                   <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
                 </label>
-                <label>Telefonnummer für Rückfragen
+                <label>Telefonnummer für Rückfragen (optional)
                   <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Art der Entrümpelung
@@ -4147,10 +4147,10 @@ function cleaningPage() {
                 <label>Ihr Name
                   <input name="name" placeholder="Ihr Name" required>
                 </label>
-                <label>E-Mail für Bestätigung
+                <label>E-Mail-Adresse für Bestätigung
                   <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
                 </label>
-                <label>Telefonnummer für Rückfragen
+                <label>Telefonnummer für Rückfragen (optional)
                   <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
                 </label>
                 <label>Privat oder gewerblich?
@@ -4465,8 +4465,11 @@ function contactForm(buttonText = "Anfrage vorbereiten", defaultService = "Motor
         <label>Name
           <input name="name" placeholder="Ihr Name">
         </label>
-        <label>Telefon oder E-Mail
-          <input name="contact" placeholder="Wie dürfen wir Sie erreichen?">
+        <label>E-Mail-Adresse für Bestätigung
+          <input type="email" name="email" autocomplete="email" placeholder="z. B. info@example.de" required>
+        </label>
+        <label>Telefonnummer für Rückfragen (optional)
+          <input type="tel" name="contact" autocomplete="tel" placeholder="z. B. +49 151 ...">
         </label>
         <label>Leistung
           <select name="service">
@@ -7096,7 +7099,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -9014,7 +9017,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX
+   DBG: ALL4YOU-ROUTER-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -11,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.5-CUSTOMER-EMAIL-REQUIRED-FIX";
+const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.6-CUSTOMER-EMAIL-LABEL-FIX";
 
 function serviceLabel(service: string | null): string {
   const labels: Record<string, string> = {

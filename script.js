@@ -589,12 +589,26 @@ function renderDashboardDetail(ticket) {
   body.innerHTML = `
     ${renderDashboardDetailHero(ticket)}
     ${renderDashboardSummaryBlock(ticket)}
-    ${renderDashboardDetailSection("Kunde & Kontakt", groups["Kunde & Kontakt"])}
-    ${renderDashboardDetailSection("Ticket", groups["Ticket"])}
-    ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
-    ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
-    ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"])}
-    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+    <div class="dashboard-quick-detail-grid">
+      ${renderDashboardQuickDetailCard("Kunde & Kontakt", groups["Kunde & Kontakt"], 3)}
+      ${renderDashboardQuickDetailCard("Ticket", groups["Ticket"], 4)}
+      ${renderDashboardQuickDetailCard("Termin", groups["Termin & Zeitraum"], 3)}
+      ${renderDashboardQuickDetailCard("Standort", groups["Standort & Strecke"], 3)}
+    </div>
+    <details class="dashboard-more-details">
+      <summary>
+        <span>Alle Ticketdetails anzeigen</span>
+        <small>Kontakt, Zeitraum, Strecke, Anfrage-Details und Hinweise öffnen</small>
+      </summary>
+      <div class="dashboard-more-details-content">
+        ${renderDashboardDetailSection("Kunde & Kontakt", groups["Kunde & Kontakt"])}
+        ${renderDashboardDetailSection("Ticket", groups["Ticket"])}
+        ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+        ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
+        ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"])}
+        ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+      </div>
+    </details>
   `;
 
   setDashboardInternalNoteEnabled(true);
@@ -1750,6 +1764,33 @@ function renderDashboardDetailSection(title, entries, options = {}) {
     </section>
   `;
 }
+function renderDashboardQuickDetailCard(title, entries, limit = 3) {
+  const visibleEntries = (entries || []).filter(([_, value]) => value !== null && value !== undefined && value !== "").slice(0, limit);
+
+  if (!visibleEntries.length) {
+    return `
+      <article class="dashboard-quick-card is-muted">
+        <h3>${escapeHtml(title)}</h3>
+        <p>Noch keine Angaben hinterlegt.</p>
+      </article>
+    `;
+  }
+
+  const rows = visibleEntries.map(([label, value]) => `
+    <div class="dashboard-quick-row">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(detailValue(value))}</strong>
+    </div>
+  `).join("");
+
+  return `
+    <article class="dashboard-quick-card">
+      <h3>${escapeHtml(title)}</h3>
+      ${rows}
+    </article>
+  `;
+}
+
 
 function renderDashboardDetailHero(ticket) {
   return `
@@ -3370,7 +3411,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.6-DASHBOARD-STATUS-FOUR-FIX
+// DBG: ALL4YOU-V5.9.9-DASHBOARD-COMPACT-WORKBENCH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -5261,7 +5302,7 @@ function pageDashboard() {
               <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
               <h1>Anfragen zentral verwalten.</h1>
               <p class="lead">
-                Alle Anfragen, Nachrichten, Anhänge und Statusänderungen werden live aus Supabase geladen.
+                Kompakte Arbeitsansicht für neue Anfragen, Statuswechsel, Nachrichten und Kundenrückfragen.
               </p>
             </div>
             <div class="dashboard-hero-actions">
@@ -5472,8 +5513,8 @@ function pageDashboard() {
             </div>
           </section>
 
-          <section class="dashboard-grid" data-dashboard-view="overview">
-            <div class="dashboard-panel">
+          <section class="dashboard-grid dashboard-workbench-grid" data-dashboard-view="overview">
+            <div class="dashboard-panel dashboard-ticket-panel">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Ticketliste</p>
@@ -5526,7 +5567,7 @@ function pageDashboard() {
               </div>
             </div>
 
-            <aside class="dashboard-panel dashboard-detail">
+            <aside class="dashboard-panel dashboard-detail dashboard-workspace-panel">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Ticketdetails</p>
@@ -5539,79 +5580,101 @@ function pageDashboard() {
                 <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links ein Ticket aus, um Details, Nachrichten, Anhänge und Verlauf zu sehen.</span></div>
               </div>
 
-              <div class="dashboard-status-editor">
-                <label>Status ändern
-                  <select id="dashboardStatusSelect" disabled>
-                    <option>Ticket auswählen</option>
-                  </select>
-                </label>
-                <button class="btn primary" type="button" id="dashboardSaveStatusButton" disabled>Status speichern <span>›</span></button>
-              </div>
-
-              <p class="dashboard-action-message" id="dashboardActionMessage">
-                Statusänderungen werden automatisch im Verlauf dokumentiert.
-              </p>
-
-              <div class="dashboard-ticket-actions">
-                <p class="eyebrow">Ticket-Aktionen</p>
-                <div class="dashboard-ticket-action-grid">
-                  <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
-                  <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
-                  <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
-                  <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
-                  <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
-                  <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
+              <div class="dashboard-focus-actions">
+                <div class="dashboard-status-editor">
+                  <label>Status ändern
+                    <select id="dashboardStatusSelect" disabled>
+                      <option>Ticket auswählen</option>
+                    </select>
+                  </label>
+                  <button class="btn primary" type="button" id="dashboardSaveStatusButton" disabled>Status speichern <span>›</span></button>
                 </div>
-                <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
-                  Bitte zuerst ein Ticket auswählen.
+
+                <p class="dashboard-action-message" id="dashboardActionMessage">
+                  Statusänderungen werden automatisch im Verlauf dokumentiert.
                 </p>
               </div>
 
-              <div class="dashboard-messages">
-                <p class="eyebrow">Nachrichten & interne Notizen</p>
-                <div class="dashboard-messages-list" id="dashboardMessagesList">
-                  <div class="dashboard-mini-empty">
-                    <strong>Nachrichten werden geladen …</strong>
-                    <p>Kundennachrichten und interne Notizen erscheinen hier.</p>
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Ticket-Aktionen</span>
+                  <small>Kopieren, archivieren oder abschließen</small>
+                </summary>
+                <div class="dashboard-ticket-actions">
+                  <div class="dashboard-ticket-action-grid">
+                    <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
+                    <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
+                    <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
+                  </div>
+                  <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
+                    Bitte zuerst ein Ticket auswählen.
+                  </p>
+                </div>
+              </details>
+
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Nachrichten & interne Notizen</span>
+                  <small>Antworten schreiben und Teamnotizen speichern</small>
+                </summary>
+                <div class="dashboard-messages">
+                  <div class="dashboard-messages-list" id="dashboardMessagesList">
+                    <div class="dashboard-mini-empty">
+                      <strong>Nachrichten werden geladen …</strong>
+                      <p>Kundennachrichten und interne Notizen erscheinen hier.</p>
+                    </div>
+                  </div>
+
+                  <form class="dashboard-customer-reply" id="dashboardCustomerReplyForm">
+                    <label>Antwort an Kunden
+                      <textarea id="dashboardCustomerReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde auf der Statusseite sehen kann …" disabled></textarea>
+                    </label>
+                    <button class="btn primary" type="submit" id="dashboardCustomerReplyButton" disabled>Antwort senden <span>›</span></button>
+                    <p class="dashboard-note-message" id="dashboardCustomerReplyMessage">Bitte zuerst ein Ticket auswählen.</p>
+                  </form>
+
+                  <form class="dashboard-internal-note" id="dashboardInternalNoteForm">
+                    <label>Interne Notiz
+                      <textarea id="dashboardInternalNoteText" rows="3" placeholder="z. B. Kunden zurückrufen, Preis prüfen, Fotos fehlen noch …" disabled></textarea>
+                    </label>
+                    <button class="btn primary" type="submit" id="dashboardInternalNoteButton" disabled>Notiz speichern <span>›</span></button>
+                    <p class="dashboard-note-message" id="dashboardInternalNoteMessage">Bitte zuerst ein Ticket auswählen.</p>
+                  </form>
+                </div>
+              </details>
+
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Anhänge</span>
+                  <small>Fotos und Dokumente zum Ticket</small>
+                </summary>
+                <div class="dashboard-attachments">
+                  <div class="dashboard-attachments-list" id="dashboardAttachmentsList">
+                    <div class="dashboard-mini-empty">
+                      <strong>Anhänge werden geladen …</strong>
+                      <p>Fotos und Dokumente erscheinen hier.</p>
+                    </div>
                   </div>
                 </div>
+              </details>
 
-                <form class="dashboard-customer-reply" id="dashboardCustomerReplyForm">
-                  <label>Antwort an Kunden
-                    <textarea id="dashboardCustomerReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde auf der Statusseite sehen kann …" disabled></textarea>
-                  </label>
-                  <button class="btn primary" type="submit" id="dashboardCustomerReplyButton" disabled>Antwort senden <span>›</span></button>
-                  <p class="dashboard-note-message" id="dashboardCustomerReplyMessage">Bitte zuerst ein Ticket auswählen.</p>
-                </form>
-
-                <form class="dashboard-internal-note" id="dashboardInternalNoteForm">
-                  <label>Interne Notiz
-                    <textarea id="dashboardInternalNoteText" rows="3" placeholder="z. B. Kunden zurückrufen, Preis prüfen, Fotos fehlen noch …" disabled></textarea>
-                  </label>
-                  <button class="btn primary" type="submit" id="dashboardInternalNoteButton" disabled>Notiz speichern <span>›</span></button>
-                  <p class="dashboard-note-message" id="dashboardInternalNoteMessage">Bitte zuerst ein Ticket auswählen.</p>
-                </form>
-              </div>
-
-              <div class="dashboard-attachments">
-                <p class="eyebrow">Anhänge</p>
-                <div class="dashboard-attachments-list" id="dashboardAttachmentsList">
-                  <div class="dashboard-mini-empty">
-                    <strong>Anhänge werden geladen …</strong>
-                    <p>Fotos und Dokumente erscheinen hier.</p>
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Statusverlauf</span>
+                  <small>Chronik der bisherigen Änderungen</small>
+                </summary>
+                <div class="dashboard-timeline">
+                  <div class="dashboard-timeline-list" id="dashboardTimelineList">
+                    <div class="dashboard-mini-empty">
+                      <strong>Statusverlauf wird geladen …</strong>
+                      <p>Die Statushistorie erscheint hier.</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="dashboard-timeline">
-                <p class="eyebrow">Statusverlauf</p>
-                <div class="dashboard-timeline-list" id="dashboardTimelineList">
-                  <div class="dashboard-mini-empty">
-                    <strong>Statusverlauf wird geladen …</strong>
-                    <p>Die Statushistorie erscheint hier.</p>
-                  </div>
-                </div>
-              </div>
+              </details>
             </aside>
           </section>
 
@@ -8054,7 +8117,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-V5.9.6-DASHBOARD-STATUS-FOUR-FIX
+   DBG: ALL4YOU-V5.9.9-DASHBOARD-COMPACT-WORKBENCH
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -10638,7 +10701,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-V5.9.6-DASHBOARD-STATUS-FOUR-FIX
+   DBG: ALL4YOU-V5.9.9-DASHBOARD-COMPACT-WORKBENCH
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

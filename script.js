@@ -524,9 +524,9 @@ function renderDashboardTickets(tickets) {
           <em>${escapeHtml(statusLabel(ticket.status))}</em>
         </span>
         <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
-        <span class="ticket-summary">${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</span>
+        <span class="ticket-customer">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</span>
         ${renderTicketActivityBadges(ticket)}
-        <span class="ticket-meta">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")} · ${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+        <span class="ticket-meta">${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
       </button>
     `;
   }).join("");
@@ -1811,13 +1811,102 @@ function renderDashboardDetailHero(ticket) {
   `;
 }
 
+function addDashboardSummaryItem(items, label, value) {
+  if (value === null || value === undefined || value === "") return;
+
+  const text = detailValue(value);
+  if (!text || text === "—") return;
+
+  const normalized = String(text).trim();
+  const duplicate = items.some(item => item.label === label && item.value === normalized);
+
+  if (!duplicate) {
+    items.push({ label, value: normalized });
+  }
+}
+
+function getDashboardCompactSummaryItems(ticket) {
+  const details = ticket.details || {};
+  const items = [];
+
+  addDashboardSummaryItem(items, "Kunde", ticket.customer_name);
+  addDashboardSummaryItem(items, "Leistung", serviceLabel(ticket.service));
+
+  if (details.trailer_model) addDashboardSummaryItem(items, "Anhänger", details.trailer_model);
+  if (details.vehicle) addDashboardSummaryItem(items, "Fahrzeug", details.vehicle);
+  if (details.property_type) addDashboardSummaryItem(items, "Objekt", details.property_type);
+
+  if (details.rental_start || details.rental_end) {
+    addDashboardSummaryItem(
+      items,
+      "Zeitraum",
+      `${detailValue(details.rental_start || "offen")} bis ${detailValue(details.rental_end || "offen")}`
+    );
+  } else {
+    addDashboardSummaryItem(items, "Wunschtermin", details.desired_date);
+  }
+
+  addDashboardSummaryItem(items, "Mietdauer", details.rental_days);
+  addDashboardSummaryItem(items, "Preis", details.rental_price);
+  addDashboardSummaryItem(items, "Intervall", details.interval);
+  addDashboardSummaryItem(items, "Status", details.availability_note || statusLabel(ticket.status));
+  addDashboardSummaryItem(items, "Übergabe", details.handover);
+  addDashboardSummaryItem(items, "Ort", details.pickup_return_address || details.delivery_address || details.address);
+
+  if (details.pickup || details.dropoff) {
+    addDashboardSummaryItem(
+      items,
+      "Strecke",
+      `${detailValue(details.pickup || "offen")} → ${detailValue(details.dropoff || "offen")}`
+    );
+  }
+
+  addDashboardSummaryItem(items, "Distanz", details.distance);
+  addDashboardSummaryItem(items, "Transportgut", details.cargo);
+  addDashboardSummaryItem(items, "Menge", details.cargo_size);
+  addDashboardSummaryItem(items, "Nachricht", details.message);
+
+  if (items.length >= 4) return items.slice(0, 9);
+
+  const summaryParts = String(ticket.summary || ticket.subject || "")
+    .split(/\s+[•|]\s+/)
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  summaryParts.forEach((part) => {
+    const cleaned = part.replace(/^.+Mietanfrage:\s*/i, "").trim();
+    const match = cleaned.match(/^([^:]{2,32}):\s*(.+)$/);
+
+    if (match) {
+      addDashboardSummaryItem(items, match[1].trim(), match[2].trim());
+    } else if (/\d{4}-\d{2}-\d{2}/.test(cleaned)) {
+      addDashboardSummaryItem(items, "Zeitraum", cleaned);
+    } else {
+      addDashboardSummaryItem(items, "Info", cleaned);
+    }
+  });
+
+  return items.slice(0, 9);
+}
+
 function renderDashboardSummaryBlock(ticket) {
-  if (!ticket.summary && !ticket.subject) return "";
+  const items = getDashboardCompactSummaryItems(ticket);
+
+  if (!items.length) return "";
+
+  const list = items.map(item => `
+    <li>
+      <strong>${escapeHtml(item.label)}</strong>
+      <span>${escapeHtml(item.value)}</span>
+    </li>
+  `).join("");
 
   return `
     <section class="detail-summary-block ${serviceAccentClass(ticket.service)}">
-      <span>Zusammenfassung</span>
-      <p>${escapeHtml(ticket.summary || ticket.subject)}</p>
+      <span>Kurzüberblick</span>
+      <ul class="detail-summary-list">
+        ${list}
+      </ul>
     </section>
   `;
 }
@@ -3411,7 +3500,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.9-DASHBOARD-COMPACT-WORKBENCH
+// DBG: ALL4YOU-V5.9.10-DASHBOARD-READABILITY-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -8117,7 +8206,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-V5.9.9-DASHBOARD-COMPACT-WORKBENCH
+   DBG: ALL4YOU-V5.9.10-DASHBOARD-READABILITY-POLISH
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -10701,7 +10790,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-V5.9.9-DASHBOARD-COMPACT-WORKBENCH
+   DBG: ALL4YOU-V5.9.10-DASHBOARD-READABILITY-POLISH
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

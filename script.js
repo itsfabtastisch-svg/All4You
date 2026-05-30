@@ -3776,7 +3776,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.16-TRAILER-KAROLINGERALLEE-PICKUP
+// DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4663,24 +4663,29 @@ function trailerPage() {
             </div>
 
             <div class="wizard-step" data-title="Übergabe & Standort">
-              <div class="form-grid">
-                <label>Wunschübergabe
-                  <select name="handover" id="trailerHandover">
-                    <option value="Abholung/Rückgabe am Standort Sachsenstraße">Abholung/Rückgabe am Standort Sachsenstraße</option>
-                    <option value="Abholung/Rückgabe am Standort Karolingerallee">Abholung/Rückgabe am Standort Karolingerallee</option>
-                    <option value="Lieferung zum Wunschort gegen Aufpreis">Lieferung zum Wunschort gegen Aufpreis</option>
-                    <option value="Lieferung & Abholung gegen Aufpreis">Lieferung & Abholung gegen Aufpreis</option>
-                    <option value="All4You soll Rücksprache halten">All4You soll Rücksprache halten</option>
+              <div class="form-grid trailer-handover-grid">
+                <input type="hidden" name="handover" id="trailerHandover" value="Abholung am Standort Sachsenstraße / Rückgabe am Standort Sachsenstraße">
+                <input type="hidden" name="pickupReturnAddress" id="trailerPickupReturnAddress" value="Sachsenstraße Höhe 25, 81543 München">
+                <input type="hidden" name="handoverNote" id="trailerHandoverNote" value="">
+
+                <label>Abholung / Lieferung
+                  <select id="trailerPickupMode">
+                    <option value="pickup_sachsen">Abholung am Standort Sachsenstraße</option>
+                    <option value="pickup_karolingerallee">Abholung am Standort Karolingerallee</option>
+                    <option value="delivery_only">Lieferung zum Wunschort gegen Aufpreis</option>
+                    <option value="delivery_and_collection">Lieferung und Abholung gegen Aufpreis</option>
                   </select>
                 </label>
-                <label class="delivery-field is-hidden" id="trailerDeliveryAddressField">Wunschort / Lieferadresse
-                  <input name="deliveryAddress" id="trailerDeliveryAddress" placeholder="Adresse für Lieferung oder Übergabe">
+
+                <label id="trailerReturnModeField">Rückgabe
+                  <select id="trailerReturnMode">
+                    <option value="return_sachsen">Rückgabe am Standort Sachsenstraße</option>
+                    <option value="return_karolingerallee">Rückgabe am Standort Karolingerallee</option>
+                  </select>
                 </label>
-                <label id="trailerPickupReturnField">Abholung/Rückgabe
-                  <input name="pickupReturnAddress" id="trailerPickupReturnAddress" value="Sachsenstraße Höhe 25, 81543 München" readonly>
-                </label>
-                <label id="trailerHandoverNoteField">Hinweis
-                  <input name="handoverNote" id="trailerHandoverNote" value="Abholung und Rückgabe am Standort Sachsenstraße Höhe 25, 81543 München." readonly>
+
+                <label class="delivery-field is-hidden trailer-delivery-address-field" id="trailerDeliveryAddressField">Lieferadresse
+                  <input name="deliveryAddress" id="trailerDeliveryAddress" placeholder="Adresse für Lieferung">
                 </label>
               </div>
             </div>
@@ -4806,7 +4811,7 @@ function trailerPage() {
             <li>Versicherung vorhanden</li>
             <li>Mietvertrag vorhanden</li>
             <li>Kaution je nach Mietdauer und Absprache</li>
-            <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München oder Karolingerallee, 81545 München</li>
+            <li>Abholung: Sachsenstraße oder Karolingerallee · Rückgabe flexibel an einem der beiden Standorte möglich</li>
             <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
             <li>Abholung nach Absprache gegen Aufpreis möglich</li>
           </ul>
@@ -4832,7 +4837,7 @@ function trailerPage() {
         <div class="faq-list">
           <article class="faq-item"><h3>Welche Anhänger werden vermietet?</h3><p>Zur Auswahl stehen aktuell ein Wörmann Multicase 7525/136, ein Brenderup CD260UBD750 mit Tür und ein Brenderup CD260UBR750 mit Rampe. Die konkrete Auswahl kann im Anhänger-Bereich durchgeschaltet werden.</p></article>
           <article class="faq-item"><h3>Welche Führerscheinklasse brauche ich?</h3><p>Für diesen Anhänger ist Führerscheinklasse B ausreichend.</p></article>
-          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt je nach Absprache an der Sachsenstraße Höhe 25, 81543 München oder an der Karolingerallee, 81545 München. Die genaue Übergabestelle wird durch All4You bestätigt.</p></article>
+          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die Abholung kann am Standort Sachsenstraße oder Karolingerallee erfolgen. Die Rückgabe kann ebenfalls an einem dieser beiden Standorte ausgewählt werden.</p></article>
           <article class="faq-item"><h3>Kann der Anhänger geliefert werden?</h3><p>Ja, auf Wunsch kann der Anhänger gegen Aufpreis direkt zum Wunschort gebracht und nach Absprache wieder abgeholt werden.</p></article>
         </div>
       </div>
@@ -9112,6 +9117,9 @@ function bindTrailerWizard() {
   const prevMonthButton = document.querySelector("#trailerCalendarPrevMonth");
   const nextMonthButton = document.querySelector("#trailerCalendarNextMonth");
   const handover = document.querySelector("#trailerHandover");
+  const pickupMode = document.querySelector("#trailerPickupMode");
+  const returnMode = document.querySelector("#trailerReturnMode");
+  const returnModeField = document.querySelector("#trailerReturnModeField");
   const deliveryAddressField = document.querySelector("#trailerDeliveryAddressField");
 
   if (!wizard || !form || !result || !prev || !next || !submit) return;
@@ -9434,13 +9442,26 @@ function bindTrailerWizard() {
   }
 
   function updateDeliveryField() {
-    if (!handover) return;
+    if (!handover || !pickupMode) return;
 
-    const value = handover.value.toLowerCase();
     const deliveryInput = document.querySelector("#trailerDeliveryAddress");
-    const pickupField = document.querySelector("#trailerPickupReturnField");
-    const pickupInput = document.querySelector("#trailerPickupReturnAddress");
+    const pickupReturnInput = document.querySelector("#trailerPickupReturnAddress");
     const noteInput = document.querySelector("#trailerHandoverNote");
+
+    const locations = {
+      sachsen: {
+        label: "Sachsenstraße",
+        address: "Sachsenstraße Höhe 25, 81543 München",
+        pickupText: "Abholung am Standort Sachsenstraße",
+        returnText: "Rückgabe am Standort Sachsenstraße"
+      },
+      karolingerallee: {
+        label: "Karolingerallee",
+        address: "Karolingerallee, 81545 München",
+        pickupText: "Abholung am Standort Karolingerallee",
+        returnText: "Rückgabe am Standort Karolingerallee"
+      }
+    };
 
     const setDelivery = (visible, label, placeholder, required = false) => {
       if (!deliveryAddressField || !deliveryInput) return;
@@ -9452,48 +9473,52 @@ function bindTrailerWizard() {
       if (!visible) deliveryInput.value = "";
     };
 
-    const setPickup = (label, value, placeholder, readonly = true, required = false) => {
-      if (!pickupField || !pickupInput) return;
-      const labelNode = Array.from(pickupField.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-      if (labelNode) labelNode.textContent = label + "\n                  ";
-      pickupInput.readOnly = readonly;
-      pickupInput.required = required;
-      pickupInput.placeholder = placeholder || "";
-      if (value !== null) pickupInput.value = value;
-      pickupField.classList.toggle("field-editable", !readonly);
+    const ensureReturnOptions = (mode) => {
+      if (!returnMode) return;
+      const current = returnMode.value || "return_sachsen";
+      const options = mode === "delivery_and_collection"
+        ? [["collection_by_all4you", "Abholung durch All4You gegen Aufpreis"]]
+        : [
+            ["return_sachsen", "Rückgabe am Standort Sachsenstraße"],
+            ["return_karolingerallee", "Rückgabe am Standort Karolingerallee"]
+          ];
+
+      returnMode.innerHTML = options.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+      const optionValues = options.map(([value]) => value);
+      returnMode.value = optionValues.includes(current) ? current : optionValues[0];
     };
 
-    if (value.includes("karolingerallee")) {
-      setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
-      setPickup("Abholung/Rückgabe", "Karolingerallee, 81545 München", "", true, false);
-      if (noteInput) noteInput.value = "Abholung und Rückgabe am Standort Karolingerallee, 81545 München. Die genaue Übergabestelle wird durch All4You bestätigt.";
+    const mode = pickupMode.value || "pickup_sachsen";
+    ensureReturnOptions(mode);
+
+    if (mode === "delivery_and_collection") {
+      setDelivery(true, "Liefer-/Abholadresse", "Adresse für Lieferung und spätere Abholung", true);
+      if (returnModeField) returnModeField.classList.remove("is-hidden");
+      handover.value = "Lieferung und Abholung gegen Aufpreis";
+      if (pickupReturnInput) pickupReturnInput.value = "Abholung durch All4You am Wunschort gegen Aufpreis";
+      if (noteInput) noteInput.value = "";
       return;
     }
 
-    if (value.includes("lieferung & abholung")) {
-      setDelivery(true, "Lieferadresse", "Adresse, an die der Anhänger geliefert werden soll", true);
-      setPickup("Abhol-/Rückgabeadresse", "", "Adresse, an der All4You den Anhänger wieder abholen soll", false, true);
-      if (noteInput) noteInput.value = "Lieferung und spätere Abholung erfolgen gegen Aufpreis nach Bestätigung durch All4You.";
+    const returnValue = returnMode?.value || "return_sachsen";
+    const returnLocation = returnValue === "return_karolingerallee" ? locations.karolingerallee : locations.sachsen;
+
+    if (mode === "delivery_only") {
+      setDelivery(true, "Lieferadresse", "Adresse für Lieferung zum Wunschort", true);
+      if (returnModeField) returnModeField.classList.remove("is-hidden");
+      handover.value = `Lieferung zum Wunschort gegen Aufpreis / ${returnLocation.returnText}`;
+      if (pickupReturnInput) pickupReturnInput.value = returnLocation.address;
+      if (noteInput) noteInput.value = "";
       return;
     }
 
-    if (value.includes("lieferung")) {
-      setDelivery(true, "Wunschort / Lieferadresse", "Adresse für die Lieferung des Anhängers", true);
-      setPickup("Rückgabe / Abholung", "Sachsenstraße Höhe 25, 81543 München", "", true, false);
-      if (noteInput) noteInput.value = "Lieferung zum Wunschort gegen Aufpreis. Rückgabe/Abholung wird final durch All4You bestätigt.";
-      return;
-    }
+    setDelivery(false, "Lieferadresse", "Adresse für Lieferung", false);
+    if (returnModeField) returnModeField.classList.remove("is-hidden");
 
-    if (value.includes("rücksprache")) {
-      setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
-      setPickup("Gewünschter Ort / Hinweis zur Übergabe", "", "z. B. Adresse, Stadtteil oder kurzer Hinweis zur Übergabe", false, false);
-      if (noteInput) noteInput.value = "All4You soll zur Übergabe Rücksprache halten.";
-      return;
-    }
-
-    setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
-    setPickup("Abholung/Rückgabe", "Sachsenstraße Höhe 25, 81543 München", "", true, false);
-    if (noteInput) noteInput.value = "Abholung und Rückgabe am Standort Sachsenstraße Höhe 25, 81543 München.";
+    const pickupLocation = mode === "pickup_karolingerallee" ? locations.karolingerallee : locations.sachsen;
+    handover.value = `${pickupLocation.pickupText} / ${returnLocation.returnText}`;
+    if (pickupReturnInput) pickupReturnInput.value = returnLocation.address;
+    if (noteInput) noteInput.value = "";
   }
 
   function collectSummary() {
@@ -9664,7 +9689,8 @@ function bindTrailerWizard() {
     renderTrailerCalendar();
   });
 
-  handover?.addEventListener("change", updateDeliveryField);
+  pickupMode?.addEventListener("change", updateDeliveryField);
+  returnMode?.addEventListener("change", updateDeliveryField);
 
   // Öffentliche Anhänger-Seite zeigt keine internen Belegungen aus dem Mitarbeiterkalender.
   // Kunden wählen nur einen Zeitraum und senden eine unverbindliche Anfrage.

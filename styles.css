@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .price-table-card {
@@ -2417,7 +2417,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2593,7 +2593,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2621,7 +2621,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2716,9 +2716,228 @@ label {
   }
 }
 
+
+/* ==========================================================================
+   Anhänger-Showcase / Kundenwunsch: 2 Anhänger mit Bild-Switcher
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
+   ========================================================================== */
+
+.trailer-showcase-section {
+  padding-top: 28px;
+}
+
+.trailer-model-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(390px, .82fr);
+  gap: 30px;
+  align-items: stretch;
+  padding: 28px;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(10,169,155,.16), transparent 23rem),
+    linear-gradient(135deg, rgba(255,255,255,.95), rgba(239,247,251,.92));
+  box-shadow: 0 24px 58px rgba(16,38,60,.14);
+  overflow: hidden;
+}
+
+.trailer-model-copy {
+  min-width: 0;
+}
+
+.trailer-model-count {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid rgba(10,169,155,.2);
+  border-radius: 999px;
+  color: var(--teal-2);
+  background: rgba(10,169,155,.09);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.trailer-model-copy h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: clamp(30px, 3vw, 48px);
+  letter-spacing: -.055em;
+}
+
+.trailer-spec-grid {
+  margin-top: 22px;
+}
+
+.trailer-spec-card {
+  min-height: 132px;
+}
+
+.trailer-spec-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--teal-2);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.trailer-spec-card h3 {
+  margin: 0 0 6px;
+  color: var(--navy);
+}
+
+.trailer-model-media {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  align-content: stretch;
+}
+
+.trailer-model-media figure {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(19,35,58,.11);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 18px 42px rgba(16,38,60,.13);
+}
+
+.trailer-model-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  max-height: 530px;
+  object-fit: contain;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff, #f5f9fc);
+}
+
+.trailer-model-media figcaption {
+  padding: 15px 18px 17px;
+  border-top: 1px solid rgba(19,35,58,.08);
+  color: var(--muted);
+  background: rgba(255,255,255,.82);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.trailer-model-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 12px 32px rgba(16,38,60,.17);
+  cursor: pointer;
+  font-size: 32px;
+  font-weight: 850;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.trailer-model-nav:hover {
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(16,38,60,.2);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.trailer-model-prev { left: 14px; }
+.trailer-model-next { right: 14px; }
+
+.trailer-model-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  z-index: 5;
+  display: inline-flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(19,35,58,.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 10px 24px rgba(16,38,60,.12);
+  transform: translateX(-50%);
+}
+
+.trailer-model-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(19,35,58,.23);
+  cursor: pointer;
+}
+
+.trailer-model-dot.active {
+  width: 26px;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+}
+
+.good-to-know-box {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(19,35,58,.11);
+}
+
+.compact-list {
+  gap: 9px;
+}
+
+@media (max-width: 1050px) {
+  .trailer-model-card {
+    grid-template-columns: 1fr;
+  }
+
+  .trailer-model-media img {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .trailer-model-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .trailer-model-media img {
+    min-height: 240px;
+    padding: 10px;
+  }
+
+  .trailer-model-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 26px;
+  }
+
+  .trailer-model-prev { left: 8px; }
+  .trailer-model-next { right: 8px; }
+
+  .trailer-model-dots {
+    bottom: 78px;
+  }
+}
+
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2998,7 +3217,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .mail-preview-btn {
@@ -3012,7 +3231,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-shell {
@@ -3469,7 +3688,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .is-hidden {
@@ -3623,7 +3842,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .auth-message.success {
@@ -3643,7 +3862,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3698,7 +3917,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3775,7 +3994,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-detail {
@@ -3922,7 +4141,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .site-header {
@@ -4066,7 +4285,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .site-header {
@@ -4124,7 +4343,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-messages {
@@ -4244,7 +4463,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4335,7 +4554,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4380,7 +4599,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .email-notification-note {
@@ -4405,7 +4624,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .customer-status-link {
@@ -4600,7 +4819,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .customer-reply-form {
@@ -4671,7 +4890,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4823,7 +5042,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4887,7 +5106,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4943,7 +5162,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5031,7 +5250,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5071,7 +5290,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5104,7 +5323,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .footer-employee-login {
@@ -5146,7 +5365,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5195,7 +5414,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .youbot-widget {
@@ -5401,7 +5620,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .youbot-widget {
@@ -5507,7 +5726,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .roller-route-note {
@@ -5640,7 +5859,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5725,7 +5944,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .service-icon {
@@ -5773,7 +5992,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -5945,7 +6164,7 @@ label {
 
 /* ==========================================================================
    V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .trailer-period-control {
@@ -6176,7 +6395,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Trailer Kalender intern / Kundenansicht vereinfacht
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .legend-dot.status-selected {
@@ -6213,7 +6432,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Anhänger Übergabe + interner Dashboard-Kalender
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 #trailerPickupReturnField.field-editable input,
@@ -6384,7 +6603,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Archiv-System
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 .dashboard-archive-layout {
@@ -6436,7 +6655,7 @@ button.calendar-day {
 
 /* ========================================================================
    Wizard Upload Requirement Hints
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ======================================================================== */
 
 .wizard-upload-requirement {
@@ -6508,7 +6727,7 @@ button.calendar-day {
 }
 
 /* ========================================================================== 
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    Kundenstatus-Nachrichten & Dashboard-Kundenantworten
    ========================================================================== */
 .customer-public-chat {
@@ -6601,7 +6820,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Basis V5.9.0
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    =========================================================================== */
 .customer-portal-page {
   min-height: 70vh;
@@ -6747,7 +6966,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Einladung / Passwort-Setup V5.9.1
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    =========================================================================== */
 .dashboard-customer-invite-box {
   display: flex;
@@ -6800,7 +7019,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Polish V5.9.3
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    =========================================================================== */
 .customer-login-wrap {
   display: grid;

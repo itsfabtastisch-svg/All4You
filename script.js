@@ -3282,6 +3282,7 @@ function buildRollerSummaryText(summary) {
 
 function buildTrailerSummaryText(summary) {
   const parts = [
+    summary.trailerModel ? `Anhänger: ${summary.trailerModel}` : "",
     summary.rentalStart && summary.rentalEnd ? `${summary.rentalStart} bis ${summary.rentalEnd}` : "",
     summary.rentalDays ? `Mietdauer: ${summary.rentalDays}` : "",
     summary.rentalPrice ? `Preis: ${summary.rentalPrice}` : "",
@@ -3332,13 +3333,68 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+// DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
 const mainNav = document.querySelector(".main-nav");
 
 const SITE_ORIGIN = "https://all4you-muenchen.de";
+
+const ALL4YOU_TRAILER_MODELS = [
+  {
+    key: "woermann-multicase-7525-136",
+    name: "Wörmann Multicase 7525/136",
+    shortName: "Wörmann Multicase",
+    type: "Plywood-Kofferanhänger",
+    image: "/assets/trailer-woermann-multicase-7525-136.jpeg",
+    imageAlt: "Wörmann Multicase Kofferanhänger mit geöffneter Heckklappe",
+    caption: "Geschlossener Kofferanhänger mit Hecktür, Innenbeleuchtung und Verzurrpunkten.",
+    lead: "Ein geschlossener 1-Achs-Plywood-Kofferanhänger für Umzug, Möbeltransport, Baumarkt-Einkäufe, Material oder private Transporte.",
+    specs: [
+      { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
+      { label: "Leergewicht", value: "ca. 385 kg", text: "kompakter 1-Achs-Kofferanhänger" },
+      { label: "Innenmaß", value: "ca. 251 × 132 × 150 cm", text: "Länge × Breite × Höhe" },
+      { label: "Aufbau", value: "Plywood-Koffer", text: "geschlossener Aufbau mit Hecktür" },
+      { label: "Sicherung", value: "6 Zurrösen", text: "verschiebbare Verzurrpunkte innen" },
+      { label: "Ausstattung", value: "Innenbeleuchtung", text: "für bessere Sicht im Koffer" }
+    ]
+  },
+  {
+    key: "brenderup-cd260ubd750",
+    name: "Brenderup CD260UBD750",
+    shortName: "Brenderup Cargo Dynamic",
+    type: "Cargo Dynamic™ Kofferanhänger",
+    image: "/assets/trailer-brenderup-cd260ubd750.jpg",
+    imageAlt: "Brenderup CD260UBD750 Kofferanhänger von hinten",
+    caption: "Leichter Cargo Dynamic™ Kofferanhänger mit Tür, 13-poligem Stecker und innenliegenden Verzurrpunkten.",
+    lead: "Ein moderner, leichter Cargo Dynamic™ Kofferanhänger mit glatten Flächen und geschütztem Laderaum für professionelle und private Transporte.",
+    specs: [
+      { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
+      { label: "Nutzlast", value: "450 kg", text: "bei 300 kg Leergewicht" },
+      { label: "Innenmaß", value: "260 × 130 × 150 cm", text: "Länge × Breite × Höhe" },
+      { label: "Außenmaß", value: "406 × 179 × 208 cm", text: "Länge × Breite × Höhe" },
+      { label: "Anschluss", value: "13-polig", text: "Spiral-Adapterkabel" },
+      { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegendes Verzurrsystem" }
+    ]
+  }
+];
+
+function renderTrailerSpecCards(trailer) {
+  return (trailer?.specs || []).map(spec => `
+    <div class="mini-card trailer-spec-card">
+      <span>${escapeHtml(spec.label)}</span>
+      <h3>${escapeHtml(spec.value)}</h3>
+      <p>${escapeHtml(spec.text)}</p>
+    </div>
+  `).join("");
+}
+
+function renderTrailerDots(activeIndex = 0) {
+  return ALL4YOU_TRAILER_MODELS.map((trailer, index) => `
+    <button class="trailer-model-dot ${index === activeIndex ? "active" : ""}" type="button" data-trailer-index="${index}" aria-label="${escapeHtml(trailer.shortName)} anzeigen"></button>
+  `).join("");
+}
 
 const SEO_ROUTES = {
   "/": {
@@ -3360,7 +3416,7 @@ const SEO_ROUTES = {
   },
   "/leistungen/anhaenger": {
     title: "Anhängervermietung München | Kofferanhänger mieten | All4You",
-    description: "Kofferanhänger in München mieten: Wörmann Multicase 750 kg, flexibel für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
+    description: "Kofferanhänger in München mieten: Wörmann Multicase und Brenderup Cargo Dynamic für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
     canonicalPath: "/leistungen/anhaenger",
     serviceName: "Anhängervermietung München"
   },
@@ -3928,6 +3984,7 @@ function rollerPage() {
 
 function trailerPage() {
   document.title = "Anhänger mieten in München | All4You Service München";
+  const firstTrailer = ALL4YOU_TRAILER_MODELS[0];
   return `
     <section class="page page-head">
       <div class="breadcrumb">
@@ -3938,7 +3995,7 @@ function trailerPage() {
       <p class="eyebrow">Anhängervermietung München</p>
       <h1>Anhänger mieten in München – flexibel, unkompliziert und passend für Ihren Transport.</h1>
       <p class="lead">
-        Mieten Sie einen Wörmann Multicase 7525/136 Plywood-Kofferanhänger für Umzug, Möbeltransport,
+        Mieten Sie den passenden Kofferanhänger für Umzug, Möbeltransport,
         Baumarkt-Einkäufe, Material oder private Transporte in München und Umgebung.
       </p>
       <div class="inline-actions">
@@ -3949,34 +4006,30 @@ function trailerPage() {
 
     ${featureBand()}
 
-    <section class="section-pad two-col">
-      <div class="info-card">
-        <p class="eyebrow">Der Anhänger</p>
-        <h2>Wörmann Multicase 7525/136.</h2>
-        <p class="lead">
-          Der angebotene Anhänger ist ein 1-Achs-Plywood-Kofferanhänger mit 750 kg zulässigem Gesamtgewicht.
-          Durch den geschlossenen Aufbau eignet er sich besonders für Transporte, bei denen das Ladegut geschützt stehen soll.
-        </p>
-        <div class="info-grid">
-          <div class="mini-card"><h3>750 kg Gesamtgewicht</h3><p>Zulässiges Gesamtgewicht: 750 kg. Leergewicht ca. 385 kg.</p></div>
-          <div class="mini-card"><h3>Kofferaufbau</h3><p>1-Achs-Plywood-Kofferanhänger mit Hecktür für geschützten Transport.</p></div>
-          <div class="mini-card"><h3>Innenmaß ca.</h3><p>Maße ca. 2510 × 1320 × 1500 mm.</p></div>
-          <div class="mini-card"><h3>Sicherung</h3><p>Innenbeleuchtung und 6 verschiebbare Zurrösen für die Ladungssicherung.</p></div>
+    <section class="section-pad trailer-showcase-section">
+      <div class="trailer-model-card" id="trailerModelShowcase" data-current-index="0">
+        <div class="trailer-model-copy">
+          <p class="eyebrow">Anhänger-Auswahl</p>
+          <span class="trailer-model-count" id="trailerModelCount">Anhänger 1 von ${ALL4YOU_TRAILER_MODELS.length}</span>
+          <h2 id="trailerModelName">${escapeHtml(firstTrailer.name)}</h2>
+          <p class="lead" id="trailerModelLead">${escapeHtml(firstTrailer.lead)}</p>
+          <div class="info-grid trailer-spec-grid" id="trailerModelSpecs">
+            ${renderTrailerSpecCards(firstTrailer)}
+          </div>
+        </div>
+
+        <div class="trailer-model-media">
+          <button class="trailer-model-nav trailer-model-prev" type="button" id="trailerModelPrev" aria-label="Vorherigen Anhänger anzeigen">‹</button>
+          <figure>
+            <img id="trailerModelImage" src="${escapeHtml(firstTrailer.image)}" alt="${escapeHtml(firstTrailer.imageAlt)}" loading="lazy">
+            <figcaption id="trailerModelCaption">${escapeHtml(firstTrailer.caption)}</figcaption>
+          </figure>
+          <button class="trailer-model-nav trailer-model-next" type="button" id="trailerModelNext" aria-label="Nächsten Anhänger anzeigen">›</button>
+          <div class="trailer-model-dots" id="trailerModelDots">
+            ${renderTrailerDots(0)}
+          </div>
         </div>
       </div>
-
-      <aside class="check-card">
-        <p class="eyebrow">Gut zu wissen</p>
-        <ul class="list">
-          <li>Führerscheinklasse B ausreichend</li>
-          <li>Versicherung vorhanden</li>
-          <li>Mietvertrag vorhanden</li>
-          <li>Kaution je nach Mietdauer und Absprache</li>
-          <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München</li>
-          <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
-          <li>Abholung nach Absprache gegen Aufpreis möglich</li>
-        </ul>
-      </aside>
     </section>
 
     <section class="section-pad" id="preise">
@@ -4032,6 +4085,7 @@ function trailerPage() {
           </div>
 
           <form id="trailerWizardForm" class="wizard-form">
+            <input type="hidden" name="trailerModel" id="trailerSelectedModel" value="${escapeHtml(firstTrailer.name)}">
             <div class="wizard-step active" data-title="Mietzeitraum & Preis">
               <div class="trailer-period-control">
                 <div class="trailer-period-info">
@@ -4228,6 +4282,18 @@ function trailerPage() {
           <li>Ist das Transportgut sicher verladbar?</li>
           <li>Wird Zubehör wie Spanngurte oder Plane benötigt?</li>
         </ul>
+
+        <div class="good-to-know-box">
+          <p class="eyebrow">Gut zu wissen</p>
+          <ul class="list compact-list">
+            <li>Versicherung vorhanden</li>
+            <li>Mietvertrag vorhanden</li>
+            <li>Kaution je nach Mietdauer und Absprache</li>
+            <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München</li>
+            <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
+            <li>Abholung nach Absprache gegen Aufpreis möglich</li>
+          </ul>
+        </div>
       </aside>
     </section>
 
@@ -4247,7 +4313,7 @@ function trailerPage() {
       <div class="faq-card">
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Welcher Anhänger wird vermietet?</h3><p>Vermietet wird ein Wörmann Multicase 7525/136, 1-Achs-Plywood-Kofferanhänger mit 750 kg zulässigem Gesamtgewicht.</p></article>
+          <article class="faq-item"><h3>Welche Anhänger werden vermietet?</h3><p>Zur Auswahl stehen aktuell ein Wörmann Multicase 7525/136 und ein Brenderup CD260UBD750. Die konkrete Auswahl kann im Anhänger-Bereich durchgeschaltet werden.</p></article>
           <article class="faq-item"><h3>Welche Führerscheinklasse brauche ich?</h3><p>Für diesen Anhänger ist Führerscheinklasse B ausreichend.</p></article>
           <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt in der Sachsenstraße Höhe 25, 81543 München.</p></article>
           <article class="faq-item"><h3>Kann der Anhänger geliefert werden?</h3><p>Ja, auf Wunsch kann der Anhänger gegen Aufpreis direkt zum Wunschort gebracht und nach Absprache wieder abgeholt werden.</p></article>
@@ -6291,6 +6357,7 @@ function renderRoute() {
   bindForms();
   bindRouteTool();
   bindTrailerTool();
+  bindTrailerModelShowcase();
   bindClearanceTool();
   bindCleaningTool();
   bindCleaningWizard();
@@ -7956,7 +8023,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8376,6 +8443,53 @@ function bindDashboardTrailerCalendarManager() {
 }
 
 
+
+function bindTrailerModelShowcase() {
+  const showcase = document.querySelector("#trailerModelShowcase");
+  if (!showcase) return;
+
+  const name = showcase.querySelector("#trailerModelName");
+  const lead = showcase.querySelector("#trailerModelLead");
+  const image = showcase.querySelector("#trailerModelImage");
+  const caption = showcase.querySelector("#trailerModelCaption");
+  const count = showcase.querySelector("#trailerModelCount");
+  const specs = showcase.querySelector("#trailerModelSpecs");
+  const dots = showcase.querySelector("#trailerModelDots");
+  const prev = showcase.querySelector("#trailerModelPrev");
+  const next = showcase.querySelector("#trailerModelNext");
+  const selectedModelInput = document.querySelector("#trailerSelectedModel");
+
+  let current = Number(showcase.dataset.currentIndex || 0);
+
+  function setTrailer(index) {
+    current = (index + ALL4YOU_TRAILER_MODELS.length) % ALL4YOU_TRAILER_MODELS.length;
+    const trailer = ALL4YOU_TRAILER_MODELS[current];
+    showcase.dataset.currentIndex = String(current);
+
+    if (name) name.textContent = trailer.name;
+    if (lead) lead.textContent = trailer.lead;
+    if (image) {
+      image.src = trailer.image;
+      image.alt = trailer.imageAlt;
+    }
+    if (caption) caption.textContent = trailer.caption;
+    if (count) count.textContent = `Anhänger ${current + 1} von ${ALL4YOU_TRAILER_MODELS.length}`;
+    if (specs) specs.innerHTML = renderTrailerSpecCards(trailer);
+    if (dots) dots.innerHTML = renderTrailerDots(current);
+    if (selectedModelInput) selectedModelInput.value = trailer.name;
+  }
+
+  prev?.addEventListener("click", () => setTrailer(current - 1));
+  next?.addEventListener("click", () => setTrailer(current + 1));
+  dots?.addEventListener("click", event => {
+    const button = event.target.closest("[data-trailer-index]");
+    if (!button) return;
+    setTrailer(Number(button.dataset.trailerIndex || 0));
+  });
+
+  setTrailer(current);
+}
+
 function bindTrailerWizard() {
   const wizard = document.querySelector("#trailerWizard");
   const form = document.querySelector("#trailerWizardForm");
@@ -8789,6 +8903,7 @@ function bindTrailerWizard() {
     const rental = calculateRental();
 
     return {
+      trailerModel: data.get("trailerModel") || ALL4YOU_TRAILER_MODELS[0]?.name || "",
       rentalStart: data.get("rentalStart") || "",
       rentalEnd: data.get("rentalEnd") || "",
       rentalDays: rental.daysText,
@@ -8816,6 +8931,7 @@ function bindTrailerWizard() {
     if (!summaryBox) return;
     const summary = collectSummary();
     summaryBox.innerHTML = `
+      <div><strong>Anhänger</strong><span>${escapeHtml(summary.trailerModel || "—")}</span></div>
       <div><strong>Mietbeginn</strong><span>${escapeHtml(summary.rentalStart ? formatGermanDate(summary.rentalStart) : "—")}</span></div>
       <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd ? formatGermanDate(summary.rentalEnd) : "—")}</span></div>
       <div><strong>Mietdauer</strong><span>${escapeHtml(summary.rentalDays || "—")}</span></div>
@@ -8976,6 +9092,7 @@ function bindTrailerWizard() {
     const subject = encodeURIComponent("Anfrage über die Webseite: Anhängervermietung");
     const body = encodeURIComponent(
       `Neue Anhänger-Mietanfrage\n\n` +
+      `Anhänger: ${summary.trailerModel}\n` +
       `Mietbeginn: ${summary.rentalStart}\n` +
       `Mietende: ${summary.rentalEnd}\n` +
       `Mietdauer: ${summary.rentalDays}\n` +
@@ -9016,6 +9133,7 @@ function bindTrailerWizard() {
         p_subject: "Anhänger-Mietanfrage",
         p_summary: buildTrailerSummaryText(summary),
         p_details: {
+          trailer_model: summary.trailerModel,
           rental_start: summary.rentalStart,
           rental_end: summary.rentalEnd,
           rental_days: summary.rentalDays,
@@ -10489,7 +10607,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH
+   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

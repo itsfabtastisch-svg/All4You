@@ -221,18 +221,60 @@ function serviceLabel(service) {
 function statusLabel(status) {
   const labels = {
     neu: "Neu",
-    in_pruefung: "In Prüfung",
-    rueckfrage_offen: "Rückfrage offen",
-    angebot_vorbereitet: "Angebot vorbereitet",
-    angebot_gesendet: "Angebot gesendet",
-    termin_vorgeschlagen: "Termin vorgeschlagen",
-    termin_bestaetigt: "Termin bestätigt",
+    in_pruefung: "In Bearbeitung",
+    rueckfrage_offen: "Rückfragen",
+    angebot_vorbereitet: "In Bearbeitung",
+    angebot_gesendet: "In Bearbeitung",
+    termin_vorgeschlagen: "In Bearbeitung",
+    termin_bestaetigt: "In Bearbeitung",
     in_bearbeitung: "In Bearbeitung",
     erledigt: "Abgeschlossen",
     storniert: "Storniert"
   };
 
   return labels[status] || status || "Unbekannt";
+}
+
+/* ========================================================================== 
+   Dashboard Statusmodell
+   --------------------------------------------------------------------------
+   Kundenwunsch V5.9.6: Im Mitarbeiterportal werden nur noch vier aktive
+   Statuswerte angeboten. Alte/feinere Statuswerte bleiben lesbar und werden
+   für Filter/Anzeige sauber auf diese vier Gruppen gemappt.
+   ========================================================================== */
+
+const DASHBOARD_PRIMARY_STATUSES = ["neu", "in_bearbeitung", "rueckfrage_offen", "erledigt"];
+
+const DASHBOARD_STATUS_GROUPS = {
+  neu: ["neu"],
+  in_bearbeitung: [
+    "in_bearbeitung",
+    "in_pruefung",
+    "angebot_vorbereitet",
+    "angebot_gesendet",
+    "termin_vorgeschlagen",
+    "termin_bestaetigt"
+  ],
+  rueckfrage_offen: ["rueckfrage_offen", "rueckfrage", "rueckfragen"],
+  erledigt: ["erledigt", "abgeschlossen"]
+};
+
+function normalizeDashboardStatusOption(status) {
+  const clean = String(status || "").trim().toLowerCase();
+
+  for (const [primaryStatus, aliases] of Object.entries(DASHBOARD_STATUS_GROUPS)) {
+    if (aliases.includes(clean)) return primaryStatus;
+  }
+
+  return DASHBOARD_PRIMARY_STATUSES.includes(clean) ? clean : "neu";
+}
+
+function dashboardStatusMatches(ticketStatus, filterStatus) {
+  if (!filterStatus || filterStatus === "all") return true;
+  const cleanTicketStatus = String(ticketStatus || "").trim().toLowerCase();
+  const cleanFilterStatus = normalizeDashboardStatusOption(filterStatus);
+  const aliases = DASHBOARD_STATUS_GROUPS[cleanFilterStatus] || [cleanFilterStatus];
+  return aliases.includes(cleanTicketStatus);
 }
 
 function formatDashboardDate(value) {
@@ -362,7 +404,7 @@ function getFilteredDashboardRequests() {
   if (state.quick === "activity") {
     list = list.filter(ticket => getTicketActivity(ticket.id).hasNewActivity);
   } else if (state.quick !== "all") {
-    list = list.filter(ticket => ticket.status === state.quick);
+    list = list.filter(ticket => dashboardStatusMatches(ticket.status, state.quick));
   }
 
   if (state.service !== "all") {
@@ -370,7 +412,7 @@ function getFilteredDashboardRequests() {
   }
 
   if (state.status !== "all") {
-    list = list.filter(ticket => ticket.status === state.status);
+    list = list.filter(ticket => dashboardStatusMatches(ticket.status, state.status));
   }
 
   if (state.search) {
@@ -566,10 +608,10 @@ function renderDashboardDetail(ticket) {
 }
 function updateDashboardStats(tickets) {
   const list = tickets || [];
-  const totalNew = list.filter(ticket => ticket.status === "neu").length;
-  const inReview = list.filter(ticket => ticket.status === "in_pruefung").length;
-  const openQuestions = list.filter(ticket => ticket.status === "rueckfrage_offen").length;
-  const done = list.filter(ticket => ticket.status === "erledigt").length;
+  const totalNew = list.filter(ticket => dashboardStatusMatches(ticket.status, "neu")).length;
+  const inReview = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_bearbeitung")).length;
+  const openQuestions = list.filter(ticket => dashboardStatusMatches(ticket.status, "rueckfrage_offen")).length;
+  const done = list.filter(ticket => dashboardStatusMatches(ticket.status, "erledigt")).length;
   const archived = dashboardArchiveCache.length;
 
   const stats = {
@@ -644,21 +686,10 @@ async function loadDashboardRequests(session) {
 let dashboardSelectedRequestId = null;
 
 function getDashboardStatusOptions(currentStatus) {
-  const statuses = [
-    "neu",
-    "in_pruefung",
-    "rueckfrage_offen",
-    "angebot_vorbereitet",
-    "angebot_gesendet",
-    "termin_vorgeschlagen",
-    "termin_bestaetigt",
-    "in_bearbeitung",
-    "erledigt",
-    "storniert"
-  ];
+  const selectedStatus = normalizeDashboardStatusOption(currentStatus);
 
-  return statuses
-    .map(status => `<option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`)
+  return DASHBOARD_PRIMARY_STATUSES
+    .map(status => `<option value="${escapeHtml(status)}" ${status === selectedStatus ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`)
     .join("");
 }
 
@@ -1489,9 +1520,15 @@ async function updateDashboardRequestStatus(session, requestId, newStatus) {
     throw new Error("Kein Ticket ausgewählt.");
   }
 
+  const cleanStatus = normalizeDashboardStatusOption(newStatus);
+
+  if (!DASHBOARD_PRIMARY_STATUSES.includes(cleanStatus)) {
+    throw new Error("Dieser Status ist im Mitarbeiterportal nicht freigegeben.");
+  }
+
   const data = await callDashboardRequestAdminRpc(session, "admin_update_request_status", {
     p_request_id: requestId,
-    p_status: newStatus
+    p_status: cleanStatus
   });
 
   if (!data?.request) {
@@ -3333,7 +3370,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.5-TRAILER-SPECS-ALIGN
+// DBG: ALL4YOU-V5.9.6-DASHBOARD-STATUS-FOUR-FIX
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -5237,7 +5274,7 @@ function pageDashboard() {
             <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
-            <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
+            <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfragen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
           </section>
 
@@ -5445,7 +5482,7 @@ function pageDashboard() {
                 <div class="dashboard-filters">
                   <button class="active" type="button" data-filter="all">Alle</button>
                   <button type="button" data-filter="neu">Neu</button>
-                  <button type="button" data-filter="in_pruefung">In Prüfung</button>
+                  <button type="button" data-filter="in_bearbeitung">In Bearbeitung</button>
                   <button type="button" data-filter="rueckfrage_offen">Rückfrage</button>
                   <button type="button" data-filter="activity">Neue Aktivität</button>
                 </div>
@@ -5463,15 +5500,9 @@ function pageDashboard() {
                 <select id="dashboardStatusFilter" aria-label="Status filtern">
                   <option value="all">Alle Status</option>
                   <option value="neu">Neu</option>
-                  <option value="in_pruefung">In Prüfung</option>
-                  <option value="rueckfrage_offen">Rückfrage offen</option>
-                  <option value="angebot_vorbereitet">Angebot vorbereitet</option>
-                  <option value="angebot_gesendet">Angebot gesendet</option>
-                  <option value="termin_vorgeschlagen">Termin vorgeschlagen</option>
-                  <option value="termin_bestaetigt">Termin bestätigt</option>
                   <option value="in_bearbeitung">In Bearbeitung</option>
+                  <option value="rueckfrage_offen">Rückfragen</option>
                   <option value="erledigt">Abgeschlossen</option>
-                  <option value="storniert">Storniert</option>
                 </select>
                 <select id="dashboardSortSelect" aria-label="Sortierung">
                   <option value="newest">Neueste zuerst</option>
@@ -8023,7 +8054,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-V5.9.5-TRAILER-SPECS-ALIGN
+   DBG: ALL4YOU-V5.9.6-DASHBOARD-STATUS-FOUR-FIX
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -10607,7 +10638,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-V5.9.5-TRAILER-SPECS-ALIGN
+   DBG: ALL4YOU-V5.9.6-DASHBOARD-STATUS-FOUR-FIX
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .price-table-card {
@@ -2417,7 +2417,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2593,7 +2593,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2621,7 +2621,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2719,7 +2719,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Showcase / Kundenwunsch: 2 Anhänger mit Bild-Switcher
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .trailer-showcase-section {
@@ -2937,7 +2937,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -3217,7 +3217,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .mail-preview-btn {
@@ -3231,7 +3231,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-shell {
@@ -3688,7 +3688,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .is-hidden {
@@ -3842,7 +3842,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .auth-message.success {
@@ -3862,7 +3862,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3917,7 +3917,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3994,7 +3994,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-detail {
@@ -4141,7 +4141,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .site-header {
@@ -4285,7 +4285,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .site-header {
@@ -4343,7 +4343,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-messages {
@@ -4463,7 +4463,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4554,7 +4554,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4599,7 +4599,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .email-notification-note {
@@ -4624,7 +4624,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .customer-status-link {
@@ -4819,7 +4819,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .customer-reply-form {
@@ -4890,7 +4890,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .attachment-upload-box {
@@ -5042,7 +5042,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -5106,7 +5106,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -5162,7 +5162,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5250,7 +5250,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5290,7 +5290,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5323,7 +5323,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .footer-employee-login {
@@ -5365,7 +5365,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5414,7 +5414,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .youbot-widget {
@@ -5620,7 +5620,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .youbot-widget {
@@ -5726,7 +5726,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .roller-route-note {
@@ -5859,7 +5859,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5944,7 +5944,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .service-icon {
@@ -5992,7 +5992,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -6164,7 +6164,7 @@ label {
 
 /* ==========================================================================
    V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .trailer-period-control {
@@ -6395,7 +6395,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Trailer Kalender intern / Kundenansicht vereinfacht
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .legend-dot.status-selected {
@@ -6432,7 +6432,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Anhänger Übergabe + interner Dashboard-Kalender
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 #trailerPickupReturnField.field-editable input,
@@ -6603,7 +6603,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Archiv-System
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .dashboard-archive-layout {
@@ -6655,7 +6655,7 @@ button.calendar-day {
 
 /* ========================================================================
    Wizard Upload Requirement Hints
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ======================================================================== */
 
 .wizard-upload-requirement {
@@ -6727,7 +6727,7 @@ button.calendar-day {
 }
 
 /* ========================================================================== 
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    Kundenstatus-Nachrichten & Dashboard-Kundenantworten
    ========================================================================== */
 .customer-public-chat {
@@ -6820,7 +6820,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Basis V5.9.0
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    =========================================================================== */
 .customer-portal-page {
   min-height: 70vh;
@@ -6966,7 +6966,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Einladung / Passwort-Setup V5.9.1
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    =========================================================================== */
 .dashboard-customer-invite-box {
   display: flex;
@@ -7019,7 +7019,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Polish V5.9.3
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    =========================================================================== */
 .customer-login-wrap {
   display: grid;
@@ -7559,7 +7559,7 @@ button.calendar-day {
 
 /* ========================================================================== 
    Footer Portal Links Polish
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    ========================================================================== */
 
 .site-footer .footer-main .footer-employee-login {
@@ -7609,7 +7609,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Compact Workbench
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    Ziel: Ticketliste kompakter, Arbeitsbereich breiter, Detaildaten aufklappbar.
    ========================================================================== */
 
@@ -8079,7 +8079,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Dashboard Readability Polish
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    Ziel: Kurzüberblick als Punkte, kompaktere Ticketkarten, sauber zentrierte Infokacheln.
    ========================================================================== */
 
@@ -8231,7 +8231,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Dashboard Ticket Card Compact Polish
-   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
    Ziel: Ticketliste niedriger, schneller scanbar und ohne unnötige Kartenhöhe.
    ========================================================================== */
 
@@ -8337,5 +8337,46 @@ button.calendar-day {
 @media (max-width: 860px) {
   .dashboard-ticket.dashboard-ticket-compact {
     min-height: 98px;
+  }
+}
+
+
+/* ===========================================================================
+   Dashboard Ticket List True Compact
+   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   Ziel: Einzelne Tickets bleiben echte kompakte Zeilen statt die komplette Listenhoehe auszufuellen.
+   ========================================================================== */
+
+.dashboard-ticket-list {
+  align-content: start;
+  align-items: start;
+  grid-auto-rows: max-content;
+}
+
+.dashboard-ticket.dashboard-ticket-compact {
+  min-height: 0;
+  height: auto;
+  align-content: start;
+  gap: 6px;
+  padding: 9px 11px;
+}
+
+.dashboard-ticket.dashboard-ticket-compact .ticket-topline,
+.dashboard-ticket.dashboard-ticket-compact .ticket-compact-main,
+.dashboard-ticket.dashboard-ticket-compact .ticket-compact-footer {
+  min-height: 0;
+}
+
+.dashboard-ticket.dashboard-ticket-compact .ticket-topline {
+  margin-bottom: 1px;
+}
+
+.dashboard-ticket.dashboard-ticket-compact .ticket-compact-footer {
+  margin-top: 1px;
+}
+
+@media (max-width: 860px) {
+  .dashboard-ticket.dashboard-ticket-compact {
+    min-height: 0;
   }
 }

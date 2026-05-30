@@ -1634,6 +1634,8 @@ function dashboardFieldLabel(key) {
     rental_end: "Mietende",
     rental_days: "Mietdauer",
     rental_price: "Mietpreis",
+    trailer_model: "Anhängerwunsch",
+    trailer_preference: "Anhängerwunsch",
     deposit: "Kaution",
     handover: "Übergabe",
     delivery_address: "Wunschort / Lieferung",
@@ -1841,7 +1843,7 @@ function getDashboardCompactSummaryItems(ticket) {
   addDashboardSummaryItem(items, "Kunde", ticket.customer_name);
   addDashboardSummaryItem(items, "Leistung", serviceLabel(ticket.service));
 
-  if (details.trailer_model) addDashboardSummaryItem(items, "Anhänger", details.trailer_model);
+  if (details.trailer_model) addDashboardSummaryItem(items, "Anhängerwunsch", details.trailer_model);
   if (details.vehicle) addDashboardSummaryItem(items, "Fahrzeug", details.vehicle);
   if (details.property_type) addDashboardSummaryItem(items, "Objekt", details.property_type);
 
@@ -3723,7 +3725,7 @@ function buildRollerSummaryText(summary) {
 
 function buildTrailerSummaryText(summary) {
   const parts = [
-    summary.trailerModel ? `Anhänger: ${summary.trailerModel}` : "",
+    summary.trailerModel ? `Anhängerwunsch: ${summary.trailerModel}` : "",
     summary.rentalStart && summary.rentalEnd ? `${summary.rentalStart} bis ${summary.rentalEnd}` : "",
     summary.rentalDays ? `Mietdauer: ${summary.rentalDays}` : "",
     summary.rentalPrice ? `Preis: ${summary.rentalPrice}` : "",
@@ -3774,7 +3776,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.14-TRAILER-THIRD-BRENDERUP
+// DBG: ALL4YOU-V5.9.15-TRAILER-WIZARD-MODEL-CHOICE
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3853,6 +3855,41 @@ function renderTrailerDots(activeIndex = 0) {
   return ALL4YOU_TRAILER_MODELS.map((trailer, index) => `
     <button class="trailer-model-dot ${index === activeIndex ? "active" : ""}" type="button" data-trailer-index="${index}" aria-label="${escapeHtml(trailer.shortName)} anzeigen"></button>
   `).join("");
+}
+
+function renderTrailerPreferenceCards() {
+  const modelCards = ALL4YOU_TRAILER_MODELS.map((trailer, index) => `
+    <label class="trailer-choice-card">
+      <input type="radio" name="trailerPreference" value="${escapeHtml(trailer.name)}">
+      <span class="trailer-choice-body">
+        <strong>${escapeHtml(trailer.shortName || trailer.name)}</strong>
+        <small>${escapeHtml(trailer.type || "Kofferanhänger")}</small>
+        <em>${index === 0 ? "klassischer Kofferanhänger" : (trailer.name.toLowerCase().includes("ubr") ? "mit Rampe" : "mit Tür")}</em>
+      </span>
+    </label>
+  `).join("");
+
+  return `
+    <div class="trailer-choice-grid">
+      <label class="trailer-choice-card featured">
+        <input type="radio" name="trailerPreference" value="Egal / All4You darf passend auswählen" checked>
+        <span class="trailer-choice-body">
+          <strong>Egal / passend auswählen</strong>
+          <small>All4You darf das passende verfügbare Modell auswählen.</small>
+          <em>empfohlen, wenn kein bestimmter Anhänger nötig ist</em>
+        </span>
+      </label>
+      ${modelCards}
+      <label class="trailer-choice-card">
+        <input type="radio" name="trailerPreference" value="Unsicher / bitte beraten">
+        <span class="trailer-choice-body">
+          <strong>Unsicher / bitte beraten</strong>
+          <small>Der Kunde ist sich nicht sicher, welches Modell passt.</small>
+          <em>Rücksprache erwünscht</em>
+        </span>
+      </label>
+    </div>
+  `;
 }
 
 const SEO_ROUTES = {
@@ -4535,7 +4572,7 @@ function trailerPage() {
         <div class="trailer-wizard" id="trailerWizard" data-current-step="0">
           <div class="wizard-top">
             <div>
-              <span class="wizard-kicker" id="trailerWizardCounter">Schritt 1 von 5</span>
+              <span class="wizard-kicker" id="trailerWizardCounter">Schritt 1 von 6</span>
               <h3 id="trailerWizardTitle">Mietzeitraum & Preis</h3>
             </div>
             <div class="wizard-progress">
@@ -4603,6 +4640,26 @@ function trailerPage() {
                 Der angezeigte Preis basiert auf der gewählten Mietdauer. Es handelt sich nicht um eine verbindliche Buchung,
                 sondern um eine Mietanfrage mit finaler Bestätigung durch All4You.
               </p>
+            </div>
+
+            <div class="wizard-step" data-title="Anhängerwunsch">
+              <div class="trailer-choice-panel">
+                <div class="trailer-choice-head">
+                  <div>
+                    <p class="eyebrow">Anhängerwunsch</p>
+                    <h3>Welcher Anhänger soll es sein?</h3>
+                    <p>
+                      Wählen Sie ein bestimmtes Modell aus oder lassen Sie All4You passend nach Transportgut,
+                      Zeitraum und Verfügbarkeit auswählen.
+                    </p>
+                  </div>
+                </div>
+                ${renderTrailerPreferenceCards()}
+                <p class="form-note">
+                  Bei einem festen Anhängerwunsch prüft All4You gezielt dieses Modell. Wenn es egal ist,
+                  wird das passende verfügbare Modell vorgeschlagen.
+                </p>
+              </div>
             </div>
 
             <div class="wizard-step" data-title="Übergabe & Standort">
@@ -9437,7 +9494,7 @@ function bindTrailerWizard() {
     const rental = calculateRental();
 
     return {
-      trailerModel: data.get("trailerModel") || ALL4YOU_TRAILER_MODELS[0]?.name || "",
+      trailerModel: data.get("trailerPreference") || data.get("trailerModel") || ALL4YOU_TRAILER_MODELS[0]?.name || "",
       rentalStart: data.get("rentalStart") || "",
       rentalEnd: data.get("rentalEnd") || "",
       rentalDays: rental.daysText,
@@ -9465,7 +9522,7 @@ function bindTrailerWizard() {
     if (!summaryBox) return;
     const summary = collectSummary();
     summaryBox.innerHTML = `
-      <div><strong>Anhänger</strong><span>${escapeHtml(summary.trailerModel || "—")}</span></div>
+      <div><strong>Anhängerwunsch</strong><span>${escapeHtml(summary.trailerModel || "—")}</span></div>
       <div><strong>Mietbeginn</strong><span>${escapeHtml(summary.rentalStart ? formatGermanDate(summary.rentalStart) : "—")}</span></div>
       <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd ? formatGermanDate(summary.rentalEnd) : "—")}</span></div>
       <div><strong>Mietdauer</strong><span>${escapeHtml(summary.rentalDays || "—")}</span></div>
@@ -9668,6 +9725,7 @@ function bindTrailerWizard() {
         p_summary: buildTrailerSummaryText(summary),
         p_details: {
           trailer_model: summary.trailerModel,
+          trailer_preference: summary.trailerModel,
           rental_start: summary.rentalStart,
           rental_end: summary.rentalEnd,
           rental_days: summary.rentalDays,

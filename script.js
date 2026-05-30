@@ -3776,7 +3776,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.15-TRAILER-WIZARD-MODEL-CHOICE
+// DBG: ALL4YOU-V5.9.16-TRAILER-KAROLINGERALLEE-PICKUP
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -4667,6 +4667,7 @@ function trailerPage() {
                 <label>Wunschübergabe
                   <select name="handover" id="trailerHandover">
                     <option value="Abholung/Rückgabe am Standort Sachsenstraße">Abholung/Rückgabe am Standort Sachsenstraße</option>
+                    <option value="Abholung/Rückgabe am Standort Karolingerallee">Abholung/Rückgabe am Standort Karolingerallee</option>
                     <option value="Lieferung zum Wunschort gegen Aufpreis">Lieferung zum Wunschort gegen Aufpreis</option>
                     <option value="Lieferung & Abholung gegen Aufpreis">Lieferung & Abholung gegen Aufpreis</option>
                     <option value="All4You soll Rücksprache halten">All4You soll Rücksprache halten</option>
@@ -4805,7 +4806,7 @@ function trailerPage() {
             <li>Versicherung vorhanden</li>
             <li>Mietvertrag vorhanden</li>
             <li>Kaution je nach Mietdauer und Absprache</li>
-            <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München</li>
+            <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München oder Karolingerallee, 81545 München</li>
             <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
             <li>Abholung nach Absprache gegen Aufpreis möglich</li>
           </ul>
@@ -4831,7 +4832,7 @@ function trailerPage() {
         <div class="faq-list">
           <article class="faq-item"><h3>Welche Anhänger werden vermietet?</h3><p>Zur Auswahl stehen aktuell ein Wörmann Multicase 7525/136, ein Brenderup CD260UBD750 mit Tür und ein Brenderup CD260UBR750 mit Rampe. Die konkrete Auswahl kann im Anhänger-Bereich durchgeschaltet werden.</p></article>
           <article class="faq-item"><h3>Welche Führerscheinklasse brauche ich?</h3><p>Für diesen Anhänger ist Führerscheinklasse B ausreichend.</p></article>
-          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt in der Sachsenstraße Höhe 25, 81543 München.</p></article>
+          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt je nach Absprache an der Sachsenstraße Höhe 25, 81543 München oder an der Karolingerallee, 81545 München. Die genaue Übergabestelle wird durch All4You bestätigt.</p></article>
           <article class="faq-item"><h3>Kann der Anhänger geliefert werden?</h3><p>Ja, auf Wunsch kann der Anhänger gegen Aufpreis direkt zum Wunschort gebracht und nach Absprache wieder abgeholt werden.</p></article>
         </div>
       </div>
@@ -9461,6 +9462,13 @@ function bindTrailerWizard() {
       if (value !== null) pickupInput.value = value;
       pickupField.classList.toggle("field-editable", !readonly);
     };
+
+    if (value.includes("karolingerallee")) {
+      setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
+      setPickup("Abholung/Rückgabe", "Karolingerallee, 81545 München", "", true, false);
+      if (noteInput) noteInput.value = "Abholung und Rückgabe am Standort Karolingerallee, 81545 München. Die genaue Übergabestelle wird durch All4You bestätigt.";
+      return;
+    }
 
     if (value.includes("lieferung & abholung")) {
       setDelivery(true, "Lieferadresse", "Adresse, an die der Anhänger geliefert werden soll", true);

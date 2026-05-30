@@ -3333,7 +3333,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
+// DBG: ALL4YOU-V5.9.5-TRAILER-SPECS-ALIGN
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3353,11 +3353,11 @@ const ALL4YOU_TRAILER_MODELS = [
     lead: "Ein geschlossener 1-Achs-Plywood-Kofferanhänger für Umzug, Möbeltransport, Baumarkt-Einkäufe, Material oder private Transporte.",
     specs: [
       { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
-      { label: "Leergewicht", value: "ca. 385 kg", text: "kompakter 1-Achs-Kofferanhänger" },
+      { label: "Nutzlast", value: "ca. 365 kg", text: "bei ca. 385 kg Leergewicht" },
+      { label: "Leergewicht", value: "ca. 385 kg", text: "Eigengewicht des Anhängers" },
       { label: "Innenmaß", value: "ca. 251 × 132 × 150 cm", text: "Länge × Breite × Höhe" },
-      { label: "Aufbau", value: "Plywood-Koffer", text: "geschlossener Aufbau mit Hecktür" },
-      { label: "Sicherung", value: "6 Zurrösen", text: "verschiebbare Verzurrpunkte innen" },
-      { label: "Ausstattung", value: "Innenbeleuchtung", text: "für bessere Sicht im Koffer" }
+      { label: "Aufbau", value: "Plywood-Koffer", text: "geschlossener Kofferaufbau" },
+      { label: "Sicherung", value: "6 Zurrösen", text: "innenliegende Verzurrpunkte" }
     ]
   },
   {
@@ -3372,10 +3372,10 @@ const ALL4YOU_TRAILER_MODELS = [
     specs: [
       { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
       { label: "Nutzlast", value: "450 kg", text: "bei 300 kg Leergewicht" },
+      { label: "Leergewicht", value: "300 kg", text: "Eigengewicht des Anhängers" },
       { label: "Innenmaß", value: "260 × 130 × 150 cm", text: "Länge × Breite × Höhe" },
-      { label: "Außenmaß", value: "406 × 179 × 208 cm", text: "Länge × Breite × Höhe" },
-      { label: "Anschluss", value: "13-polig", text: "Spiral-Adapterkabel" },
-      { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegendes Verzurrsystem" }
+      { label: "Aufbau", value: "Cargo Dynamic™", text: "geschlossener Kofferaufbau" },
+      { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegende Verzurrpunkte" }
     ]
   }
 ];
@@ -8023,7 +8023,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
+   DBG: ALL4YOU-V5.9.5-TRAILER-SPECS-ALIGN
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -10607,7 +10607,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-V5.9.4-TRAILER-SHOWCASE
+   DBG: ALL4YOU-V5.9.5-TRAILER-SPECS-ALIGN
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

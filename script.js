@@ -3774,7 +3774,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
+// DBG: ALL4YOU-V5.9.14-TRAILER-THIRD-BRENDERUP
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -3804,8 +3804,8 @@ const ALL4YOU_TRAILER_MODELS = [
   {
     key: "brenderup-cd260ubd750",
     name: "Brenderup CD260UBD750",
-    shortName: "Brenderup Cargo Dynamic",
-    type: "Cargo Dynamic™ Kofferanhänger",
+    shortName: "Brenderup Cargo Dynamic Tür",
+    type: "Cargo Dynamic™ Kofferanhänger mit Tür",
     image: "/assets/trailer-brenderup-cd260ubd750.jpg",
     imageAlt: "Brenderup CD260UBD750 Kofferanhänger von hinten",
     caption: "Leichter Cargo Dynamic™ Kofferanhänger mit Tür, 13-poligem Stecker und innenliegenden Verzurrpunkten.",
@@ -3815,7 +3815,25 @@ const ALL4YOU_TRAILER_MODELS = [
       { label: "Nutzlast", value: "450 kg", text: "bei 300 kg Leergewicht" },
       { label: "Leergewicht", value: "300 kg", text: "Eigengewicht des Anhängers" },
       { label: "Innenmaß", value: "260 × 130 × 150 cm", text: "Länge × Breite × Höhe" },
-      { label: "Aufbau", value: "Cargo Dynamic™", text: "geschlossener Kofferaufbau" },
+      { label: "Aufbau", value: "Cargo Dynamic™ mit Tür", text: "geschlossener Kofferaufbau" },
+      { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegende Verzurrpunkte" }
+    ]
+  },
+  {
+    key: "brenderup-cd260ubr750",
+    name: "Brenderup CD260UBR750",
+    shortName: "Brenderup Cargo Dynamic Rampe",
+    type: "Cargo Dynamic™ Kofferanhänger mit Rampe",
+    image: "/assets/trailer-brenderup-cd260ubr750.jpg",
+    imageAlt: "Brenderup CD260UBR750 Kofferanhänger mit Rampe von hinten",
+    caption: "Leichter Cargo Dynamic™ Kofferanhänger mit Rampe, 13-poligem Stecker und innenliegenden Verzurrpunkten.",
+    lead: "Ein moderner, leichter Cargo Dynamic™ Kofferanhänger mit Rampe für Transportgut, das bequem ein- und ausgeladen werden soll.",
+    specs: [
+      { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
+      { label: "Nutzlast", value: "450 kg", text: "bei 300 kg Leergewicht" },
+      { label: "Leergewicht", value: "300 kg", text: "Eigengewicht des Anhängers" },
+      { label: "Innenmaß", value: "260 × 130 × 150 cm", text: "Länge × Breite × Höhe" },
+      { label: "Aufbau", value: "Cargo Dynamic™ mit Rampe", text: "geschlossener Kofferaufbau" },
       { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegende Verzurrpunkte" }
     ]
   }
@@ -3857,7 +3875,7 @@ const SEO_ROUTES = {
   },
   "/leistungen/anhaenger": {
     title: "Anhängervermietung München | Kofferanhänger mieten | All4You",
-    description: "Kofferanhänger in München mieten: Wörmann Multicase und Brenderup Cargo Dynamic für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
+    description: "Kofferanhänger in München mieten: Wörmann Multicase sowie Brenderup Cargo Dynamic mit Tür oder Rampe für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
     canonicalPath: "/leistungen/anhaenger",
     serviceName: "Anhängervermietung München"
   },
@@ -4011,7 +4029,7 @@ const services = [
     sub: "Wörmann Multicase 750 kg",
     icon: serviceIconTrailer,
     color: "",
-    text: "Plywood-Kofferanhänger flexibel mieten – mit Hecktür, Innenbeleuchtung und Zurrösen."
+    text: "Kofferanhänger flexibel mieten – je nach Modell mit Hecktür, Rampe, Innenbeleuchtung und Zurrösen."
   },
   {
     slug: "raeumungen",
@@ -4754,7 +4772,7 @@ function trailerPage() {
       <div class="faq-card">
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Welche Anhänger werden vermietet?</h3><p>Zur Auswahl stehen aktuell ein Wörmann Multicase 7525/136 und ein Brenderup CD260UBD750. Die konkrete Auswahl kann im Anhänger-Bereich durchgeschaltet werden.</p></article>
+          <article class="faq-item"><h3>Welche Anhänger werden vermietet?</h3><p>Zur Auswahl stehen aktuell ein Wörmann Multicase 7525/136, ein Brenderup CD260UBD750 mit Tür und ein Brenderup CD260UBR750 mit Rampe. Die konkrete Auswahl kann im Anhänger-Bereich durchgeschaltet werden.</p></article>
           <article class="faq-item"><h3>Welche Führerscheinklasse brauche ich?</h3><p>Für diesen Anhänger ist Führerscheinklasse B ausreichend.</p></article>
           <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt in der Sachsenstraße Höhe 25, 81543 München.</p></article>
           <article class="faq-item"><h3>Kann der Anhänger geliefert werden?</h3><p>Ja, auf Wunsch kann der Anhänger gegen Aufpreis direkt zum Wunschort gebracht und nach Absprache wieder abgeholt werden.</p></article>

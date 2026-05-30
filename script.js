@@ -518,15 +518,19 @@ function renderDashboardTickets(tickets) {
     const activity = getTicketActivity(ticket.id);
     const isActive = ticket.id === currentSelectionId;
     return `
-      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+      <button class="dashboard-ticket dashboard-ticket-compact ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
         <span class="ticket-topline">
           <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
           <em>${escapeHtml(statusLabel(ticket.status))}</em>
         </span>
-        <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
-        <span class="ticket-customer">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</span>
-        ${renderTicketActivityBadges(ticket)}
-        <span class="ticket-meta">${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+        <span class="ticket-compact-main">
+          <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
+          <span class="ticket-customer">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</span>
+        </span>
+        <span class="ticket-compact-footer">
+          ${renderTicketActivityBadges(ticket) || "<span></span>"}
+          <span class="ticket-meta">${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+        </span>
       </button>
     `;
   }).join("");
@@ -3500,7 +3504,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.10-DASHBOARD-READABILITY-POLISH
+// DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -8206,7 +8210,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-V5.9.10-DASHBOARD-READABILITY-POLISH
+   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -10790,7 +10794,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-V5.9.10-DASHBOARD-READABILITY-POLISH
+   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

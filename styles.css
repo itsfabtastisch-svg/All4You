@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .trailer-tool {
@@ -1676,7 +1676,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1700,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1709,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1859,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1873,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +1950,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2182,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2277,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2341,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .price-table-card {
@@ -2417,7 +2417,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2593,7 +2593,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2621,7 +2621,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2719,7 +2719,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Showcase / Kundenwunsch: 2 Anhänger mit Bild-Switcher
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .trailer-showcase-section {
@@ -2937,7 +2937,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -3217,7 +3217,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .mail-preview-btn {
@@ -3231,7 +3231,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-shell {
@@ -3688,7 +3688,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .is-hidden {
@@ -3842,7 +3842,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .auth-message.success {
@@ -3862,7 +3862,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3917,7 +3917,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3994,7 +3994,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-detail {
@@ -4141,7 +4141,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .site-header {
@@ -4285,7 +4285,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .site-header {
@@ -4343,7 +4343,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-messages {
@@ -4463,7 +4463,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4554,7 +4554,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4599,7 +4599,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .email-notification-note {
@@ -4624,7 +4624,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .customer-status-link {
@@ -4819,7 +4819,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .customer-reply-form {
@@ -4890,7 +4890,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .attachment-upload-box {
@@ -5042,7 +5042,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -5106,7 +5106,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -5162,7 +5162,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5250,7 +5250,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5290,7 +5290,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5323,7 +5323,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .footer-employee-login {
@@ -5365,7 +5365,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5414,7 +5414,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .youbot-widget {
@@ -5620,7 +5620,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .youbot-widget {
@@ -5726,7 +5726,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .roller-route-note {
@@ -5859,7 +5859,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5944,7 +5944,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .service-icon {
@@ -5992,7 +5992,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -6164,7 +6164,7 @@ label {
 
 /* ==========================================================================
    V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .trailer-period-control {
@@ -6395,7 +6395,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Trailer Kalender intern / Kundenansicht vereinfacht
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .legend-dot.status-selected {
@@ -6432,7 +6432,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Anhänger Übergabe + interner Dashboard-Kalender
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 #trailerPickupReturnField.field-editable input,
@@ -6603,7 +6603,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Archiv-System
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .dashboard-archive-layout {
@@ -6655,7 +6655,7 @@ button.calendar-day {
 
 /* ========================================================================
    Wizard Upload Requirement Hints
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ======================================================================== */
 
 .wizard-upload-requirement {
@@ -6727,7 +6727,7 @@ button.calendar-day {
 }
 
 /* ========================================================================== 
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    Kundenstatus-Nachrichten & Dashboard-Kundenantworten
    ========================================================================== */
 .customer-public-chat {
@@ -6820,7 +6820,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Basis V5.9.0
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    =========================================================================== */
 .customer-portal-page {
   min-height: 70vh;
@@ -6966,7 +6966,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Einladung / Passwort-Setup V5.9.1
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    =========================================================================== */
 .dashboard-customer-invite-box {
   display: flex;
@@ -7019,7 +7019,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Polish V5.9.3
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    =========================================================================== */
 .customer-login-wrap {
   display: grid;
@@ -7559,7 +7559,7 @@ button.calendar-day {
 
 /* ========================================================================== 
    Footer Portal Links Polish
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    ========================================================================== */
 
 .site-footer .footer-main .footer-employee-login {
@@ -7609,7 +7609,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Compact Workbench
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    Ziel: Ticketliste kompakter, Arbeitsbereich breiter, Detaildaten aufklappbar.
    ========================================================================== */
 
@@ -8079,7 +8079,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Dashboard Readability Polish
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    Ziel: Kurzüberblick als Punkte, kompaktere Ticketkarten, sauber zentrierte Infokacheln.
    ========================================================================== */
 
@@ -8231,7 +8231,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Dashboard Ticket Card Compact Polish
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    Ziel: Ticketliste niedriger, schneller scanbar und ohne unnötige Kartenhöhe.
    ========================================================================== */
 
@@ -8343,7 +8343,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Dashboard Ticket List True Compact
-   DBG: ALL4YOU-V5.9.12-DASHBOARD-TICKET-LIST-TRUE-COMPACT
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
    Ziel: Einzelne Tickets bleiben echte kompakte Zeilen statt die komplette Listenhoehe auszufuellen.
    ========================================================================== */
 
@@ -8378,5 +8378,359 @@ button.calendar-day {
 @media (max-width: 860px) {
   .dashboard-ticket.dashboard-ticket-compact {
     min-height: 0;
+  }
+}
+
+
+/* ===========================================================================
+   Dashboard Messages Center
+   DBG: ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
+   Ziel: eigene kompakte Nachrichtenansicht fuer Kundenkommunikation.
+   ========================================================================== */
+
+.dashboard-messages-center {
+  margin-top: 14px;
+  padding: 18px;
+}
+
+.dashboard-messages-center-head {
+  align-items: center;
+}
+
+.dashboard-messages-center-head .dashboard-calendar-intro {
+  margin: 6px 0 0;
+  max-width: 760px;
+}
+
+.dashboard-message-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.dashboard-message-list-panel,
+.dashboard-message-thread-panel {
+  min-width: 0;
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 22px;
+  background: rgba(255,255,255,.74);
+  box-shadow: 0 14px 34px rgba(16,38,60,.055);
+}
+
+.dashboard-message-list-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 13px;
+}
+
+.dashboard-message-list-tools input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(19,35,58,.14);
+  border-radius: 14px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 760;
+  background: rgba(255,255,255,.92);
+}
+
+.dashboard-message-ticket-list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-height: calc(100vh - 330px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.dashboard-message-ticket {
+  --service-soft: rgba(10,169,155,.12);
+  --service-line: var(--teal);
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(19,35,58,.10);
+  border-left: 5px solid var(--service-line);
+  border-radius: 16px;
+  color: var(--navy);
+  background: rgba(255,255,255,.86);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.dashboard-message-ticket:hover,
+.dashboard-message-ticket.active {
+  transform: translateY(-1px);
+  border-color: rgba(10,169,155,.28);
+  background: linear-gradient(135deg, rgba(255,255,255,.96), var(--service-soft));
+  box-shadow: 0 12px 28px rgba(16,38,60,.08);
+}
+
+.dashboard-message-ticket.has-new-activity {
+  box-shadow: 0 0 0 1px rgba(10,169,155,.18), 0 14px 30px rgba(10,169,155,.08);
+}
+
+.message-ticket-topline,
+.message-ticket-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.message-ticket-topline strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.message-ticket-topline em {
+  flex: 0 0 auto;
+  color: var(--teal-2);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.message-ticket-person {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.message-ticket-meta small,
+.message-ticket-date {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1.15;
+}
+
+.message-ticket-meta small:last-child {
+  flex: 0 0 auto;
+  color: var(--navy);
+}
+
+.message-ticket-date {
+  display: block;
+  text-align: right;
+}
+
+.dashboard-message-thread-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(280px, 1fr) auto;
+  gap: 12px;
+  padding: 14px;
+}
+
+.dashboard-message-thread-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(238,246,250,.82), rgba(255,255,255,.92));
+  border: 1px solid rgba(19,35,58,.08);
+}
+
+.dashboard-message-thread-head h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(24px, 2vw, 34px);
+  line-height: 1.05;
+}
+
+.dashboard-message-contact-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-message-contact-strip > article,
+.dashboard-message-contact-strip > span {
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 15px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(238,246,250,.72);
+}
+
+.dashboard-message-contact-strip > span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-weight: 820;
+}
+
+.dashboard-message-contact-strip span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.dashboard-message-contact-strip strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.24;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-message-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 280px;
+  max-height: calc(100vh - 500px);
+  overflow: auto;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.08);
+  background: linear-gradient(180deg, rgba(238,246,250,.72), rgba(255,255,255,.78));
+}
+
+.dashboard-chat-bubble {
+  display: grid;
+  gap: 7px;
+  max-width: min(78%, 720px);
+  padding: 12px 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 10px 22px rgba(16,38,60,.055);
+}
+
+.dashboard-chat-bubble.team {
+  align-self: flex-end;
+  border-color: rgba(10,169,155,.22);
+  background: linear-gradient(135deg, rgba(10,169,155,.13), rgba(255,255,255,.94));
+}
+
+.dashboard-chat-bubble.customer {
+  align-self: flex-start;
+}
+
+.dashboard-chat-bubble div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-chat-bubble strong {
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.dashboard-chat-bubble span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.dashboard-chat-bubble p {
+  margin: 0;
+  color: var(--navy);
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-message-composer {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(255,255,255,.86);
+}
+
+.dashboard-message-composer label {
+  display: grid;
+  gap: 8px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.dashboard-message-composer textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  border: 1px solid rgba(19,35,58,.13);
+  border-radius: 15px;
+  padding: 12px 13px;
+  font: inherit;
+  font-weight: 760;
+  background: rgba(238,246,250,.58);
+}
+
+.dashboard-message-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-message-composer-actions .dashboard-note-message {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.dashboard-message-composer-actions .btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-message-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-message-ticket-list,
+  .dashboard-message-thread {
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-messages-center {
+    padding: 14px;
+  }
+
+  .dashboard-message-contact-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-message-thread-head,
+  .dashboard-message-composer-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-chat-bubble {
+    max-width: 100%;
   }
 }

@@ -1,63 +1,21 @@
-# All4You Service München
+# ALL4YOU-V5.9.13-DASHBOARD-MESSAGES-CENTER
 
-DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+Patch für das All4You Mitarbeiterportal.
 
-## Inhalt
+## Enthalten
+- `index.html`
+- `script.js`
+- `styles.css`
+- `APPLY_ALL4YOU_V5.9.13_DASHBOARD_MESSAGES_CENTER.bat`
 
-Fix für Mitarbeiter-Dashboard: Archivieren, Wiederherstellen, Status „Abgeschlossen“ und endgültiges Löschen laufen jetzt über sichere Supabase-RPC-Funktionen statt direkter REST-PATCH/DELETE-Operationen.
+## Änderung
+- Neuer linker Menüpunkt/Ansicht „Nachrichten“ funktioniert jetzt als eigene Ansicht.
+- Moderne kompakte Nachrichten-Zentrale im Mitarbeiterportal.
+- Linke Gesprächsliste pro Auftrag mit Ticketnummer, Kunde, Status, Leistung und Nachrichtenhinweis.
+- Rechte Chat-/Nachrichtenansicht mit kompaktem Auftragskopf, Kontaktzeile und Nachrichtenverlauf.
+- Mitarbeiter können dem Kunden direkt eine öffentliche Antwort schreiben.
+- Interne Notizen bleiben weiterhin in den Ticketdetails und werden in der Nachrichten-Zentrale bewusst nicht vermischt.
+- Keine SQL-Änderung nötig.
 
-## Wichtig
-
-Vor dem Testen muss in Supabase einmal die SQL-Datei ausgeführt werden:
-
-`supabase/SUPABASE-SQL-V5.8.14-DASHBOARD-ARCHIVE-DELETE-FIX.sql`
-
-## Geändert
-
-- Archivieren per Dashboard-RPC
-- Aus Archiv zurückholen per Dashboard-RPC
-- Status „Abgeschlossen“ archiviert weiterhin automatisch
-- Neuer Button „Endgültig löschen“ in aktiven Tickets
-- Neuer Button „Endgültig löschen“ im Archiv
-- Löschfunktion entfernt zugehörige Nachrichten, Statusverlauf und Anhang-Zuordnungen aus der Datenbank
-
-## Nicht geändert
-
-- Keine Mail-/Resend-Function geändert
-- Keine Kundenportal-Phase weitergebaut
-- Keine Anfrage-Wizards geändert
-- Keine rechtlichen Seiten geändert
-
-Aktuelle sichtbare Build-Kennung:
-
-`ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS`
-
-
-## ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
-
-Dashboard-Hotfix: fehlende JavaScript-Helferfunktion `dashboardFieldLabel` und `isLongDashboardField` wiederhergestellt, damit aktive Anfragen nach dem Archiv-/Lösch-Patch wieder geladen werden. Keine SQL-, Mail-, Supabase-Function- oder Formularänderungen.
-
-
-## V5.8.16 Dashboard Selection/Status Fix
-- Fehlende Dashboard-Statusmeldung wiederhergestellt.
-- Ticket-Auswahl robuster gemacht, damit Statusänderung und Ticket-Aktionen das aktive Ticket sauber erkennen.
-- Keine SQL-, Supabase-, Mail- oder Formularänderung.
-
-
-## V5.8.18 Dashboard Actions Direct Fix
-
-DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
-
-- Fehlende Dashboard-Hilfsfunktion `setDashboardActionMessage` wiederhergestellt.
-- Status speichern kann wieder sichtbare Meldungen ausgeben.
-- Ticket-Aktionen werden nach Ticket-Auswahl wieder korrekt aktiviert.
-- Keine SQL-, Mail-, Supabase-Function- oder Formularänderungen.
-
-
-## ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
-
-- Kundenportal-Basis unter `/kundenportal` ergänzt.
-- Dashboard-Bereich „Kundenkonten“ zum Vorbereiten von Kundenkonten und Zuordnen bestehender Tickets ergänzt.
-- Kunden sehen nach Login nur zugeordnete Aufträge, Status und öffentliche Nachrichten.
-- Kundennachrichten aus dem Portal werden als öffentliche Ticketnachrichten gespeichert.
-- Benötigt SQL-Datei `SUPABASE-SQL-V5.9.0-CUSTOMER-PORTAL-BASIS.sql`.
+## Zielpfad
+`F:\One4All\Webseite\all4you_homepage`

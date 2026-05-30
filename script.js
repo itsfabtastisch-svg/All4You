@@ -195,6 +195,8 @@ let dashboardArchiveCache = [];
 let dashboardSelectedArchiveId = null;
 let dashboardCustomerAccountsCache = [];
 let dashboardSelectedCustomerAccountId = null;
+let dashboardSelectedMessageRequestId = null;
+let dashboardMessagesCenterLoadId = 0;
 
 
 function serviceAccentClass(service) {
@@ -675,6 +677,9 @@ async function loadDashboardRequests(session) {
     renderDashboardArchiveDetail(null);
     updateDashboardStats(dashboardAllRequestCache);
     updateDashboardActivityStats(dashboardAllRequestCache);
+    if (!document.querySelector("#dashboardMessagesCenter")?.classList.contains("is-hidden")) {
+      renderDashboardMessagesCenter();
+    }
 
     if (liveStatus) {
       liveStatus.textContent = "Live verbunden";
@@ -2445,6 +2450,271 @@ function updateDashboardActivityStats(tickets) {
 
   if (newActivityElement) newActivityElement.textContent = newActivityCount;
   if (attachmentsElement) attachmentsElement.textContent = attachmentCount;
+}
+
+
+/* ==========================================================================
+   Dashboard Nachrichten-Zentrale V5.9.13
+   --------------------------------------------------------------------------
+   Eigene kompakte Arbeitsansicht fuer Kundenkommunikation: wenig Auftragsdaten,
+   klarer Nachrichtenverlauf und direkte Antwort an den Kunden.
+   ========================================================================== */
+
+function getDashboardMessagesCenterTickets() {
+  return [...(dashboardAllRequestCache || [])].sort((a, b) => {
+    const aActivity = new Date(getTicketActivity(a.id).latestActivityAt || a.updated_at || a.created_at || 0).getTime();
+    const bActivity = new Date(getTicketActivity(b.id).latestActivityAt || b.updated_at || b.created_at || 0).getTime();
+    return bActivity - aActivity;
+  });
+}
+
+function ticketMessageSearchText(ticket) {
+  return [
+    ticket.ticket_number,
+    ticket.customer_name,
+    ticket.customer_email,
+    ticket.customer_phone,
+    serviceLabel(ticket.service),
+    statusLabel(ticket.status),
+    ticket.summary,
+    JSON.stringify(ticket.details || {})
+  ].join(" ").toLowerCase();
+}
+
+function getDashboardMessagesCenterFilteredTickets() {
+  const search = String(document.querySelector("#dashboardMessagesSearchInput")?.value || "").trim().toLowerCase();
+  const tickets = getDashboardMessagesCenterTickets();
+  if (!search) return tickets;
+  return tickets.filter(ticket => ticketMessageSearchText(ticket).includes(search));
+}
+
+function dashboardTicketContactLine(ticket) {
+  const parts = [];
+  if (ticket?.customer_email) parts.push(ticket.customer_email);
+  if (ticket?.customer_phone) parts.push(ticket.customer_phone);
+  return parts.length ? parts.join(" · ") : "Keine direkte Kontaktangabe";
+}
+
+function renderDashboardMessageTicketCard(ticket) {
+  const activity = getTicketActivity(ticket.id);
+  const isActive = ticket.id === dashboardSelectedMessageRequestId;
+  const countLabel = activity.customerMessages > 0
+    ? `${activity.customerMessages} Kundennachricht${activity.customerMessages === 1 ? "" : "en"}`
+    : "Keine Kundennachricht";
+
+  return `
+    <button class="dashboard-message-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-message-ticket-id="${escapeHtml(ticket.id)}">
+      <span class="message-ticket-topline">
+        <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+        <em>${escapeHtml(statusLabel(ticket.status))}</em>
+      </span>
+      <span class="message-ticket-person">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</span>
+      <span class="message-ticket-meta">
+        <small>${escapeHtml(serviceLabel(ticket.service))}</small>
+        <small>${escapeHtml(countLabel)}</small>
+      </span>
+      <span class="message-ticket-date">${escapeHtml(formatDashboardDate(activity.latestActivityAt || ticket.updated_at || ticket.created_at))}</span>
+    </button>
+  `;
+}
+
+function renderDashboardMessagesCenterList(tickets) {
+  const list = document.querySelector("#dashboardMessagesCenterList");
+  const count = document.querySelector("#dashboardMessagesCenterCount");
+  if (!list) return;
+
+  const rows = Array.isArray(tickets) ? tickets : [];
+  if (count) count.textContent = `${rows.length} Gespräch${rows.length === 1 ? "" : "e"}`;
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Keine passenden Gespräche gefunden</strong>
+        <p>Suche anpassen oder über die Ticketliste einen Auftrag prüfen.</p>
+      </div>
+    `;
+    renderDashboardMessageThreadEmpty("Kein Gespräch ausgewählt", "Zu dieser Suche wurde kein Auftrag gefunden.");
+    return;
+  }
+
+  const selectedStillVisible = dashboardSelectedMessageRequestId && rows.some(ticket => ticket.id === dashboardSelectedMessageRequestId);
+  if (!selectedStillVisible) {
+    dashboardSelectedMessageRequestId = rows[0]?.id || null;
+  }
+
+  list.innerHTML = rows.map(renderDashboardMessageTicketCard).join("");
+}
+
+function renderDashboardMessageThreadEmpty(title = "Kein Gespräch ausgewählt", text = "Wählen Sie links einen Auftrag aus, um Nachrichten zu lesen und zu antworten.") {
+  const head = document.querySelector("#dashboardMessagesThreadHead");
+  const contact = document.querySelector("#dashboardMessagesContactStrip");
+  const thread = document.querySelector("#dashboardMessagesThread");
+  const textInput = document.querySelector("#dashboardMessagesReplyText");
+  const button = document.querySelector("#dashboardMessagesReplyButton");
+
+  if (head) {
+    head.innerHTML = `
+      <div>
+        <p class="eyebrow">Gespräch</p>
+        <h3>${escapeHtml(title)}</h3>
+      </div>
+      <span class="status-pill">—</span>
+    `;
+  }
+  if (contact) contact.innerHTML = `<span>${escapeHtml(text)}</span>`;
+  if (thread) {
+    thread.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>${escapeHtml(title)}</strong>
+        <p>${escapeHtml(text)}</p>
+      </div>
+    `;
+  }
+  if (textInput) textInput.disabled = true;
+  if (button) button.disabled = true;
+  setDashboardMessagesReplyMessage("", "Bitte zuerst einen Auftrag auswählen.");
+}
+
+function setDashboardMessagesReplyMessage(type, text) {
+  const message = document.querySelector("#dashboardMessagesReplyMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function renderDashboardMessageThread(ticket, messages = []) {
+  const head = document.querySelector("#dashboardMessagesThreadHead");
+  const contact = document.querySelector("#dashboardMessagesContactStrip");
+  const thread = document.querySelector("#dashboardMessagesThread");
+  const textInput = document.querySelector("#dashboardMessagesReplyText");
+  const button = document.querySelector("#dashboardMessagesReplyButton");
+
+  if (!ticket?.id) {
+    renderDashboardMessageThreadEmpty();
+    return;
+  }
+
+  const publicMessages = (messages || [])
+    .filter(message => !message.is_internal)
+    .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+
+  if (head) {
+    head.innerHTML = `
+      <div>
+        <p class="eyebrow">${escapeHtml(serviceLabel(ticket.service))}</p>
+        <h3>${escapeHtml(ticket.ticket_number || "Ticket")}</h3>
+      </div>
+      <span class="status-pill">${escapeHtml(statusLabel(ticket.status))}</span>
+    `;
+  }
+
+  if (contact) {
+    contact.innerHTML = `
+      <article>
+        <span>Kunde</span>
+        <strong>${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</strong>
+      </article>
+      <article>
+        <span>Kontakt</span>
+        <strong>${escapeHtml(dashboardTicketContactLine(ticket))}</strong>
+      </article>
+      <article>
+        <span>Auftrag</span>
+        <strong>${escapeHtml(serviceLabel(ticket.service))}</strong>
+      </article>
+    `;
+  }
+
+  if (thread) {
+    thread.innerHTML = publicMessages.length
+      ? publicMessages.map(message => {
+          const isTeam = message.sender_type === "team" || message.sender_type === "system";
+          return `
+            <article class="dashboard-chat-bubble ${isTeam ? "team" : "customer"}">
+              <div>
+                <strong>${escapeHtml(senderTypeLabel(message.sender_type))}</strong>
+                <span>${escapeHtml(message.sender_name || "—")} · ${escapeHtml(formatDashboardDate(message.created_at))}</span>
+              </div>
+              <p>${escapeHtml(message.message || "—")}</p>
+            </article>
+          `;
+        }).join("")
+      : `
+        <div class="dashboard-mini-empty">
+          <strong>Noch kein öffentlicher Nachrichtenverlauf</strong>
+          <p>Sie können dem Kunden hier direkt eine erste Antwort zum Auftrag senden.</p>
+        </div>
+      `;
+  }
+
+  if (textInput) textInput.disabled = false;
+  if (button) button.disabled = false;
+  setDashboardMessagesReplyMessage("", "Antworten sind für Kunden sichtbar und werden dem Auftrag zugeordnet.");
+}
+
+async function loadDashboardMessagesCenterThread(ticket) {
+  if (!ticket?.id || !dashboardCurrentSession) {
+    renderDashboardMessageThreadEmpty();
+    return;
+  }
+
+  const loadId = ++dashboardMessagesCenterLoadId;
+  const thread = document.querySelector("#dashboardMessagesThread");
+  if (thread) {
+    thread.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Nachrichten werden geladen …</strong>
+        <p>Der Nachrichtenverlauf wird aus Supabase geladen.</p>
+      </div>
+    `;
+  }
+
+  try {
+    const messages = await fetchDashboardMessages(dashboardCurrentSession, ticket.id);
+    if (loadId !== dashboardMessagesCenterLoadId || dashboardSelectedMessageRequestId !== ticket.id) return;
+    renderDashboardMessageThread(ticket, messages);
+    markDashboardTicketSeen(ticket.id);
+    renderDashboardMessagesCenterList(getDashboardMessagesCenterFilteredTickets());
+    updateDashboardActivityStats(dashboardAllRequestCache);
+  } catch (error) {
+    if (loadId !== dashboardMessagesCenterLoadId) return;
+    if (thread) {
+      thread.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Nachrichten konnten nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+function selectDashboardMessageTicket(ticketId) {
+  const ticket = getDashboardTicketByIdOrNumber(ticketId);
+  if (!ticket?.id) {
+    renderDashboardMessageThreadEmpty();
+    return;
+  }
+
+  dashboardSelectedMessageRequestId = ticket.id;
+  document.querySelectorAll("#dashboardMessagesCenterList [data-message-ticket-id]").forEach(button => {
+    button.classList.toggle("active", button.dataset.messageTicketId === ticket.id);
+  });
+  loadDashboardMessagesCenterThread(ticket);
+}
+
+function renderDashboardMessagesCenter() {
+  const tickets = getDashboardMessagesCenterFilteredTickets();
+  renderDashboardMessagesCenterList(tickets);
+
+  const ticket = getDashboardTicketByIdOrNumber(dashboardSelectedMessageRequestId) || tickets[0] || null;
+  if (ticket?.id) {
+    dashboardSelectedMessageRequestId = ticket.id;
+    selectDashboardMessageTicket(ticket.id);
+  } else {
+    renderDashboardMessageThreadEmpty();
+  }
 }
 
 
@@ -5372,7 +5642,7 @@ function pageDashboard() {
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
-            <a href="#dashboard-messages" data-dashboard-view-trigger="overview">Nachrichten</a>
+            <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
             <a href="#dashboard-status-history" data-dashboard-view-trigger="overview">Statusverlauf</a>
           </nav>
@@ -5410,6 +5680,65 @@ function pageDashboard() {
             <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
             <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfragen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
+          </section>
+
+
+          <section class="dashboard-panel dashboard-messages-center is-hidden" id="dashboardMessagesCenter" data-dashboard-view="messages">
+            <div class="panel-head dashboard-messages-center-head">
+              <div>
+                <p class="eyebrow">Nachrichten</p>
+                <h2>Nachrichten-Zentrale</h2>
+                <p class="dashboard-calendar-intro">
+                  Kompakte Kundenkommunikation pro Auftrag. Links Auftrag auswählen, rechts Verlauf lesen und dem Kunden antworten.
+                </p>
+              </div>
+              <span class="status-pill" id="dashboardMessagesCenterCount">0 Gespräche</span>
+            </div>
+
+            <div class="dashboard-message-workspace">
+              <aside class="dashboard-message-list-panel">
+                <div class="dashboard-message-list-tools">
+                  <input id="dashboardMessagesSearchInput" type="search" placeholder="Suche nach Ticket, Kunde, E-Mail oder Telefon">
+                </div>
+                <div class="dashboard-message-ticket-list" id="dashboardMessagesCenterList">
+                  <div class="dashboard-empty-state">
+                    <strong>Nachrichten werden nach Login geladen …</strong>
+                    <p>Aufträge mit Kundenkontakt erscheinen hier.</p>
+                  </div>
+                </div>
+              </aside>
+
+              <article class="dashboard-message-thread-panel">
+                <div class="dashboard-message-thread-head" id="dashboardMessagesThreadHead">
+                  <div>
+                    <p class="eyebrow">Gespräch</p>
+                    <h3>Auftrag auswählen</h3>
+                  </div>
+                  <span class="status-pill">—</span>
+                </div>
+
+                <div class="dashboard-message-contact-strip" id="dashboardMessagesContactStrip">
+                  <span>Wählen Sie links einen Auftrag aus, um Kontakt und Nachrichtenverlauf zu sehen.</span>
+                </div>
+
+                <div class="dashboard-message-thread" id="dashboardMessagesThread">
+                  <div class="dashboard-mini-empty">
+                    <strong>Kein Gespräch ausgewählt</strong>
+                    <p>Nachrichten werden kompakt und chronologisch angezeigt.</p>
+                  </div>
+                </div>
+
+                <form class="dashboard-message-composer" id="dashboardMessagesReplyForm">
+                  <label>Antwort an Kunden
+                    <textarea id="dashboardMessagesReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde im Kundenportal/Statusbereich sehen kann …" disabled></textarea>
+                  </label>
+                  <div class="dashboard-message-composer-actions">
+                    <p class="dashboard-note-message" id="dashboardMessagesReplyMessage">Bitte zuerst einen Auftrag auswählen.</p>
+                    <button class="btn primary" type="submit" id="dashboardMessagesReplyButton" disabled>Antwort senden <span>›</span></button>
+                  </div>
+                </form>
+              </article>
+            </div>
           </section>
 
           <section class="dashboard-panel dashboard-customers-manager is-hidden" id="dashboardCustomersManager" data-dashboard-view="customers">
@@ -9366,7 +9695,7 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "customers", "trailer-calendar"];
+  const allowedViews = ["overview", "archive", "customers", "trailer-calendar", "messages"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
@@ -9387,6 +9716,9 @@ function setDashboardView(view = "overview") {
   if (normalized === "customers") {
     renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
   }
+  if (normalized === "messages") {
+    renderDashboardMessagesCenter();
+  }
 }
 
 function bindDashboardShell() {
@@ -9405,6 +9737,11 @@ function bindDashboardShell() {
   const archiveRestoreButton = document.querySelector("#dashboardArchiveRestoreButton");
   const archiveDeleteButton = document.querySelector("#dashboardArchiveDeleteButton");
   const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
+  const dashboardMessagesSearchInput = document.querySelector("#dashboardMessagesSearchInput");
+  const dashboardMessagesCenterList = document.querySelector("#dashboardMessagesCenterList");
+  const dashboardMessagesReplyForm = document.querySelector("#dashboardMessagesReplyForm");
+  const dashboardMessagesReplyText = document.querySelector("#dashboardMessagesReplyText");
+  const dashboardMessagesReplyButton = document.querySelector("#dashboardMessagesReplyButton");
 
   bindDashboardActionDirectGuard();
   bindDashboardCustomerAccounts();
@@ -9698,6 +10035,54 @@ function bindDashboardShell() {
       setDashboardInternalNoteMessage("error", error.message || "Interne Notiz konnte nicht gespeichert werden.");
     } finally {
       if (noteButton) noteButton.disabled = !dashboardSelectedRequestId;
+    }
+  });
+
+  dashboardMessagesSearchInput?.addEventListener("input", () => renderDashboardMessagesCenter());
+
+  dashboardMessagesCenterList?.addEventListener("click", event => {
+    const button = event.target.closest("[data-message-ticket-id]");
+    if (!button) return;
+    selectDashboardMessageTicket(button.dataset.messageTicketId);
+  });
+
+  dashboardMessagesReplyForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const ticket = getDashboardTicketByIdOrNumber(dashboardSelectedMessageRequestId);
+    const text = String(dashboardMessagesReplyText?.value || "").trim();
+
+    if (!ticket?.id) {
+      setDashboardMessagesReplyMessage("error", "Bitte zuerst einen Auftrag auswählen.");
+      return;
+    }
+
+    if (!text) {
+      setDashboardMessagesReplyMessage("error", "Bitte eine Antwort an den Kunden eintragen.");
+      return;
+    }
+
+    if (dashboardMessagesReplyButton) dashboardMessagesReplyButton.disabled = true;
+    setDashboardMessagesReplyMessage("loading", "Antwort wird gespeichert …");
+
+    try {
+      await createDashboardCustomerReply(
+        dashboardCurrentSession,
+        ticket.id,
+        text,
+        dashboardCurrentEmployeeProfile
+      );
+
+      if (dashboardMessagesReplyText) dashboardMessagesReplyText.value = "";
+      setDashboardMessagesReplyMessage("success", "Antwort wurde gespeichert und ist für den Kunden sichtbar.");
+      await fetchDashboardActivitySummary(dashboardCurrentSession, dashboardAllRequestCache);
+      renderDashboardMessagesCenterList(getDashboardMessagesCenterFilteredTickets());
+      await loadDashboardMessagesCenterThread(ticket);
+      updateDashboardActivityStats(dashboardAllRequestCache);
+    } catch (error) {
+      setDashboardMessagesReplyMessage("error", error.message || "Antwort konnte nicht gespeichert werden.");
+    } finally {
+      if (dashboardMessagesReplyButton) dashboardMessagesReplyButton.disabled = !dashboardSelectedMessageRequestId;
     }
   });
 

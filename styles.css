@@ -7449,11 +7449,18 @@ button.calendar-day {
   text-transform: uppercase;
 }
 
+.customer-status-badge.status-in_pruefung,
 .customer-status-badge.status-rueckfrage_offen {
   color: #8a5a00;
   background: rgba(255,183,77,.22);
 }
 
+.customer-status-badge.status-in_bearbeitung {
+  color: #075e58;
+  background: rgba(10,169,155,.16);
+}
+
+.customer-status-badge.status-abgeschlossen,
 .customer-status-badge.status-erledigt {
   color: #08786f;
   background: rgba(10,169,155,.16);
@@ -9528,22 +9535,26 @@ body.modal-open {
   gap: 5px;
 }
 
+.object-status-in_bearbeitung,
 .object-status-in_progress {
   color: #075e58;
   background: rgba(10,169,155,.18);
 }
 
+.object-status-neu,
 .object-status-assigned,
 .object-status-planned {
   color: #0b4e80;
   background: rgba(83,173,255,.14);
 }
 
+.object-status-abgeschlossen,
 .object-status-completed {
   color: #0b766e;
   background: rgba(10,169,155,.14);
 }
 
+.object-status-in_pruefung,
 .object-status-paused,
 .object-status-cancelled {
   color: #8a5a00;

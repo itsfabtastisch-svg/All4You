@@ -225,21 +225,49 @@ function serviceLabel(service) {
   return labels[service] || service || "Unbekannt";
 }
 
+function normalizeGlobalStatus(status) {
+  const clean = String(status || "").trim().toLowerCase();
+  const map = {
+    neu: "neu",
+    new: "neu",
+    planned: "neu",
+    draft: "neu",
+    in_bearbeitung: "in_bearbeitung",
+    assigned: "in_bearbeitung",
+    in_progress: "in_bearbeitung",
+    angebot_vorbereitet: "in_bearbeitung",
+    angebot_gesendet: "in_bearbeitung",
+    termin_vorgeschlagen: "in_bearbeitung",
+    termin_bestaetigt: "in_bearbeitung",
+    rueckfrage_offen: "in_pruefung",
+    rueckfrage: "in_pruefung",
+    rueckfragen: "in_pruefung",
+    in_pruefung: "in_pruefung",
+    review: "in_pruefung",
+    report_submitted: "in_pruefung",
+    submitted: "in_pruefung",
+    waiting_for_admin: "in_pruefung",
+    erledigt: "abgeschlossen",
+    abgeschlossen: "abgeschlossen",
+    completed: "abgeschlossen",
+    approved: "abgeschlossen",
+    storniert: "abgeschlossen",
+    cancelled: "abgeschlossen",
+    archived: "archived",
+  };
+  return map[clean] || "neu";
+}
+
 function statusLabel(status) {
   const labels = {
-    neu: "Neu",
-    in_pruefung: "In Bearbeitung",
-    rueckfrage_offen: "Rückfragen",
-    angebot_vorbereitet: "In Bearbeitung",
-    angebot_gesendet: "In Bearbeitung",
-    termin_vorgeschlagen: "In Bearbeitung",
-    termin_bestaetigt: "In Bearbeitung",
-    in_bearbeitung: "In Bearbeitung",
-    erledigt: "Abgeschlossen",
-    storniert: "Storniert"
+    neu: "NEU",
+    in_bearbeitung: "IN BEARBEITUNG",
+    in_pruefung: "IN PRÜFUNG",
+    abgeschlossen: "ABGESCHLOSSEN",
+    archived: "Archiviert",
   };
 
-  return labels[status] || status || "Unbekannt";
+  return labels[normalizeGlobalStatus(status)] || "NEU";
 }
 
 /* ========================================================================== 
@@ -250,20 +278,21 @@ function statusLabel(status) {
    für Filter/Anzeige sauber auf diese vier Gruppen gemappt.
    ========================================================================== */
 
-const DASHBOARD_PRIMARY_STATUSES = ["neu", "in_bearbeitung", "rueckfrage_offen", "erledigt"];
+const DASHBOARD_PRIMARY_STATUSES = ["neu", "in_bearbeitung", "in_pruefung", "erledigt"];
 
 const DASHBOARD_STATUS_GROUPS = {
-  neu: ["neu"],
+  neu: ["neu", "planned", "draft"],
   in_bearbeitung: [
     "in_bearbeitung",
-    "in_pruefung",
+    "assigned",
+    "in_progress",
     "angebot_vorbereitet",
     "angebot_gesendet",
     "termin_vorgeschlagen",
     "termin_bestaetigt"
   ],
-  rueckfrage_offen: ["rueckfrage_offen", "rueckfrage", "rueckfragen"],
-  erledigt: ["erledigt", "abgeschlossen"]
+  in_pruefung: ["in_pruefung", "rueckfrage_offen", "rueckfrage", "rueckfragen", "review", "report_submitted", "submitted", "waiting_for_admin"],
+  erledigt: ["erledigt", "abgeschlossen", "completed", "approved", "storniert", "cancelled"]
 };
 
 function normalizeDashboardStatusOption(status) {
@@ -635,7 +664,7 @@ function updateDashboardStats(tickets) {
   const list = tickets || [];
   const totalNew = list.filter(ticket => dashboardStatusMatches(ticket.status, "neu")).length;
   const inReview = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_bearbeitung")).length;
-  const openQuestions = list.filter(ticket => dashboardStatusMatches(ticket.status, "rueckfrage_offen")).length;
+  const openQuestions = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_pruefung")).length;
   const done = list.filter(ticket => dashboardStatusMatches(ticket.status, "erledigt")).length;
   const archived = dashboardArchiveCache.length;
 
@@ -3497,20 +3526,7 @@ function setCustomerReplyMessage(type, text) {
 }
 
 function publicStatusStepLabel(status) {
-  const labels = {
-    neu: "Anfrage eingegangen",
-    in_pruefung: "In Prüfung",
-    rueckfrage_offen: "Rückfrage offen",
-    angebot_vorbereitet: "Angebot wird vorbereitet",
-    angebot_gesendet: "Angebot gesendet",
-    termin_vorgeschlagen: "Termin vorgeschlagen",
-    termin_bestaetigt: "Termin bestätigt",
-    in_bearbeitung: "In Bearbeitung",
-    erledigt: "Erledigt",
-    storniert: "Storniert"
-  };
-
-  return labels[status] || statusLabel(status);
+  return statusLabel(status);
 }
 
 function renderPublicStatusMessageList(messages) {
@@ -4315,7 +4331,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+// DBG: ALL4YOU-V6.10.0-OBJECTPORTAL-STATUS-LOGIC
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -6300,7 +6316,7 @@ function pageDashboard() {
             <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
-            <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfragen</small></article>
+            <article><span>In Prüfung</span><strong id="dashboardStatQuestions">0</strong><small>warten auf Prüfung</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
           </section>
 
@@ -6716,7 +6732,7 @@ function pageDashboard() {
                   <button class="active" type="button" data-filter="all">Alle</button>
                   <button type="button" data-filter="neu">Neu</button>
                   <button type="button" data-filter="in_bearbeitung">In Bearbeitung</button>
-                  <button type="button" data-filter="rueckfrage_offen">Rückfrage</button>
+                  <button type="button" data-filter="in_pruefung">In Prüfung</button>
                   <button type="button" data-filter="activity">Neue Aktivität</button>
                 </div>
               </div>
@@ -6734,7 +6750,7 @@ function pageDashboard() {
                   <option value="all">Alle Status</option>
                   <option value="neu">Neu</option>
                   <option value="in_bearbeitung">In Bearbeitung</option>
-                  <option value="rueckfrage_offen">Rückfragen</option>
+                  <option value="in_pruefung">In Prüfung</option>
                   <option value="erledigt">Abgeschlossen</option>
                 </select>
                 <select id="dashboardSortSelect" aria-label="Sortierung">
@@ -7531,7 +7547,7 @@ function pageCustomerPortal() {
           <section class="customer-portal-overview" id="customerPortalOverviewStats" aria-label="Kundenportal Übersicht">
             <article><span>Aufträge</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>Aktiv</span><strong>—</strong><small>werden geladen</small></article>
-            <article><span>Rückfragen</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>In Prüfung</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>Abgeschlossen</span><strong>—</strong><small>werden geladen</small></article>
           </section>
 
@@ -11137,18 +11153,18 @@ function setCustomerPortalMessage(type, text) {
 }
 
 function isCustomerPortalDoneStatus(status) {
-  return ["erledigt", "storniert"].includes(String(status || ""));
+  return normalizeGlobalStatus(status) === "abgeschlossen";
 }
 
 function isCustomerPortalActiveStatus(status) {
-  return Boolean(status) && !isCustomerPortalDoneStatus(status);
+  return ["in_bearbeitung", "in_pruefung"].includes(normalizeGlobalStatus(status));
 }
 
 function getCustomerPortalStats(requests = customerPortalRequests) {
   const rows = Array.isArray(requests) ? requests : [];
   const active = rows.filter(ticket => isCustomerPortalActiveStatus(ticket.status)).length;
-  const review = rows.filter(ticket => ["neu", "in_pruefung", "angebot_vorbereitet"].includes(String(ticket.status || ""))).length;
-  const openQuestions = rows.filter(ticket => String(ticket.status || "") === "rueckfrage_offen").length;
+  const review = rows.filter(ticket => normalizeGlobalStatus(ticket.status) === "in_pruefung").length;
+  const openQuestions = review;
   const done = rows.filter(ticket => isCustomerPortalDoneStatus(ticket.status)).length;
   const latest = rows
     .map(ticket => ticket.updated_at || ticket.created_at)
@@ -11173,8 +11189,8 @@ function getCustomerPortalCombinedStats(requests = customerPortalRequests, objec
     tickets: requestStats.total,
     objectJobs: objectJobs.length,
     total: requestStats.total + objectJobs.length,
-    active: requestStats.active + objectStats.active + objectStats.planned,
-    openQuestions: requestStats.openQuestions,
+    active: requestStats.active + objectStats.active,
+    openQuestions: requestStats.openQuestions + objectStats.inReview,
     done: requestStats.done + objectStats.completed,
     latest
   };
@@ -11191,7 +11207,7 @@ function renderCustomerPortalOverviewStats(requests = customerPortalRequests, ob
   box.innerHTML = `
     <article><span>Aufträge</span><strong>${stats.total}</strong><small>${escapeHtml(totalHint)}</small></article>
     <article><span>Aktiv</span><strong>${stats.active}</strong><small>laufende/geplante Vorgänge</small></article>
-    <article class="${stats.openQuestions ? "attention" : ""}"><span>Rückfragen</span><strong>${stats.openQuestions}</strong><small>${stats.openQuestions ? "bitte prüfen" : "keine offen"}</small></article>
+    <article class="${stats.openQuestions ? "attention" : ""}"><span>In Prüfung</span><strong>${stats.openQuestions}</strong><small>${stats.openQuestions ? "wartet auf Prüfung" : "keine offen"}</small></article>
     <article><span>Abgeschlossen</span><strong>${stats.done}</strong><small>${stats.latest ? "letzte Änderung: " + escapeHtml(formatDashboardDate(stats.latest)) : "noch keine Daten"}</small></article>
   `;
 }
@@ -11201,7 +11217,7 @@ function renderCustomerPortalSideSummary(requests = customerPortalRequests, obje
   if (!box) return;
   const stats = getCustomerPortalCombinedStats(requests, objects);
   const nextAction = stats.openQuestions > 0
-    ? `${stats.openQuestions} Rückfrage${stats.openQuestions === 1 ? "" : "n"} offen`
+    ? `${stats.openQuestions} Vorgang${stats.openQuestions === 1 ? "" : "e"} in Prüfung`
     : stats.active > 0
       ? `${stats.active} aktive/geplante Vorgänge`
       : stats.total > 0
@@ -11215,13 +11231,11 @@ function renderCustomerPortalSideSummary(requests = customerPortalRequests, obje
 }
 
 function getCustomerPortalStageIndex(status) {
-  const clean = String(status || "");
-  if (clean === "storniert") return -1;
-  if (["neu"].includes(clean)) return 0;
-  if (["in_pruefung", "rueckfrage_offen"].includes(clean)) return 1;
-  if (["angebot_vorbereitet", "angebot_gesendet", "termin_vorgeschlagen"].includes(clean)) return 2;
-  if (["termin_bestaetigt", "in_bearbeitung"].includes(clean)) return 3;
-  if (["erledigt"].includes(clean)) return 4;
+  const clean = normalizeGlobalStatus(status);
+  if (clean === "neu") return 0;
+  if (clean === "in_bearbeitung") return 1;
+  if (clean === "in_pruefung") return 2;
+  if (clean === "abgeschlossen") return 3;
   return 0;
 }
 
@@ -11235,10 +11249,8 @@ function renderCustomerPortalProgress(ticket) {
   }
 
   const current = getCustomerPortalStageIndex(ticket.status);
-  const isCancelled = String(ticket.status || "") === "storniert";
-  const steps = isCancelled
-    ? ["Eingegangen", "Geprüft", "Storniert"]
-    : ["Eingang", "Prüfung", "Abstimmung", "Bearbeitung", "Abschluss"];
+  const isCancelled = false;
+  const steps = ["NEU", "IN BEARBEITUNG", "IN PRÜFUNG", "ABGESCHLOSSEN"];
 
   box.innerHTML = `
     <div class="customer-progress-head">
@@ -11303,16 +11315,7 @@ function objectAddress(object = {}) {
 }
 
 function formatCustomerObjectJobStatus(value) {
-  const map = {
-    planned: "Geplant",
-    assigned: "Zugewiesen",
-    in_progress: "In Arbeit",
-    completed: "Abgeschlossen",
-    paused: "Pausiert",
-    cancelled: "Storniert",
-    archived: "Archiviert"
-  };
-  return map[String(value || "planned").toLowerCase()] || statusLabel(value) || "Geplant";
+  return statusLabel(value);
 }
 
 function getCustomerPortalObjectUnits(object = {}) {
@@ -11320,13 +11323,13 @@ function getCustomerPortalObjectUnits(object = {}) {
 }
 
 function getCustomerPortalObjectJobs(object = {}) {
-  return (Array.isArray(object.jobs) ? object.jobs : []).filter(job => String(job.status || "planned") !== "archived");
+  return (Array.isArray(object.jobs) ? object.jobs : []).filter(job => normalizeGlobalStatus(job.status || "neu") !== "archived");
 }
 
 function getCustomerPortalNextJob(jobs = []) {
   const now = new Date();
   return [...jobs]
-    .filter(job => ["planned", "assigned", "in_progress"].includes(String(job.status || "planned")))
+    .filter(job => ["neu", "in_bearbeitung"].includes(normalizeGlobalStatus(job.status || "neu")))
     .sort((a, b) => {
       const aDate = a.planned_date ? new Date(a.planned_date) : now;
       const bDate = b.planned_date ? new Date(b.planned_date) : now;
@@ -11336,38 +11339,38 @@ function getCustomerPortalNextJob(jobs = []) {
 
 function getCustomerPortalLastJob(jobs = []) {
   return [...jobs]
-    .filter(job => String(job.status || "") === "completed" || job.finished_at || job.started_at || job.planned_date)
+    .filter(job => normalizeGlobalStatus(job.status) === "abgeschlossen" || job.finished_at || job.started_at || job.planned_date)
     .sort((a, b) => new Date(b.finished_at || b.started_at || b.planned_date || b.created_at || 0) - new Date(a.finished_at || a.started_at || a.planned_date || a.created_at || 0))[0] || null;
 }
 
 function getCustomerPortalObjectState(object = {}) {
   const jobs = getCustomerPortalObjectJobs(object);
-  const active = jobs.find(job => String(job.status || "") === "in_progress");
+  const active = jobs.find(job => normalizeGlobalStatus(job.status) === "in_bearbeitung");
   if (active) {
     return {
-      key: "in_progress",
-      label: "In Arbeit",
-      hint: active.latest_checkin_at ? `Mitarbeiter vor Ort seit ${formatDashboardDate(active.latest_checkin_at)}` : "Mitarbeiter vor Ort",
+      key: "in_bearbeitung",
+      label: "IN BEARBEITUNG",
+      hint: active.latest_checkin_at ? `Mitarbeiter vor Ort seit ${formatDashboardDate(active.latest_checkin_at)}` : "Einsatz ist aktiv oder vorbereitet",
       job: active
     };
   }
 
-  const assigned = jobs.find(job => String(job.status || "") === "assigned");
-  if (assigned) {
-    return { key: "assigned", label: "Zugewiesen", hint: assigned.planned_date ? `Geplant: ${formatDashboardDate(assigned.planned_date)}` : "Einsatz zugewiesen", job: assigned };
+  const review = jobs.find(job => normalizeGlobalStatus(job.status) === "in_pruefung");
+  if (review) {
+    return { key: "in_pruefung", label: "IN PRÜFUNG", hint: "Einsatz wurde eingereicht und wartet auf Prüfung durch All4You.", job: review };
   }
 
   const next = getCustomerPortalNextJob(jobs);
   if (next) {
-    return { key: "planned", label: "Geplant", hint: next.planned_date ? `Nächster Einsatz: ${formatDashboardDate(next.planned_date)}` : "Einsatz vorbereitet", job: next };
+    return { key: "neu", label: "NEU", hint: next.planned_date ? `Nächster Einsatz: ${formatDashboardDate(next.planned_date)}` : "Einsatz wurde vorbereitet", job: next };
   }
 
-  const completed = jobs.find(job => String(job.status || "") === "completed");
+  const completed = jobs.find(job => normalizeGlobalStatus(job.status) === "abgeschlossen");
   if (completed) {
-    return { key: "completed", label: "Abgeschlossen", hint: completed.finished_at ? `Letzter Abschluss: ${formatDashboardDate(completed.finished_at)}` : "Letzter Einsatz abgeschlossen", job: completed };
+    return { key: "abgeschlossen", label: "ABGESCHLOSSEN", hint: completed.finished_at ? `Letzter Abschluss: ${formatDashboardDate(completed.finished_at)}` : "Letzter Einsatz abgeschlossen", job: completed };
   }
 
-  return { key: "active", label: "Aktiv", hint: "Objekt ist im System hinterlegt", job: null };
+  return { key: "neu", label: "NEU", hint: "Objekt ist im System hinterlegt", job: null };
 }
 
 function getCustomerPortalObjectStats(objects = customerPortalObjects) {
@@ -11376,9 +11379,10 @@ function getCustomerPortalObjectStats(objects = customerPortalObjects) {
   return {
     objects: rows.length,
     units: rows.reduce((sum, object) => sum + getCustomerPortalObjectUnits(object).length, 0),
-    active: jobs.filter(job => String(job.status || "") === "in_progress").length,
-    planned: jobs.filter(job => ["planned", "assigned"].includes(String(job.status || "planned"))).length,
-    completed: jobs.filter(job => String(job.status || "") === "completed").length,
+    neu: jobs.filter(job => normalizeGlobalStatus(job.status) === "neu").length,
+    active: jobs.filter(job => normalizeGlobalStatus(job.status) === "in_bearbeitung").length,
+    inReview: jobs.filter(job => normalizeGlobalStatus(job.status) === "in_pruefung").length,
+    completed: jobs.filter(job => normalizeGlobalStatus(job.status) === "abgeschlossen").length,
   };
 }
 
@@ -11445,7 +11449,7 @@ function renderCustomerPortalObjectDetail(object) {
           <span>${escapeHtml(job.planned_date ? formatDashboardDate(job.planned_date) : "Datum noch offen")}</span>
         </div>
         <div class="customer-object-job-meta">
-          <em class="customer-status-badge object-status-${escapeHtml(String(job.status || "planned").replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(formatCustomerObjectJobStatus(job.status))}</em>
+          <em class="customer-status-badge object-status-${escapeHtml(normalizeGlobalStatus(job.status).replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(formatCustomerObjectJobStatus(job.status))}</em>
           ${photoCount ? `<small>${photoCount} freigegebene${photoCount === 1 ? "s" : ""} Bild${photoCount === 1 ? "" : "er"}</small>` : ""}
         </div>
       </article>
@@ -11528,7 +11532,7 @@ function renderCustomerPortalObjects(objects = customerPortalObjects) {
   if (hint) {
     hint.innerHTML = stats.active
       ? `<strong>Aktuell in Arbeit</strong><span>${stats.active} Objekt${stats.active === 1 ? "" : "e"} mit laufendem Einsatz.</span>`
-      : `<strong>Objektübersicht</strong><span>${stats.units} Bereich${stats.units === 1 ? "" : "e"} · ${stats.planned} geplant · ${stats.completed} abgeschlossen</span>`;
+      : `<strong>Objektübersicht</strong><span>${stats.units} Bereich${stats.units === 1 ? "" : "e"} · ${stats.neu} neu · ${stats.completed} abgeschlossen</span>`;
   }
 
   if (!rows.some(object => object.id === customerPortalSelectedObjectId)) {
@@ -11595,7 +11599,7 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
           <small>${escapeHtml(ticket.summary || ticket.subject || "Ihre Anfrage bei All4You")}</small>
         </span>
         <span class="customer-ticket-foot">
-          <em class="customer-status-badge status-${escapeHtml(String(ticket.status || "unknown").replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(statusLabel(ticket.status))}</em>
+          <em class="customer-status-badge status-${escapeHtml(normalizeGlobalStatus(ticket.status).replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(statusLabel(ticket.status))}</em>
           <small>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</small>
           ${publicMessages.length ? `<small>${publicMessages.length} Nachricht${publicMessages.length === 1 ? "" : "en"}</small>` : ""}
         </span>

@@ -152,11 +152,6 @@ let dashboardArchiveCache = [];
 let dashboardSelectedArchiveId = null;
 let dashboardCustomerAccountsCache = [];
 let dashboardSelectedCustomerAccountId = null;
-let dashboardObjectPortalCustomersCache = [];
-let dashboardObjectPortalObjectsCache = [];
-let dashboardObjectPortalSelectedObjectId = null;
-let dashboardObjectPortalWizardStep = 1;
-const DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP = 5;
 
 
 function serviceAccentClass(service) {
@@ -1272,627 +1267,6 @@ function bindDashboardCustomerAccounts() {
   });
 }
 
-
-
-/* ==========================================================================
-   All4You ObjektPortal UX Polish V6.0.1
-   --------------------------------------------------------------------------
-   MVP: Kunden -> Objekte -> Einheiten/Bereiche -> Reinigungsintervalle.
-   QR-Code-Check-in, Bilder, Berichte und kontrollierte Kundenhinweise folgen.
-   ========================================================================== */
-
-function objectPortalStatusLabel(status) {
-  const labels = {
-    active: "Aktiv",
-    paused: "Pausiert",
-    draft: "Entwurf",
-    in_progress: "In Arbeit",
-    completed: "Abgeschlossen"
-  };
-  return labels[status] || status || "—";
-}
-
-function objectPortalPackageLabel(key) {
-  const labels = {
-    basic: "ObjektPortal Basic",
-    plus: "ObjektPortal Plus",
-    pro: "ObjektPortal Pro",
-    custom: "Individuell"
-  };
-  return labels[key] || "Nicht gesetzt";
-}
-
-function objectPortalUnitTypeLabel(type) {
-  const labels = {
-    treppenhaus: "Treppenhaus",
-    keller: "Keller",
-    eingang: "Eingang",
-    aussenbereich: "Außenbereich",
-    raum: "Raum",
-    sonstiges: "Sonstiges"
-  };
-  return labels[type] || type || "Einheit";
-}
-
-function objectPortalAddress(object) {
-  const parts = [object?.street, [object?.zip, object?.city].filter(Boolean).join(" ")].filter(Boolean);
-  return parts.length ? parts.join(", ") : "Adresse noch nicht hinterlegt";
-}
-
-function objectPortalCustomerName(customer) {
-  return customer?.display_name || customer?.company || customer?.email || "Kunde";
-}
-
-function getObjectPortalCustomerForObject(object) {
-  return dashboardObjectPortalCustomersCache.find(customer => customer.id === object?.customer_account_id) || object?.customer || null;
-}
-
-async function fetchDashboardObjectPortal(session) {
-  const data = await callDashboardRequestAdminRpc(session, "admin_list_object_portal", {});
-  return {
-    customers: Array.isArray(data?.customers) ? data.customers : [],
-    objects: Array.isArray(data?.objects) ? data.objects : [],
-    stats: data?.stats || {}
-  };
-}
-
-async function createDashboardObjectPortalObject(session, payload) {
-  const data = await callDashboardRequestAdminRpc(session, "admin_create_object_portal_object", payload);
-  if (!data?.object) throw new Error("Objekt wurde nicht bestätigt.");
-  return data.object;
-}
-
-async function createDashboardObjectPortalUnit(session, payload) {
-  const data = await callDashboardRequestAdminRpc(session, "admin_create_object_portal_unit", payload);
-  if (!data?.unit) throw new Error("Einheit wurde nicht bestätigt.");
-  return data.unit;
-}
-
-function setDashboardObjectPortalMessage(type, text) {
-  const message = document.querySelector("#dashboardObjectPortalMessage");
-  if (!message) return;
-  message.classList.remove("success", "error", "loading");
-  if (type) message.classList.add(type);
-  message.textContent = text || "";
-}
-
-function setDashboardObjectPortalUnitMessage(type, text) {
-  const message = document.querySelector("#dashboardObjectPortalUnitMessage");
-  if (!message) return;
-  message.classList.remove("success", "error", "loading");
-  if (type) message.classList.add(type);
-  message.textContent = text || "";
-}
-
-
-function setDashboardObjectPortalWizardStep(step) {
-  const modal = document.querySelector("#dashboardObjectPortalObjectModal");
-  const form = document.querySelector("#dashboardObjectPortalObjectForm");
-  if (!modal || !form) return;
-
-  dashboardObjectPortalWizardStep = Math.max(1, Math.min(DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP, Number(step) || 1));
-
-  modal.querySelectorAll("[data-object-portal-wizard-step]").forEach(section => {
-    section.classList.toggle("is-active", Number(section.dataset.objectPortalWizardStep) === dashboardObjectPortalWizardStep);
-  });
-
-  modal.querySelectorAll("[data-object-portal-wizard-progress]").forEach(item => {
-    const itemStep = Number(item.dataset.objectPortalWizardProgress);
-    item.classList.toggle("is-active", itemStep === dashboardObjectPortalWizardStep);
-    item.classList.toggle("is-done", itemStep < dashboardObjectPortalWizardStep);
-  });
-
-  const prevButton = modal.querySelector("#dashboardObjectPortalWizardPrev");
-  const nextButton = modal.querySelector("#dashboardObjectPortalWizardNext");
-  const submitButton = modal.querySelector("#dashboardObjectPortalWizardSubmit");
-
-  if (prevButton) prevButton.disabled = dashboardObjectPortalWizardStep <= 1;
-  if (nextButton) nextButton.classList.toggle("is-hidden", dashboardObjectPortalWizardStep >= DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP);
-  if (submitButton) submitButton.classList.toggle("is-hidden", dashboardObjectPortalWizardStep < DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP);
-
-  updateDashboardObjectPortalWizardSummary();
-}
-
-function updateDashboardObjectPortalWizardSummary() {
-  const form = document.querySelector("#dashboardObjectPortalObjectForm");
-  const summary = document.querySelector("#dashboardObjectPortalWizardSummary");
-  if (!form || !summary) return;
-
-  const data = new FormData(form);
-  const customerSelect = form.querySelector("#dashboardObjectPortalCustomerSelect");
-  const selectedCustomer = customerSelect?.selectedOptions?.[0]?.textContent?.trim() || "Noch nicht ausgewählt";
-  const objectName = String(data.get("name") || "Neues Objekt").trim() || "Neues Objekt";
-  const street = String(data.get("street") || "").trim();
-  const zip = String(data.get("zip") || "").trim();
-  const city = String(data.get("city") || "").trim();
-  const unitName = String(data.get("unit_name") || "").trim() || "Noch keine erste Einheit";
-  const interval = String(data.get("cleaning_interval") || "").trim() || "Intervall später ergänzen";
-  const packageKey = String(data.get("package_key") || "basic").trim();
-  const monthly = String(data.get("monthly_price") || "").trim();
-  const address = [street, [zip, city].filter(Boolean).join(" ")].filter(Boolean).join(", ") || "Adresse kann später ergänzt werden";
-
-  summary.innerHTML = `
-    <article><span>Kunde</span><strong>${escapeHtml(selectedCustomer)}</strong></article>
-    <article><span>Objekt</span><strong>${escapeHtml(objectName)}</strong><small>${escapeHtml(address)}</small></article>
-    <article><span>Paket</span><strong>${escapeHtml(objectPortalPackageLabel(packageKey))}</strong><small>${monthly ? `${escapeHtml(monthly.replace(".", ","))} € monatlich` : "Monatskosten optional"}</small></article>
-    <article><span>Erste Einheit</span><strong>${escapeHtml(unitName)}</strong><small>${escapeHtml(interval)}</small></article>
-  `;
-}
-
-function validateDashboardObjectPortalWizardStep() {
-  const form = document.querySelector("#dashboardObjectPortalObjectForm");
-  if (!form) return true;
-  const data = new FormData(form);
-
-  if (dashboardObjectPortalWizardStep === 1 && !String(data.get("customer_account_id") || "").trim()) {
-    setDashboardObjectPortalMessage("error", "Bitte zuerst ein Kundenkonto auswählen.");
-    return false;
-  }
-
-  if (dashboardObjectPortalWizardStep === 2 && !String(data.get("name") || "").trim()) {
-    setDashboardObjectPortalMessage("error", "Bitte einen Objektnamen eintragen.");
-    return false;
-  }
-
-  setDashboardObjectPortalMessage("", "Objekt wird Schritt für Schritt vorbereitet.");
-  return true;
-}
-
-function openDashboardObjectPortalWizard() {
-  const modal = document.querySelector("#dashboardObjectPortalObjectModal");
-  const form = document.querySelector("#dashboardObjectPortalObjectForm");
-  if (!modal) return;
-  modal.classList.remove("is-hidden");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("object-portal-modal-open");
-  setDashboardObjectPortalWizardStep(1);
-  window.setTimeout(() => {
-    const firstField = form?.querySelector("select, input, textarea, button");
-    firstField?.focus?.();
-  }, 50);
-}
-
-function closeDashboardObjectPortalWizard() {
-  const modal = document.querySelector("#dashboardObjectPortalObjectModal");
-  if (!modal) return;
-  modal.classList.add("is-hidden");
-  modal.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("object-portal-modal-open");
-  setDashboardObjectPortalWizardStep(1);
-}
-
-function renderDashboardObjectPortalCustomerOptions() {
-  const select = document.querySelector("#dashboardObjectPortalCustomerSelect");
-  if (!select) return;
-
-  if (!dashboardObjectPortalCustomersCache.length) {
-    select.innerHTML = `<option value="">Noch keine Kundenkonten vorhanden</option>`;
-    return;
-  }
-
-  select.innerHTML = [
-    `<option value="">Kundenkonto auswählen …</option>`,
-    ...dashboardObjectPortalCustomersCache.map(customer => `
-      <option value="${escapeHtml(customer.id)}">${escapeHtml(objectPortalCustomerName(customer))} · ${escapeHtml(customer.email || "keine E-Mail")}</option>
-    `)
-  ].join("");
-}
-
-function renderDashboardObjectPortalStats() {
-  const objects = dashboardObjectPortalObjectsCache || [];
-  const units = objects.reduce((sum, object) => sum + (Array.isArray(object.units) ? object.units.length : 0), 0);
-  const customerIds = new Set(objects.map(object => object.customer_account_id).filter(Boolean));
-
-  const stats = {
-    objectPortalStatObjects: objects.length,
-    objectPortalStatUnits: units,
-    objectPortalStatCustomers: customerIds.size
-  };
-
-  Object.entries(stats).forEach(([id, value]) => {
-    const element = document.querySelector(`#${id}`);
-    if (element) element.textContent = value;
-  });
-
-  const status = document.querySelector("#dashboardObjectPortalStatus");
-  if (status) status.textContent = `${objects.length} Objekt${objects.length === 1 ? "" : "e"}`;
-}
-
-function renderDashboardObjectPortalList(objects = dashboardObjectPortalObjectsCache) {
-  const list = document.querySelector("#dashboardObjectPortalObjectList");
-  if (!list) return;
-
-  const rows = Array.isArray(objects) ? objects : [];
-  if (!rows.length) {
-    list.innerHTML = `
-      <div class="dashboard-empty-state">
-        <strong>Noch keine Objekte</strong>
-        <p>Klicken Sie oben auf „Objekt hinzufügen“, um den geführten Objekt-Wizard zu starten.</p>
-      </div>
-    `;
-    renderDashboardObjectPortalDetail(null);
-    return;
-  }
-
-  list.innerHTML = rows.map(object => {
-    const customer = getObjectPortalCustomerForObject(object);
-    const unitCount = Array.isArray(object.units) ? object.units.length : 0;
-    const isActive = object.id === dashboardObjectPortalSelectedObjectId;
-    return `
-      <button class="dashboard-ticket object-portal-object-card ${isActive ? "active" : ""}" type="button" data-object-portal-object-id="${escapeHtml(object.id)}">
-        <span class="ticket-topline">
-          <strong>${escapeHtml(object.name || "Objekt")}</strong>
-          <em>${escapeHtml(objectPortalStatusLabel(object.status))}</em>
-        </span>
-        <span class="ticket-summary">${escapeHtml(objectPortalAddress(object))}</span>
-        <span class="object-portal-card-meta">
-          <b>${escapeHtml(objectPortalCustomerName(customer))}</b>
-          <small>${unitCount} Bereich${unitCount === 1 ? "" : "e"}</small>
-          <small>${escapeHtml(objectPortalPackageLabel(customer?.package_key))}</small>
-        </span>
-      </button>
-    `;
-  }).join("");
-
-  const selected = rows.find(object => object.id === dashboardObjectPortalSelectedObjectId);
-  renderDashboardObjectPortalDetail(selected || null);
-}
-
-function renderDashboardObjectPortalDetail(object) {
-  const title = document.querySelector("#dashboardObjectPortalDetailTitle");
-  const status = document.querySelector("#dashboardObjectPortalDetailStatus");
-  const body = document.querySelector("#dashboardObjectPortalDetailBody");
-  const unitForm = document.querySelector("#dashboardObjectPortalUnitForm");
-  const unitObjectId = document.querySelector("#dashboardObjectPortalUnitObjectId");
-
-  if (!title || !body) return;
-
-  if (!object?.id) {
-    dashboardObjectPortalSelectedObjectId = null;
-    title.textContent = "Objekt auswählen";
-    if (status) status.textContent = "Details";
-    if (unitForm) unitForm.classList.add("is-hidden");
-    if (unitObjectId) unitObjectId.value = "";
-    body.innerHTML = `
-      <div class="object-portal-detail-empty">
-        <strong>Erst auswählen, dann Details sehen</strong>
-        <p>Die Übersicht bleibt bewusst kompakt. Wählen Sie links ein Objekt aus oder starten Sie oben den Wizard für ein neues Objekt.</p>
-      </div>
-    `;
-    return;
-  }
-
-  dashboardObjectPortalSelectedObjectId = object.id;
-  const customer = getObjectPortalCustomerForObject(object);
-  const units = Array.isArray(object.units) ? object.units : [];
-  const primaryUnit = units[0] || null;
-  const monthlyPrice = customer?.monthly_price !== null && customer?.monthly_price !== undefined
-    ? `${String(customer.monthly_price).replace(".", ",")} €`
-    : "—";
-
-  title.textContent = object.name || "Objekt";
-  if (status) status.textContent = objectPortalStatusLabel(object.status);
-  if (unitForm) unitForm.classList.remove("is-hidden");
-  if (unitObjectId) unitObjectId.value = object.id;
-
-  body.innerHTML = `
-    <section class="object-portal-detail-hero compact">
-      <span>Ausgewähltes Objekt</span>
-      <h3>${escapeHtml(object.name || "Objekt")}</h3>
-      <p>${escapeHtml(objectPortalAddress(object))}</p>
-    </section>
-
-    <div class="object-portal-detail-mini-grid">
-      <article><span>Kunde</span><strong>${escapeHtml(objectPortalCustomerName(customer))}</strong></article>
-      <article><span>Bereiche</span><strong>${units.length}</strong></article>
-      <article><span>Paket</span><strong>${escapeHtml(objectPortalPackageLabel(customer?.package_key))}</strong></article>
-      <article><span>Monatlich</span><strong>${escapeHtml(monthlyPrice)}</strong></article>
-    </div>
-
-    ${primaryUnit ? `
-      <section class="object-portal-next-info">
-        <span>Erstes Intervall</span>
-        <strong>${escapeHtml(primaryUnit.name || "Einheit")}</strong>
-        <p>${escapeHtml(primaryUnit.cleaning_interval || "Intervall noch nicht hinterlegt")}</p>
-      </section>
-    ` : ""}
-
-    ${object.notes ? `
-      <details class="object-portal-details-block">
-        <summary>Interne Notiz anzeigen</summary>
-        <p>${escapeHtml(object.notes)}</p>
-      </details>
-    ` : ""}
-
-    <details class="object-portal-details-block">
-      <summary>${units.length} Einheit${units.length === 1 ? "" : "en"} / Bereich${units.length === 1 ? "" : "e"} anzeigen</summary>
-      <div class="object-portal-unit-list compact">
-        ${units.length ? units.map(unit => `
-          <article class="object-portal-unit-card">
-            <div>
-              <strong>${escapeHtml(unit.name || "Einheit")}</strong>
-              <span>${escapeHtml(objectPortalUnitTypeLabel(unit.unit_type))}</span>
-            </div>
-            <p>${escapeHtml(unit.cleaning_interval || "Intervall noch nicht hinterlegt")}</p>
-            ${unit.notes ? `<small>${escapeHtml(unit.notes)}</small>` : ""}
-          </article>
-        `).join("") : `
-          <div class="dashboard-mini-empty">
-            <strong>Noch keine Einheiten</strong>
-            <p>Ergänzen Sie unten z. B. Treppenhaus, Keller, Eingangsbereich oder Außenanlage.</p>
-          </div>
-        `}
-      </div>
-    </details>
-  `;
-}
-
-function renderDashboardObjectPortal() {
-  renderDashboardObjectPortalCustomerOptions();
-  renderDashboardObjectPortalStats();
-  renderDashboardObjectPortalList(dashboardObjectPortalObjectsCache);
-}
-
-async function loadDashboardObjectPortal(session = dashboardCurrentSession) {
-  const list = document.querySelector("#dashboardObjectPortalObjectList");
-  if (list) {
-    list.innerHTML = `<div class="dashboard-empty-state"><strong>ObjektPortal wird geladen …</strong><p>Kunden, Objekte und Einheiten werden aus Supabase abgerufen.</p></div>`;
-  }
-
-  try {
-    const data = await fetchDashboardObjectPortal(session);
-    dashboardObjectPortalCustomersCache = data.customers || [];
-    dashboardObjectPortalObjectsCache = data.objects || [];
-    renderDashboardObjectPortal();
-    setDashboardObjectPortalMessage("success", "ObjektPortal-Daten geladen.");
-  } catch (error) {
-    dashboardObjectPortalCustomersCache = [];
-    dashboardObjectPortalObjectsCache = [];
-    renderDashboardObjectPortalCustomerOptions();
-    renderDashboardObjectPortalStats();
-    if (list) {
-      list.innerHTML = `
-        <div class="dashboard-empty-state error">
-          <strong>ObjektPortal konnte nicht geladen werden</strong>
-          <p>${escapeHtml(error.message || "Bitte SQL V6.0.0 in Supabase ausführen.")}</p>
-        </div>
-      `;
-    }
-    renderDashboardObjectPortalDetail(null);
-    setDashboardObjectPortalMessage("error", error.message || "ObjektPortal konnte nicht geladen werden.");
-  }
-}
-
-function bindDashboardObjectPortal() {
-  const objectForm = document.querySelector("#dashboardObjectPortalObjectForm");
-  const unitForm = document.querySelector("#dashboardObjectPortalUnitForm");
-  const list = document.querySelector("#dashboardObjectPortalObjectList");
-  const reloadButton = document.querySelector("#dashboardObjectPortalReload");
-  const openWizardButton = document.querySelector("#dashboardObjectPortalOpenWizard");
-  const wizardPrevButton = document.querySelector("#dashboardObjectPortalWizardPrev");
-  const wizardNextButton = document.querySelector("#dashboardObjectPortalWizardNext");
-
-  openWizardButton?.addEventListener("click", () => {
-    objectForm?.reset();
-    setDashboardObjectPortalMessage("", "Objekt wird Schritt für Schritt vorbereitet.");
-    openDashboardObjectPortalWizard();
-  });
-
-  document.querySelectorAll("[data-object-portal-modal-close]").forEach(button => {
-    button.addEventListener("click", () => closeDashboardObjectPortalWizard());
-  });
-
-  wizardPrevButton?.addEventListener("click", () => {
-    setDashboardObjectPortalWizardStep(dashboardObjectPortalWizardStep - 1);
-  });
-
-  wizardNextButton?.addEventListener("click", () => {
-    if (!validateDashboardObjectPortalWizardStep()) return;
-    setDashboardObjectPortalWizardStep(dashboardObjectPortalWizardStep + 1);
-  });
-
-  objectForm?.addEventListener("input", updateDashboardObjectPortalWizardSummary);
-  objectForm?.addEventListener("change", updateDashboardObjectPortalWizardSummary);
-
-  objectForm?.addEventListener("submit", async event => {
-    event.preventDefault();
-    const data = new FormData(objectForm);
-    const customerId = String(data.get("customer_account_id") || "").trim();
-    const name = String(data.get("name") || "").trim();
-
-    if (!customerId) {
-      setDashboardObjectPortalMessage("error", "Bitte ein Kundenkonto auswählen.");
-      return;
-    }
-    if (!name) {
-      setDashboardObjectPortalMessage("error", "Bitte einen Objektnamen eintragen.");
-      return;
-    }
-
-    const submitButton = objectForm.querySelector("button[type='submit']");
-    if (submitButton) submitButton.disabled = true;
-    setDashboardObjectPortalMessage("loading", "Objekt wird gespeichert …");
-
-    try {
-      const object = await createDashboardObjectPortalObject(dashboardCurrentSession, {
-        p_customer_account_id: customerId,
-        p_name: name,
-        p_object_type: String(data.get("object_type") || "").trim(),
-        p_street: String(data.get("street") || "").trim(),
-        p_zip: String(data.get("zip") || "").trim(),
-        p_city: String(data.get("city") || "").trim(),
-        p_status: String(data.get("status") || "active").trim(),
-        p_notes: String(data.get("notes") || "").trim(),
-        p_package_key: String(data.get("package_key") || "basic").trim(),
-        p_monthly_price: data.get("monthly_price") ? Number(data.get("monthly_price")) : null,
-        p_initial_unit_name: String(data.get("unit_name") || "").trim(),
-        p_initial_unit_type: String(data.get("unit_type") || "sonstiges").trim(),
-        p_initial_cleaning_interval: String(data.get("cleaning_interval") || "").trim()
-      });
-      dashboardObjectPortalSelectedObjectId = object.id;
-      objectForm.reset();
-      closeDashboardObjectPortalWizard();
-      await loadDashboardObjectPortal(dashboardCurrentSession);
-      setDashboardObjectPortalMessage("success", "Objekt wurde gespeichert.");
-    } catch (error) {
-      setDashboardObjectPortalMessage("error", error.message || "Objekt konnte nicht gespeichert werden.");
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-  });
-
-  unitForm?.addEventListener("submit", async event => {
-    event.preventDefault();
-    const data = new FormData(unitForm);
-    const objectId = String(data.get("object_id") || dashboardObjectPortalSelectedObjectId || "").trim();
-    const name = String(data.get("name") || "").trim();
-
-    if (!objectId) {
-      setDashboardObjectPortalUnitMessage("error", "Bitte zuerst ein Objekt auswählen.");
-      return;
-    }
-    if (!name) {
-      setDashboardObjectPortalUnitMessage("error", "Bitte einen Namen für die Einheit eintragen.");
-      return;
-    }
-
-    const submitButton = unitForm.querySelector("button[type='submit']");
-    if (submitButton) submitButton.disabled = true;
-    setDashboardObjectPortalUnitMessage("loading", "Einheit wird gespeichert …");
-
-    try {
-      await createDashboardObjectPortalUnit(dashboardCurrentSession, {
-        p_object_id: objectId,
-        p_name: name,
-        p_unit_type: String(data.get("unit_type") || "sonstiges").trim(),
-        p_cleaning_interval: String(data.get("cleaning_interval") || "").trim(),
-        p_notes: String(data.get("notes") || "").trim()
-      });
-      unitForm.reset();
-      dashboardObjectPortalSelectedObjectId = objectId;
-      await loadDashboardObjectPortal(dashboardCurrentSession);
-      setDashboardObjectPortalUnitMessage("success", "Einheit wurde gespeichert.");
-    } catch (error) {
-      setDashboardObjectPortalUnitMessage("error", error.message || "Einheit konnte nicht gespeichert werden.");
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-  });
-
-  list?.addEventListener("click", event => {
-    const button = event.target.closest("[data-object-portal-object-id]");
-    if (!button) return;
-    list.querySelectorAll(".dashboard-ticket").forEach(item => item.classList.remove("active"));
-    button.classList.add("active");
-    const object = dashboardObjectPortalObjectsCache.find(item => item.id === button.dataset.objectPortalObjectId);
-    renderDashboardObjectPortalDetail(object || null);
-  });
-
-  reloadButton?.addEventListener("click", () => {
-    loadDashboardObjectPortal(dashboardCurrentSession);
-  });
-}
-
-async function fetchCustomerObjectPortalData(session) {
-  if (!session?.access_token) {
-    throw new Error("Keine gültige Kundensitzung vorhanden.");
-  }
-
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_my_object_portal`, {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${session.access_token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({})
-  });
-
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(data?.message || data?.hint || data?.details || "ObjektPortal konnte nicht geladen werden.");
-  }
-
-  if (!data?.success) {
-    throw new Error(data?.message || "ObjektPortal ist für dieses Kundenkonto noch nicht aktiv.");
-  }
-
-  return data;
-}
-
-function renderCustomerPortalObjects(objects = customerPortalObjects, errorMessage = "") {
-  const list = document.querySelector("#customerPortalObjectList");
-  const count = document.querySelector("#customerPortalObjectCount");
-  if (!list) return;
-
-  const rows = Array.isArray(objects) ? objects : [];
-  if (count) count.textContent = `${rows.length} Objekt${rows.length === 1 ? "" : "e"}`;
-
-  if (errorMessage) {
-    list.innerHTML = `
-      <div class="dashboard-empty-state warning">
-        <strong>ObjektPortal noch nicht vollständig eingerichtet</strong>
-        <p>${escapeHtml(errorMessage)}</p>
-      </div>
-    `;
-    return;
-  }
-
-  if (!rows.length) {
-    list.innerHTML = `
-      <div class="dashboard-empty-state">
-        <strong>Noch keine Objekte hinterlegt</strong>
-        <p>Sobald All4You Objekte oder Einheiten für Ihr Kundenkonto anlegt, erscheinen diese hier.</p>
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = rows.map(object => {
-    const units = Array.isArray(object.units) ? object.units : [];
-    const primaryUnit = units[0] || null;
-    return `
-      <details class="customer-object-card compact">
-        <summary class="customer-object-card-head">
-          <div>
-            <span class="eyebrow">Objekt</span>
-            <h3>${escapeHtml(object.name || "Objekt")}</h3>
-            <p>${escapeHtml(objectPortalAddress(object))}</p>
-          </div>
-          <div class="customer-object-card-status">
-            <span class="status-pill">${escapeHtml(objectPortalStatusLabel(object.status))}</span>
-            <small>${units.length} Bereich${units.length === 1 ? "" : "e"}</small>
-          </div>
-        </summary>
-        ${primaryUnit ? `
-          <div class="customer-object-primary-unit">
-            <span>Nächstes sichtbares Intervall</span>
-            <strong>${escapeHtml(primaryUnit.name || "Einheit")}</strong>
-            <p>${escapeHtml(primaryUnit.cleaning_interval || "Intervall noch nicht hinterlegt")}</p>
-          </div>
-        ` : ""}
-        <div class="customer-object-units">
-          ${units.length ? units.map(unit => `
-            <div class="customer-object-unit">
-              <strong>${escapeHtml(unit.name || "Einheit")}</strong>
-              <span>${escapeHtml(objectPortalUnitTypeLabel(unit.unit_type))}</span>
-              <p>${escapeHtml(unit.cleaning_interval || "Intervall noch nicht hinterlegt")}</p>
-            </div>
-          `).join("") : `
-            <div class="dashboard-mini-empty">
-              <strong>Keine Einheiten hinterlegt</strong>
-              <p>All4You kann hier z. B. Treppenhaus, Keller oder Eingangsbereich ergänzen.</p>
-            </div>
-          `}
-        </div>
-      </details>
-    `;
-  }).join("");
-}
-
-
-
 async function archiveDashboardRequest(session, requestId, reason = "Manuell archiviert") {
   if (!requestId) {
     throw new Error("Kein Ticket ausgewählt.");
@@ -2844,7 +2218,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -3857,7 +3231,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
+// DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -5659,7 +5033,6 @@ function pageDashboard() {
             <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
-            <a href="#dashboard-object-portal" data-dashboard-view-trigger="object-portal">ObjektPortal</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="overview">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
@@ -5821,227 +5194,6 @@ function pageDashboard() {
                   <p class="dashboard-ticket-action-message" id="dashboardArchiveMessage">Archivierte Aufträge können bei Bedarf zurückgeholt werden.</p>
                 </div>
               </aside>
-            </div>
-          </section>
-
-
-          <section class="dashboard-panel object-portal-manager is-hidden" id="dashboardObjectPortalManager" data-dashboard-view="object-portal">
-            <div class="panel-head object-portal-main-head">
-              <div>
-                <p class="eyebrow">All4You ObjektPortal</p>
-                <h2>Digitales Objekt- &amp; Reinigungsportal</h2>
-              </div>
-              <span class="status-pill" id="dashboardObjectPortalStatus">Übersicht</span>
-            </div>
-
-            <div class="object-portal-actionbar">
-              <div>
-                <strong>Objekte kompakt verwalten</strong>
-                <p>Erst Übersicht, dann Details: Neue Objekte werden geführt über einen Wizard angelegt.</p>
-              </div>
-              <div class="object-portal-actionbar-buttons">
-                <button class="btn primary" type="button" id="dashboardObjectPortalOpenWizard">+ Objekt hinzufügen</button>
-                <button class="btn ghost" type="button" id="dashboardObjectPortalReload">Neu laden</button>
-              </div>
-            </div>
-
-            <div class="object-portal-stats compact">
-              <article><span>Objekte</span><strong id="objectPortalStatObjects">0</strong><small>angelegt</small></article>
-              <article><span>Einheiten</span><strong id="objectPortalStatUnits">0</strong><small>Bereiche / Räume</small></article>
-              <article><span>Kunden</span><strong id="objectPortalStatCustomers">0</strong><small>aktiv</small></article>
-            </div>
-
-            <details class="object-portal-help">
-              <summary>Was kommt als nächstes?</summary>
-              <p>Dieses Fundament verwaltet Kunden, Objekte, Einheiten und Intervalle. QR-Code-Check-in, Bilder, Berichte und kontrollierte Kundenhinweise folgen in den nächsten Stufen.</p>
-            </details>
-
-            <div class="object-portal-admin-layout polished">
-              <div class="dashboard-panel object-portal-list-panel">
-                <div class="panel-head compact">
-                  <div>
-                    <p class="eyebrow">Objekte</p>
-                    <h3>Angelegte Objekte</h3>
-                  </div>
-                </div>
-                <div class="dashboard-ticket-list object-portal-object-list" id="dashboardObjectPortalObjectList">
-                  <div class="dashboard-empty-state">
-                    <strong>Objekte werden geladen …</strong>
-                    <p>Nach dem SQL-Setup erscheinen hier die ObjektPortal-Daten.</p>
-                  </div>
-                </div>
-              </div>
-
-              <aside class="dashboard-panel dashboard-detail object-portal-detail-panel">
-                <div class="panel-head">
-                  <div>
-                    <p class="eyebrow">Objektdetails</p>
-                    <h2 id="dashboardObjectPortalDetailTitle">Objekt auswählen</h2>
-                  </div>
-                  <span class="status-pill" id="dashboardObjectPortalDetailStatus">Details</span>
-                </div>
-                <div class="dashboard-detail-body" id="dashboardObjectPortalDetailBody">
-                  <div class="object-portal-detail-empty"><strong>Erst auswählen, dann Details sehen</strong><p>Die Übersicht bleibt bewusst kompakt.</p></div>
-                </div>
-
-                <form class="object-portal-form object-portal-unit-form-card is-hidden" id="dashboardObjectPortalUnitForm">
-                  <input type="hidden" name="object_id" id="dashboardObjectPortalUnitObjectId">
-                  <div class="panel-head compact">
-                    <div>
-                      <p class="eyebrow">Einheit ergänzen</p>
-                      <h3>Bereich / Intervall hinzufügen</h3>
-                    </div>
-                  </div>
-                  <label>Name
-                    <input type="text" name="name" placeholder="z. B. Treppenhaus B" required>
-                  </label>
-                  <div class="form-grid compact">
-                    <label>Typ
-                      <select name="unit_type">
-                        <option value="treppenhaus">Treppenhaus</option>
-                        <option value="keller">Keller</option>
-                        <option value="eingang">Eingang</option>
-                        <option value="aussenbereich">Außenbereich</option>
-                        <option value="raum">Raum</option>
-                        <option value="sonstiges">Sonstiges</option>
-                      </select>
-                    </label>
-                    <label>Intervall
-                      <input type="text" name="cleaning_interval" placeholder="z. B. alle 2 Wochen">
-                    </label>
-                  </div>
-                  <label>Notiz
-                    <textarea name="notes" rows="2" placeholder="Besonderheiten zur Einheit …"></textarea>
-                  </label>
-                  <button class="btn primary" type="submit">Einheit speichern <span>›</span></button>
-                  <p class="dashboard-ticket-action-message" id="dashboardObjectPortalUnitMessage">Einheiten werden dem ausgewählten Objekt zugeordnet.</p>
-                </form>
-              </aside>
-            </div>
-
-            <div class="object-portal-modal is-hidden" id="dashboardObjectPortalObjectModal" aria-hidden="true">
-              <button class="object-portal-modal-backdrop" type="button" aria-label="Objekt-Wizard schließen" data-object-portal-modal-close></button>
-              <section class="object-portal-modal-card" role="dialog" aria-modal="true" aria-labelledby="objectPortalWizardTitle">
-                <button class="object-portal-modal-close" type="button" aria-label="Schließen" data-object-portal-modal-close>×</button>
-                <form class="object-portal-form object-portal-wizard-form" id="dashboardObjectPortalObjectForm">
-                  <div class="object-portal-wizard-head">
-                    <div>
-                      <p class="eyebrow">Objekt hinzufügen</p>
-                      <h2 id="objectPortalWizardTitle">Geführte Objekterstellung</h2>
-                      <span>Nur die wichtigen Daten pro Schritt — der Rest bleibt übersichtlich.</span>
-                    </div>
-                  </div>
-
-                  <div class="object-portal-wizard-progress" aria-label="Fortschritt">
-                    <span data-object-portal-wizard-progress="1">Kunde</span>
-                    <span data-object-portal-wizard-progress="2">Objekt</span>
-                    <span data-object-portal-wizard-progress="3">Adresse</span>
-                    <span data-object-portal-wizard-progress="4">Einheit</span>
-                    <span data-object-portal-wizard-progress="5">Prüfen</span>
-                  </div>
-
-                  <section class="object-portal-wizard-step is-active" data-object-portal-wizard-step="1">
-                    <h3>Kunde &amp; Paket</h3>
-                    <label>Kunde
-                      <select name="customer_account_id" id="dashboardObjectPortalCustomerSelect" required>
-                        <option value="">Kundenkonten werden geladen …</option>
-                      </select>
-                    </label>
-                    <div class="form-grid compact">
-                      <label>Paket
-                        <select name="package_key">
-                          <option value="basic">ObjektPortal Basic</option>
-                          <option value="plus">ObjektPortal Plus</option>
-                          <option value="pro">ObjektPortal Pro</option>
-                          <option value="custom">Individuell</option>
-                        </select>
-                      </label>
-                      <label>Monatlich €
-                        <input type="number" name="monthly_price" step="0.01" min="0" placeholder="optional">
-                      </label>
-                    </div>
-                  </section>
-
-                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="2">
-                    <h3>Objekt-Grunddaten</h3>
-                    <label>Objektname
-                      <input type="text" name="name" placeholder="z. B. Musterstraße 12 / Wohnanlage Nord" required>
-                    </label>
-                    <div class="form-grid compact">
-                      <label>Objektart
-                        <select name="object_type">
-                          <option value="wohnanlage">Wohnanlage</option>
-                          <option value="hausverwaltung">Hausverwaltung</option>
-                          <option value="buero">Büro / Gewerbe</option>
-                          <option value="treppenhaus">Treppenhaus</option>
-                          <option value="sonstiges">Sonstiges</option>
-                        </select>
-                      </label>
-                      <label>Status
-                        <select name="status">
-                          <option value="active">Aktiv</option>
-                          <option value="paused">Pausiert</option>
-                          <option value="draft">Entwurf</option>
-                        </select>
-                      </label>
-                    </div>
-                  </section>
-
-                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="3">
-                    <h3>Adresse</h3>
-                    <label>Straße / Adresse
-                      <input type="text" name="street" placeholder="Straße und Hausnummer">
-                    </label>
-                    <div class="form-grid compact">
-                      <label>PLZ
-                        <input type="text" name="zip" placeholder="z. B. 80331">
-                      </label>
-                      <label>Ort
-                        <input type="text" name="city" placeholder="München">
-                      </label>
-                    </div>
-                  </section>
-
-                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="4">
-                    <h3>Erste Einheit / Bereich</h3>
-                    <label>Erste Einheit / Bereich
-                      <input type="text" name="unit_name" placeholder="z. B. Treppenhaus A, Keller, Eingangsbereich">
-                    </label>
-                    <div class="form-grid compact">
-                      <label>Einheit-Typ
-                        <select name="unit_type">
-                          <option value="treppenhaus">Treppenhaus</option>
-                          <option value="keller">Keller</option>
-                          <option value="eingang">Eingang</option>
-                          <option value="aussenbereich">Außenbereich</option>
-                          <option value="raum">Raum</option>
-                          <option value="sonstiges">Sonstiges</option>
-                        </select>
-                      </label>
-                      <label>Intervall
-                        <input type="text" name="cleaning_interval" placeholder="z. B. wöchentlich montags">
-                      </label>
-                    </div>
-                  </section>
-
-                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="5">
-                    <h3>Zusammenfassung</h3>
-                    <div class="object-portal-wizard-summary" id="dashboardObjectPortalWizardSummary"></div>
-                    <label>Interne Notiz
-                      <textarea name="notes" rows="3" placeholder="z. B. Schlüssel, Besonderheiten, abgesprochener Umfang …"></textarea>
-                    </label>
-                  </section>
-
-                  <footer class="object-portal-wizard-footer">
-                    <p class="dashboard-ticket-action-message" id="dashboardObjectPortalMessage">Objekt wird Schritt für Schritt vorbereitet.</p>
-                    <div>
-                      <button class="btn ghost" type="button" id="dashboardObjectPortalWizardPrev" disabled>Zurück</button>
-                      <button class="btn primary" type="button" id="dashboardObjectPortalWizardNext">Weiter <span>›</span></button>
-                      <button class="btn primary is-hidden" type="submit" id="dashboardObjectPortalWizardSubmit">Objekt speichern <span>›</span></button>
-                    </div>
-                  </footer>
-                </form>
-              </section>
             </div>
           </section>
 
@@ -6879,27 +6031,6 @@ function pageCustomerPortal() {
             </div>
             <div class="dashboard-hero-actions">
               <span class="status-pill success" id="customerPortalLiveStatus">Live verbunden</span>
-            </div>
-          </section>
-
-
-          <section class="dashboard-panel customer-portal-object-panel">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">All4You ObjektPortal</p>
-                <h2>Meine Objekte</h2>
-              </div>
-              <span class="status-pill" id="customerPortalObjectCount">0 Objekte</span>
-            </div>
-            <p class="dashboard-calendar-intro">
-              Hier sehen Sie hinterlegte Objekte, Einheiten und vereinbarte Reinigungsintervalle.
-              QR-Check-in, Bilder und Abschlussberichte werden in den nächsten Ausbaustufen ergänzt.
-            </p>
-            <div class="customer-object-list" id="customerPortalObjectList">
-              <div class="dashboard-empty-state">
-                <strong>Objekte werden geladen …</strong>
-                <p>Ihre ObjektPortal-Daten erscheinen hier, sobald All4You diese hinterlegt hat.</p>
-              </div>
             </div>
           </section>
 
@@ -8662,7 +7793,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
+   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -9767,7 +8898,7 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "customers", "object-portal", "trailer-calendar"];
+  const allowedViews = ["overview", "archive", "customers", "trailer-calendar"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
@@ -9787,15 +8918,6 @@ function setDashboardView(view = "overview") {
   }
   if (normalized === "customers") {
     renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
-  }
-  if (normalized === "object-portal") {
-    if (dashboardObjectPortalObjectsCache.length || dashboardObjectPortalCustomersCache.length) {
-      renderDashboardObjectPortal();
-    } else if (dashboardCurrentSession) {
-      loadDashboardObjectPortal(dashboardCurrentSession);
-    } else {
-      renderDashboardObjectPortal();
-    }
   }
 }
 
@@ -9818,7 +8940,6 @@ function bindDashboardShell() {
 
   bindDashboardActionDirectGuard();
   bindDashboardCustomerAccounts();
-  bindDashboardObjectPortal();
 
   dashboardViewLinks.forEach(link => {
     if (link.dataset.dashboardViewBound === "true") return;
@@ -10148,7 +9269,6 @@ function bindDashboardAuth() {
 
     loadDashboardRequests(session);
     loadDashboardCustomerAccounts(session);
-    loadDashboardObjectPortal(session).catch(() => null);
     bindDashboardTrailerCalendarManager();
   }
 
@@ -10208,9 +9328,6 @@ function bindDashboardAuth() {
     dashboardArchiveCache = [];
     dashboardCustomerAccountsCache = [];
     dashboardSelectedCustomerAccountId = null;
-    dashboardObjectPortalCustomersCache = [];
-    dashboardObjectPortalObjectsCache = [];
-    dashboardObjectPortalSelectedObjectId = null;
     dashboardCurrentSession = null;
     dashboardCurrentEmployeeProfile = null;
     clearTicketExtras();
@@ -10232,7 +9349,6 @@ let customerPortalCurrentSession = null;
 let customerPortalAccount = null;
 let customerPortalRequests = [];
 let customerPortalSelectedRequestId = null;
-let customerPortalObjects = [];
 
 async function fetchCustomerPortalData(session) {
   if (!session?.access_token) {
@@ -10418,15 +9534,6 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   customerPortalAccount = data.account;
   customerPortalRequests = Array.isArray(data.requests) ? data.requests : [];
 
-  try {
-    const objectPortalData = await fetchCustomerObjectPortalData(session);
-    customerPortalObjects = Array.isArray(objectPortalData.objects) ? objectPortalData.objects : [];
-    renderCustomerPortalObjects(customerPortalObjects);
-  } catch (error) {
-    customerPortalObjects = [];
-    renderCustomerPortalObjects([], error.message || "ObjektPortal wird vorbereitet.");
-  }
-
   const name = document.querySelector("#customerPortalName");
   const meta = document.querySelector("#customerPortalMeta");
   if (name) name.textContent = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
@@ -10507,7 +9614,6 @@ function bindCustomerPortalPage() {
     customerPortalAccount = null;
     customerPortalRequests = [];
     customerPortalSelectedRequestId = null;
-    customerPortalObjects = [];
     showLogin();
     setCustomerPortalAuthMessage("success", "Abgemeldet", "Die Kundensitzung wurde beendet.");
   });
@@ -10992,7 +10098,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
+   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

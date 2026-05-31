@@ -9043,3 +9043,260 @@ button.calendar-day {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   V6.5.2 Mitarbeiterkonten & Rollen Wizard
+   Scope: nur Dashboard-Bereich Mitarbeiter.
+   ========================================================================== */
+.dashboard-employees-head {
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.dashboard-employees-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-employee-role-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.dashboard-employee-role-info div {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(10, 169, 155, .16);
+  background: linear-gradient(135deg, rgba(255, 255, 255, .94), rgba(238, 246, 250, .74));
+}
+
+.dashboard-employee-role-info strong,
+.dashboard-employee-role-info span {
+  display: block;
+}
+
+.dashboard-employee-role-info strong {
+  color: var(--navy);
+  font-size: .92rem;
+}
+
+.dashboard-employee-role-info span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: .84rem;
+  line-height: 1.45;
+}
+
+.dashboard-employees-layout-compact {
+  grid-template-columns: minmax(320px, .9fr) minmax(420px, 1.1fr);
+}
+
+.dashboard-modal[hidden] {
+  display: none !important;
+}
+
+.dashboard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.dashboard-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 24, 42, .58);
+  backdrop-filter: blur(6px);
+}
+
+.dashboard-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  max-height: min(86vh, 920px);
+  overflow: auto;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, .52);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(244, 251, 253, .96));
+  box-shadow: 0 30px 90px rgba(3, 24, 42, .32);
+  padding: 22px;
+}
+
+.dashboard-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.dashboard-modal-head h2 {
+  margin: 0;
+  color: var(--navy);
+}
+
+.dashboard-modal-head p:not(.eyebrow) {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.dashboard-employee-wizard {
+  display: grid;
+  gap: 16px;
+}
+
+.dashboard-employee-wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-employee-wizard-steps span {
+  padding: 10px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 38, 60, .10);
+  background: rgba(255, 255, 255, .78);
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 950;
+  text-align: center;
+}
+
+.dashboard-employee-wizard-steps span.active {
+  color: #fff;
+  border-color: rgba(10, 169, 155, .7);
+  background: linear-gradient(135deg, var(--teal), #078578);
+  box-shadow: 0 12px 24px rgba(10, 169, 155, .22);
+}
+
+.dashboard-employee-wizard-steps span.done {
+  color: var(--teal-dark);
+  background: rgba(10, 169, 155, .10);
+  border-color: rgba(10, 169, 155, .20);
+}
+
+.dashboard-employee-wizard-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(16, 38, 60, .10);
+  background: rgba(255, 255, 255, .82);
+}
+
+.dashboard-employee-wizard-panel label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: .84rem;
+  font-weight: 900;
+}
+
+.dashboard-employee-wizard-panel input,
+.dashboard-employee-wizard-panel select,
+.dashboard-employee-wizard-panel textarea {
+  width: 100%;
+  border: 1px solid rgba(16, 38, 60, .14);
+  border-radius: 16px;
+  padding: 12px 13px;
+  background: rgba(255, 255, 255, .94);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.dashboard-employee-wizard-panel input:focus,
+.dashboard-employee-wizard-panel select:focus,
+.dashboard-employee-wizard-panel textarea:focus {
+  border-color: rgba(10, 169, 155, .55);
+  box-shadow: 0 0 0 4px rgba(10, 169, 155, .11);
+}
+
+.dashboard-wizard-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.dashboard-employee-role-checks {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-employee-wizard-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashboard-employee-wizard-summary div {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 38, 60, .10);
+  background: rgba(238, 246, 250, .68);
+}
+
+.dashboard-employee-wizard-summary strong,
+.dashboard-employee-wizard-summary span {
+  display: block;
+}
+
+.dashboard-employee-wizard-summary strong {
+  color: var(--navy);
+  font-size: .8rem;
+}
+
+.dashboard-employee-wizard-summary span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.dashboard-employee-wizard-actions {
+  justify-content: flex-end;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-employee-role-info,
+  .dashboard-employees-layout-compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard-modal {
+    padding: 12px;
+    place-items: stretch;
+  }
+
+  .dashboard-modal-card {
+    border-radius: 24px;
+    max-height: 92vh;
+  }
+
+  .dashboard-modal-head,
+  .dashboard-employees-head-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-employee-wizard-steps,
+  .dashboard-employee-wizard-summary,
+  .dashboard-employee-role-checks {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9045,7 +9045,7 @@ button.calendar-day {
 }
 
 /* ==========================================================================
-   V6.5.2 Mitarbeiterkonten & Rollen Wizard
+   V6.5.3 Mitarbeiterkonten Wizard + Löschen
    Scope: nur Dashboard-Bereich Mitarbeiter.
    ========================================================================== */
 .dashboard-employees-head {
@@ -9191,6 +9191,10 @@ button.calendar-day {
   border-radius: 22px;
   border: 1px solid rgba(16, 38, 60, .10);
   background: rgba(255, 255, 255, .82);
+}
+
+.dashboard-employee-wizard-panel[hidden] {
+  display: none !important;
 }
 
 .dashboard-employee-wizard-panel label {

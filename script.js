@@ -1430,7 +1430,7 @@ function bindDashboardCustomerAccounts() {
 
 
 /* ========================================================================== 
-   Dashboard Mitarbeiterverwaltung / Rollen & echte Mitarbeiter-Accounts V6.5.2
+   Dashboard Mitarbeiterverwaltung / Rollen, echte Accounts & Löschen V6.5.3
    --------------------------------------------------------------------------
    Chef/Admin erstellt hier echte Supabase-Login-Konten plus interne
    Mitarbeiter-ID. Das ObjektPortal nutzt die Rolle/Rechte später für Check-ins.
@@ -1471,6 +1471,30 @@ async function createDashboardEmployeeAccount(session, payload) {
 
   if (!response.ok || data?.success === false) {
     throw new Error(data?.message || data?.error || "Mitarbeiterkonto konnte nicht erstellt werden.");
+  }
+
+  return data;
+}
+
+async function deleteDashboardEmployeeAccount(session, employeeId) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Chef-/Admin-Sitzung vorhanden.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-employee-account`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ employee_id: employeeId })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.error || "Mitarbeiterkonto konnte nicht gelöscht werden.");
   }
 
   return data;
@@ -1530,7 +1554,6 @@ function buildEmployeeRightsSummary(employee) {
     rights.push("Nur Ansicht");
   }
   if (employee?.can_qr_checkin) rights.push("QR-Check-in");
-  if (employee?.is_active === false) return ["Inaktiv"];
   return rights;
 }
 
@@ -1591,7 +1614,7 @@ function renderDashboardEmployeeDetail(employee) {
   dashboardSelectedEmployeeId = employee.id;
   const roleGroup = employeeRoleGroup(employee.role);
   title.textContent = `${employee.employee_number || "MA offen"} · ${dashboardEmployeeDisplayName(employee)}`;
-  if (status) status.textContent = employee.is_active === false ? "Inaktiv" : "Aktiv";
+  if (status) status.textContent = employeeRoleLabel(employee.role);
 
   body.innerHTML = `
     <div class="dashboard-employee-profile-card">
@@ -1606,12 +1629,12 @@ function renderDashboardEmployeeDetail(employee) {
       <div><strong>Rolle</strong><span>${escapeHtml(employeeRoleLabel(employee.role))}</span></div>
       <div><strong>Aufgabe</strong><span>${escapeHtml(employeeRoleDescription(employee.role))}</span></div>
       <div><strong>QR-Check-in</strong><span>${employee.can_qr_checkin ? "erlaubt" : "nicht erlaubt"}</span></div>
-      <div><strong>Status</strong><span>${employee.is_active === false ? "deaktiviert" : "aktiv"}</span></div>
       <div><strong>Sicht für Kunden</strong><span>${roleGroup === "mitarbeiter" ? "neutraler Einsatzstatus" : "nicht öffentlich"}</span></div>
       <div><strong>Interne Zuordnung</strong><span>${escapeHtml(employee.employee_number || "offen")}</span></div>
     </div>
     <div class="dashboard-ticket-action-grid">
       <button class="btn ghost" type="button" data-employee-edit="${escapeHtml(employee.id)}">Bearbeiten</button>
+      <button class="btn ghost danger-action" type="button" data-employee-delete="${escapeHtml(employee.id)}">Konto löschen</button>
     </div>
     <div class="summary-wide">
       <strong>Hinweis</strong>
@@ -1631,7 +1654,6 @@ function resetDashboardEmployeeWizardForm() {
   form.elements.employee_id.value = "";
   form.elements.mode.value = "create";
   form.elements.role.value = "mitarbeiter";
-  form.elements.is_active.checked = true;
   form.elements.can_qr_checkin.checked = true;
 }
 
@@ -1657,7 +1679,6 @@ function openDashboardEmployeeWizard(mode = "create", employee = null) {
     form.elements.password.value = "";
     form.elements.password.required = false;
     form.elements.role.value = employeeRoleGroup(employee.role) === "admin" ? "admin" : (employeeRoleGroup(employee.role) === "viewer" ? "viewer" : "mitarbeiter");
-    form.elements.is_active.checked = employee.is_active !== false;
     form.elements.can_qr_checkin.checked = Boolean(employee.can_qr_checkin);
     form.elements.notes.value = employee.notes || "";
     if (title) title.textContent = "Mitarbeiter bearbeiten";
@@ -1696,7 +1717,7 @@ function getDashboardEmployeeWizardData() {
     email: String(data.get("email") || "").trim().toLowerCase(),
     password: String(data.get("password") || ""),
     role,
-    is_active: Boolean(data.get("is_active")),
+    is_active: true,
     object_portal_enabled: !isViewer,
     can_qr_checkin: isAdminRole ? true : Boolean(data.get("can_qr_checkin")),
     notes: String(data.get("notes") || "").trim()
@@ -1764,7 +1785,6 @@ function updateDashboardEmployeeWizard() {
       <div><strong>Rolle</strong><span>${escapeHtml(employeeRoleLabel(payload.role))}</span></div>
       <div><strong>Rechte</strong><span>${escapeHtml(employeeRoleDescription(payload.role))}</span></div>
       <div><strong>QR-Check-in</strong><span>${payload.can_qr_checkin ? "erlaubt" : "nicht erlaubt"}</span></div>
-      <div><strong>Status</strong><span>${payload.is_active ? "aktiv" : "inaktiv"}</span></div>
     `;
   }
 }
@@ -1883,11 +1903,35 @@ function bindDashboardEmployees() {
     renderDashboardEmployeeDetail(employee || null);
   });
 
-  detailBody?.addEventListener("click", event => {
-    const button = event.target.closest("[data-employee-edit]");
-    if (!button) return;
-    const employee = getDashboardEmployeeById(button.dataset.employeeEdit);
-    if (employee) openDashboardEmployeeWizard("edit", employee);
+  detailBody?.addEventListener("click", async event => {
+    const editButton = event.target.closest("[data-employee-edit]");
+    if (editButton) {
+      const employee = getDashboardEmployeeById(editButton.dataset.employeeEdit);
+      if (employee) openDashboardEmployeeWizard("edit", employee);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-employee-delete]");
+    if (!deleteButton) return;
+    const employee = getDashboardEmployeeById(deleteButton.dataset.employeeDelete);
+    if (!employee?.id) return;
+
+    const label = `${employee.employee_number || "Mitarbeiter"} · ${dashboardEmployeeDisplayName(employee)}`;
+    const confirmed = window.confirm(`Mitarbeiterkonto wirklich löschen?\n\n${label}\n\nDas Login-Konto und der Mitarbeiter-Datensatz werden entfernt. Diese Aktion ist für Test-/Fehlkonten gedacht.`);
+    if (!confirmed) return;
+
+    deleteButton.disabled = true;
+    setDashboardEmployeesMessage("loading", "Mitarbeiterkonto wird gelöscht …");
+    try {
+      await deleteDashboardEmployeeAccount(dashboardCurrentSession, employee.id);
+      dashboardSelectedEmployeeId = null;
+      await loadDashboardEmployees(dashboardCurrentSession);
+      setDashboardEmployeesMessage("success", "Mitarbeiterkonto wurde gelöscht.");
+    } catch (error) {
+      setDashboardEmployeesMessage("error", error.message || "Mitarbeiterkonto konnte nicht gelöscht werden.");
+    } finally {
+      deleteButton.disabled = false;
+    }
   });
 }
 
@@ -6422,7 +6466,7 @@ function pageDashboard() {
                 <p class="eyebrow">Mitarbeiterverwaltung</p>
                 <h2>Mitarbeiterkonten & Rollen</h2>
                 <p class="dashboard-calendar-intro">
-                  Hier erstellt der Chef echte Login-Konten mit Mitarbeiter-ID. Chef/Admin verwaltet alles,
+                  Hier erstellt der Chef echte Login-Konten mit Mitarbeiter-ID. Konten können bearbeitet oder gelöscht werden,
                   Mitarbeiter/Putzkräfte erhalten später ihre eigene Durchführungsansicht für Einsätze und QR-Check-ins.
                 </p>
               </div>
@@ -6448,7 +6492,7 @@ function pageDashboard() {
                 <div class="dashboard-ticket-list dashboard-employee-list" id="dashboardEmployeesList">
                   <div class="dashboard-empty-state">
                     <strong>Mitarbeiter werden nach Login geladen …</strong>
-                    <p>Aktive Mitarbeiter erscheinen hier.</p>
+                    <p>Erstellte Mitarbeiterkonten erscheinen hier.</p>
                   </div>
                 </div>
               </div>
@@ -6519,13 +6563,12 @@ function pageDashboard() {
                       </select>
                     </label>
                     <div class="dashboard-employee-checks dashboard-employee-role-checks">
-                      <label><input type="checkbox" name="is_active" checked> Konto aktiv</label>
                       <label><input type="checkbox" name="can_qr_checkin" checked> QR-Check-in erlauben</label>
                     </div>
                     <label>Interne Notiz
                       <textarea name="notes" rows="3" placeholder="z. B. Einsatzgebiet, Telefon intern oder Hinweise für den Chef"></textarea>
                     </label>
-                    <p class="dashboard-wizard-hint">Mitarbeiter bekommen später eine eigene Durchführung. Chef/Admin verwaltet die Organisation.</p>
+                    <p class="dashboard-wizard-hint">Mitarbeiterkonten sind nach dem Erstellen direkt nutzbar. Nicht mehr benötigte Konten werden gelöscht statt deaktiviert.</p>
                   </section>
 
                   <section class="dashboard-employee-wizard-panel" data-employee-wizard-step="4" hidden>

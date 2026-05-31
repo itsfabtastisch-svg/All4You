@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.2.0 App Entry & Direct Login
+   V6.2.2 Unit Remove
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.2.0-OBJECTPORTAL-APP-ENTRY
+   DBG: ALL4YOU-V6.2.2-OBJECTPORTAL-UNIT-REMOVE
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -310,8 +310,12 @@ function showAppOrLogin() {
   return true;
 }
 
+function activeUnits(units = []) {
+  return (Array.isArray(units) ? units : []).filter((unit) => String(unit.status || "active").toLowerCase() !== "archived");
+}
+
 function getAllUnits() {
-  return state.objects.flatMap((object) => Array.isArray(object.units) ? object.units : []);
+  return state.objects.flatMap((object) => activeUnits(object.units));
 }
 
 function renderStats() {
@@ -384,7 +388,7 @@ function renderCustomers() {
 
 function objectMatchesFilters(object) {
   const customer = object.customer || {};
-  const units = Array.isArray(object.units) ? object.units : [];
+  const units = activeUnits(object.units);
   const q = state.filters.query;
   const status = state.filters.status;
   const packageKey = state.filters.package;
@@ -422,21 +426,25 @@ function renderFeatureChips(customer = {}) {
 }
 
 function renderUnits(units = []) {
-  if (!units.length) return `<div class="op-empty">Noch keine Einheit/Bereich hinterlegt.</div>`;
+  const active = activeUnits(units);
+  if (!active.length) return `<div class="op-empty">Noch keine Einheit/Bereich hinterlegt.</div>`;
 
-  return units.map((unit) => `
+  return active.map((unit) => `
     <div class="op-unit">
       <div>
         <strong>${escapeHtml(unit.name)}</strong>
         <small>${formatUnitType(unit.unit_type)}${unit.floor ? ` · Etage ${escapeHtml(unit.floor)}` : ""}</small>
       </div>
-      <span class="op-chip op-chip-soft">${formatInterval(unit.cleaning_interval)}</span>
+      <div class="op-unit-actions">
+        <span class="op-chip op-chip-soft">${formatInterval(unit.cleaning_interval)}</span>
+        <button class="op-mini-danger" type="button" data-delete-unit="${escapeHtml(unit.id)}" data-unit-name="${escapeHtml(unit.name)}">Entfernen</button>
+      </div>
     </div>
   `).join("");
 }
 
 function renderObjectDetail(object) {
-  const units = Array.isArray(object.units) ? object.units : [];
+  const units = activeUnits(object.units);
   const customer = object.customer || {};
   const isUnitFormOpen = state.openUnitForms.has(object.id);
 
@@ -559,7 +567,7 @@ function renderObjects() {
   }
 
   list.innerHTML = objects.map((object) => {
-    const units = Array.isArray(object.units) ? object.units : [];
+    const units = activeUnits(object.units);
     const customer = object.customer || {};
     const isOpen = state.openObjectIds.has(object.id);
     return `
@@ -612,6 +620,10 @@ function renderObjects() {
 
   list.querySelectorAll("[data-add-unit]").forEach((form) => {
     form.addEventListener("submit", handleAddUnit);
+  });
+
+  list.querySelectorAll("[data-delete-unit]").forEach((button) => {
+    button.addEventListener("click", handleDeleteUnit);
   });
 }
 
@@ -737,6 +749,31 @@ async function handleAddUnit(event) {
     setStatus(data?.message || "Einheit wurde gespeichert.", "success");
   } catch (error) {
     setStatus(error.message || "Einheit konnte nicht gespeichert werden.", "error");
+  }
+}
+
+
+async function handleDeleteUnit(event) {
+  const button = event.currentTarget;
+  const unitId = button.dataset.deleteUnit;
+  const unitName = button.dataset.unitName || "diese Einheit";
+
+  if (!unitId) return;
+
+  const confirmed = window.confirm(`Einheit „${unitName}“ wirklich entfernen? Sie wird aus der aktiven Objektansicht ausgeblendet.`);
+  if (!confirmed) return;
+
+  try {
+    setStatus("Einheit wird entfernt …", "loading");
+    const data = await callRpc("admin_delete_object_portal_unit", {
+      p_unit_id: unitId,
+    });
+
+    if (data?.success === false) throw new Error(data.message || "Einheit konnte nicht entfernt werden.");
+    await loadObjectPortal();
+    setStatus(data?.message || "Einheit wurde entfernt.", "success");
+  } catch (error) {
+    setStatus(error.message || "Einheit konnte nicht entfernt werden.", "error");
   }
 }
 

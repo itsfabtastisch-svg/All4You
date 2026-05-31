@@ -150,3 +150,34 @@ button, input, select, textarea { font: inherit; }
 .op-login-message.success { background: #e5fbf6; color: #086b5d; border-color: rgba(10,169,155,.28); }
 .op-login-message.error { background: #fff0f0; color: #8c1d1d; border-color: rgba(140,29,29,.18); }
 .op-login-message.loading { background: #fff8db; color: #7c5a00; border-color: rgba(124,90,0,.16); }
+
+/* =========================================================
+   V6.2.2 · ObjectPortal Unit Remove
+   Nur ObjektPortal-eigene Klassen.
+   ========================================================= */
+.op-unit-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.op-mini-danger {
+  border: 1px solid rgba(140, 29, 29, .18);
+  background: #fff0f0;
+  color: #8c1d1d;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: .76rem;
+  padding: 7px 10px;
+  transition: transform .16s ease, background .16s ease;
+}
+.op-mini-danger:hover {
+  transform: translateY(-1px);
+  background: #ffe4e4;
+}
+@media (max-width: 640px) {
+  .op-unit { align-items: flex-start; flex-direction: column; }
+  .op-unit-actions { justify-content: flex-start; }
+}

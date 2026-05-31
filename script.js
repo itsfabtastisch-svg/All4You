@@ -11231,6 +11231,43 @@ function renderCustomerPortalProgress(ticket) {
   `;
 }
 
+function formatUnitType(value) {
+  const map = {
+    treppenhaus: "Treppenhaus",
+    eingang: "Eingangsbereich",
+    flur: "Flur / Allgemeinfläche",
+    keller: "Keller",
+    aussenbereich: "Außenbereich",
+    garten: "Garten / Grünfläche",
+    garage: "Garage",
+    tiefgarage: "Tiefgarage / Parkfläche",
+    buero: "Büroräume / Praxisräume",
+    sanitaer: "Sanitäranlagen",
+    kueche: "Küche / Aufenthaltsraum",
+    aufzug: "Aufzug",
+    muellraum: "Müllraum / Tonnenbereich",
+    waschkueche: "Waschküche",
+    lager: "Lagerraum",
+    technikraum: "Technikraum",
+    fenster: "Fenster / Glasflächen",
+    gemeinschaftsraum: "Gemeinschaftsraum",
+    raum: "Sonstige Räume / Einheit",
+    sonstiges: "Sonstiges",
+  };
+  return map[String(value || "").toLowerCase()] || value || "Bereich";
+}
+
+function formatInterval(value) {
+  const map = {
+    woechentlich: "Wöchentlich",
+    zweiwoechentlich: "Alle 2 Wochen",
+    monatlich: "Monatlich",
+    nach_bedarf: "Nach Bedarf",
+    individuell: "Individuell",
+  };
+  return map[String(value || "").toLowerCase()] || value || "Noch nicht hinterlegt";
+}
+
 function formatCustomerObjectJobStatus(value) {
   const map = {
     planned: "Geplant",

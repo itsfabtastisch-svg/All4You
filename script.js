@@ -711,6 +711,7 @@ async function loadDashboardRequests(session) {
     renderDashboardArchiveDetail(null);
     updateDashboardStats(dashboardAllRequestCache);
     updateDashboardActivityStats(dashboardAllRequestCache);
+    renderDashboardStatusOverview();
     if (!document.querySelector("#dashboardMessagesCenter")?.classList.contains("is-hidden")) {
       renderDashboardMessagesCenter();
     }
@@ -6274,15 +6275,13 @@ function pageDashboard() {
 
           <nav class="dashboard-menu" aria-label="Dashboard Navigation">
             <a class="active" href="#dashboard-overview" data-dashboard-view-trigger="overview">Übersicht</a>
-            <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
-            <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
-            <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
-            <a href="#dashboard-employees" data-dashboard-view-trigger="employees">Mitarbeiter</a>
-            <a href="/objektportal/" target="_blank" rel="noopener">ObjektPortal</a>
-            <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
+            <a href="#dashboard-tickets" data-dashboard-view-trigger="tickets">Anfragen / Aufträge</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
-            <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
-            <a href="#dashboard-status-history" data-dashboard-view-trigger="overview">Statusverlauf</a>
+            <a href="#dashboard-status" data-dashboard-view-trigger="status">Status / Verlauf</a>
+            <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger</a>
+            <a href="/objektportal/" target="_blank" rel="noopener">ObjektPortal</a>
+            <a href="#dashboard-management" data-dashboard-view-trigger="management">Verwaltung</a>
+            <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
           </nav>
 
           <div class="dashboard-user-card">
@@ -6312,14 +6311,96 @@ function pageDashboard() {
             </div>
           </section>
 
-          <section class="dashboard-stats" data-dashboard-view="overview">
-            <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
+          <section class="dashboard-stats dashboard-stats-clean" data-dashboard-view="overview">
+            <article><span>NEU</span><strong id="dashboardStatNew">0</strong><small>frische Anfragen</small></article>
+            <article><span>IN BEARBEITUNG</span><strong id="dashboardStatReview">0</strong><small>aktive Vorgänge</small></article>
+            <article><span>IN PRÜFUNG</span><strong id="dashboardStatQuestions">0</strong><small>warten auf Kontrolle</small></article>
+            <article><span>ABGESCHLOSSEN</span><strong id="dashboardStatDone">0</strong><small>fertig im System</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
-            <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
-            <article><span>In Prüfung</span><strong id="dashboardStatQuestions">0</strong><small>warten auf Prüfung</small></article>
-            <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
           </section>
 
+          <section class="dashboard-panel dashboard-overview-hub" data-dashboard-view="overview">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Arbeitsbereiche</p>
+                <h2>Was möchtest du öffnen?</h2>
+                <p class="dashboard-calendar-intro">Die Übersicht bleibt bewusst kompakt. Details findest du in den passenden Bereichen links.</p>
+              </div>
+            </div>
+            <div class="dashboard-hub-grid">
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="tickets">
+                <span>Anfragen / Aufträge</span>
+                <strong>Tickets bearbeiten</strong>
+                <small>Liste, Filter, Details, Aktionen und Statusänderungen.</small>
+              </button>
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="messages">
+                <span>Nachrichten</span>
+                <strong>Kommunikation öffnen</strong>
+                <small>Kundennachrichten und Antworten gesammelt bearbeiten.</small>
+              </button>
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="status">
+                <span>Status / Verlauf</span>
+                <strong>Statusgruppen prüfen</strong>
+                <small>NEU, IN BEARBEITUNG, IN PRÜFUNG und ABGESCHLOSSEN.</small>
+              </button>
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="management">
+                <span>Verwaltung</span>
+                <strong>Konten & Rechte</strong>
+                <small>Kundenkonten, Mitarbeiter und spätere Rollen an einem Ort.</small>
+              </button>
+              <a class="dashboard-hub-card" href="/objektportal/" target="_blank" rel="noopener">
+                <span>ObjektPortal</span>
+                <strong>Web-App öffnen</strong>
+                <small>Objekte, Einsätze, QR-Check-in und Reinigungssystem.</small>
+              </a>
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="trailer-calendar">
+                <span>Anhänger</span>
+                <strong>Kalender verwalten</strong>
+                <small>Interne Belegungen und Verfügbarkeit pflegen.</small>
+              </button>
+            </div>
+          </section>
+
+          <section class="dashboard-panel dashboard-status-manager is-hidden" id="dashboardStatusManager" data-dashboard-view="status">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Status / Verlauf</p>
+                <h2>Statusgruppen im Überblick</h2>
+                <p class="dashboard-calendar-intro">Alle Vorgänge werden in den vier Hauptstatus geführt. Details öffnest du über den Bereich Anfragen / Aufträge.</p>
+              </div>
+              <button class="btn ghost" type="button" data-dashboard-view-trigger="tickets">Anfragen öffnen</button>
+            </div>
+            <div class="dashboard-status-board" id="dashboardStatusBoard">
+              <div class="dashboard-empty-state"><strong>Statusdaten werden geladen …</strong><p>Nach dem Login erscheinen hier die aktuellen Gruppen.</p></div>
+            </div>
+          </section>
+
+          <section class="dashboard-panel dashboard-management-hub is-hidden" id="dashboardManagementHub" data-dashboard-view="management">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Verwaltung</p>
+                <h2>Konten, Zugänge & Rechte</h2>
+                <p class="dashboard-calendar-intro">Kundenkonten und Mitarbeiter liegen jetzt gebündelt in einem Verwaltungsbereich. Die eigentlichen Formulare öffnen sich erst nach Auswahl.</p>
+              </div>
+            </div>
+            <div class="dashboard-hub-grid dashboard-management-grid">
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="customers">
+                <span>Kundenkonten</span>
+                <strong>Kundenportal-Zugänge</strong>
+                <small>Kunden anlegen, Aufträge zuordnen und Einladungen senden.</small>
+              </button>
+              <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="employees">
+                <span>Mitarbeiter</span>
+                <strong>Accounts & Rollen</strong>
+                <small>Mitarbeiterkonten erstellen, bearbeiten, löschen und Rechte pflegen.</small>
+              </button>
+              <button class="dashboard-hub-card is-disabled" type="button" disabled>
+                <span>Rollen & Rechte</span>
+                <strong>Vorbereitet</strong>
+                <small>Spätere Detailrechte für Chef/Admin, Mitarbeiter und Ansichtskonten.</small>
+              </button>
+            </div>
+          </section>
 
           <section class="dashboard-panel dashboard-messages-center is-hidden" id="dashboardMessagesCenter" data-dashboard-view="messages">
             <div class="panel-head dashboard-messages-center-head">
@@ -6721,7 +6802,7 @@ function pageDashboard() {
             </div>
           </section>
 
-          <section class="dashboard-grid dashboard-workbench-grid" data-dashboard-view="overview">
+          <section class="dashboard-grid dashboard-workbench-grid is-hidden" data-dashboard-view="tickets">
             <div class="dashboard-panel dashboard-ticket-panel">
               <div class="panel-head">
                 <div>
@@ -6886,7 +6967,7 @@ function pageDashboard() {
             </aside>
           </section>
 
-          <section class="dashboard-roadmap system-status-board">
+          <section class="dashboard-roadmap system-status-board" data-dashboard-view="overview">
             <p class="eyebrow">Systemstatus</p>
             <div class="roadmap-grid">
               <article><strong>Live</strong><span>Anfragen, Tickets und Statusverwaltung aktiv</span></article>
@@ -10575,18 +10656,70 @@ function bindTrailerWizard() {
   updateWizard();
 }
 
+
+function getDashboardStatusRows() {
+  const tickets = dashboardAllRequestCache || [];
+  const groups = [
+    { key: "neu", label: "NEU", text: "Neue Anfragen oder noch nicht gestartete Vorgänge." },
+    { key: "in_bearbeitung", label: "IN BEARBEITUNG", text: "Geplante, zugewiesene oder aktiv bearbeitete Vorgänge." },
+    { key: "in_pruefung", label: "IN PRÜFUNG", text: "Warten auf Prüfung durch Chef/Admin." },
+    { key: "erledigt", label: "ABGESCHLOSSEN", text: "Final abgeschlossene Vorgänge." },
+  ];
+
+  return groups.map(group => {
+    const rows = tickets.filter(ticket => dashboardStatusMatches(ticket.status, group.key));
+    const latest = rows
+      .slice()
+      .sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0))
+      .slice(0, 3);
+    return { ...group, rows, latest };
+  });
+}
+
+function renderDashboardStatusOverview() {
+  const board = document.querySelector("#dashboardStatusBoard");
+  if (!board) return;
+
+  const rows = getDashboardStatusRows();
+  const total = (dashboardAllRequestCache || []).length;
+  if (!total) {
+    board.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Noch keine aktiven Vorgänge</strong>
+        <p>Sobald Anfragen oder ObjektPortal-Einsätze vorhanden sind, werden sie hier nach Status gruppiert.</p>
+      </div>
+    `;
+    return;
+  }
+
+  board.innerHTML = rows.map(group => `
+    <article class="dashboard-status-group-card status-${escapeHtml(group.key)}">
+      <div class="dashboard-status-group-head">
+        <span>${escapeHtml(group.label)}</span>
+        <strong>${group.rows.length}</strong>
+      </div>
+      <p>${escapeHtml(group.text)}</p>
+      <div class="dashboard-status-mini-list">
+        ${group.latest.length ? group.latest.map(ticket => `
+          <div class="dashboard-status-mini-item">
+            <strong>${escapeHtml(ticket.ticket_number || ticket.id || "Ticket")}</strong>
+            <span>${escapeHtml(ticket.customer_name || ticket.service || "Vorgang")}</span>
+          </div>
+        `).join("") : `<div class="dashboard-status-mini-item muted"><span>Keine Vorgänge in dieser Gruppe.</span></div>`}
+      </div>
+    </article>
+  `).join("");
+}
+
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
+  const allowedViews = ["overview", "tickets", "status", "archive", "management", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
   });
   document.querySelectorAll("[data-dashboard-view-trigger]").forEach(link => {
     const trigger = link.dataset.dashboardViewTrigger || "overview";
-    const isActive = normalized === "overview"
-      ? link.textContent.trim() === "Übersicht"
-      : trigger === normalized;
-    link.classList.toggle("active", isActive);
+    link.classList.toggle("active", trigger === normalized);
   });
   if (normalized === "trailer-calendar") {
     refreshDashboardTrailerCalendar();
@@ -10602,6 +10735,9 @@ function setDashboardView(view = "overview") {
   }
   if (normalized === "messages") {
     renderDashboardMessagesCenter();
+  }
+  if (normalized === "status") {
+    renderDashboardStatusOverview();
   }
 }
 

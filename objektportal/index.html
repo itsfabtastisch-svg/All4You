@@ -13,7 +13,7 @@
       <div>
         <p class="op-eyebrow">All4You ObjektPortal</p>
         <h1>Digitales Objekt- & Reinigungsportal</h1>
-        <p>Isolierter ObjektPortal-Bereich. Bestehende Startseite, Dashboard, Tickets, Nachrichten und Kundenportal werden von dieser Seite nicht verändert.</p>
+        <p>Objekte, Einheiten, Reinigungsintervalle und Paketgrundlagen sauber verwalten. QR-Code, Bilder und Berichte folgen in den nächsten Phasen.</p>
       </div>
       <div class="op-hero-actions">
         <a class="op-btn op-btn-ghost" href="/dashboard">Zurück zum Mitarbeiterportal</a>
@@ -30,7 +30,7 @@
     <section id="opApp" class="op-app is-hidden" aria-live="polite">
       <section class="op-status-row">
         <span id="opStatusBadge" class="op-status-badge">Bereit</span>
-        <span id="opBuildBadge" class="op-build">DBG: ALL4YOU-V6.0.0-OBJECTPORTAL-SAFE-STANDALONE</span>
+        <span id="opBuildBadge" class="op-build">DBG: ALL4YOU-V6.1.0-OBJECTPORTAL-CORE-DATA</span>
       </section>
 
       <section class="op-stats" id="opStats"></section>
@@ -57,6 +57,22 @@
               <h2 id="opObjectTitle">Objektübersicht</h2>
             </div>
             <button class="op-btn op-btn-primary" id="opOpenWizardTop" type="button">+ Objekt hinzufügen</button>
+          </div>
+          <div class="op-object-toolbar" aria-label="Objektfilter">
+            <input id="opObjectSearch" type="search" placeholder="Objekt, Adresse, Einheit oder Intervall suchen …">
+            <select id="opStatusFilter" aria-label="Status filtern">
+              <option value="all">Alle Status</option>
+              <option value="active">Aktiv</option>
+              <option value="paused">Pausiert</option>
+              <option value="draft">Entwurf</option>
+            </select>
+            <select id="opPackageFilter" aria-label="Paket filtern">
+              <option value="all">Alle Pakete</option>
+              <option value="basic">Basic</option>
+              <option value="plus">Plus</option>
+              <option value="pro">Pro</option>
+              <option value="custom">Individuell</option>
+            </select>
           </div>
           <div class="op-object-list" id="opObjectList"></div>
         </section>
@@ -159,6 +175,10 @@
       <section class="op-step" data-step="4">
         <h3>Zusammenfassung</h3>
         <div class="op-summary" id="opWizardSummary"></div>
+        <div class="op-feature-preview">
+          <p class="op-eyebrow">Paket-Vorschau</p>
+          <div class="op-feature-list" id="opWizardFeaturePreview"></div>
+        </div>
         <label>Interne Notiz optional
           <textarea id="opWizardNotes" rows="3" placeholder="z. B. Zugang über Innenhof, Schlüsselregelung später ergänzen …"></textarea>
         </label>

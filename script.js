@@ -11899,22 +11899,35 @@ function renderCustomerPortalHomeSummary(requests = customerPortalRequests, obje
 function renderCustomerPortalStatusOverview(requests = customerPortalRequests, objects = customerPortalObjects) {
   const box = document.querySelector("#customerPortalStatusGrid");
   if (!box) return;
+
   const requestRows = (Array.isArray(requests) ? requests : []).map(ticket => ({
-    type: "Auftrag",
-    title: ticket.ticket_number || serviceLabel(ticket.service) || "Auftrag",
-    subtitle: ticket.summary || ticket.subject || serviceLabel(ticket.service),
+    type: serviceLabel(ticket.service) || "Auftrag",
+    title: ticket.ticket_number || "Auftrag",
     status: normalizeGlobalStatus(ticket.status),
-    date: ticket.updated_at || ticket.created_at
+    date: ticket.updated_at || ticket.created_at,
+    facts: getCustomerRequestCardFacts(ticket)
   }));
+
   const objectRows = (Array.isArray(objects) ? objects : []).flatMap(object =>
-    getCustomerPortalObjectJobs(object).map(job => ({
-      type: "ObjektPortal",
-      title: object.name || "Objekt",
-      subtitle: `${job.unit?.name || "Bereich"}${job.planned_date ? " · " + formatDashboardDate(job.planned_date) : ""}`,
-      status: normalizeGlobalStatus(job.status),
-      date: job.updated_at || job.finished_at || job.started_at || job.planned_date || job.created_at
-    }))
+    getCustomerPortalObjectJobs(object).map(job => {
+      const unitName = job.unit?.name || "Bereich";
+      return {
+        type: "ObjektPortal",
+        title: object.name || "Objekt",
+        status: normalizeGlobalStatus(job.status),
+        date: job.updated_at || job.finished_at || job.started_at || job.planned_date || job.created_at,
+        facts: [
+          ["Objekt", object.name || "Objekt"],
+          ["Bereich", unitName],
+          ["Status", statusLabel(job.status)],
+          ["Geplant", job.planned_date ? formatDashboardDate(job.planned_date) : "Noch nicht geplant"],
+          ["Intervall", formatInterval(job.unit?.cleaning_interval || object.cleaning_interval || "")],
+          ["Aktualisiert", job.updated_at ? formatDashboardDate(job.updated_at) : "—"]
+        ].filter(([_, value]) => value && String(value).trim() && value !== "—")
+      };
+    })
   );
+
   const rows = [...requestRows, ...objectRows]
     .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
@@ -11940,10 +11953,21 @@ function renderCustomerPortalStatusOverview(requests = customerPortalRequests, o
         </div>
         <div class="customer-status-column-list">
           ${items.length ? items.slice(0, 6).map(item => `
-            <div class="customer-status-row">
-              <span>${escapeHtml(item.type)}</span>
-              <strong>${escapeHtml(item.title)}</strong>
-              <small>${escapeHtml(item.subtitle || "")}</small>
+            <div class="customer-status-row customer-status-row-rich">
+              <div class="customer-status-row-top">
+                <span>${escapeHtml(item.type)}</span>
+                <strong>${escapeHtml(item.title)}</strong>
+              </div>
+              ${item.facts?.length ? `
+                <div class="customer-status-row-facts">
+                  ${item.facts.slice(0, 6).map(([factLabel, factValue]) => `
+                    <span class="customer-status-row-fact">
+                      <strong>${escapeHtml(factLabel)}</strong>
+                      <em>${escapeHtml(detailValue(factValue))}</em>
+                    </span>
+                  `).join("")}
+                </div>
+              ` : ""}
             </div>
           `).join("") : `<small>Keine Vorgänge</small>`}
         </div>

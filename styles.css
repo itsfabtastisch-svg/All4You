@@ -10643,3 +10643,89 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 }
+
+/* ========================================================================== 
+   ALL4YOU-V6.10.9 · Kundenportal Statuskarten kompakt
+   Status-Verlauf nutzt strukturierte Info-Kacheln statt langer Textzusammenfassungen.
+   ========================================================================== */
+
+.customer-status-row-rich {
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(10,169,155,.12);
+  background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(238,246,250,.78));
+}
+
+.customer-status-row-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.customer-status-row-top span {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(10,169,155,.1);
+  color: var(--teal-dark);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.customer-status-row-top strong {
+  flex: 1;
+  text-align: right;
+  color: var(--navy);
+  font-size: .94rem;
+  line-height: 1.15;
+}
+
+.customer-status-row-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 7px;
+}
+
+.customer-status-row-fact {
+  display: grid;
+  gap: 4px;
+  min-height: 50px;
+  padding: 8px 9px;
+  border-radius: 13px;
+  border: 1px solid rgba(19,35,58,.08);
+  background: rgba(255,255,255,.82);
+}
+
+.customer-status-row-fact strong {
+  color: var(--muted);
+  font-size: .62rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.customer-status-row-fact em {
+  color: var(--navy);
+  font-style: normal;
+  font-size: .78rem;
+  font-weight: 850;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .customer-status-row-top {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .customer-status-row-top strong {
+    text-align: left;
+  }
+}

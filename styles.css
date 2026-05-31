@@ -10286,6 +10286,43 @@ body.modal-open {
   line-height: 1.35;
 }
 
+
+.customer-ticket-card-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.customer-ticket-card-fact {
+  display: grid;
+  gap: 5px;
+  min-height: 62px;
+  padding: 10px 11px;
+  border: 1px solid rgba(19,35,58,.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,.72);
+}
+
+.customer-ticket-card-fact strong {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.customer-ticket-card-fact em {
+  color: var(--navy);
+  font-style: normal;
+  font-size: .88rem;
+  font-weight: 850;
+  line-height: 1.22;
+}
+
+.customer-detail-fact-grid-primary {
+  padding: 0;
+}
+
 .customer-ticket-card-meta {
   display: flex;
   align-items: center;

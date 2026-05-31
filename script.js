@@ -12372,12 +12372,11 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
           <div>
             <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
             <h3>${escapeHtml(ticket.ticket_number || "Auftrag")}</h3>
-            <p>${escapeHtml(ticket.summary || ticket.subject || "Ihre Anfrage bei All4You")}</p>
           </div>
           <em class="customer-status-badge status-${escapeHtml(normalizeGlobalStatus(ticket.status).replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(statusLabel(ticket.status))}</em>
         </div>
+        ${renderCustomerRequestCardFacts(ticket)}
         <div class="customer-ticket-card-meta">
-          <span>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</span>
           ${publicMessages.length ? `<span>${publicMessages.length} Nachricht${publicMessages.length === 1 ? "" : "en"}</span>` : `<span>Keine neuen Nachrichten</span>`}
         </div>
         <div class="customer-ticket-card-actions">
@@ -12430,6 +12429,45 @@ function renderCustomerDetailFact(label, value) {
   `;
 }
 
+
+function getCustomerRequestCardFacts(ticket) {
+  const details = ticket?.details || {};
+  const dateValue = ticket?.updated_at || ticket?.created_at;
+  const period = [details.rental_start, details.rental_end].filter(Boolean).join(" – ");
+  const location = details.pickup_return_address || details.delivery_address || details.address || details.pickup || details.dropoff || details.handover_note || "";
+
+  const candidates = [
+    ["Leistung", serviceLabel(ticket?.service)],
+    ["Status", statusLabel(ticket?.status)],
+    ["Aktualisiert", formatDashboardDate(dateValue)],
+    ["Zeitraum", period],
+    ["Dauer", details.rental_days ? `${detailValue(details.rental_days)} Tage` : ""],
+    ["Preis", details.rental_price ? `${detailValue(details.rental_price)} €` : ""],
+    ["Ort", location],
+    ["Intervall", details.interval]
+  ];
+
+  return candidates
+    .filter(([_, value]) => value !== null && value !== undefined && String(value).trim() !== "" && value !== "—")
+    .slice(0, 6);
+}
+
+function renderCustomerRequestCardFacts(ticket) {
+  const facts = getCustomerRequestCardFacts(ticket);
+  if (!facts.length) return "";
+
+  return `
+    <div class="customer-ticket-card-facts">
+      ${facts.map(([label, value]) => `
+        <span class="customer-ticket-card-fact">
+          <strong>${escapeHtml(label)}</strong>
+          <em>${escapeHtml(detailValue(value))}</em>
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderCustomerPortalDetail(ticket) {
   const title = document.querySelector("#customerPortalDetailTitle");
   const status = document.querySelector("#customerPortalDetailStatus");
@@ -12465,8 +12503,6 @@ function renderCustomerPortalDetail(ticket) {
   renderCustomerPortalProgress(ticket);
 
   const groups = getDashboardDetailGroups(ticket);
-  const details = ticket.details || {};
-  const summary = ticket.summary || ticket.subject || details.message || "Noch keine kurze Zusammenfassung vorhanden.";
   const contactFacts = [
     renderCustomerDetailFact("Leistung", serviceLabel(ticket.service)),
     renderCustomerDetailFact("Status", statusLabel(ticket.status)),
@@ -12475,11 +12511,7 @@ function renderCustomerPortalDetail(ticket) {
   ].join("");
 
   body.innerHTML = `
-    <section class="customer-detail-summary-card ${serviceAccentClass(ticket.service)}">
-      <span>Zusammenfassung</span>
-      <p>${escapeHtml(summary)}</p>
-    </section>
-    <section class="customer-detail-fact-grid">
+    <section class="customer-detail-fact-grid customer-detail-fact-grid-primary">
       ${contactFacts}
     </section>
     ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}

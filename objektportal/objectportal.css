@@ -892,3 +892,144 @@ body.op-employee-mode #opOpenWizard,
     width: 100%;
   }
 }
+
+/* =========================================================
+   V6.8.1 · Upload UX Cleanup
+   - Einsatzansichten bleiben kompakt.
+   - Bilder werden über Buttons/Dialoge/Wizard-Flows gepflegt.
+   ========================================================= */
+.op-job-photo-section-clean {
+  padding: 14px;
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(15,44,70,.10);
+  border-radius: 18px;
+  margin-top: 12px;
+}
+
+.op-job-photo-section-clean.compact {
+  padding: 12px;
+}
+
+.op-muted-small {
+  display: block;
+  margin-top: 4px;
+  color: #66788d;
+  font-size: .88rem;
+  line-height: 1.35;
+}
+
+.op-photo-clean-actions,
+.op-photo-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.op-photo-action-note {
+  margin-top: 10px;
+}
+
+.op-photo-dialog-card {
+  max-width: min(980px, calc(100vw - 28px));
+  width: 100%;
+  max-height: min(88vh, 900px);
+  overflow: auto;
+}
+
+.op-photo-dialog-layout {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.op-photo-dialog-section {
+  border: 1px solid rgba(15,44,70,.10);
+  border-radius: 20px;
+  background: #f8fbfd;
+  padding: 16px;
+}
+
+.op-photo-upload-form-dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.op-file-drop {
+  border: 1px dashed rgba(0,145,130,.45) !important;
+  background: rgba(0,170,155,.07);
+  border-radius: 16px;
+  padding: 14px !important;
+  cursor: pointer;
+}
+
+.op-file-drop span {
+  display: block;
+  margin-top: 5px;
+  color: #65758a;
+  font-size: .88rem;
+  font-weight: 700;
+}
+
+.op-file-drop input[type="file"] {
+  margin-top: 10px;
+}
+
+.op-checkin-wizard-clean {
+  margin-top: 16px;
+}
+
+.op-checkin-steps-compact {
+  margin-bottom: 14px;
+}
+
+.op-checkin-step-single {
+  box-shadow: 0 18px 45px rgba(10, 37, 64, .08);
+}
+
+.op-checkin-proof-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-top: 14px;
+  border-radius: 16px;
+  background: rgba(10, 169, 155, .08);
+  border: 1px solid rgba(10, 169, 155, .20);
+}
+
+.op-checkin-upload-card {
+  margin-top: 14px;
+}
+
+@media (max-width: 820px) {
+  .op-photo-dialog-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .op-photo-dialog-card {
+    max-height: 92vh;
+  }
+
+  .op-photo-clean-actions,
+  .op-photo-action-row,
+  .op-checkin-proof-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .op-photo-clean-actions .op-btn,
+  .op-photo-clean-actions .op-mini-action,
+  .op-photo-action-row .op-btn,
+  .op-checkin-proof-summary .op-mini-action {
+    width: 100%;
+    justify-content: center;
+  }
+}

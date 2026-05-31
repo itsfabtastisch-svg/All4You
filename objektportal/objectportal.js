@@ -1,6 +1,6 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.8.0 Check-in Wizard / Vorher-Dokumentation
+   V6.8.1 Upload UX / Wizard Cleanup
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Dateien.
@@ -8,7 +8,7 @@
    - Macht den QR-Check-in zum geführten Mitarbeiter-Wizard.
    - Vorher-Zustand muss vor dem eigentlichen Check-in dokumentiert werden.
 
-   DBG: ALL4YOU-V6.8.0-OBJECTPORTAL-CHECKIN-WIZARD
+   DBG: ALL4YOU-V6.8.1-OBJECTPORTAL-UPLOAD-UX
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -38,6 +38,7 @@ const state = {
   checkinData: null,
   portalMode: "admin",
   photoUrls: {},
+  photoDialogJobId: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -499,6 +500,23 @@ function getAllJobs() {
   return state.objects.flatMap((object) => getObjectJobs(object));
 }
 
+function findJobById(jobId) {
+  const wanted = String(jobId || "");
+  if (!wanted) return null;
+  for (const object of state.objects) {
+    const job = getObjectJobs(object).find((item) => String(item.id) === wanted)
+      || (Array.isArray(object.jobs) ? object.jobs : []).find((item) => String(item.id) === wanted);
+    if (job) {
+      return { object, job, unit: activeUnits(object.units).find((unit) => unit.id === job.unit_id) || job.unit || null, customer: object.customer || {} };
+    }
+  }
+  const checkinJob = state.checkinData?.job;
+  if (checkinJob && String(checkinJob.id) === wanted) {
+    return { object: state.checkinData.object || {}, job: checkinJob, unit: state.checkinData.unit || null, customer: state.checkinData.customer || {} };
+  }
+  return null;
+}
+
 function getObjectJobSummary(object = {}) {
   const jobs = getObjectJobs(object);
   const current = jobs.find((job) => ["in_progress", "assigned"].includes(String(job.status || "").toLowerCase()));
@@ -573,7 +591,7 @@ function setPortalMode(mode) {
   $("#opOpenWizard")?.classList.toggle("is-hidden", isEmployee);
   $("#opOpenWizardTop")?.classList.toggle("is-hidden", isEmployee);
   const build = $("#opBuildBadge");
-  if (build) build.textContent = "DBG: ALL4YOU-V6.8.0-OBJECTPORTAL-CHECKIN-WIZARD";
+  if (build) build.textContent = "DBG: ALL4YOU-V6.8.1-OBJECTPORTAL-UPLOAD-UX";
 }
 
 function getUnitLabel(object = {}, unitId) {
@@ -593,83 +611,85 @@ function renderCheckinWizard(job = {}) {
   const beforeCount = getCheckinJobPhotoCount(job, ["before"]);
   const issueCount = getCheckinJobPhotoCount(job, ["damage", "blocked", "general"]);
   const canFinish = beforeCount > 0;
+  const stepIndex = beforeCount ? 1 : 0;
 
-  return `
-    <div class="op-checkin-wizard">
-      <div class="op-checkin-steps">
-        <span class="op-checkin-step ${beforeCount ? "done" : "active"}"><b>1</b> Vorher-Zustand</span>
-        <span class="op-checkin-step ${beforeCount ? (issueCount ? "done" : "active") : ""}"><b>2</b> Schäden & Auffälligkeiten</span>
-        <span class="op-checkin-step ${canFinish ? "active" : ""}"><b>3</b> Check-in abschließen</span>
-      </div>
+  const progress = `
+    <div class="op-checkin-steps op-checkin-steps-compact">
+      <span class="op-checkin-step ${beforeCount ? "done" : "active"}"><b>1</b> Vorher-Zustand</span>
+      <span class="op-checkin-step ${beforeCount ? "active" : ""}"><b>2</b> Auffälligkeiten</span>
+      <span class="op-checkin-step ${canFinish ? "" : ""}"><b>3</b> Einchecken</span>
+    </div>
+  `;
 
-      <section class="op-checkin-step-card ${beforeCount ? "is-done" : ""}">
-        <div>
-          <p class="op-eyebrow">Schritt 1 von 3</p>
-          <h3>Vorher-Zustand dokumentieren</h3>
-          <p>Bitte lade mindestens ein Bild vom Zustand vor Arbeitsbeginn hoch. Erst danach kann der Einsatz eingecheckt werden.</p>
-        </div>
-        ${beforeCount ? `
-          <div class="op-checkin-done-box">
-            <strong>${beforeCount} Vorher-Bild${beforeCount === 1 ? "" : "er"} gespeichert</strong>
-            <span>Der erste Pflichtschritt ist erledigt.</span>
+  const proofSummary = getJobPhotos(job).length ? `
+    <div class="op-checkin-proof-summary">
+      <strong>${getJobPhotos(job).length} Bild${getJobPhotos(job).length === 1 ? "" : "er"} gespeichert</strong>
+      <button class="op-mini-action" type="button" data-open-photo-dialog="${escapeHtml(job.id)}">Bilder ansehen / ergänzen</button>
+    </div>
+  ` : "";
+
+  if (!beforeCount) {
+    return `
+      <div class="op-checkin-wizard op-checkin-wizard-clean">
+        ${progress}
+        <section class="op-checkin-step-card op-checkin-step-single">
+          <div>
+            <p class="op-eyebrow">Schritt 1 von 3</p>
+            <h3>Vorher-Zustand dokumentieren</h3>
+            <p>Bitte dokumentiere den Zustand vor Arbeitsbeginn. Erst nach mindestens einem Vorher-Bild kann der Einsatz gestartet werden.</p>
           </div>
-        ` : `
-          <form class="op-checkin-upload-form" data-checkin-wizard-upload="before" data-job-id="${escapeHtml(job.id)}">
-            <label>Vorher-Bild(er)
+          <form class="op-checkin-upload-form op-checkin-upload-card" data-checkin-wizard-upload="before" data-job-id="${escapeHtml(job.id)}">
+            <label class="op-file-drop">Vorher-Bild auswählen
               <input name="photos" type="file" accept="image/*" multiple required>
+              <span>Foto vom Bereich vor Arbeitsbeginn hochladen</span>
             </label>
             <label>Kurze Notiz optional
               <textarea name="caption" rows="2" placeholder="z. B. Zustand vor Arbeitsbeginn …"></textarea>
             </label>
-            <button class="op-btn op-btn-primary" type="submit">Vorher-Bild speichern</button>
+            <button class="op-btn op-btn-primary" type="submit">Vorher-Zustand speichern</button>
           </form>
-        `}
-      </section>
+        </section>
+      </div>
+    `;
+  }
 
-      <section class="op-checkin-step-card ${!beforeCount ? "is-locked" : ""}">
+  return `
+    <div class="op-checkin-wizard op-checkin-wizard-clean">
+      ${progress}
+      <section class="op-checkin-step-card op-checkin-step-single">
         <div>
           <p class="op-eyebrow">Schritt 2 von 3</p>
-          <h3>Schäden oder Auffälligkeiten erfassen</h3>
-          <p>Wenn etwas bereits vor Arbeitsbeginn beschädigt, stark verschmutzt oder nicht zugänglich war, kann es hier dokumentiert werden.</p>
+          <h3>Schäden & Auffälligkeiten prüfen</h3>
+          <p>Falls vor Arbeitsbeginn Schäden, starke Verschmutzung oder zugestellte Bereiche sichtbar sind, kannst du sie hier dokumentieren. Wenn nichts auffällt, kannst du direkt einchecken.</p>
         </div>
-        ${!beforeCount ? `
-          <div class="op-checkin-locked-box">Bitte zuerst den Vorher-Zustand hochladen.</div>
-        ` : `
-          ${issueCount ? `<div class="op-checkin-done-box"><strong>${issueCount} Auffälligkeit${issueCount === 1 ? "" : "en"} gespeichert</strong><span>Du kannst weitere Bilder ergänzen oder den Check-in abschließen.</span></div>` : ""}
-          <form class="op-checkin-upload-form" data-checkin-wizard-upload="issue" data-job-id="${escapeHtml(job.id)}">
-            <div class="op-photo-upload-grid">
-              <label>Art
-                <select name="photoType">
-                  <option value="damage">Schaden / Auffälligkeit</option>
-                  <option value="blocked">Zugestellt / nicht zugänglich</option>
-                  <option value="general">Allgemeine Auffälligkeit</option>
-                </select>
-              </label>
-              <label>Bild(er) optional
-                <input name="photos" type="file" accept="image/*" multiple>
-              </label>
-            </div>
-            <label>Notiz optional
-              <textarea name="caption" rows="2" placeholder="z. B. Kellerbereich zugestellt, Schaden an Wand sichtbar …"></textarea>
+        <div class="op-checkin-done-box">
+          <strong>${beforeCount} Vorher-Bild${beforeCount === 1 ? "" : "er"} gespeichert</strong>
+          <span>${issueCount ? `${issueCount} Auffälligkeit${issueCount === 1 ? "" : "en"} zusätzlich dokumentiert.` : "Keine Auffälligkeit dokumentiert."}</span>
+        </div>
+        <form class="op-checkin-upload-form op-checkin-upload-card" data-checkin-wizard-upload="issue" data-job-id="${escapeHtml(job.id)}">
+          <div class="op-photo-upload-grid">
+            <label>Art
+              <select name="photoType">
+                <option value="damage">Schaden / Auffälligkeit</option>
+                <option value="blocked">Zugestellt / nicht zugänglich</option>
+                <option value="general">Allgemeine Auffälligkeit</option>
+              </select>
             </label>
-            <div class="op-checkin-wizard-actions">
-              <button class="op-btn op-btn-ghost" type="submit">Auffälligkeit speichern</button>
-              <button class="op-btn op-btn-primary" type="button" data-checkin-finalize="${escapeHtml(job.id)}">Keine weiteren Auffälligkeiten / einchecken</button>
-            </div>
-          </form>
-        `}
+            <label class="op-file-drop">Bild optional
+              <input name="photos" type="file" accept="image/*" multiple>
+              <span>Nur nötig, wenn etwas dokumentiert werden soll</span>
+            </label>
+          </div>
+          <label>Notiz optional
+            <textarea name="caption" rows="2" placeholder="z. B. Kellerbereich zugestellt, Schaden sichtbar …"></textarea>
+          </label>
+          <div class="op-checkin-wizard-actions">
+            <button class="op-btn op-btn-ghost" type="submit">Auffälligkeit speichern</button>
+            <button class="op-btn op-btn-primary" type="button" data-checkin-finalize="${escapeHtml(job.id)}">Check-in abschließen</button>
+          </div>
+        </form>
+        ${proofSummary}
       </section>
-
-      <section class="op-checkin-step-card ${!canFinish ? "is-locked" : ""}">
-        <div>
-          <p class="op-eyebrow">Schritt 3 von 3</p>
-          <h3>Einsatz starten</h3>
-          <p>Nach der Vorher-Dokumentation wird der Einsatz auf „In Arbeit“ gesetzt und der Mitarbeiter gilt als vor Ort eingecheckt.</p>
-        </div>
-        <button class="op-btn op-btn-primary" type="button" data-checkin-finalize="${escapeHtml(job.id)}" ${canFinish ? "" : "disabled"}>Jetzt endgültig einchecken</button>
-      </section>
-
-      ${getJobPhotos(job).length ? `<div class="op-checkin-proof-preview"><h4>Bereits gespeicherte Bilder</h4>${renderPhotoGrid(job)}</div>` : ""}
     </div>
   `;
 }
@@ -757,6 +777,8 @@ function renderCheckinPanel() {
   panel.querySelectorAll("[data-checkin-wizard-upload]").forEach((form) => {
     form.addEventListener("submit", handleCheckinWizardPhotoUpload);
   });
+
+  attachPhotoDialogOpenHandlers(panel);
 }
 
 async function loadCheckinFromUrl() {
@@ -859,7 +881,7 @@ function renderPhotoUploadForm(job = {}, compact = false) {
   const canUpload = isManagerProfile() || status === "in_progress";
   if (!canUpload) {
     return `
-      <div class="op-photo-upload-note">
+      <div class="op-photo-upload-note op-photo-action-note">
         <strong>Bilddokumentation nach Check-in</strong>
         <span>Fotos können hochgeladen werden, sobald der Einsatz auf „In Arbeit“ steht.</span>
       </div>
@@ -867,48 +889,133 @@ function renderPhotoUploadForm(job = {}, compact = false) {
   }
 
   return `
-    <form class="op-photo-upload-form ${compact ? "compact" : ""}" data-upload-job-photo="${escapeHtml(job.id)}">
-      <div class="op-photo-upload-head">
-        <div>
-          <p class="op-eyebrow">Bilddokumentation</p>
-          <strong>Vorher-Bilder / Auffälligkeiten hochladen</strong>
-        </div>
-      </div>
-      <div class="op-photo-upload-grid">
-        <label>Bildtyp
-          <select name="photoType">
-            <option value="before">Vorher-Zustand</option>
-            <option value="damage">Schaden / Auffälligkeit</option>
-            <option value="blocked">Zugestellt / nicht zugänglich</option>
-            <option value="general">Allgemein</option>
-          </select>
-        </label>
-        <label>Foto(s)
-          <input name="photos" type="file" accept="image/*" multiple required>
-        </label>
-      </div>
-      <label>Kurze Notiz optional
-        <textarea name="caption" rows="2" placeholder="z. B. Schaden war vor Arbeitsbeginn vorhanden …"></textarea>
-      </label>
-      <button class="op-btn op-btn-primary" type="submit">Bild(er) hochladen</button>
-    </form>
+    <div class="op-photo-action-row">
+      <button class="op-btn op-btn-primary" type="button" data-open-photo-dialog="${escapeHtml(job.id)}">Bild-Wizard öffnen</button>
+    </div>
   `;
 }
 
 function renderJobPhotosSection(job = {}, options = {}) {
+  const count = getJobPhotos(job).length;
+  const compactClass = options.compact ? "compact" : "";
   return `
-    <section class="op-job-photo-section ${options.compact ? "compact" : ""}">
+    <section class="op-job-photo-section op-job-photo-section-clean ${compactClass}">
       <div class="op-section-title op-section-title-small">
         <div>
           <p class="op-eyebrow">Nachweise</p>
-          <h4>Bilder zum Einsatz</h4>
+          <h4>Bilddokumentation</h4>
+          <span class="op-muted-small">Bilder werden über einen separaten Wizard verwaltet, damit die Einsatzansicht kompakt bleibt.</span>
         </div>
-        <span class="op-chip op-chip-soft">${getJobPhotos(job).length} Bild${getJobPhotos(job).length === 1 ? "" : "er"}</span>
+        <span class="op-chip op-chip-soft">${count} Bild${count === 1 ? "" : "er"}</span>
       </div>
-      ${renderPhotoGrid(job)}
-      ${renderPhotoUploadForm(job, options.compact)}
+      <div class="op-photo-clean-actions">
+        ${count ? `<button class="op-mini-action" type="button" data-open-photo-dialog="${escapeHtml(job.id)}">Bilder ansehen</button>` : ""}
+        ${renderPhotoUploadForm(job, options.compact)}
+      </div>
     </section>
   `;
+}
+
+function ensurePhotoDialog() {
+  let dialog = document.getElementById("opPhotoDialog");
+  if (dialog) return dialog;
+  document.body.insertAdjacentHTML("beforeend", `
+    <dialog class="op-modal op-photo-dialog" id="opPhotoDialog">
+      <div class="op-modal-card op-photo-dialog-card">
+        <button class="op-modal-close" id="opClosePhotoDialog" type="button" aria-label="Schließen">×</button>
+        <div id="opPhotoDialogBody"></div>
+      </div>
+    </dialog>
+  `);
+  dialog = document.getElementById("opPhotoDialog");
+  document.getElementById("opClosePhotoDialog")?.addEventListener("click", closePhotoDialog);
+  dialog?.addEventListener("click", (event) => {
+    if (event.target === dialog) closePhotoDialog();
+  });
+  return dialog;
+}
+
+function closePhotoDialog() {
+  const dialog = document.getElementById("opPhotoDialog");
+  state.photoDialogJobId = null;
+  if (dialog?.open) dialog.close();
+}
+
+function openPhotoDialog(jobId) {
+  state.photoDialogJobId = jobId;
+  const dialog = ensurePhotoDialog();
+  renderPhotoDialog();
+  if (dialog && !dialog.open) dialog.showModal();
+}
+
+function renderPhotoDialog() {
+  const body = document.getElementById("opPhotoDialogBody");
+  if (!body) return;
+  const found = findJobById(state.photoDialogJobId);
+  if (!found?.job) {
+    body.innerHTML = `<div class="op-empty">Der Einsatz konnte nicht geladen werden.</div>`;
+    return;
+  }
+  const { object, unit, job } = found;
+  const status = String(job.status || "planned").toLowerCase();
+  const canUpload = isManagerProfile() || status === "in_progress";
+  body.innerHTML = `
+    <div class="op-modal-head">
+      <p class="op-eyebrow">Bild-Wizard</p>
+      <h2>Bilddokumentation</h2>
+      <p>${escapeHtml(object?.name || "Objekt")} · ${escapeHtml(unit?.name || getUnitLabel(object, job.unit_id))}</p>
+    </div>
+    <div class="op-photo-dialog-layout">
+      <section class="op-photo-dialog-section">
+        <div class="op-section-title op-section-title-small">
+          <div>
+            <p class="op-eyebrow">Gespeicherte Bilder</p>
+            <h4>${getJobPhotos(job).length} Bild${getJobPhotos(job).length === 1 ? "" : "er"}</h4>
+          </div>
+        </div>
+        ${renderPhotoGrid(job)}
+      </section>
+      <section class="op-photo-dialog-section">
+        <div class="op-section-title op-section-title-small">
+          <div>
+            <p class="op-eyebrow">Neues Bild</p>
+            <h4>Dokumentation ergänzen</h4>
+          </div>
+        </div>
+        ${canUpload ? `
+          <form class="op-photo-upload-form op-photo-upload-form-dialog" data-upload-job-photo="${escapeHtml(job.id)}">
+            <label>Bildtyp
+              <select name="photoType">
+                <option value="before">Vorher-Zustand</option>
+                <option value="damage">Schaden / Auffälligkeit</option>
+                <option value="blocked">Zugestellt / nicht zugänglich</option>
+                <option value="general">Allgemein</option>
+              </select>
+            </label>
+            <label class="op-file-drop">Foto(s) auswählen
+              <input name="photos" type="file" accept="image/*" multiple required>
+              <span>Ein oder mehrere Bilder hochladen</span>
+            </label>
+            <label>Kurze Notiz optional
+              <textarea name="caption" rows="2" placeholder="z. B. Schaden war vor Arbeitsbeginn vorhanden …"></textarea>
+            </label>
+            <button class="op-btn op-btn-primary" type="submit">Bild(er) speichern</button>
+          </form>
+        ` : `
+          <div class="op-photo-upload-note"><strong>Noch nicht verfügbar</strong><span>Bilder können nach dem Check-in hochgeladen werden.</span></div>
+        `}
+      </section>
+    </div>
+  `;
+  body.querySelectorAll("[data-upload-job-photo]").forEach((form) => {
+    form.addEventListener("submit", handleUploadJobPhotos);
+  });
+}
+
+function attachPhotoDialogOpenHandlers(scope = document) {
+  scope.querySelectorAll("[data-open-photo-dialog]").forEach((button) => {
+    button.addEventListener("click", () => openPhotoDialog(button.dataset.openPhotoDialog));
+  });
 }
 
 function renderEmployeeJobCard(row) {
@@ -1019,9 +1126,7 @@ function renderEmployeeWorkspace() {
     </section>
   `;
 
-  list.querySelectorAll("[data-upload-job-photo]").forEach((form) => {
-    form.addEventListener("submit", handleUploadJobPhotos);
-  });
+  attachPhotoDialogOpenHandlers(list);
 }
 
 function renderStats() {
@@ -1566,9 +1671,7 @@ function renderObjects() {
     button.addEventListener("click", handleDeleteJob);
   });
 
-  list.querySelectorAll("[data-upload-job-photo]").forEach((form) => {
-    form.addEventListener("submit", handleUploadJobPhotos);
-  });
+  attachPhotoDialogOpenHandlers(list);
 }
 
 async function loadObjectPortal() {
@@ -1824,9 +1927,14 @@ async function handleUploadJobPhotos(event) {
       if (data?.success === false) throw new Error(data.message || "Bild konnte nicht gespeichert werden.");
     }
 
+    const inPhotoDialog = Boolean(form.closest("#opPhotoDialog"));
     form.reset();
     state.photoUrls = {};
     await loadObjectPortal();
+    if (inPhotoDialog) {
+      state.photoDialogJobId = jobId;
+      renderPhotoDialog();
+    }
     setStatus(files.length === 1 ? "Bild wurde gespeichert." : `${files.length} Bilder wurden gespeichert.`, "success");
   } catch (error) {
     setStatus(error.message || "Bilddokumentation konnte nicht gespeichert werden.", "error");

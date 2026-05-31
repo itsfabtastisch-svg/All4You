@@ -10781,13 +10781,14 @@ function readCustomerPortalHistoryState() {
     tab,
     request: url.searchParams.get("request") || "",
     object: url.searchParams.get("object") || "",
+    statusItem: url.searchParams.get("statusItem") || "",
     modal: url.searchParams.get("modal") || ""
   };
 }
 
 function writeCustomerPortalHistoryState(tab = "overview", extra = {}, options = {}) {
   const normalized = CUSTOMER_PORTAL_HISTORY_TABS.includes(tab) ? tab : "overview";
-  const clearKeys = ["tab", "request", "object", "modal"];
+  const clearKeys = ["tab", "request", "object", "statusItem", "modal"];
   const url = portalUrlWithParams({ tab: normalized, ...extra }, clearKeys);
   pushPortalHistory(url, { portal: "kundenportal", tab: normalized, ...extra }, options);
 }
@@ -10810,6 +10811,12 @@ function applyCustomerPortalHistoryState() {
     }
   } else {
     closeCustomerPortalRequestModal({ updateHistory: false });
+  }
+
+  if (state.tab === "status" && state.modal === "status-detail" && state.statusItem) {
+    openCustomerPortalStatusDetail(state.statusItem, { updateHistory: false });
+  } else {
+    closeCustomerPortalStatusModal({ updateHistory: false });
   }
 }
 
@@ -11680,6 +11687,7 @@ let customerPortalObjects = [];
 let customerPortalSelectedObjectId = null;
 let customerPortalObjectLoadError = "";
 let customerPortalActiveTab = "overview";
+let customerPortalStatusRows = [];
 
 async function fetchCustomerPortalData(session) {
   if (!session?.access_token) {
@@ -11900,26 +11908,47 @@ function renderCustomerPortalStatusOverview(requests = customerPortalRequests, o
   const box = document.querySelector("#customerPortalStatusGrid");
   if (!box) return;
 
-  const requestRows = (Array.isArray(requests) ? requests : []).map(ticket => ({
-    type: serviceLabel(ticket.service) || "Auftrag",
-    title: ticket.ticket_number || "Auftrag",
-    status: normalizeGlobalStatus(ticket.status),
-    date: ticket.updated_at || ticket.created_at,
-    facts: getCustomerRequestCardFacts(ticket)
-  }));
+  const requestRows = (Array.isArray(requests) ? requests : []).map(ticket => {
+    const facts = getCustomerRequestCardFacts(ticket);
+    const service = serviceLabel(ticket.service) || "Auftrag";
+    const status = normalizeGlobalStatus(ticket.status);
+    const date = ticket.updated_at || ticket.created_at;
+
+    return {
+      id: `request:${ticket.id}`,
+      source: "request",
+      ticket,
+      type: service,
+      title: ticket.ticket_number || "Auftrag",
+      subtitle: service,
+      status,
+      statusText: statusLabel(ticket.status),
+      date,
+      facts
+    };
+  });
 
   const objectRows = (Array.isArray(objects) ? objects : []).flatMap(object =>
     getCustomerPortalObjectJobs(object).map(job => {
       const unitName = job.unit?.name || "Bereich";
+      const status = normalizeGlobalStatus(job.status);
+      const date = job.updated_at || job.finished_at || job.started_at || job.planned_date || job.created_at;
+
       return {
+        id: `object-job:${job.id || `${object.id || "object"}-${unitName}-${job.planned_date || date || "date"}`}`,
+        source: "object_job",
+        object,
+        job,
         type: "ObjektPortal",
         title: object.name || "Objekt",
-        status: normalizeGlobalStatus(job.status),
-        date: job.updated_at || job.finished_at || job.started_at || job.planned_date || job.created_at,
+        subtitle: unitName,
+        status,
+        statusText: formatCustomerObjectJobStatus(job.status),
+        date,
         facts: [
           ["Objekt", object.name || "Objekt"],
           ["Bereich", unitName],
-          ["Status", statusLabel(job.status)],
+          ["Status", formatCustomerObjectJobStatus(job.status)],
           ["Geplant", job.planned_date ? formatDashboardDate(job.planned_date) : "Noch nicht geplant"],
           ["Intervall", formatInterval(job.unit?.cleaning_interval || object.cleaning_interval || "")],
           ["Aktualisiert", job.updated_at ? formatDashboardDate(job.updated_at) : "—"]
@@ -11930,6 +11959,8 @@ function renderCustomerPortalStatusOverview(requests = customerPortalRequests, o
 
   const rows = [...requestRows, ...objectRows]
     .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+  customerPortalStatusRows = rows;
 
   if (!rows.length) {
     box.innerHTML = `<div class="dashboard-mini-empty"><strong>Noch kein Verlauf</strong><p>Wenn All4You Aufträge oder ObjektPortal-Einsätze zuordnet, erscheint hier der Statusverlauf.</p></div>`;
@@ -11952,28 +11983,148 @@ function renderCustomerPortalStatusOverview(requests = customerPortalRequests, o
           <span>${items.length}</span>
         </div>
         <div class="customer-status-column-list">
-          ${items.length ? items.slice(0, 6).map(item => `
-            <div class="customer-status-row customer-status-row-rich">
-              <div class="customer-status-row-top">
-                <span>${escapeHtml(item.type)}</span>
-                <strong>${escapeHtml(item.title)}</strong>
-              </div>
-              ${item.facts?.length ? `
-                <div class="customer-status-row-facts">
-                  ${item.facts.slice(0, 6).map(([factLabel, factValue]) => `
-                    <span class="customer-status-row-fact">
-                      <strong>${escapeHtml(factLabel)}</strong>
-                      <em>${escapeHtml(detailValue(factValue))}</em>
-                    </span>
-                  `).join("")}
-                </div>
-              ` : ""}
-            </div>
+          ${items.length ? items.slice(0, 8).map(item => `
+            <button type="button" class="customer-status-row customer-status-row-compact" data-customer-status-detail="${escapeHtml(item.id)}">
+              <span class="customer-status-row-type">${escapeHtml(item.type)}</span>
+              <strong>${escapeHtml(item.title)}</strong>
+              <small>${escapeHtml(item.subtitle || item.statusText || label)}${item.date ? ` · ${escapeHtml(formatDashboardDate(item.date))}` : ""}</small>
+              <em>Details ansehen ›</em>
+            </button>
           `).join("") : `<small>Keine Vorgänge</small>`}
         </div>
       </article>
     `;
   }).join("");
+}
+
+function getCustomerPortalStatusRow(rowId) {
+  return (customerPortalStatusRows || []).find(row => String(row.id) === String(rowId)) || null;
+}
+
+function ensureCustomerPortalStatusModal() {
+  let modal = document.querySelector("#customerPortalStatusDetailModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "customerPortalStatusDetailModal";
+  modal.className = "portal-modal-backdrop customer-status-detail-modal is-hidden";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <section class="portal-modal-card customer-request-modal-card customer-status-detail-card" role="dialog" aria-modal="true" aria-labelledby="customerPortalStatusDetailTitle">
+      <div class="portal-modal-head">
+        <div>
+          <span>Statusdetails</span>
+          <h2 id="customerPortalStatusDetailTitle">Vorgang</h2>
+        </div>
+        <button class="portal-modal-close" type="button" data-customer-status-modal-close aria-label="Fenster schließen">×</button>
+      </div>
+      <div class="portal-modal-body customer-request-modal-body">
+        <div class="customer-request-modal-statusline">
+          <span class="status-pill customer-status-badge" id="customerPortalStatusDetailBadge">—</span>
+        </div>
+        <div class="dashboard-detail-body customer-detail-body" id="customerPortalStatusDetailBody"></div>
+      </div>
+    </section>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function closeCustomerPortalStatusModal({ updateHistory = true } = {}) {
+  const modal = document.querySelector("#customerPortalStatusDetailModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  if (updateHistory) writeCustomerPortalHistoryState("status");
+}
+
+function renderCustomerPortalStatusDetailBody(row) {
+  if (!row) return `<div class="dashboard-mini-empty"><strong>Nichts ausgewählt</strong><p>Wählen Sie einen Vorgang aus.</p></div>`;
+
+  if (row.source === "request" && row.ticket) {
+    const ticket = row.ticket;
+    const groups = getDashboardDetailGroups(ticket);
+    const facts = [
+      renderCustomerDetailFact("Auftrag", ticket.ticket_number || "Auftrag"),
+      renderCustomerDetailFact("Leistung", serviceLabel(ticket.service)),
+      renderCustomerDetailFact("Status", statusLabel(ticket.status)),
+      renderCustomerDetailFact("Aktualisiert", formatDashboardDate(ticket.updated_at || ticket.created_at)),
+      ...getCustomerRequestCardFacts(ticket).map(([label, value]) => renderCustomerDetailFact(label, value))
+    ].join("");
+
+    return `
+      <section class="customer-detail-fact-grid customer-detail-fact-grid-primary customer-status-detail-facts">
+        ${facts}
+      </section>
+      <div class="customer-modal-section-grid customer-status-detail-sections">
+        ${renderCustomerModalInfoSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+        ${renderCustomerModalInfoSection("Standort & Strecke", groups["Standort & Strecke"])}
+        ${renderCustomerModalInfoSection("Weitere Angaben", groups["Anfrage-Details"], { fullWidth: true })}
+        ${renderCustomerModalInfoSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true, fullWidthFields: true })}
+      </div>
+    `;
+  }
+
+  if (row.source === "object_job" && row.object && row.job) {
+    const object = row.object;
+    const job = row.job;
+    const unit = job.unit || {};
+    const facts = [
+      renderCustomerDetailFact("Objekt", object.name || "Objekt"),
+      renderCustomerDetailFact("Bereich", unit.name || "Bereich"),
+      renderCustomerDetailFact("Status", formatCustomerObjectJobStatus(job.status)),
+      renderCustomerDetailFact("Geplant", job.planned_date ? formatDashboardDate(job.planned_date) : "Noch nicht geplant"),
+      renderCustomerDetailFact("Intervall", formatInterval(unit.cleaning_interval || object.cleaning_interval || "")),
+      renderCustomerDetailFact("Aktualisiert", job.updated_at ? formatDashboardDate(job.updated_at) : "—")
+    ].join("");
+
+    const objectEntries = [
+      ["Objekt", object.name || "Objekt"],
+      ["Adresse", objectAddress(object) || "—"],
+      ["Bereich", unit.name || "Bereich"],
+      ["Bereichsart", unit.unit_type || "—"]
+    ];
+
+    const jobEntries = [
+      ["Status", formatCustomerObjectJobStatus(job.status)],
+      ["Geplant", job.planned_date ? formatDashboardDate(job.planned_date) : "Noch nicht geplant"],
+      ["Gestartet", job.started_at ? formatDashboardDate(job.started_at) : "Noch nicht gestartet"],
+      ["Beendet", job.finished_at ? formatDashboardDate(job.finished_at) : "Noch nicht beendet"],
+      ["Intervall", formatInterval(unit.cleaning_interval || object.cleaning_interval || "")]
+    ];
+
+    return `
+      <section class="customer-detail-fact-grid customer-detail-fact-grid-primary customer-status-detail-facts">
+        ${facts}
+      </section>
+      <div class="customer-modal-section-grid customer-status-detail-sections">
+        ${renderCustomerModalInfoSection("Objekt & Bereich", objectEntries)}
+        ${renderCustomerModalInfoSection("Einsatzstatus", jobEntries)}
+      </div>
+    `;
+  }
+
+  return `<div class="dashboard-mini-empty"><strong>Keine Details</strong><p>Zu diesem Vorgang liegen aktuell keine weiteren Details vor.</p></div>`;
+}
+
+function openCustomerPortalStatusDetail(rowId, options = {}) {
+  const row = getCustomerPortalStatusRow(rowId);
+  if (!row) return;
+  const modal = ensureCustomerPortalStatusModal();
+  const title = modal.querySelector("#customerPortalStatusDetailTitle");
+  const badge = modal.querySelector("#customerPortalStatusDetailBadge");
+  const body = modal.querySelector("#customerPortalStatusDetailBody");
+
+  if (title) title.textContent = row.source === "request" ? (row.title || "Auftrag") : `${row.title || "Objekt"} · ${row.subtitle || "Bereich"}`;
+  if (badge) {
+    badge.textContent = row.statusText || statusLabel(row.status);
+    badge.className = `status-pill customer-status-badge status-${String(row.status || "unknown").replace(/[^a-z0-9_-]/gi, "")}`;
+  }
+  if (body) body.innerHTML = renderCustomerPortalStatusDetailBody(row);
+
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+  if (options.updateHistory !== false) writeCustomerPortalHistoryState("status", { statusItem: row.id, modal: "status-detail" });
 }
 
 function setCustomerPortalTab(tab = "overview", options = {}) {
@@ -11989,6 +12140,10 @@ function setCustomerPortalTab(tab = "overview", options = {}) {
 
   if (customerPortalActiveTab !== "requests") {
     closeCustomerPortalRequestModal({ updateHistory: false });
+  }
+
+  if (customerPortalActiveTab !== "status") {
+    closeCustomerPortalStatusModal({ updateHistory: false });
   }
 
   if (options.updateHistory !== false) {
@@ -12666,6 +12821,13 @@ function bindCustomerPortalPage() {
   bindCustomerPortalHistoryRouting();
 
   protectedArea.addEventListener("click", event => {
+    const statusDetailButton = event.target.closest("[data-customer-status-detail]");
+    if (statusDetailButton) {
+      event.preventDefault();
+      openCustomerPortalStatusDetail(statusDetailButton.dataset.customerStatusDetail);
+      return;
+    }
+
     const button = event.target.closest("[data-customer-portal-tab]");
     if (!button) return;
     const tab = button.dataset.customerPortalTab || "overview";
@@ -12846,6 +13008,13 @@ function bindCustomerPortalPage() {
   customerRequestModal?.addEventListener("click", event => {
     if (event.target === customerRequestModal || event.target.closest("[data-customer-request-modal-close]")) {
       closeCustomerPortalRequestModal();
+    }
+  });
+
+  const customerStatusModal = ensureCustomerPortalStatusModal();
+  customerStatusModal?.addEventListener("click", event => {
+    if (event.target === customerStatusModal || event.target.closest("[data-customer-status-modal-close]")) {
+      closeCustomerPortalStatusModal();
     }
   });
 

@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.3.0 Job Foundation
+   V6.3.2 Job Employee-ID + Remove Job
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.3.0-OBJECTPORTAL-JOB-FOUNDATION
+   DBG: ALL4YOU-V6.3.2-OBJECTPORTAL-JOB-REMOVE
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -74,6 +74,7 @@ function formatJobStatus(value) {
     completed: "Abgeschlossen",
     paused: "Pausiert",
     cancelled: "Storniert",
+    archived: "Archiviert",
   };
   return map[String(value || "planned").toLowerCase()] || value || "Geplant";
 }
@@ -337,7 +338,8 @@ function getAllUnits() {
 }
 
 function getObjectJobs(object = {}) {
-  const jobs = Array.isArray(object.jobs) ? object.jobs : [];
+  const jobs = (Array.isArray(object.jobs) ? object.jobs : [])
+    .filter((job) => String(job.status || "planned").toLowerCase() !== "archived");
   return jobs.slice().sort((a, b) => {
     const aDate = a.planned_date ? new Date(a.planned_date).getTime() : Number.MAX_SAFE_INTEGER;
     const bDate = b.planned_date ? new Date(b.planned_date).getTime() : Number.MAX_SAFE_INTEGER;
@@ -378,8 +380,8 @@ function renderStats() {
   wrap.innerHTML = `
     <article class="op-stat"><strong>${Number(stats.objects || state.objects.length || 0)}</strong><span>Objekte</span></article>
     <article class="op-stat"><strong>${Number(stats.units || units.length || 0)}</strong><span>Einheiten / Bereiche</span></article>
-    <article class="op-stat"><strong>${Number(stats.jobs || jobs.length || 0)}</strong><span>Einsätze</span></article>
-    <article class="op-stat"><strong>${Number(stats.active_jobs || activeJobs || 0)}</strong><span>Aktiv / zugewiesen</span></article>
+    <article class="op-stat"><strong>${jobs.length}</strong><span>Einsätze</span></article>
+    <article class="op-stat"><strong>${activeJobs}</strong><span>Aktiv / zugewiesen</span></article>
   `;
 }
 
@@ -503,7 +505,7 @@ function renderJobs(object = {}) {
     <article class="op-job-card ${jobStatusClass(job.status)}">
       <div class="op-job-main">
         <strong>${escapeHtml(getUnitLabel(object, job.unit_id))}</strong>
-        <small>Geplant: ${escapeHtml(formatDate(job.planned_date))} · ${escapeHtml(job.assigned_employee_name || "Mitarbeiter noch offen")}</small>
+        <small>Geplant: ${escapeHtml(formatDate(job.planned_date))} · ${escapeHtml(job.assigned_employee_name || "Mitarbeiter-ID offen")}</small>
         ${job.notes ? `<p>${escapeHtml(job.notes)}</p>` : ""}
       </div>
       <div class="op-job-actions">
@@ -516,6 +518,7 @@ function renderJobs(object = {}) {
           <option value="paused" ${String(job.status || "") === "paused" ? "selected" : ""}>Pausiert</option>
           <option value="cancelled" ${String(job.status || "") === "cancelled" ? "selected" : ""}>Storniert</option>
         </select>
+        <button class="op-mini-danger" type="button" data-delete-job="${escapeHtml(job.id)}" data-job-label="${escapeHtml(`${getUnitLabel(object, job.unit_id)} · ${formatDate(job.planned_date)}`)}">Entfernen</button>
       </div>
     </article>
   `).join("");
@@ -647,8 +650,8 @@ function renderObjectDetail(object) {
             <option value="paused">Pausiert</option>
           </select>
         </label>
-        <label>Mitarbeiter optional
-          <input name="assignedEmployeeName" type="text" placeholder="z. B. Putzkraft / Team A">
+        <label>Mitarbeiter-ID / Mitarbeiter optional
+          <input name="assignedEmployeeName" type="text" placeholder="z. B. MA-001 / Mitarbeiter-ID optional">
         </label>
         <label class="op-job-note">Interne Notiz optional
           <textarea name="notes" rows="2" placeholder="z. B. Erstbegehung, Schlüsselregelung, Besonderheit …"></textarea>
@@ -772,6 +775,10 @@ function renderObjects() {
 
   list.querySelectorAll("[data-delete-unit]").forEach((button) => {
     button.addEventListener("click", handleDeleteUnit);
+  });
+
+  list.querySelectorAll("[data-delete-job]").forEach((button) => {
+    button.addEventListener("click", handleDeleteJob);
   });
 }
 
@@ -971,6 +978,30 @@ async function handleDeleteUnit(event) {
     setStatus(data?.message || "Einheit wurde entfernt.", "success");
   } catch (error) {
     setStatus(error.message || "Einheit konnte nicht entfernt werden.", "error");
+  }
+}
+
+async function handleDeleteJob(event) {
+  const button = event.currentTarget;
+  const jobId = button.dataset.deleteJob;
+  const jobLabel = button.dataset.jobLabel || "diesen Einsatz";
+
+  if (!jobId) return;
+
+  const confirmed = window.confirm(`Einsatz „${jobLabel}“ wirklich entfernen? Er wird aus der aktiven Objektansicht ausgeblendet.`);
+  if (!confirmed) return;
+
+  try {
+    setStatus("Einsatz wird entfernt …", "loading");
+    const data = await callRpc("admin_delete_object_portal_job", {
+      p_job_id: jobId,
+    });
+
+    if (data?.success === false) throw new Error(data.message || "Einsatz konnte nicht entfernt werden.");
+    await loadObjectPortal();
+    setStatus(data?.message || "Einsatz wurde entfernt.", "success");
+  } catch (error) {
+    setStatus(error.message || "Einsatz konnte nicht entfernt werden.", "error");
   }
 }
 

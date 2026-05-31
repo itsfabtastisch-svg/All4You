@@ -735,3 +735,160 @@ body.op-employee-mode #opOpenWizard,
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   V6.8.0 · QR-Check-in Wizard
+   ========================================================= */
+.op-checkin-wizard {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+.op-checkin-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.op-checkin-step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--op-border);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--op-muted);
+  font-weight: 900;
+  padding: 10px 12px;
+}
+.op-checkin-step b {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #edf5f8;
+  color: var(--op-text);
+  font-size: .86rem;
+}
+.op-checkin-step.active {
+  border-color: rgba(10,169,155,.35);
+  background: linear-gradient(135deg, #f0fffb, #ffffff);
+  color: var(--op-text);
+}
+.op-checkin-step.active b {
+  background: linear-gradient(135deg, var(--op-teal), #087b72);
+  color: #fff;
+}
+.op-checkin-step.done {
+  border-color: rgba(16,130,104,.28);
+  background: #f0fff7;
+  color: #0d6d58;
+}
+.op-checkin-step.done b {
+  background: #0d8f74;
+  color: #fff;
+}
+.op-checkin-step-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(10,169,155,.18);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 14px 36px rgba(16,36,59,.06);
+  padding: 16px;
+}
+.op-checkin-step-card h3 {
+  margin: 0 0 5px;
+  color: var(--op-text);
+  font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+  letter-spacing: -.035em;
+}
+.op-checkin-step-card p {
+  margin: 0;
+  color: var(--op-muted);
+  font-weight: 750;
+  line-height: 1.5;
+}
+.op-checkin-step-card.is-locked {
+  opacity: .7;
+  background: #f7fbfd;
+}
+.op-checkin-done-box,
+.op-checkin-locked-box {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(10,169,155,.18);
+  border-radius: 16px;
+  background: #f2fffb;
+  color: var(--op-muted);
+  font-weight: 850;
+  padding: 11px 12px;
+}
+.op-checkin-done-box strong {
+  color: #0a6c61;
+}
+.op-checkin-locked-box {
+  border-style: dashed;
+  background: #f6fbfd;
+}
+.op-checkin-upload-form {
+  display: grid;
+  gap: 10px;
+}
+.op-checkin-upload-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--op-muted);
+  font-weight: 900;
+  font-size: .84rem;
+}
+.op-checkin-upload-form input,
+.op-checkin-upload-form select,
+.op-checkin-upload-form textarea {
+  width: 100%;
+  border: 1px solid var(--op-border);
+  border-radius: 14px;
+  padding: 10px 11px;
+  background: #fff;
+  color: var(--op-text);
+  outline: none;
+}
+.op-checkin-upload-form input[type="file"] {
+  padding: 9px;
+}
+.op-checkin-upload-form input:focus,
+.op-checkin-upload-form select:focus,
+.op-checkin-upload-form textarea:focus {
+  border-color: rgba(10,169,155,.72);
+  box-shadow: 0 0 0 4px rgba(10,169,155,.11);
+}
+.op-checkin-wizard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.op-checkin-proof-preview {
+  border: 1px solid var(--op-border);
+  border-radius: 22px;
+  background: #fbfdfe;
+  padding: 14px;
+}
+.op-checkin-proof-preview h4 {
+  margin: 0 0 10px;
+  color: var(--op-text);
+}
+.op-checkin-active-card {
+  margin-top: 14px;
+}
+@media (max-width: 760px) {
+  .op-checkin-steps {
+    grid-template-columns: 1fr;
+  }
+  .op-checkin-wizard-actions {
+    justify-content: stretch;
+  }
+  .op-checkin-wizard-actions .op-btn {
+    width: 100%;
+  }
+}

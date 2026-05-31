@@ -1,13 +1,14 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.7.0 Check-in Fotos / Bilddokumentation
+   V6.8.0 Check-in Wizard / Vorher-Dokumentation
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Dateien.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
-   - Ergänzt Bilddokumentation pro Reinigungseinsatz.
+   - Macht den QR-Check-in zum geführten Mitarbeiter-Wizard.
+   - Vorher-Zustand muss vor dem eigentlichen Check-in dokumentiert werden.
 
-   DBG: ALL4YOU-V6.7.0-OBJECTPORTAL-CHECKIN-PHOTOS
+   DBG: ALL4YOU-V6.8.0-OBJECTPORTAL-CHECKIN-WIZARD
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -572,7 +573,7 @@ function setPortalMode(mode) {
   $("#opOpenWizard")?.classList.toggle("is-hidden", isEmployee);
   $("#opOpenWizardTop")?.classList.toggle("is-hidden", isEmployee);
   const build = $("#opBuildBadge");
-  if (build) build.textContent = "DBG: ALL4YOU-V6.7.0-OBJECTPORTAL-CHECKIN-PHOTOS";
+  if (build) build.textContent = "DBG: ALL4YOU-V6.8.0-OBJECTPORTAL-CHECKIN-WIZARD";
 }
 
 function getUnitLabel(object = {}, unitId) {
@@ -580,6 +581,97 @@ function getUnitLabel(object = {}, unitId) {
   const unit = activeUnits(object.units).find((item) => item.id === unitId)
     || (Array.isArray(object.units) ? object.units : []).find((item) => item.id === unitId);
   return unit?.name || "Einheit";
+}
+
+
+function getCheckinJobPhotoCount(job = {}, types = []) {
+  const wanted = types.map((type) => String(type).toLowerCase());
+  return getJobPhotos(job).filter((photo) => wanted.includes(String(photo.photo_type || "").toLowerCase())).length;
+}
+
+function renderCheckinWizard(job = {}) {
+  const beforeCount = getCheckinJobPhotoCount(job, ["before"]);
+  const issueCount = getCheckinJobPhotoCount(job, ["damage", "blocked", "general"]);
+  const canFinish = beforeCount > 0;
+
+  return `
+    <div class="op-checkin-wizard">
+      <div class="op-checkin-steps">
+        <span class="op-checkin-step ${beforeCount ? "done" : "active"}"><b>1</b> Vorher-Zustand</span>
+        <span class="op-checkin-step ${beforeCount ? (issueCount ? "done" : "active") : ""}"><b>2</b> Schäden & Auffälligkeiten</span>
+        <span class="op-checkin-step ${canFinish ? "active" : ""}"><b>3</b> Check-in abschließen</span>
+      </div>
+
+      <section class="op-checkin-step-card ${beforeCount ? "is-done" : ""}">
+        <div>
+          <p class="op-eyebrow">Schritt 1 von 3</p>
+          <h3>Vorher-Zustand dokumentieren</h3>
+          <p>Bitte lade mindestens ein Bild vom Zustand vor Arbeitsbeginn hoch. Erst danach kann der Einsatz eingecheckt werden.</p>
+        </div>
+        ${beforeCount ? `
+          <div class="op-checkin-done-box">
+            <strong>${beforeCount} Vorher-Bild${beforeCount === 1 ? "" : "er"} gespeichert</strong>
+            <span>Der erste Pflichtschritt ist erledigt.</span>
+          </div>
+        ` : `
+          <form class="op-checkin-upload-form" data-checkin-wizard-upload="before" data-job-id="${escapeHtml(job.id)}">
+            <label>Vorher-Bild(er)
+              <input name="photos" type="file" accept="image/*" multiple required>
+            </label>
+            <label>Kurze Notiz optional
+              <textarea name="caption" rows="2" placeholder="z. B. Zustand vor Arbeitsbeginn …"></textarea>
+            </label>
+            <button class="op-btn op-btn-primary" type="submit">Vorher-Bild speichern</button>
+          </form>
+        `}
+      </section>
+
+      <section class="op-checkin-step-card ${!beforeCount ? "is-locked" : ""}">
+        <div>
+          <p class="op-eyebrow">Schritt 2 von 3</p>
+          <h3>Schäden oder Auffälligkeiten erfassen</h3>
+          <p>Wenn etwas bereits vor Arbeitsbeginn beschädigt, stark verschmutzt oder nicht zugänglich war, kann es hier dokumentiert werden.</p>
+        </div>
+        ${!beforeCount ? `
+          <div class="op-checkin-locked-box">Bitte zuerst den Vorher-Zustand hochladen.</div>
+        ` : `
+          ${issueCount ? `<div class="op-checkin-done-box"><strong>${issueCount} Auffälligkeit${issueCount === 1 ? "" : "en"} gespeichert</strong><span>Du kannst weitere Bilder ergänzen oder den Check-in abschließen.</span></div>` : ""}
+          <form class="op-checkin-upload-form" data-checkin-wizard-upload="issue" data-job-id="${escapeHtml(job.id)}">
+            <div class="op-photo-upload-grid">
+              <label>Art
+                <select name="photoType">
+                  <option value="damage">Schaden / Auffälligkeit</option>
+                  <option value="blocked">Zugestellt / nicht zugänglich</option>
+                  <option value="general">Allgemeine Auffälligkeit</option>
+                </select>
+              </label>
+              <label>Bild(er) optional
+                <input name="photos" type="file" accept="image/*" multiple>
+              </label>
+            </div>
+            <label>Notiz optional
+              <textarea name="caption" rows="2" placeholder="z. B. Kellerbereich zugestellt, Schaden an Wand sichtbar …"></textarea>
+            </label>
+            <div class="op-checkin-wizard-actions">
+              <button class="op-btn op-btn-ghost" type="submit">Auffälligkeit speichern</button>
+              <button class="op-btn op-btn-primary" type="button" data-checkin-finalize="${escapeHtml(job.id)}">Keine weiteren Auffälligkeiten / einchecken</button>
+            </div>
+          </form>
+        `}
+      </section>
+
+      <section class="op-checkin-step-card ${!canFinish ? "is-locked" : ""}">
+        <div>
+          <p class="op-eyebrow">Schritt 3 von 3</p>
+          <h3>Einsatz starten</h3>
+          <p>Nach der Vorher-Dokumentation wird der Einsatz auf „In Arbeit“ gesetzt und der Mitarbeiter gilt als vor Ort eingecheckt.</p>
+        </div>
+        <button class="op-btn op-btn-primary" type="button" data-checkin-finalize="${escapeHtml(job.id)}" ${canFinish ? "" : "disabled"}>Jetzt endgültig einchecken</button>
+      </section>
+
+      ${getJobPhotos(job).length ? `<div class="op-checkin-proof-preview"><h4>Bereits gespeicherte Bilder</h4>${renderPhotoGrid(job)}</div>` : ""}
+    </div>
+  `;
 }
 
 function renderCheckinPanel() {
@@ -640,17 +732,30 @@ function renderCheckinPanel() {
           <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
           <small>Geplant: ${escapeHtml(formatDate(job.planned_date))}</small>
           <small>Angemeldet als: ${escapeHtml(currentEmployee.employee_number || currentEmployee.display_name || currentEmployee.email || "Mitarbeiter")}</small>
-          <button class="op-btn op-btn-primary" type="button" data-checkin-job="${escapeHtml(job.id)}" ${isInProgress ? "disabled" : ""}>${isInProgress ? "Bereits in Arbeit" : "Jetzt einchecken"}</button>
+          ${isInProgress ? `<span class="op-chip op-chip-soft">Bereits eingecheckt</span>` : `<span class="op-chip op-chip-soft">Vorher-Dokumentation erforderlich</span>`}
         ` : `
           <span class="op-chip op-chip-soft">Kein geplanter Einsatz</span>
           <small>Lege zuerst einen Einsatz für diese Einheit an, dann kann der QR-Check-in den Status setzen.</small>
         `}
       </div>
     </div>
+    ${job ? (isInProgress ? `
+      <div class="op-checkin-card op-checkin-active-card">
+        <div>
+          <p class="op-eyebrow">Einsatz läuft</p>
+          <h2>Du bist eingecheckt</h2>
+          <p>Der Einsatz steht auf „In Arbeit“. Weitere Bilder können im Einsatzbereich ergänzt werden.</p>
+        </div>
+      </div>
+    ` : renderCheckinWizard(job)) : ""}
   `;
 
-  panel.querySelectorAll("[data-checkin-job]").forEach((button) => {
+  panel.querySelectorAll("[data-checkin-finalize]").forEach((button) => {
     button.addEventListener("click", handleCheckinJob);
+  });
+
+  panel.querySelectorAll("[data-checkin-wizard-upload]").forEach((form) => {
+    form.addEventListener("submit", handleCheckinWizardPhotoUpload);
   });
 }
 
@@ -675,7 +780,7 @@ async function loadCheckinFromUrl() {
 }
 
 async function handleCheckinJob(event) {
-  const jobId = event.currentTarget.dataset.checkinJob;
+  const jobId = event.currentTarget.dataset.checkinJob || event.currentTarget.dataset.checkinFinalize;
   if (!jobId) return;
 
   try {
@@ -1610,6 +1715,73 @@ async function uploadFileToObjectPortal(file, jobId) {
   }
 
   return storagePath;
+}
+
+
+async function saveJobPhotoRecords(jobId, files, photoType, caption) {
+  for (const file of files) {
+    if (!String(file.type || "").startsWith("image/")) {
+      throw new Error(`„${file.name}“ ist kein unterstütztes Bild.`);
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error(`„${file.name}“ ist größer als 10 MB.`);
+    }
+
+    const storagePath = await uploadFileToObjectPortal(file, jobId);
+    const data = await callRpc("object_portal_add_job_photo", {
+      p_job_id: jobId,
+      p_photo_type: photoType,
+      p_storage_path: storagePath,
+      p_file_name: file.name || "foto",
+      p_file_size: file.size || null,
+      p_mime_type: file.type || null,
+      p_caption: caption || null,
+      p_visible_to_customer: false,
+    });
+    if (data?.success === false) throw new Error(data.message || "Bild konnte nicht gespeichert werden.");
+  }
+}
+
+async function handleCheckinWizardPhotoUpload(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const jobId = form.dataset.jobId;
+  const step = form.dataset.checkinWizardUpload;
+  const formData = new FormData(form);
+  const files = Array.from(form.querySelector('input[type="file"]')?.files || []);
+
+  if (!jobId) return;
+
+  try {
+    const photoType = step === "before" ? "before" : (formData.get("photoType") || "damage");
+    const caption = formData.get("caption") || null;
+
+    if (step === "before" && !files.length) {
+      setStatus("Bitte mindestens ein Vorher-Bild hochladen, bevor der Einsatz gestartet wird.", "error");
+      return;
+    }
+
+    if (step !== "before" && !files.length && !String(caption || "").trim()) {
+      setStatus("Keine Auffälligkeit gespeichert. Du kannst den Check-in jetzt abschließen.", "success");
+      return;
+    }
+
+    if (!files.length) {
+      setStatus("Bitte mindestens ein Bild auswählen.", "error");
+      return;
+    }
+
+    setStatus(step === "before" ? "Vorher-Zustand wird gespeichert …" : "Auffälligkeit wird gespeichert …", "loading");
+    await saveJobPhotoRecords(jobId, files, photoType, caption);
+
+    form.reset();
+    state.photoUrls = {};
+    await loadObjectPortal();
+    await loadCheckinFromUrl();
+    setStatus(step === "before" ? "Vorher-Zustand gespeichert. Bitte Schäden/Auffälligkeiten prüfen oder Check-in abschließen." : "Auffälligkeit wurde gespeichert.", "success");
+  } catch (error) {
+    setStatus(error.message || "Check-in-Dokumentation konnte nicht gespeichert werden.", "error");
+  }
 }
 
 async function handleUploadJobPhotos(event) {

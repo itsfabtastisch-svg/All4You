@@ -567,6 +567,11 @@ function renderDashboardTickets(tickets) {
           ${renderTicketActivityBadges(ticket) || "<span></span>"}
           <span class="ticket-meta">${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
         </span>
+        <span class="ticket-card-actions" aria-label="Ticket-Aktionen">
+          <span class="mini-action" data-ticket-modal-action="details" data-ticket-modal-id="${escapeHtml(ticket.id)}">Details</span>
+          <span class="mini-action" data-ticket-modal-action="actions" data-ticket-modal-id="${escapeHtml(ticket.id)}">Aktionen</span>
+          <span class="mini-action" data-ticket-modal-action="assign" data-ticket-modal-id="${escapeHtml(ticket.id)}">Zuordnen</span>
+        </span>
       </button>
     `;
   }).join("");
@@ -6811,37 +6816,44 @@ function pageDashboard() {
                   <p class="eyebrow">Ticketliste</p>
                   <h2>Neue Anfragen</h2>
                 </div>
-                <div class="dashboard-filters">
-                  <button class="active" type="button" data-filter="all">Alle</button>
-                  <button type="button" data-filter="neu">Neu</button>
-                  <button type="button" data-filter="in_bearbeitung">In Bearbeitung</button>
-                  <button type="button" data-filter="in_pruefung">In Prüfung</button>
-                  <button type="button" data-filter="activity">Neue Aktivität</button>
-                </div>
+                <button class="btn ghost dashboard-filter-toggle" type="button" id="dashboardAdvancedFilterToggle">Weitere Filter</button>
               </div>
 
-              <div class="dashboard-search-row dashboard-search-row-advanced">
-                <input id="dashboardSearchInput" type="search" placeholder="Suche nach Ticketnummer, Kunde, Telefon, E-Mail oder Leistung">
-                <select id="dashboardServiceFilter" aria-label="Leistung filtern">
-                  <option value="all">Alle Leistungen</option>
-                  <option value="reinigung">Reinigung</option>
-                  <option value="entruempelung">Entrümpelung</option>
-                  <option value="rollerabholservice">Motorrad- & Rollertransport</option>
-                  <option value="anhaenger">Anhänger</option>
-                </select>
-                <select id="dashboardStatusFilter" aria-label="Status filtern">
-                  <option value="all">Alle Status</option>
-                  <option value="neu">Neu</option>
-                  <option value="in_bearbeitung">In Bearbeitung</option>
-                  <option value="in_pruefung">In Prüfung</option>
-                  <option value="erledigt">Abgeschlossen</option>
-                </select>
-                <select id="dashboardSortSelect" aria-label="Sortierung">
-                  <option value="newest">Neueste zuerst</option>
-                  <option value="oldest">Älteste zuerst</option>
-                  <option value="activity">Letzte Aktivität</option>
-                </select>
+              <div class="dashboard-search-row dashboard-search-row-advanced dashboard-request-search-compact">
+                <input id="dashboardSearchInput" type="search" placeholder="Suche nach Ticketnummer, Kunde, Kontakt oder Leistung">
               </div>
+
+              <details class="dashboard-advanced-filters" id="dashboardAdvancedFilters">
+                <summary>Filter & Sortierung öffnen</summary>
+                <div class="dashboard-advanced-filter-body">
+                  <div class="dashboard-filters dashboard-status-quickfilters">
+                    <button class="active" type="button" data-filter="all">Alle</button>
+                    <button type="button" data-filter="neu">Neu</button>
+                    <button type="button" data-filter="in_bearbeitung">In Bearbeitung</button>
+                    <button type="button" data-filter="in_pruefung">In Prüfung</button>
+                    <button type="button" data-filter="erledigt">Abgeschlossen</button>
+                  </div>
+                  <select id="dashboardServiceFilter" aria-label="Leistung filtern">
+                    <option value="all">Alle Leistungen</option>
+                    <option value="reinigung">Reinigung</option>
+                    <option value="entruempelung">Entrümpelung</option>
+                    <option value="rollerabholservice">Motorrad- & Rollertransport</option>
+                    <option value="anhaenger">Anhänger</option>
+                  </select>
+                  <select id="dashboardStatusFilter" aria-label="Status filtern">
+                    <option value="all">Alle Status</option>
+                    <option value="neu">Neu</option>
+                    <option value="in_bearbeitung">In Bearbeitung</option>
+                    <option value="in_pruefung">In Prüfung</option>
+                    <option value="erledigt">Abgeschlossen</option>
+                  </select>
+                  <select id="dashboardSortSelect" aria-label="Sortierung">
+                    <option value="newest">Neueste zuerst</option>
+                    <option value="oldest">Älteste zuerst</option>
+                    <option value="activity">Letzte Aktivität</option>
+                  </select>
+                </div>
+              </details>
 
               <div class="dashboard-filter-meta-row">
                 <span id="dashboardFilterMeta">0 Tickets angezeigt</span>
@@ -6894,8 +6906,7 @@ function pageDashboard() {
                 <div class="dashboard-ticket-actions">
                   <div class="dashboard-ticket-action-grid">
                     <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
-                    <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
-                    <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="assign-customer" disabled>Kundenkonto zuordnen</button>
                     <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
                     <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
                     <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
@@ -6978,6 +6989,29 @@ function pageDashboard() {
               <article><strong>Mail</strong><span>Team-Benachrichtigung mit Statuslink aktiv</span></article>
             </div>
           </section>
+
+          <div class="portal-modal-backdrop is-hidden" id="dashboardRequestModal" aria-hidden="true">
+            <section class="portal-modal-card dashboard-request-modal" role="dialog" aria-modal="true" aria-labelledby="dashboardRequestModalTitle">
+              <div class="portal-modal-head">
+                <div>
+                  <p class="eyebrow" id="dashboardRequestModalEyebrow">Anfrage / Auftrag</p>
+                  <h2 id="dashboardRequestModalTitle">Ticketdetails</h2>
+                </div>
+                <button class="portal-modal-close" type="button" data-dashboard-request-modal-close aria-label="Fenster schließen">×</button>
+              </div>
+              <div class="portal-modal-tabs" id="dashboardRequestModalTabs">
+                <button type="button" data-request-modal-tab="details">Details</button>
+                <button type="button" data-request-modal-tab="actions">Aktionen</button>
+                <button type="button" data-request-modal-tab="assign">Kundenkonto</button>
+              </div>
+              <div class="portal-modal-body" id="dashboardRequestModalBody">
+                <div class="dashboard-mini-empty">
+                  <strong>Kein Ticket ausgewählt</strong>
+                  <p>Wählen Sie eine Anfrage aus der Liste.</p>
+                </div>
+              </div>
+            </section>
+          </div>
         </main>
       </div>
     </section>
@@ -10859,6 +10893,254 @@ function setDashboardView(view = "overview", options = {}) {
   }
 }
 
+
+function getDashboardTicketById(ticketId) {
+  if (!ticketId) return null;
+  return dashboardAllRequestCache.find(ticket => ticket.id === ticketId)
+    || dashboardRequestCache.find(ticket => ticket.id === ticketId)
+    || dashboardArchiveCache.find(ticket => ticket.id === ticketId)
+    || null;
+}
+
+function getDashboardRequestModalElements() {
+  return {
+    modal: document.querySelector("#dashboardRequestModal"),
+    title: document.querySelector("#dashboardRequestModalTitle"),
+    eyebrow: document.querySelector("#dashboardRequestModalEyebrow"),
+    body: document.querySelector("#dashboardRequestModalBody"),
+    tabs: document.querySelector("#dashboardRequestModalTabs")
+  };
+}
+
+function closeDashboardRequestModal() {
+  const { modal } = getDashboardRequestModalElements();
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function getDashboardAssignableAccountsForTicket(ticket) {
+  const rows = Array.isArray(dashboardCustomerAccountsCache) ? dashboardCustomerAccountsCache : [];
+  if (!ticket?.id) return rows;
+  return rows.filter(account => !(account?.requests || []).some(request => request.id === ticket.id));
+}
+
+function renderDashboardRequestModalDetails(ticket) {
+  const groups = getDashboardDetailGroups(ticket);
+  return `
+    ${renderDashboardDetailHero(ticket)}
+    ${renderDashboardSummaryBlock(ticket)}
+    <div class="dashboard-modal-detail-grid">
+      ${renderDashboardQuickDetailCard("Kunde & Kontakt", groups["Kunde & Kontakt"], 4)}
+      ${renderDashboardQuickDetailCard("Ticket", groups["Ticket"], 4)}
+      ${renderDashboardQuickDetailCard("Termin", groups["Termin & Zeitraum"], 4)}
+      ${renderDashboardQuickDetailCard("Standort", groups["Standort & Strecke"], 4)}
+    </div>
+    <details class="dashboard-more-details modal-details-expand">
+      <summary>
+        <span>Alle Details öffnen</span>
+        <small>Weitere Anfragefelder, Hinweise und Sonderangaben</small>
+      </summary>
+      <div class="dashboard-more-details-content">
+        ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"], { fullWidth: true })}
+        ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+      </div>
+    </details>
+  `;
+}
+
+function renderDashboardRequestModalActions(ticket) {
+  const statusOptions = getDashboardStatusOptions(ticket.status);
+  return `
+    <div class="dashboard-modal-action-layout">
+      <section class="dashboard-modal-action-card">
+        <p class="eyebrow">Status</p>
+        <h3>Status ändern</h3>
+        <label>Status
+          <select id="dashboardModalStatusSelect">${statusOptions}</select>
+        </label>
+        <button class="btn primary" type="button" data-modal-ticket-action="save-status">Status speichern <span>›</span></button>
+      </section>
+      <section class="dashboard-modal-action-card">
+        <p class="eyebrow">Schnellaktionen</p>
+        <h3>Ticket-Aktionen</h3>
+        <div class="dashboard-modal-button-grid">
+          <button class="btn ghost" type="button" data-modal-ticket-action="copy-contact">Kontakt kopieren</button>
+          <button class="btn ghost" type="button" data-modal-ticket-action="archive-ticket">Archivieren</button>
+          <button class="btn primary soft-action" type="button" data-modal-ticket-action="mark-done">Als abgeschlossen markieren</button>
+          <button class="btn ghost danger-action" type="button" data-modal-ticket-action="delete-ticket">Endgültig löschen</button>
+        </div>
+      </section>
+      <p class="dashboard-ticket-action-message" id="dashboardModalActionMessage">Aktionen gelten für ${escapeHtml(ticket.ticket_number || "das ausgewählte Ticket")}.</p>
+    </div>
+  `;
+}
+
+function renderDashboardRequestModalAssign(ticket) {
+  const accounts = getDashboardAssignableAccountsForTicket(ticket);
+  const allAccounts = Array.isArray(dashboardCustomerAccountsCache) ? dashboardCustomerAccountsCache : [];
+  const alreadyLinked = allAccounts.find(account => (account?.requests || []).some(request => request.id === ticket.id));
+  if (alreadyLinked) {
+    return `
+      <div class="dashboard-modal-action-card">
+        <p class="eyebrow">Kundenkonto</p>
+        <h3>Bereits zugeordnet</h3>
+        <p>Dieses Ticket ist aktuell mit <strong>${escapeHtml(dashboardCustomerDisplayName(alreadyLinked))}</strong> verbunden.</p>
+        <button class="btn ghost" type="button" data-modal-ticket-action="open-customers">Kundenkonto öffnen</button>
+      </div>
+    `;
+  }
+  return `
+    <div class="dashboard-modal-action-card">
+      <p class="eyebrow">Kundenkonto</p>
+      <h3>Ticket einem Kundenkonto zuordnen</h3>
+      <p class="dashboard-calendar-intro">Wähle ein bestehendes Kundenkonto aus. Der Kunde sieht das Ticket danach im Kundenportal.</p>
+      <label>Kundenkonto
+        <select id="dashboardModalCustomerAccountSelect">
+          ${accounts.length ? accounts.map(account => `<option value="${escapeHtml(account.id)}">${escapeHtml(dashboardCustomerDisplayName(account))} · ${escapeHtml(account.email || "ohne E-Mail")}</option>`).join("") : `<option value="">Keine freien Kundenkonten verfügbar</option>`}
+        </select>
+      </label>
+      <button class="btn primary" type="button" data-modal-ticket-action="assign-customer" ${accounts.length ? "" : "disabled"}>Ticket zuordnen <span>›</span></button>
+      <p class="dashboard-ticket-action-message" id="dashboardModalAssignMessage">Zuordnung wird sofort im Kundenportal sichtbar.</p>
+    </div>
+  `;
+}
+
+async function openDashboardRequestModal(ticketOrId, tab = "details") {
+  const ticket = typeof ticketOrId === "string" ? getDashboardTicketById(ticketOrId) : ticketOrId;
+  const { modal, title, eyebrow, body, tabs } = getDashboardRequestModalElements();
+  if (!modal || !body || !ticket?.id) return;
+
+  dashboardSelectedRequestId = ticket.id;
+  document.querySelectorAll("#dashboardTicketList .dashboard-ticket").forEach(button => {
+    button.classList.toggle("active", button.dataset.ticketId === ticket.id);
+  });
+  renderDashboardDetail(ticket);
+
+  if (title) title.textContent = ticket.ticket_number || "Ticketdetails";
+  if (eyebrow) eyebrow.textContent = `${serviceLabel(ticket.service)} · ${statusLabel(ticket.status)}`;
+  if (tabs) {
+    tabs.querySelectorAll("[data-request-modal-tab]").forEach(button => {
+      button.classList.toggle("active", button.dataset.requestModalTab === tab);
+    });
+  }
+
+  body.dataset.ticketId = ticket.id;
+  body.dataset.activeTab = tab;
+
+  if (tab === "actions") {
+    body.innerHTML = renderDashboardRequestModalActions(ticket);
+  } else if (tab === "assign") {
+    if (!dashboardCustomerAccountsCache.length) {
+      body.innerHTML = `<div class="dashboard-empty-state"><strong>Kundenkonten werden geladen …</strong><p>Bitte kurz warten.</p></div>`;
+      try {
+        dashboardCustomerAccountsCache = await fetchDashboardCustomerAccounts(dashboardCurrentSession || getStoredEmployeeSession());
+      } catch (error) {
+        body.innerHTML = `<div class="dashboard-empty-state error"><strong>Kundenkonten konnten nicht geladen werden</strong><p>${escapeHtml(error.message || "Unbekannter Fehler")}</p></div>`;
+        modal.classList.remove("is-hidden");
+        modal.setAttribute("aria-hidden", "false");
+        return;
+      }
+    }
+    body.innerHTML = renderDashboardRequestModalAssign(ticket);
+  } else {
+    body.innerHTML = renderDashboardRequestModalDetails(ticket);
+  }
+
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+  writeDashboardHistoryState("tickets", { ticket: ticket.id, modal: tab });
+}
+
+function setDashboardModalMessage(id, type, text) {
+  const message = document.querySelector(`#${id}`);
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+async function handleDashboardModalAction(button) {
+  const action = button?.dataset?.modalTicketAction;
+  const body = document.querySelector("#dashboardRequestModalBody");
+  const ticket = getDashboardTicketById(body?.dataset?.ticketId);
+  if (!action || !ticket?.id) return;
+
+  try {
+    if (action === "save-status") {
+      const status = document.querySelector("#dashboardModalStatusSelect")?.value;
+      if (!status) return;
+      button.disabled = true;
+      setDashboardModalMessage("dashboardModalActionMessage", "loading", "Status wird gespeichert …");
+      const updatedTicket = await applyDashboardTicketStatusUpdate(ticket.id, status);
+      setDashboardModalMessage("dashboardModalActionMessage", "success", `Status wurde auf „${statusLabel(updatedTicket.status)}“ geändert.`);
+      await openDashboardRequestModal(updatedTicket.id, "actions");
+      return;
+    }
+
+    if (action === "copy-contact") {
+      await copyTextToClipboard(buildTicketContactText(ticket));
+      setDashboardModalMessage("dashboardModalActionMessage", "success", "Kontaktdaten wurden kopiert.");
+      return;
+    }
+
+    if (action === "archive-ticket") {
+      if (!confirm("Dieses Ticket wirklich archivieren?")) return;
+      button.disabled = true;
+      const archivedTicket = await archiveDashboardRequest(getStoredEmployeeSession(), ticket.id, "Manuell archiviert.");
+      moveTicketToArchiveCache(archivedTicket);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
+      closeDashboardRequestModal();
+      return;
+    }
+
+    if (action === "delete-ticket") {
+      if (!confirm("Dieses Ticket endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) return;
+      button.disabled = true;
+      await deleteDashboardRequest(getStoredEmployeeSession(), ticket.id);
+      removeTicketFromDashboardCaches(ticket.id);
+      applyDashboardFilters();
+      updateDashboardStats(dashboardAllRequestCache);
+      closeDashboardRequestModal();
+      return;
+    }
+
+    if (action === "mark-done") {
+      button.disabled = true;
+      await applyDashboardTicketStatusUpdate(ticket.id, "erledigt");
+      setDashboardModalMessage("dashboardModalActionMessage", "success", "Ticket wurde als abgeschlossen markiert.");
+      await openDashboardRequestModal(ticket.id, "actions");
+      return;
+    }
+
+    if (action === "assign-customer") {
+      const accountId = document.querySelector("#dashboardModalCustomerAccountSelect")?.value;
+      if (!accountId) {
+        setDashboardModalMessage("dashboardModalAssignMessage", "error", "Bitte Kundenkonto auswählen.");
+        return;
+      }
+      button.disabled = true;
+      setDashboardModalMessage("dashboardModalAssignMessage", "loading", "Ticket wird zugeordnet …");
+      await linkDashboardCustomerRequest(dashboardCurrentSession || getStoredEmployeeSession(), accountId, ticket.id);
+      dashboardCustomerAccountsCache = await fetchDashboardCustomerAccounts(dashboardCurrentSession || getStoredEmployeeSession());
+      setDashboardModalMessage("dashboardModalAssignMessage", "success", "Ticket wurde dem Kundenkonto zugeordnet.");
+      await openDashboardRequestModal(ticket.id, "assign");
+      return;
+    }
+
+    if (action === "open-customers") {
+      closeDashboardRequestModal();
+      setDashboardView("customers");
+      return;
+    }
+  } catch (error) {
+    const target = action === "assign-customer" ? "dashboardModalAssignMessage" : "dashboardModalActionMessage";
+    setDashboardModalMessage(target, "error", error.message || "Aktion konnte nicht ausgeführt werden.");
+    button.disabled = false;
+  }
+}
+
 function bindDashboardShell() {
   const list = document.querySelector("#dashboardTicketList");
   const saveStatusButton = document.querySelector("#dashboardSaveStatusButton");
@@ -10902,8 +11184,40 @@ function bindDashboardShell() {
   if (initialDashboardState.archive) dashboardSelectedArchiveId = initialDashboardState.archive;
   if (initialDashboardState.message) dashboardSelectedMessageRequestId = initialDashboardState.message;
 
+  const requestModal = document.querySelector("#dashboardRequestModal");
+  requestModal?.addEventListener("click", event => {
+    if (event.target === requestModal || event.target.closest("[data-dashboard-request-modal-close]")) {
+      closeDashboardRequestModal();
+      return;
+    }
+    const tabButton = event.target.closest("[data-request-modal-tab]");
+    if (tabButton) {
+      const ticketId = document.querySelector("#dashboardRequestModalBody")?.dataset?.ticketId || dashboardSelectedRequestId;
+      openDashboardRequestModal(ticketId, tabButton.dataset.requestModalTab || "details");
+      return;
+    }
+    const actionButton = event.target.closest("[data-modal-ticket-action]");
+    if (actionButton) {
+      handleDashboardModalAction(actionButton);
+    }
+  });
+
+  const advancedFilterToggle = document.querySelector("#dashboardAdvancedFilterToggle");
+  const advancedFilters = document.querySelector("#dashboardAdvancedFilters");
+  advancedFilterToggle?.addEventListener("click", () => {
+    if (advancedFilters) advancedFilters.open = !advancedFilters.open;
+  });
+
   if (list) {
     list.addEventListener("click", event => {
+      const modalAction = event.target.closest("[data-ticket-modal-action]");
+      if (modalAction) {
+        event.preventDefault();
+        event.stopPropagation();
+        openDashboardRequestModal(modalAction.dataset.ticketModalId, modalAction.dataset.ticketModalAction || "details");
+        return;
+      }
+
       const ticketButton = event.target.closest(".dashboard-ticket");
       if (!ticketButton) return;
 
@@ -10914,7 +11228,7 @@ function bindDashboardShell() {
       renderDashboardDetail(ticket || null);
 
       if (ticket?.id) {
-        writeDashboardHistoryState("tickets", { ticket: ticket.id });
+        openDashboardRequestModal(ticket, "details");
         setTimeout(() => {
           if (dashboardSelectedRequestId === ticket.id) {
             markDashboardTicketSeen(ticket.id);
@@ -11046,15 +11360,8 @@ function bindDashboardShell() {
         return;
       }
 
-      if (action === "copy-status-link") {
-        await copyTextToClipboard(buildPublicStatusLink(ticket));
-        setDashboardTicketActionMessage("success", "Statuslink wurde kopiert.");
-        return;
-      }
-
-      if (action === "copy-ticket") {
-        await copyTextToClipboard(buildTicketCompactText(ticket));
-        setDashboardTicketActionMessage("success", "Kompakte Ticketdaten wurden kopiert.");
+      if (action === "assign-customer") {
+        await openDashboardRequestModal(ticket, "assign");
         return;
       }
 

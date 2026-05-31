@@ -9960,3 +9960,270 @@ body.modal-open {
     min-height: auto;
   }
 }
+
+/* ===========================================================================
+   Mitarbeiterportal Anfragen / Aufträge Modal UX
+   DBG: ALL4YOU-V6.10.4-EMPLOYEE-REQUESTS-MODAL-UX
+   Ziel: Anfragen kompakter anzeigen, Details/Aktionen/Kundenzuordnung in Modal-Fenstern.
+   ========================================================================== */
+
+.dashboard-requests-modern .dashboard-workspace-panel,
+[data-dashboard-view="tickets"] .dashboard-workspace-panel {
+  display: none !important;
+}
+
+[data-dashboard-view="tickets"].dashboard-workbench-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-dashboard-view="tickets"] .dashboard-ticket-panel {
+  max-width: 1180px;
+  width: 100%;
+}
+
+.dashboard-request-search-compact {
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 8px;
+}
+
+.dashboard-filter-toggle {
+  white-space: nowrap;
+}
+
+.dashboard-advanced-filters {
+  margin: 0 0 10px;
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 16px;
+  background: rgba(238,246,250,.58);
+  overflow: hidden;
+}
+
+.dashboard-advanced-filters summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 13px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.dashboard-advanced-filters summary::-webkit-details-marker {
+  display: none;
+}
+
+.dashboard-advanced-filters summary::after {
+  content: "+";
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+}
+
+.dashboard-advanced-filters[open] summary::after {
+  content: "−";
+}
+
+.dashboard-advanced-filter-body {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, minmax(170px, 220px));
+  gap: 9px;
+  padding: 0 12px 12px;
+}
+
+.dashboard-status-quickfilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ticket-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.mini-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 6px 9px;
+  border: 1px solid rgba(10,169,155,.18);
+  border-radius: 999px;
+  background: rgba(10,169,155,.08);
+  color: var(--teal-2);
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.mini-action:hover {
+  background: rgba(10,169,155,.14);
+  transform: translateY(-1px);
+}
+
+.portal-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(10, 25, 41, .52);
+  backdrop-filter: blur(12px);
+}
+
+.portal-modal-backdrop.is-hidden {
+  display: none !important;
+}
+
+.portal-modal-card {
+  width: min(980px, calc(100vw - 34px));
+  max-height: min(860px, calc(100vh - 34px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(239,248,251,.96));
+  box-shadow: 0 30px 100px rgba(0, 31, 53, .34);
+}
+
+.portal-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid rgba(19,35,58,.08);
+}
+
+.portal-modal-head h2 {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-size: clamp(24px, 2.4vw, 34px);
+}
+
+.portal-modal-close {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(19,35,58,.08);
+  color: var(--navy);
+  font-size: 24px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.portal-modal-close:hover {
+  background: rgba(255,98,98,.14);
+  color: #b42323;
+}
+
+.portal-modal-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid rgba(19,35,58,.08);
+  background: rgba(238,246,250,.58);
+}
+
+.portal-modal-tabs button {
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 999px;
+  background: rgba(255,255,255,.74);
+  color: var(--muted);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.portal-modal-tabs button.active {
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 12px 28px rgba(10,169,155,.22);
+}
+
+.portal-modal-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 24px 24px;
+}
+
+.dashboard-modal-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.modal-details-expand {
+  margin-top: 12px;
+}
+
+.dashboard-modal-action-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-modal-action-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 22px;
+  background: rgba(255,255,255,.78);
+}
+
+.dashboard-modal-action-card h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 20px;
+}
+
+.dashboard-modal-action-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.dashboard-modal-button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.dashboard-modal-action-layout > .dashboard-ticket-action-message {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .dashboard-advanced-filter-body,
+  .dashboard-modal-detail-grid,
+  .dashboard-modal-action-layout,
+  .dashboard-modal-button-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-modal-backdrop {
+    padding: 10px;
+  }
+
+  .portal-modal-head,
+  .portal-modal-body,
+  .portal-modal-tabs {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

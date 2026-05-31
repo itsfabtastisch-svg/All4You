@@ -1476,6 +1476,31 @@ async function createDashboardEmployeeAccount(session, payload) {
   return data;
 }
 
+
+async function updateDashboardEmployeeAccount(session, payload) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Chef-/Admin-Sitzung vorhanden.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/update-employee-account`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload || {})
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.error || "Mitarbeiterkonto konnte nicht aktualisiert werden.");
+  }
+
+  return data;
+}
+
 async function deleteDashboardEmployeeAccount(session, employeeId) {
   if (!session?.access_token) {
     throw new Error("Keine aktive Chef-/Admin-Sitzung vorhanden.");
@@ -1856,18 +1881,19 @@ function bindDashboardEmployees() {
     try {
       let employee;
       if (payload.mode === "edit" && payload.employee_id) {
-        employee = await upsertDashboardEmployee(dashboardCurrentSession, {
-          p_employee_id: payload.employee_id,
-          p_employee_number: payload.employee_number,
-          p_display_name: payload.display_name || payload.employee_number,
-          p_email: payload.email,
-          p_auth_user_id: dashboardEmployeeWizardEmployee?.auth_user_id || null,
-          p_role: payload.role,
-          p_is_active: payload.is_active,
-          p_object_portal_enabled: payload.object_portal_enabled,
-          p_can_qr_checkin: payload.can_qr_checkin,
-          p_notes: payload.notes
+        const result = await updateDashboardEmployeeAccount(dashboardCurrentSession, {
+          employee_id: payload.employee_id,
+          auth_user_id: dashboardEmployeeWizardEmployee?.auth_user_id || null,
+          employee_number: payload.employee_number,
+          display_name: payload.display_name || payload.employee_number,
+          email: payload.email,
+          role: payload.role,
+          is_active: payload.is_active,
+          object_portal_enabled: payload.object_portal_enabled,
+          can_qr_checkin: payload.can_qr_checkin,
+          notes: payload.notes
         });
+        employee = result.employee;
       } else {
         const result = await createDashboardEmployeeAccount(dashboardCurrentSession, {
           employee_number: payload.employee_number,

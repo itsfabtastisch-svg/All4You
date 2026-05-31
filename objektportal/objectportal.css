@@ -590,3 +590,148 @@ body.op-employee-mode #opOpenWizard,
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   V6.7.0 · ObjectPortal Check-in Fotos
+   Nur ObjektPortal-eigene Klassen.
+   ========================================================= */
+.op-job-photo-section {
+  margin-top: 10px;
+  border: 1px solid var(--op-border);
+  border-radius: 18px;
+  background: #fbfdfe;
+  padding: 12px;
+}
+.op-job-photo-section.compact {
+  background: #ffffff;
+  border-color: rgba(10,169,155,.18);
+}
+.op-section-title-small {
+  margin-bottom: 8px;
+}
+.op-section-title-small h4 {
+  margin: 0;
+  color: var(--op-text);
+  font-size: 1rem;
+}
+.op-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.op-photo-card {
+  overflow: hidden;
+  border: 1px solid var(--op-border);
+  border-radius: 16px;
+  background: #fff;
+}
+.op-photo-card img,
+.op-photo-placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: linear-gradient(135deg, #eef7fa, #ffffff);
+}
+.op-photo-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--op-muted);
+  font-weight: 900;
+  font-size: .82rem;
+  text-align: center;
+  padding: 10px;
+}
+.op-photo-meta {
+  display: grid;
+  gap: 3px;
+  padding: 9px;
+}
+.op-photo-meta strong {
+  color: var(--op-text);
+  font-size: .86rem;
+}
+.op-photo-meta span,
+.op-photo-meta p {
+  color: var(--op-muted);
+  font-size: .78rem;
+  line-height: 1.35;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.op-photo-empty,
+.op-photo-upload-note {
+  border: 1px dashed #cfe1e8;
+  border-radius: 16px;
+  background: #f6fbfd;
+  color: var(--op-muted);
+  font-weight: 800;
+  padding: 11px 12px;
+  margin-bottom: 10px;
+}
+.op-photo-upload-note {
+  display: grid;
+  gap: 3px;
+}
+.op-photo-upload-note strong {
+  color: var(--op-text);
+}
+.op-photo-upload-form {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(10,169,155,.18);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f4fffc, #ffffff);
+  padding: 12px;
+}
+.op-photo-upload-form.compact {
+  padding: 10px;
+}
+.op-photo-upload-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.op-photo-upload-head strong {
+  display: block;
+  color: var(--op-text);
+}
+.op-photo-upload-grid {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(180px, 1fr);
+  gap: 10px;
+}
+.op-photo-upload-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--op-muted);
+  font-weight: 900;
+  font-size: .84rem;
+}
+.op-photo-upload-form select,
+.op-photo-upload-form input,
+.op-photo-upload-form textarea {
+  width: 100%;
+  border: 1px solid var(--op-border);
+  border-radius: 14px;
+  padding: 10px 11px;
+  background: #fff;
+  color: var(--op-text);
+  outline: none;
+}
+.op-photo-upload-form input[type="file"] {
+  padding: 9px;
+}
+.op-photo-upload-form select:focus,
+.op-photo-upload-form input:focus,
+.op-photo-upload-form textarea:focus {
+  border-color: rgba(10,169,155,.72);
+  box-shadow: 0 0 0 4px rgba(10,169,155,.11);
+}
+@media (max-width: 720px) {
+  .op-photo-upload-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,18 +1,19 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.6.1 Mitarbeiteransicht FormatTime-Fix
+   V6.7.0 Check-in Fotos / Bilddokumentation
 
    Änderungsgrenze:
-   - Nur ObjektPortal-eigene Datei.
+   - Nur ObjektPortal-eigene Dateien.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
-   - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
+   - Ergänzt Bilddokumentation pro Reinigungseinsatz.
 
-   DBG: ALL4YOU-V6.6.1-OBJECTPORTAL-EMPLOYEE-VIEW-FIX
+   DBG: ALL4YOU-V6.7.0-OBJECTPORTAL-CHECKIN-PHOTOS
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WcOv91u6w7XLAE9SXwRb5A_AvKQHmZk";
 const ALL4YOU_AUTH_STORAGE_KEY = "all4you_employee_session_v1";
+const OP_PHOTO_BUCKET = "object-portal-files";
 
 const state = {
   session: null,
@@ -35,6 +36,7 @@ const state = {
   checkinToken: new URLSearchParams(window.location.search).get("checkin") || "",
   checkinData: null,
   portalMode: "admin",
+  photoUrls: {},
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -188,6 +190,82 @@ function unitCheckinUrl(unit = {}) {
 
 function qrImageUrl(link) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(link)}`;
+}
+
+function formatPhotoType(value) {
+  const map = {
+    before: "Vorher-Zustand",
+    damage: "Schaden / Auffälligkeit",
+    blocked: "Zugestellt / nicht zugänglich",
+    general: "Allgemein",
+    after: "Nachher-Bild",
+  };
+  return map[String(value || "general").toLowerCase()] || "Allgemein";
+}
+
+function formatFileSize(value) {
+  const size = Number(value || 0);
+  if (!Number.isFinite(size) || size <= 0) return "";
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}
+
+function getJobPhotos(job = {}) {
+  return (Array.isArray(job.photos) ? job.photos : [])
+    .filter((photo) => photo && String(photo.status || "active").toLowerCase() !== "archived")
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+}
+
+function safePathSegment(value) {
+  return String(value || "datei")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 90) || "datei";
+}
+
+function encodeStoragePath(path) {
+  return String(path || "").split("/").map(encodeURIComponent).join("/");
+}
+
+async function createSignedPhotoUrl(storagePath) {
+  if (!storagePath || !state.session?.access_token) return "";
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${OP_PHOTO_BUCKET}/${encodeStoragePath(storagePath)}`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${state.session.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ expiresIn: 60 * 60 }),
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.signedURL) return "";
+  return data.signedURL.startsWith("http") ? data.signedURL : `${SUPABASE_URL}${data.signedURL}`;
+}
+
+function collectPhotoPaths() {
+  const paths = [];
+  state.objects.forEach((object) => {
+    getObjectJobs(object).forEach((job) => {
+      getJobPhotos(job).forEach((photo) => {
+        if (photo.storage_path) paths.push(photo.storage_path);
+      });
+    });
+  });
+  return [...new Set(paths)];
+}
+
+async function hydratePhotoUrls() {
+  const paths = collectPhotoPaths().filter((path) => !state.photoUrls[path]);
+  if (!paths.length) return;
+
+  await Promise.all(paths.map(async (path) => {
+    const url = await createSignedPhotoUrl(path);
+    if (url) state.photoUrls[path] = url;
+  }));
 }
 
 async function copyTextToClipboard(text) {
@@ -494,7 +572,7 @@ function setPortalMode(mode) {
   $("#opOpenWizard")?.classList.toggle("is-hidden", isEmployee);
   $("#opOpenWizardTop")?.classList.toggle("is-hidden", isEmployee);
   const build = $("#opBuildBadge");
-  if (build) build.textContent = "DBG: ALL4YOU-V6.6.1-OBJECTPORTAL-EMPLOYEE-VIEW-FIX";
+  if (build) build.textContent = "DBG: ALL4YOU-V6.7.0-OBJECTPORTAL-CHECKIN-PHOTOS";
 }
 
 function getUnitLabel(object = {}, unitId) {
@@ -646,6 +724,88 @@ function renderEmployeeStats() {
   `;
 }
 
+function renderPhotoGrid(job = {}) {
+  const photos = getJobPhotos(job);
+  if (!photos.length) {
+    return `<div class="op-photo-empty">Noch keine Bilder zu diesem Einsatz hochgeladen.</div>`;
+  }
+
+  return `
+    <div class="op-photo-grid">
+      ${photos.map((photo) => {
+        const url = state.photoUrls[photo.storage_path] || "";
+        return `
+          <article class="op-photo-card">
+            ${url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(photo.file_name || formatPhotoType(photo.photo_type))}" loading="lazy">` : `<div class="op-photo-placeholder">Bild wird vorbereitet</div>`}
+            <div class="op-photo-meta">
+              <strong>${escapeHtml(formatPhotoType(photo.photo_type))}</strong>
+              <span>${escapeHtml(formatDateTime(photo.created_at))}${photo.file_size ? ` · ${escapeHtml(formatFileSize(photo.file_size))}` : ""}</span>
+              ${photo.caption ? `<p>${escapeHtml(photo.caption)}</p>` : ""}
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderPhotoUploadForm(job = {}, compact = false) {
+  const status = String(job.status || "planned").toLowerCase();
+  const canUpload = isManagerProfile() || status === "in_progress";
+  if (!canUpload) {
+    return `
+      <div class="op-photo-upload-note">
+        <strong>Bilddokumentation nach Check-in</strong>
+        <span>Fotos können hochgeladen werden, sobald der Einsatz auf „In Arbeit“ steht.</span>
+      </div>
+    `;
+  }
+
+  return `
+    <form class="op-photo-upload-form ${compact ? "compact" : ""}" data-upload-job-photo="${escapeHtml(job.id)}">
+      <div class="op-photo-upload-head">
+        <div>
+          <p class="op-eyebrow">Bilddokumentation</p>
+          <strong>Vorher-Bilder / Auffälligkeiten hochladen</strong>
+        </div>
+      </div>
+      <div class="op-photo-upload-grid">
+        <label>Bildtyp
+          <select name="photoType">
+            <option value="before">Vorher-Zustand</option>
+            <option value="damage">Schaden / Auffälligkeit</option>
+            <option value="blocked">Zugestellt / nicht zugänglich</option>
+            <option value="general">Allgemein</option>
+          </select>
+        </label>
+        <label>Foto(s)
+          <input name="photos" type="file" accept="image/*" multiple required>
+        </label>
+      </div>
+      <label>Kurze Notiz optional
+        <textarea name="caption" rows="2" placeholder="z. B. Schaden war vor Arbeitsbeginn vorhanden …"></textarea>
+      </label>
+      <button class="op-btn op-btn-primary" type="submit">Bild(er) hochladen</button>
+    </form>
+  `;
+}
+
+function renderJobPhotosSection(job = {}, options = {}) {
+  return `
+    <section class="op-job-photo-section ${options.compact ? "compact" : ""}">
+      <div class="op-section-title op-section-title-small">
+        <div>
+          <p class="op-eyebrow">Nachweise</p>
+          <h4>Bilder zum Einsatz</h4>
+        </div>
+        <span class="op-chip op-chip-soft">${getJobPhotos(job).length} Bild${getJobPhotos(job).length === 1 ? "" : "er"}</span>
+      </div>
+      ${renderPhotoGrid(job)}
+      ${renderPhotoUploadForm(job, options.compact)}
+    </section>
+  `;
+}
+
 function renderEmployeeJobCard(row) {
   const { object, job, unit, customer } = row;
   const status = String(job.status || "planned").toLowerCase();
@@ -672,11 +832,13 @@ function renderEmployeeJobCard(row) {
           <strong>Du bist für diesen Einsatz eingecheckt.</strong>
           <span>Vor Ort seit: ${escapeHtml(formatDateTime(job.checked_in_at || job.started_at))}</span>
         </div>
+        ${renderJobPhotosSection(job, { compact: true })}
       ` : `
         <div class="op-employee-hint-box">
           <strong>QR-Code vor Ort scannen</strong>
           <span>Zum Starten des Einsatzes bitte den QR-Code an der passenden Einheit scannen.</span>
         </div>
+        ${getJobPhotos(job).length ? renderJobPhotosSection(job, { compact: true }) : ""}
       `}
     </article>
   `;
@@ -751,6 +913,10 @@ function renderEmployeeWorkspace() {
       </div>
     </section>
   `;
+
+  list.querySelectorAll("[data-upload-job-photo]").forEach((form) => {
+    form.addEventListener("submit", handleUploadJobPhotos);
+  });
 }
 
 function renderStats() {
@@ -986,6 +1152,7 @@ function renderJobs(object = {}) {
           </div>
         </article>
         ${isEditing ? renderJobEditForm(object, job) : ""}
+        ${renderJobPhotosSection(job)}
       </div>
     `;
   }).join("");
@@ -1293,6 +1460,10 @@ function renderObjects() {
   list.querySelectorAll("[data-delete-job]").forEach((button) => {
     button.addEventListener("click", handleDeleteJob);
   });
+
+  list.querySelectorAll("[data-upload-job-photo]").forEach((form) => {
+    form.addEventListener("submit", handleUploadJobPhotos);
+  });
 }
 
 async function loadObjectPortal() {
@@ -1308,6 +1479,7 @@ async function loadObjectPortal() {
     state.customers = data.customers || [];
     state.objects = data.objects || [];
     state.stats = data.stats || {};
+    await hydratePhotoUrls();
 
     if (state.selectedCustomerId && !state.customers.some((customer) => customer.id === state.selectedCustomerId)) {
       state.selectedCustomerId = null;
@@ -1411,6 +1583,81 @@ async function saveWizardObject() {
     setStatus(data?.message || "Objekt wurde gespeichert.", "success");
   } catch (error) {
     setStatus(error.message || "Objekt konnte nicht gespeichert werden.", "error");
+  }
+}
+
+async function uploadFileToObjectPortal(file, jobId) {
+  const extension = safePathSegment((file.name || "foto.jpg").split(".").pop() || "jpg").toLowerCase();
+  const baseName = safePathSegment((file.name || "foto").replace(/\.[^.]+$/, ""));
+  const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const storagePath = `jobs/${safePathSegment(jobId)}/${unique}-${baseName}.${extension}`;
+  const encodedPath = encodeStoragePath(storagePath);
+
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${OP_PHOTO_BUCKET}/${encodedPath}`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${state.session.access_token}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "false",
+    },
+    body: file,
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || `Upload für ${file.name || "Bild"} fehlgeschlagen.`);
+  }
+
+  return storagePath;
+}
+
+async function handleUploadJobPhotos(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const jobId = form.dataset.uploadJobPhoto;
+  const formData = new FormData(form);
+  const files = Array.from(form.querySelector('input[type="file"]')?.files || []);
+
+  if (!jobId) return;
+  if (!files.length) {
+    setStatus("Bitte mindestens ein Bild auswählen.", "error");
+    return;
+  }
+
+  try {
+    setStatus("Bilddokumentation wird hochgeladen …", "loading");
+    const photoType = formData.get("photoType") || "before";
+    const caption = formData.get("caption") || null;
+
+    for (const file of files) {
+      if (!String(file.type || "").startsWith("image/")) {
+        throw new Error(`„${file.name}“ ist kein unterstütztes Bild.`);
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(`„${file.name}“ ist größer als 10 MB.`);
+      }
+
+      const storagePath = await uploadFileToObjectPortal(file, jobId);
+      const data = await callRpc("object_portal_add_job_photo", {
+        p_job_id: jobId,
+        p_photo_type: photoType,
+        p_storage_path: storagePath,
+        p_file_name: file.name || "foto",
+        p_file_size: file.size || null,
+        p_mime_type: file.type || null,
+        p_caption: caption,
+        p_visible_to_customer: false,
+      });
+      if (data?.success === false) throw new Error(data.message || "Bild konnte nicht gespeichert werden.");
+    }
+
+    form.reset();
+    state.photoUrls = {};
+    await loadObjectPortal();
+    setStatus(files.length === 1 ? "Bild wurde gespeichert." : `${files.length} Bilder wurden gespeichert.`, "success");
+  } catch (error) {
+    setStatus(error.message || "Bilddokumentation konnte nicht gespeichert werden.", "error");
   }
 }
 

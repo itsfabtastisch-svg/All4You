@@ -8858,3 +8858,45 @@ button.calendar-day {
     max-width: 100%;
   }
 }
+
+
+/* =========================================================
+   ALL4YOU-V6.0.0-OBJECTPORTAL-DASHBOARD-INTEGRATION
+   Nur Integration des bestehenden ObjektPortal-Ordners in das Mitarbeiterportal.
+   Bestehende Ticket-, Nachrichten-, Kundenportal- und Übersichtslogik bleibt unberührt.
+   ========================================================= */
+.dashboard-objectportal-manager {
+  gap: 18px;
+}
+
+.dashboard-objectportal-head {
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.dashboard-objectportal-frame-wrap {
+  overflow: hidden;
+  border: 1px solid rgba(11, 132, 123, 0.14);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(248, 252, 252, 0.95), rgba(239, 248, 248, 0.88));
+  box-shadow: 0 18px 48px rgba(8, 40, 55, 0.08);
+}
+
+.dashboard-objectportal-frame {
+  display: block;
+  width: 100%;
+  min-height: 760px;
+  border: 0;
+  background: transparent;
+}
+
+@media (max-width: 860px) {
+  .dashboard-objectportal-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-objectportal-frame {
+    min-height: 820px;
+  }
+}

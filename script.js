@@ -5722,6 +5722,7 @@ function pageDashboard() {
             <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
+            <a href="#dashboard-objectportal" data-dashboard-view-trigger="objectportal">ObjektPortal</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
@@ -5942,6 +5943,28 @@ function pageDashboard() {
                   <p class="dashboard-ticket-action-message" id="dashboardArchiveMessage">Archivierte Aufträge können bei Bedarf zurückgeholt werden.</p>
                 </div>
               </aside>
+            </div>
+          </section>
+
+          <section class="dashboard-panel dashboard-objectportal-manager is-hidden" id="dashboardObjectPortalManager" data-dashboard-view="objectportal">
+            <div class="panel-head dashboard-objectportal-head">
+              <div>
+                <p class="eyebrow">All4You ObjektPortal</p>
+                <h2>Digitales Objekt- & Reinigungsportal</h2>
+                <p class="dashboard-calendar-intro">
+                  Objektverwaltung für Bestandskunden: Kundenkonto auswählen, Objekt anlegen, Einheiten/Bereiche und Reinigungsintervalle vorbereiten.
+                </p>
+              </div>
+              <a class="btn ghost" href="/objektportal/" target="_blank" rel="noopener">Separat öffnen</a>
+            </div>
+
+            <div class="dashboard-objectportal-frame-wrap">
+              <iframe
+                class="dashboard-objectportal-frame"
+                src="/objektportal/index.html"
+                title="All4You ObjektPortal"
+                loading="lazy"
+              ></iframe>
             </div>
           </section>
 
@@ -9805,7 +9828,7 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "customers", "trailer-calendar", "messages"];
+  const allowedViews = ["overview", "archive", "customers", "objectportal", "trailer-calendar", "messages"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);

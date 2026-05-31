@@ -7816,7 +7816,6 @@ function pageCustomerPortal() {
                   <div class="customer-new-request-actions">
                     <button class="btn ghost" type="button" data-customer-new-request-prev>Zurück</button>
                     <button class="btn primary" type="button" data-customer-new-request-next>Weiter <span>›</span></button>
-                    <button class="btn primary" type="submit" data-customer-new-request-submit hidden>Anfrage senden <span>›</span></button>
                   </div>
                   <p class="dashboard-note-message" id="customerNewRequestMessage"></p>
                 </form>
@@ -12878,6 +12877,56 @@ function customerPortalAccountPrefill() {
   };
 }
 
+let customerNewRequestAddressControllers = {};
+
+function resetCustomerNewRequestAddressControllers() {
+  Object.values(customerNewRequestAddressControllers || {}).forEach(controller => {
+    controller?.hideSuggestions?.();
+  });
+  customerNewRequestAddressControllers = {};
+}
+
+function bindCustomerNewRequestAddressAutocomplete() {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  if (!form) return;
+
+  resetCustomerNewRequestAddressControllers();
+
+  form.querySelectorAll("[data-customer-address-autocomplete]").forEach(input => {
+    const key = input.dataset.customerAddressAutocomplete;
+    const status = form.querySelector(`[data-customer-address-status="${key}"]`);
+    const controller = bindGoogleAddressAutocomplete(input, status, {
+      onSelect(place) {
+        input.dataset.placeId = place?.placeId || "";
+        input.dataset.placeAddress = place?.address || input.value || "";
+      },
+      onDirty() {
+        delete input.dataset.placeId;
+        delete input.dataset.placeAddress;
+      }
+    });
+    if (controller) customerNewRequestAddressControllers[key] = controller;
+  });
+}
+
+function getCustomerNewRequestSelectedAddresses() {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  const addresses = {};
+  if (!form) return addresses;
+
+  form.querySelectorAll("[data-customer-address-autocomplete]").forEach(input => {
+    const key = input.name || input.dataset.customerAddressAutocomplete;
+    const controllerKey = input.dataset.customerAddressAutocomplete;
+    const selected = customerNewRequestAddressControllers?.[controllerKey]?.getSelectedPlace?.();
+    if (selected?.placeId) {
+      addresses[`${key}_place_id`] = selected.placeId;
+      addresses[`${key}_confirmed_address`] = selected.address || input.value || "";
+    }
+  });
+
+  return addresses;
+}
+
 function setCustomerNewRequestMessage(type, text) {
   const message = document.querySelector("#customerNewRequestMessage");
   if (!message) return;
@@ -12918,7 +12967,8 @@ function customerPortalServiceFieldsTemplate(serviceKey = customerPortalNewReque
       return `
         <div class="customer-new-request-grid">
           <label>Adresse / Objekt
-            <input type="text" name="address" placeholder="Straße, PLZ, Ort" required>
+            <input type="text" name="address" placeholder="Adresse suchen und Vorschlag auswählen" required data-customer-address-autocomplete="object_address">
+            <small class="address-confirmation" data-customer-address-status="object_address"></small>
           </label>
           <label>Objektart
             <select name="object_type" required>
@@ -12947,7 +12997,8 @@ function customerPortalServiceFieldsTemplate(serviceKey = customerPortalNewReque
       return `
         <div class="customer-new-request-grid">
           <label>Adresse / Objekt
-            <input type="text" name="address" placeholder="Straße, PLZ, Ort" required>
+            <input type="text" name="address" placeholder="Adresse suchen und Vorschlag auswählen" required data-customer-address-autocomplete="object_address">
+            <small class="address-confirmation" data-customer-address-status="object_address"></small>
           </label>
           <label>Reinigungsart
             <select name="cleaning_type" required>
@@ -12982,10 +13033,12 @@ function customerPortalServiceFieldsTemplate(serviceKey = customerPortalNewReque
       return `
         <div class="customer-new-request-grid">
           <label>Abholort
-            <input type="text" name="pickup" placeholder="Adresse / Ort" required>
+            <input type="text" name="pickup" placeholder="Adresse suchen und Vorschlag auswählen" required data-customer-address-autocomplete="pickup">
+            <small class="address-confirmation" data-customer-address-status="pickup"></small>
           </label>
           <label>Zielort
-            <input type="text" name="destination" placeholder="Adresse / Ort" required>
+            <input type="text" name="destination" placeholder="Adresse suchen und Vorschlag auswählen" required data-customer-address-autocomplete="destination">
+            <small class="address-confirmation" data-customer-address-status="destination"></small>
           </label>
           <label>Fahrzeugart
             <select name="vehicle_type" required>
@@ -13016,6 +13069,7 @@ function renderCustomerNewRequestServiceFields() {
   const box = document.querySelector("#customerNewRequestServiceFields");
   if (!box) return;
   box.innerHTML = customerPortalServiceFieldsTemplate(customerPortalNewRequestService);
+  bindCustomerNewRequestAddressAutocomplete();
 }
 
 function collectCustomerNewRequestData() {
@@ -13032,6 +13086,7 @@ function collectCustomerNewRequestData() {
     if (["name", "email", "phone", "company"].includes(key)) continue;
     details[key] = String(value || "").trim();
   }
+  Object.assign(details, getCustomerNewRequestSelectedAddresses());
   return { contact, details, serviceKey: customerPortalNewRequestService };
 }
 
@@ -13054,7 +13109,7 @@ function customerNewRequestDetailPairs(details = {}, serviceKey = customerPortal
     message: "Nachricht"
   };
   return Object.entries(details)
-    .filter(([, value]) => String(value || "").trim())
+    .filter(([key, value]) => String(value || "").trim() && !key.endsWith("_place_id") && !key.endsWith("_confirmed_address"))
     .map(([key, value]) => [labels[key] || key, value]);
 }
 
@@ -13099,10 +13154,12 @@ function setCustomerNewRequestStep(step) {
   });
   const prev = form.querySelector("[data-customer-new-request-prev]");
   const next = form.querySelector("[data-customer-new-request-next]");
-  const submit = form.querySelector("[data-customer-new-request-submit]");
   if (prev) prev.disabled = customerPortalNewRequestStep === 0;
-  if (next) next.hidden = customerPortalNewRequestStep === steps.length - 1;
-  if (submit) submit.hidden = customerPortalNewRequestStep !== steps.length - 1;
+  if (next) {
+    const isLastStep = customerPortalNewRequestStep === steps.length - 1;
+    next.innerHTML = isLastStep ? "Anfrage senden <span>›</span>" : "Weiter <span>›</span>";
+    next.dataset.customerNewRequestMode = isLastStep ? "submit" : "next";
+  }
   if (customerPortalNewRequestStep === 2) renderCustomerNewRequestServiceFields();
   if (customerPortalNewRequestStep === 3) renderCustomerNewRequestSummary();
 }
@@ -13203,6 +13260,39 @@ function buildCustomerPortalRequestPayload() {
     },
     p_initial_message: message
   };
+}
+
+async function submitCustomerPortalNewRequest() {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  if (!form || !validateCustomerNewRequestStep()) return;
+
+  const button = form.querySelector("[data-customer-new-request-next]");
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = "Anfrage wird gesendet …";
+  }
+  setCustomerNewRequestMessage("loading", "Anfrage wird erstellt …");
+
+  try {
+    const payload = buildCustomerPortalRequestPayload();
+    const response = await createCustomerPortalRequest(customerPortalCurrentSession, payload);
+    await tryNotifyTeam(document.createElement("div"), response, buildNotificationFallbacks({
+      name: payload.p_customer_name,
+      email: payload.p_customer_email,
+      contact: payload.p_customer_phone
+    }, payload.p_service));
+    setCustomerNewRequestMessage("success", `Anfrage wurde erstellt: ${response.ticket_number || "neues Ticket"}`);
+    await loadCustomerPortal(customerPortalCurrentSession);
+    setCustomerPortalTab("requests", { updateHistory: true });
+    setTimeout(() => closeCustomerNewRequestModal(), 900);
+  } catch (error) {
+    setCustomerNewRequestMessage("error", error.message || "Anfrage konnte nicht erstellt werden.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      setCustomerNewRequestStep(customerPortalNewRequestStep);
+    }
+  }
 }
 
 async function loadCustomerPortal(session = customerPortalCurrentSession) {
@@ -13508,36 +13598,21 @@ function bindCustomerPortalPage() {
       setCustomerNewRequestStep(customerPortalNewRequestStep - 1);
       return;
     }
-    if (event.target.closest("[data-customer-new-request-next]")) {
+    const nextButton = event.target.closest("[data-customer-new-request-next]");
+    if (nextButton) {
       event.preventDefault();
       if (!validateCustomerNewRequestStep()) return;
-      setCustomerNewRequestStep(customerPortalNewRequestStep + 1);
+      if (nextButton.dataset.customerNewRequestMode === "submit") {
+        submitCustomerPortalNewRequest();
+      } else {
+        setCustomerNewRequestStep(customerPortalNewRequestStep + 1);
+      }
     }
   });
 
   customerNewRequestForm?.addEventListener("submit", async event => {
     event.preventDefault();
-    if (!validateCustomerNewRequestStep()) return;
-    const submit = customerNewRequestForm.querySelector("[data-customer-new-request-submit]");
-    if (submit) submit.disabled = true;
-    setCustomerNewRequestMessage("loading", "Anfrage wird erstellt …");
-    try {
-      const payload = buildCustomerPortalRequestPayload();
-      const response = await createCustomerPortalRequest(customerPortalCurrentSession, payload);
-      await tryNotifyTeam(document.createElement("div"), response, buildNotificationFallbacks({
-        name: payload.p_customer_name,
-        email: payload.p_customer_email,
-        contact: payload.p_customer_phone
-      }, payload.p_service));
-      setCustomerNewRequestMessage("success", `Anfrage wurde erstellt: ${response.ticket_number || "neues Ticket"}`);
-      await loadCustomerPortal(customerPortalCurrentSession);
-      setCustomerPortalTab("requests", { updateHistory: true });
-      setTimeout(() => closeCustomerNewRequestModal(), 900);
-    } catch (error) {
-      setCustomerNewRequestMessage("error", error.message || "Anfrage konnte nicht erstellt werden.");
-    } finally {
-      if (submit) submit.disabled = false;
-    }
+    submitCustomerPortalNewRequest();
   });
 
   messageForm?.addEventListener("submit", async event => {

@@ -8900,3 +8900,146 @@ button.calendar-day {
     min-height: 820px;
   }
 }
+
+/* ==========================================================================
+   V6.5.0 Mitarbeiterverwaltung / ObjektPortal-Rechte
+   Scope: nur neuer Dashboard-Bereich Mitarbeiter.
+   ========================================================================== */
+.dashboard-employees-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, .85fr) minmax(280px, .9fr) minmax(320px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.dashboard-employee-form-panel,
+.dashboard-employee-list-panel,
+.dashboard-employee-detail-panel {
+  min-width: 0;
+}
+
+.dashboard-employee-form {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-employee-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: .84rem;
+  font-weight: 850;
+}
+
+.dashboard-employee-form input,
+.dashboard-employee-form select,
+.dashboard-employee-form textarea {
+  width: 100%;
+  border: 1px solid rgba(16, 38, 60, .14);
+  border-radius: 16px;
+  padding: 12px 13px;
+  background: rgba(255, 255, 255, .92);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.dashboard-employee-form input:focus,
+.dashboard-employee-form select:focus,
+.dashboard-employee-form textarea:focus {
+  border-color: rgba(10, 169, 155, .55);
+  box-shadow: 0 0 0 4px rgba(10, 169, 155, .11);
+}
+
+.dashboard-employee-checks {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(16, 38, 60, .11);
+  border-radius: 18px;
+  background: rgba(238, 246, 250, .72);
+}
+
+.dashboard-employee-checks label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  font-size: .88rem;
+}
+
+.dashboard-employee-checks input {
+  width: auto;
+  accent-color: var(--teal);
+}
+
+.dashboard-employee-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-employee-card strong {
+  letter-spacing: .02em;
+}
+
+.dashboard-employee-profile-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(10, 169, 155, .10), rgba(11, 78, 145, .07));
+  border: 1px solid rgba(10, 169, 155, .18);
+}
+
+.dashboard-employee-profile-card strong {
+  color: var(--navy);
+  font-size: 1.1rem;
+}
+
+.dashboard-employee-profile-card span,
+.dashboard-employee-profile-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.dashboard-employee-rights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.dashboard-employee-rights-grid div {
+  padding: 13px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid rgba(16, 38, 60, .10);
+}
+
+.dashboard-employee-rights-grid strong,
+.dashboard-employee-rights-grid span {
+  display: block;
+}
+
+.dashboard-employee-rights-grid strong {
+  color: var(--navy);
+  font-size: .82rem;
+}
+
+.dashboard-employee-rights-grid span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-employees-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-employee-rights-grid {
+    grid-template-columns: 1fr;
+  }
+}

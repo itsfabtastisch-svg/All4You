@@ -183,7 +183,10 @@ async function fetchEmployeeProfile(session) {
     display_name: data.display_name,
     email: data.email,
     role: data.role,
-    is_active: data.is_active
+    is_active: data.is_active,
+    employee_number: data.employee_number || null,
+    object_portal_enabled: Boolean(data.object_portal_enabled),
+    can_qr_checkin: Boolean(data.can_qr_checkin)
   };
 }
 
@@ -195,6 +198,8 @@ let dashboardArchiveCache = [];
 let dashboardSelectedArchiveId = null;
 let dashboardCustomerAccountsCache = [];
 let dashboardSelectedCustomerAccountId = null;
+let dashboardEmployeesCache = [];
+let dashboardSelectedEmployeeId = null;
 let dashboardSelectedMessageRequestId = null;
 let dashboardMessagesCenterLoadId = 0;
 
@@ -1419,6 +1424,244 @@ function bindDashboardCustomerAccounts() {
     } catch (error) {
       setDashboardCustomersMessage("error", error.message || "Zuordnung konnte nicht entfernt werden.");
     }
+  });
+}
+
+
+
+/* ========================================================================== 
+   Dashboard Mitarbeiterverwaltung / ObjektPortal-Rechte V6.5.0
+   --------------------------------------------------------------------------
+   Chef/Admin pflegt hier interne Mitarbeiter-ID und Rechte. Das ObjektPortal
+   nutzt diese Zuordnung beim QR-Check-in, ohne Kundendaten/Tickets anzufassen.
+   ========================================================================== */
+
+async function fetchDashboardEmployees(session) {
+  const data = await callDashboardRequestAdminRpc(session, "admin_list_employee_registry", {});
+  return Array.isArray(data?.employees) ? data.employees : [];
+}
+
+async function upsertDashboardEmployee(session, payload) {
+  const data = await callDashboardRequestAdminRpc(session, "admin_upsert_employee_registry", payload);
+  if (!data?.employee) throw new Error(data?.message || "Mitarbeiter wurde nicht bestätigt.");
+  return data.employee;
+}
+
+function dashboardEmployeeDisplayName(employee) {
+  return employee?.display_name || employee?.email || employee?.employee_number || "Mitarbeiter";
+}
+
+function setDashboardEmployeesMessage(type, text) {
+  const message = document.querySelector("#dashboardEmployeesMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function employeeRoleLabel(role) {
+  const labels = {
+    admin: "Admin / Chef",
+    chef: "Chef",
+    mitarbeiter: "Mitarbeiter / Putzkraft",
+    viewer: "Nur Ansicht"
+  };
+  return labels[String(role || "").toLowerCase()] || role || "Mitarbeiter";
+}
+
+function renderDashboardEmployees(employees = dashboardEmployeesCache) {
+  const list = document.querySelector("#dashboardEmployeesList");
+  const count = document.querySelector("#dashboardEmployeesCount");
+  if (!list) return;
+
+  const rows = Array.isArray(employees) ? employees : [];
+  if (count) count.textContent = `${rows.length} Mitarbeiter`;
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Noch keine Mitarbeiter angelegt</strong>
+        <p>Lege Mitarbeiter mit interner Mitarbeiter-ID an und aktiviere bei Bedarf ObjektPortal-Rechte.</p>
+      </div>
+    `;
+    renderDashboardEmployeeDetail(null);
+    return;
+  }
+
+  list.innerHTML = rows.map(employee => {
+    const isActive = employee.id === dashboardSelectedEmployeeId;
+    const rights = [];
+    if (employee.object_portal_enabled) rights.push("ObjektPortal");
+    if (employee.can_qr_checkin) rights.push("QR-Check-in");
+    return `
+      <button class="dashboard-ticket dashboard-employee-card ${isActive ? "active" : ""}" type="button" data-employee-id="${escapeHtml(employee.id)}">
+        <span>
+          <strong>${escapeHtml(employee.employee_number || "MA offen")}</strong>
+          <small>${escapeHtml(dashboardEmployeeDisplayName(employee))}</small>
+        </span>
+        <span class="ticket-meta">
+          <small>${escapeHtml(employeeRoleLabel(employee.role))}</small>
+          <small>${employee.is_active === false ? "Inaktiv" : (rights.join(" · ") || "Keine ObjektPortal-Rechte")}</small>
+        </span>
+      </button>
+    `;
+  }).join("");
+
+  const selected = rows.find(employee => employee.id === dashboardSelectedEmployeeId) || rows[0];
+  renderDashboardEmployeeDetail(selected);
+}
+
+function renderDashboardEmployeeDetail(employee) {
+  const title = document.querySelector("#dashboardEmployeeDetailTitle");
+  const body = document.querySelector("#dashboardEmployeeDetailBody");
+  const status = document.querySelector("#dashboardEmployeeDetailStatus");
+  if (!title || !body) return;
+
+  if (!employee?.id) {
+    dashboardSelectedEmployeeId = null;
+    title.textContent = "Mitarbeiter auswählen";
+    if (status) status.textContent = "—";
+    body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Mitarbeiter aus oder legen Sie einen neuen an.</span></div>`;
+    return;
+  }
+
+  dashboardSelectedEmployeeId = employee.id;
+  title.textContent = `${employee.employee_number || "MA offen"} · ${dashboardEmployeeDisplayName(employee)}`;
+  if (status) status.textContent = employee.is_active === false ? "Inaktiv" : "Aktiv";
+
+  body.innerHTML = `
+    <div class="dashboard-employee-profile-card">
+      <strong>${escapeHtml(employee.employee_number || "Mitarbeiter-ID offen")}</strong>
+      <span>${escapeHtml(employee.display_name || "Ohne Namen")}</span>
+      <span>${escapeHtml(employee.email || "Keine E-Mail")}</span>
+      <span>${escapeHtml(employeeRoleLabel(employee.role))}</span>
+      ${employee.auth_user_id ? `<span>Auth verknüpft</span>` : `<span>Auth-User-ID noch nicht hinterlegt</span>`}
+      ${employee.notes ? `<p>${escapeHtml(employee.notes)}</p>` : ""}
+    </div>
+    <div class="dashboard-employee-rights-grid">
+      <div><strong>ObjektPortal</strong><span>${employee.object_portal_enabled ? "aktiv" : "nicht aktiv"}</span></div>
+      <div><strong>QR-Check-in</strong><span>${employee.can_qr_checkin ? "erlaubt" : "nicht erlaubt"}</span></div>
+      <div><strong>Status</strong><span>${employee.is_active === false ? "deaktiviert" : "aktiv"}</span></div>
+    </div>
+    <div class="dashboard-ticket-action-grid">
+      <button class="btn ghost" type="button" data-employee-edit="${escapeHtml(employee.id)}">Bearbeiten</button>
+    </div>
+    <div class="summary-wide">
+      <strong>Hinweis</strong>
+      <span>Beim QR-Code-Check-in wird diese Mitarbeiter-ID intern gespeichert. Kunden sehen später nur einen neutralen Status wie „Mitarbeiter vor Ort“.</span>
+    </div>
+  `;
+}
+
+function fillDashboardEmployeeForm(employee) {
+  const form = document.querySelector("#dashboardEmployeeForm");
+  if (!form || !employee) return;
+  form.elements.employee_id.value = employee.id || "";
+  form.elements.employee_number.value = employee.employee_number || "";
+  form.elements.display_name.value = employee.display_name || "";
+  form.elements.email.value = employee.email || "";
+  form.elements.auth_user_id.value = employee.auth_user_id || "";
+  form.elements.role.value = employee.role || "mitarbeiter";
+  form.elements.is_active.checked = employee.is_active !== false;
+  form.elements.object_portal_enabled.checked = Boolean(employee.object_portal_enabled);
+  form.elements.can_qr_checkin.checked = Boolean(employee.can_qr_checkin);
+  form.elements.notes.value = employee.notes || "";
+  form.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function resetDashboardEmployeeForm() {
+  const form = document.querySelector("#dashboardEmployeeForm");
+  if (!form) return;
+  form.reset();
+  form.elements.employee_id.value = "";
+  form.elements.is_active.checked = true;
+}
+
+async function loadDashboardEmployees(session = dashboardCurrentSession) {
+  const list = document.querySelector("#dashboardEmployeesList");
+  if (list) {
+    list.innerHTML = `<div class="dashboard-empty-state"><strong>Mitarbeiter werden geladen …</strong><p>Interne Mitarbeiter-IDs und Rechte werden aus Supabase abgerufen.</p></div>`;
+  }
+
+  try {
+    dashboardEmployeesCache = await fetchDashboardEmployees(session);
+    renderDashboardEmployees(dashboardEmployeesCache);
+    setDashboardEmployeesMessage("success", "Mitarbeiter geladen.");
+  } catch (error) {
+    dashboardEmployeesCache = [];
+    if (list) {
+      list.innerHTML = `<div class="dashboard-empty-state error"><strong>Mitarbeiter konnten nicht geladen werden</strong><p>${escapeHtml(error.message || "Unbekannter Fehler")}</p></div>`;
+    }
+    setDashboardEmployeesMessage("error", error.message || "Mitarbeiter konnten nicht geladen werden.");
+  }
+}
+
+function bindDashboardEmployees() {
+  const form = document.querySelector("#dashboardEmployeeForm");
+  const resetButton = document.querySelector("#dashboardEmployeeFormReset");
+  const list = document.querySelector("#dashboardEmployeesList");
+  const detailBody = document.querySelector("#dashboardEmployeeDetailBody");
+
+  form?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const email = String(data.get("email") || "").trim().toLowerCase();
+    const displayName = String(data.get("display_name") || "").trim();
+    const employeeNumber = String(data.get("employee_number") || "").trim().toUpperCase();
+
+    if (!employeeNumber) {
+      setDashboardEmployeesMessage("error", "Bitte eine Mitarbeiter-ID eintragen, z. B. MA-001.");
+      return;
+    }
+    if (!email || !email.includes("@")) {
+      setDashboardEmployeesMessage("error", "Bitte eine gültige Mitarbeiter-E-Mail eintragen.");
+      return;
+    }
+
+    setDashboardEmployeesMessage("loading", "Mitarbeiter wird gespeichert …");
+    const submitButton = form.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      const employee = await upsertDashboardEmployee(dashboardCurrentSession, {
+        p_employee_id: data.get("employee_id") || null,
+        p_employee_number: employeeNumber,
+        p_display_name: displayName || employeeNumber,
+        p_email: email,
+        p_auth_user_id: data.get("auth_user_id") || null,
+        p_role: data.get("role") || "mitarbeiter",
+        p_is_active: Boolean(data.get("is_active")),
+        p_object_portal_enabled: Boolean(data.get("object_portal_enabled")),
+        p_can_qr_checkin: Boolean(data.get("can_qr_checkin")),
+        p_notes: String(data.get("notes") || "").trim()
+      });
+      dashboardSelectedEmployeeId = employee.id;
+      resetDashboardEmployeeForm();
+      await loadDashboardEmployees(dashboardCurrentSession);
+      setDashboardEmployeesMessage("success", "Mitarbeiter wurde gespeichert.");
+    } catch (error) {
+      setDashboardEmployeesMessage("error", error.message || "Mitarbeiter konnte nicht gespeichert werden.");
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+
+  resetButton?.addEventListener("click", resetDashboardEmployeeForm);
+
+  list?.addEventListener("click", event => {
+    const button = event.target.closest("[data-employee-id]");
+    if (!button) return;
+    list.querySelectorAll(".dashboard-ticket").forEach(item => item.classList.remove("active"));
+    button.classList.add("active");
+    const employee = dashboardEmployeesCache.find(item => item.id === button.dataset.employeeId);
+    renderDashboardEmployeeDetail(employee || null);
+  });
+
+  detailBody?.addEventListener("click", event => {
+    const button = event.target.closest("[data-employee-edit]");
+    if (!button) return;
+    const employee = dashboardEmployeesCache.find(item => item.id === button.dataset.employeeEdit);
+    if (employee) fillDashboardEmployeeForm(employee);
   });
 }
 
@@ -5722,6 +5965,7 @@ function pageDashboard() {
             <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
+            <a href="#dashboard-employees" data-dashboard-view-trigger="employees">Mitarbeiter</a>
             <a href="/objektportal/" target="_blank" rel="noopener">ObjektPortal</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
@@ -5941,6 +6185,86 @@ function pageDashboard() {
                     <button class="btn ghost danger-action" type="button" id="dashboardArchiveDeleteButton" disabled>Endgültig löschen</button>
                   </div>
                   <p class="dashboard-ticket-action-message" id="dashboardArchiveMessage">Archivierte Aufträge können bei Bedarf zurückgeholt werden.</p>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section class="dashboard-panel dashboard-employees-manager is-hidden" id="dashboardEmployeesManager" data-dashboard-view="employees">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Mitarbeiterverwaltung</p>
+                <h2>Mitarbeiter & ObjektPortal-Rechte</h2>
+                <p class="dashboard-calendar-intro">
+                  Hier verwaltet der Chef interne Mitarbeiter-IDs und die Rechte für ObjektPortal-Einsätze.
+                  Der QR-Code-Check-in nutzt diese Daten, um später eindeutig zu sehen, welcher Mitarbeiter vor Ort war.
+                </p>
+              </div>
+              <span class="status-pill" id="dashboardEmployeesCount">0 Mitarbeiter</span>
+            </div>
+
+            <div class="dashboard-employees-layout">
+              <aside class="dashboard-panel dashboard-employee-form-panel">
+                <p class="eyebrow">Mitarbeiter anlegen / bearbeiten</p>
+                <form class="dashboard-employee-form" id="dashboardEmployeeForm">
+                  <input type="hidden" name="employee_id" id="dashboardEmployeeId">
+                  <label>Mitarbeiter-ID
+                    <input type="text" name="employee_number" placeholder="z. B. MA-001" required>
+                  </label>
+                  <label>Name / Anzeige intern
+                    <input type="text" name="display_name" placeholder="z. B. Max Mustermann" required>
+                  </label>
+                  <label>E-Mail / Login
+                    <input type="email" name="email" placeholder="mitarbeiter@example.de" required>
+                  </label>
+                  <label>Auth-User-ID optional
+                    <input type="text" name="auth_user_id" placeholder="optional, falls aus Supabase Auth bekannt">
+                  </label>
+                  <label>Rolle
+                    <select name="role">
+                      <option value="mitarbeiter">Mitarbeiter / Putzkraft</option>
+                      <option value="admin">Admin / Chef</option>
+                      <option value="viewer">Nur Ansicht</option>
+                    </select>
+                  </label>
+                  <div class="dashboard-employee-checks">
+                    <label><input type="checkbox" name="is_active" checked> Konto aktiv</label>
+                    <label><input type="checkbox" name="object_portal_enabled"> ObjektPortal-Zugriff</label>
+                    <label><input type="checkbox" name="can_qr_checkin"> QR-Check-in erlaubt</label>
+                  </div>
+                  <label>Interne Notiz
+                    <textarea name="notes" rows="3" placeholder="z. B. Einsatzgebiet, Telefon intern oder Hinweise für den Chef"></textarea>
+                  </label>
+                  <div class="dashboard-employee-actions">
+                    <button class="btn primary" type="submit">Mitarbeiter speichern <span>›</span></button>
+                    <button class="btn ghost" type="button" id="dashboardEmployeeFormReset">Formular leeren</button>
+                  </div>
+                </form>
+                <p class="dashboard-ticket-action-message" id="dashboardEmployeesMessage">
+                  Hinweis: Die Login-Daten selbst laufen über Supabase Auth. Hier werden interne Mitarbeiter-ID und ObjektPortal-Rechte gepflegt.
+                </p>
+              </aside>
+
+              <div class="dashboard-panel dashboard-employee-list-panel">
+                <p class="eyebrow">Mitarbeiter</p>
+                <div class="dashboard-ticket-list dashboard-employee-list" id="dashboardEmployeesList">
+                  <div class="dashboard-empty-state">
+                    <strong>Mitarbeiter werden nach Login geladen …</strong>
+                    <p>Aktive Mitarbeiter erscheinen hier.</p>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="dashboard-panel dashboard-detail dashboard-employee-detail-panel">
+                <div class="panel-head">
+                  <div>
+                    <p class="eyebrow">Mitarbeiterdetails</p>
+                    <h2 id="dashboardEmployeeDetailTitle">Mitarbeiter auswählen</h2>
+                  </div>
+                  <span class="status-pill" id="dashboardEmployeeDetailStatus">—</span>
+                </div>
+                <div class="dashboard-detail-body" id="dashboardEmployeeDetailBody">
+                  <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Mitarbeiter aus oder legen Sie einen neuen an.</span></div>
                 </div>
               </aside>
             </div>
@@ -9828,7 +10152,7 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "customers", "objectportal", "trailer-calendar", "messages"];
+  const allowedViews = ["overview", "archive", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
@@ -9848,6 +10172,9 @@ function setDashboardView(view = "overview") {
   }
   if (normalized === "customers") {
     renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
+  }
+  if (normalized === "employees") {
+    renderDashboardEmployees(dashboardEmployeesCache);
   }
   if (normalized === "messages") {
     renderDashboardMessagesCenter();
@@ -9878,6 +10205,7 @@ function bindDashboardShell() {
 
   bindDashboardActionDirectGuard();
   bindDashboardCustomerAccounts();
+  bindDashboardEmployees();
 
   dashboardViewLinks.forEach(link => {
     if (link.dataset.dashboardViewBound === "true") return;
@@ -10255,6 +10583,7 @@ function bindDashboardAuth() {
 
     loadDashboardRequests(session);
     loadDashboardCustomerAccounts(session);
+    loadDashboardEmployees(session);
     bindDashboardTrailerCalendarManager();
   }
 

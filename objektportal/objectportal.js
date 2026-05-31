@@ -16,6 +16,7 @@ const ALL4YOU_AUTH_STORAGE_KEY = "all4you_employee_session_v1";
 
 const state = {
   session: null,
+  employeeProfile: null,
   customers: [],
   objects: [],
   stats: {},
@@ -457,6 +458,7 @@ function renderCheckinPanel() {
   const object = state.checkinData.object || {};
   const unit = state.checkinData.unit || {};
   const customer = state.checkinData.customer || {};
+  const currentEmployee = state.checkinData.current_employee || state.employeeProfile || {};
   const job = state.checkinData.job || null;
   const isInProgress = String(job?.status || "").toLowerCase() === "in_progress";
 
@@ -476,6 +478,7 @@ function renderCheckinPanel() {
         ${job ? `
           <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
           <small>Geplant: ${escapeHtml(formatDate(job.planned_date))}</small>
+          <small>Angemeldet als: ${escapeHtml(currentEmployee.employee_number || currentEmployee.display_name || currentEmployee.email || "Mitarbeiter")}</small>
           <button class="op-btn op-btn-primary" type="button" data-checkin-job="${escapeHtml(job.id)}" ${isInProgress ? "disabled" : ""}>${isInProgress ? "Bereits in Arbeit" : "Jetzt einchecken"}</button>
         ` : `
           <span class="op-chip op-chip-soft">Kein geplanter Einsatz</span>
@@ -1088,6 +1091,7 @@ async function loadObjectPortal() {
   if (!showAppOrLogin()) return;
   try {
     setStatus("ObjektPortal wird geladen …", "loading");
+    state.employeeProfile = await fetchEmployeeProfile(state.session).catch(() => null);
     const data = await callRpc("admin_list_object_portal", {});
     state.customers = data.customers || [];
     state.objects = data.objects || [];
@@ -1350,7 +1354,7 @@ async function handleObjectPortalLogin(event) {
     const session = await supabasePasswordLogin(email, password);
     storeEmployeeSession(session);
     const storedSession = getStoredEmployeeSession();
-    await fetchEmployeeProfile(storedSession);
+    state.employeeProfile = await fetchEmployeeProfile(storedSession);
     state.session = storedSession;
     form.reset();
     setLoginMessage("Login erfolgreich. ObjektPortal wird geladen …", "success");
@@ -1368,6 +1372,7 @@ async function handleObjectPortalLogout() {
   await supabaseLogout(session?.access_token);
   clearEmployeeSession();
   state.session = null;
+  state.employeeProfile = null;
   state.customers = [];
   state.objects = [];
   state.stats = {};

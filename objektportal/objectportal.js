@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.3.3 Job Edit + Employee-ID Label
+   V6.4.0 QR-Code Check-in
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.3.3-OBJECTPORTAL-JOB-EDIT
+   DBG: ALL4YOU-V6.4.0-OBJECTPORTAL-QR-CHECKIN
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -30,6 +30,9 @@ const state = {
   openUnitForms: new Set(),
   openJobForms: new Set(),
   openEditJobIds: new Set(),
+  openQrUnitIds: new Set(),
+  checkinToken: new URLSearchParams(window.location.search).get("checkin") || "",
+  checkinData: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -155,6 +158,44 @@ function customerLabel(customer) {
 
 function objectAddress(object) {
   return [object.street, [object.zip, object.city].filter(Boolean).join(" ")].filter(Boolean).join(", ") || "Adresse noch offen";
+}
+
+function getCheckinBaseUrl() {
+  return `${window.location.origin}${window.location.pathname.replace(/index\.html$/i, "")}`;
+}
+
+function unitCheckinUrl(unit = {}) {
+  if (!unit.qr_code_token) return "";
+  const url = new URL(getCheckinBaseUrl(), window.location.origin);
+  url.searchParams.set("checkin", unit.qr_code_token);
+  return url.toString();
+}
+
+function qrImageUrl(link) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(link)}`;
+}
+
+async function copyTextToClipboard(text) {
+  if (!text) return false;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fallback unten verwenden.
+  }
+
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "readonly");
+  area.style.position = "fixed";
+  area.style.left = "-9999px";
+  document.body.appendChild(area);
+  area.select();
+  const ok = document.execCommand("copy");
+  area.remove();
+  return ok;
 }
 
 function featureList(packageKey, rawFeatures = {}) {
@@ -330,6 +371,8 @@ function showAppOrLogin() {
     $("#opLoginHint")?.classList.remove("is-hidden");
     $("#opApp")?.classList.add("is-hidden");
     logoutButton?.classList.add("is-hidden");
+    if (state.checkinToken) setLoginMessage("QR-Code erkannt. Bitte einloggen, danach öffnet sich der Check-in.", "loading");
+    renderCheckinPanel();
     return false;
   }
 
@@ -375,6 +418,128 @@ function getUnitLabel(object = {}, unitId) {
   const unit = activeUnits(object.units).find((item) => item.id === unitId)
     || (Array.isArray(object.units) ? object.units : []).find((item) => item.id === unitId);
   return unit?.name || "Einheit";
+}
+
+function renderCheckinPanel() {
+  const panel = $("#opCheckinPanel");
+  if (!panel) return;
+
+  if (!state.checkinToken) {
+    panel.classList.add("is-hidden");
+    panel.innerHTML = "";
+    return;
+  }
+
+  panel.classList.remove("is-hidden");
+
+  if (!state.checkinData) {
+    panel.innerHTML = `
+      <div class="op-checkin-card loading">
+        <p class="op-eyebrow">QR-Check-in</p>
+        <h2>Check-in wird geladen …</h2>
+        <p>Die Einheit wird anhand des QR-Codes gesucht.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (state.checkinData.success === false) {
+    panel.innerHTML = `
+      <div class="op-checkin-card error">
+        <p class="op-eyebrow">QR-Check-in</p>
+        <h2>Check-in nicht verfügbar</h2>
+        <p>${escapeHtml(state.checkinData.message || "Der QR-Code konnte nicht zugeordnet werden.")}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const object = state.checkinData.object || {};
+  const unit = state.checkinData.unit || {};
+  const customer = state.checkinData.customer || {};
+  const job = state.checkinData.job || null;
+  const isInProgress = String(job?.status || "").toLowerCase() === "in_progress";
+
+  panel.innerHTML = `
+    <div class="op-checkin-card">
+      <div class="op-checkin-main">
+        <p class="op-eyebrow">QR-Check-in</p>
+        <h2>${escapeHtml(unit.name || "Einheit")}</h2>
+        <p>${escapeHtml(object.name || "Objekt")} · ${escapeHtml(objectAddress(object))}</p>
+        <div class="op-object-meta">
+          <span class="op-chip">${escapeHtml(customerLabel(customer))}</span>
+          <span class="op-chip">${escapeHtml(formatUnitType(unit.unit_type))}</span>
+          <span class="op-chip">${escapeHtml(formatInterval(unit.cleaning_interval))}</span>
+        </div>
+      </div>
+      <div class="op-checkin-action">
+        ${job ? `
+          <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
+          <small>Geplant: ${escapeHtml(formatDate(job.planned_date))}</small>
+          <button class="op-btn op-btn-primary" type="button" data-checkin-job="${escapeHtml(job.id)}" ${isInProgress ? "disabled" : ""}>${isInProgress ? "Bereits in Arbeit" : "Jetzt einchecken"}</button>
+        ` : `
+          <span class="op-chip op-chip-soft">Kein geplanter Einsatz</span>
+          <small>Lege zuerst einen Einsatz für diese Einheit an, dann kann der QR-Check-in den Status setzen.</small>
+        `}
+      </div>
+    </div>
+  `;
+
+  panel.querySelectorAll("[data-checkin-job]").forEach((button) => {
+    button.addEventListener("click", handleCheckinJob);
+  });
+}
+
+async function loadCheckinFromUrl() {
+  if (!state.checkinToken || !state.session?.access_token) {
+    renderCheckinPanel();
+    return;
+  }
+
+  try {
+    state.checkinData = null;
+    renderCheckinPanel();
+    const data = await callRpc("admin_get_object_portal_checkin_by_token", {
+      p_qr_code_token: state.checkinToken,
+    });
+    state.checkinData = data;
+    renderCheckinPanel();
+  } catch (error) {
+    state.checkinData = { success: false, message: error.message || "QR-Check-in konnte nicht geladen werden." };
+    renderCheckinPanel();
+  }
+}
+
+async function handleCheckinJob(event) {
+  const jobId = event.currentTarget.dataset.checkinJob;
+  if (!jobId) return;
+
+  try {
+    setStatus("QR-Check-in wird gespeichert …", "loading");
+    const data = await callRpc("admin_checkin_object_portal_job", {
+      p_job_id: jobId,
+    });
+
+    if (data?.success === false) throw new Error(data.message || "Check-in konnte nicht gespeichert werden.");
+    await loadObjectPortal();
+    await loadCheckinFromUrl();
+    setStatus(data?.message || "Mitarbeiter ist eingecheckt. Einsatz läuft.", "success");
+  } catch (error) {
+    setStatus(error.message || "Check-in konnte nicht gespeichert werden.", "error");
+  }
+}
+
+function openQrPrintWindow(link, name) {
+  if (!link) return;
+  const qr = qrImageUrl(link);
+  const title = `All4You ObjektPortal · ${name || "QR-Code"}`;
+  const win = window.open("", "_blank", "noopener,noreferrer,width=520,height=680");
+  if (!win) {
+    setStatus("Druckfenster konnte nicht geöffnet werden. Bitte Pop-up-Blocker prüfen.", "error");
+    return;
+  }
+  win.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#10243b;text-align:center}img{width:260px;height:260px}code{display:block;margin-top:18px;word-break:break-all;color:#65758a}.box{border:1px solid #dbe8ef;border-radius:20px;padding:24px;max-width:420px;margin:0 auto}</style></head><body><div class="box"><h1>All4You ObjektPortal</h1><h2>${escapeHtml(name || "QR-Code")}</h2><img src="${escapeHtml(qr)}" alt="QR-Code"><code>${escapeHtml(link)}</code></div><script>window.onload=()=>window.print();<\/script></body></html>`);
+  win.document.close();
 }
 
 function renderStats() {
@@ -487,22 +652,57 @@ function renderFeatureChips(customer = {}) {
     .join("");
 }
 
+function renderUnitQrPanel(unit = {}) {
+  const link = unitCheckinUrl(unit);
+  if (!link) {
+    return `
+      <div class="op-qr-panel">
+        <strong>QR-Code noch nicht vorbereitet</strong>
+        <span>Bitte die V6.4.0-SQL ausführen. Danach bekommt jede Einheit automatisch einen QR-Token.</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="op-qr-panel">
+      <div class="op-qr-info">
+        <strong>QR-Code für ${escapeHtml(unit.name)}</strong>
+        <span>Dieser Link führt Mitarbeiter direkt in den Check-in für diese Einheit.</span>
+        <code>${escapeHtml(link)}</code>
+        <div class="op-qr-actions">
+          <button class="op-mini-action" type="button" data-copy-qr="${escapeHtml(link)}">Link kopieren</button>
+          <a class="op-mini-action" href="${escapeHtml(qrImageUrl(link))}" target="_blank" rel="noopener">QR öffnen</a>
+          <button class="op-mini-action" type="button" data-print-qr="${escapeHtml(link)}" data-print-qr-name="${escapeHtml(unit.name)}">Druckansicht</button>
+        </div>
+      </div>
+      <img class="op-qr-image" src="${escapeHtml(qrImageUrl(link))}" alt="QR-Code für ${escapeHtml(unit.name)}" loading="lazy">
+    </div>
+  `;
+}
+
 function renderUnits(units = []) {
   const active = activeUnits(units);
   if (!active.length) return `<div class="op-empty">Noch keine Einheit/Bereich hinterlegt.</div>`;
 
-  return active.map((unit) => `
-    <div class="op-unit">
-      <div>
-        <strong>${escapeHtml(unit.name)}</strong>
-        <small>${formatUnitType(unit.unit_type)}${unit.floor ? ` · Etage ${escapeHtml(unit.floor)}` : ""}</small>
+  return active.map((unit) => {
+    const qrOpen = state.openQrUnitIds.has(unit.id);
+    return `
+      <div class="op-unit-wrap">
+        <div class="op-unit">
+          <div>
+            <strong>${escapeHtml(unit.name)}</strong>
+            <small>${formatUnitType(unit.unit_type)}${unit.floor ? ` · Etage ${escapeHtml(unit.floor)}` : ""}</small>
+          </div>
+          <div class="op-unit-actions">
+            <span class="op-chip op-chip-soft">${formatInterval(unit.cleaning_interval)}</span>
+            <button class="op-mini-action" type="button" data-toggle-unit-qr="${escapeHtml(unit.id)}">${qrOpen ? "QR schließen" : "QR-Code"}</button>
+            <button class="op-mini-danger" type="button" data-delete-unit="${escapeHtml(unit.id)}" data-unit-name="${escapeHtml(unit.name)}">Entfernen</button>
+          </div>
+        </div>
+        ${qrOpen ? renderUnitQrPanel(unit) : ""}
       </div>
-      <div class="op-unit-actions">
-        <span class="op-chip op-chip-soft">${formatInterval(unit.cleaning_interval)}</span>
-        <button class="op-mini-danger" type="button" data-delete-unit="${escapeHtml(unit.id)}" data-unit-name="${escapeHtml(unit.name)}">Entfernen</button>
-      </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 function renderJobEditForm(object = {}, job = {}) {
@@ -852,6 +1052,29 @@ function renderObjects() {
     select.addEventListener("change", handleUpdateJobStatus);
   });
 
+  list.querySelectorAll("[data-toggle-unit-qr]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.toggleUnitQr;
+      if (!id) return;
+      if (state.openQrUnitIds.has(id)) state.openQrUnitIds.delete(id);
+      else state.openQrUnitIds.add(id);
+      renderObjects();
+    });
+  });
+
+  list.querySelectorAll("[data-copy-qr]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const ok = await copyTextToClipboard(button.dataset.copyQr || "");
+      setStatus(ok ? "QR-Link wurde kopiert." : "QR-Link konnte nicht kopiert werden.", ok ? "success" : "error");
+    });
+  });
+
+  list.querySelectorAll("[data-print-qr]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openQrPrintWindow(button.dataset.printQr || "", button.dataset.printQrName || "QR-Code");
+    });
+  });
+
   list.querySelectorAll("[data-delete-unit]").forEach((button) => {
     button.addEventListener("click", handleDeleteUnit);
   });
@@ -875,7 +1098,8 @@ async function loadObjectPortal() {
     renderStats();
     renderCustomers();
     renderObjects();
-    setStatus("ObjektPortal geladen", "success");
+    await loadCheckinFromUrl();
+    setStatus(state.checkinToken ? "ObjektPortal + QR-Check-in geladen" : "ObjektPortal geladen", "success");
   } catch (error) {
     setStatus(error.message || "ObjektPortal konnte nicht geladen werden.", "error");
   }

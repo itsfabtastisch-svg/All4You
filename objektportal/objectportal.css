@@ -325,3 +325,140 @@ button, input, select, textarea { font: inherit; }
     flex-direction: column;
   }
 }
+
+/* =========================================================
+   V6.4.0 · ObjectPortal QR-Code Check-in
+   Nur ObjektPortal-eigene Klassen.
+   ========================================================= */
+.op-unit-wrap {
+  display: grid;
+  gap: 8px;
+}
+.op-mini-action {
+  border: 1px solid rgba(10, 169, 155, .22);
+  background: #e9fbf7;
+  color: #087d73;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: .76rem;
+  padding: 7px 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .16s ease, background .16s ease;
+}
+.op-mini-action:hover {
+  transform: translateY(-1px);
+  background: #d8f7ef;
+}
+.op-qr-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px dashed rgba(10, 169, 155, .38);
+  background: linear-gradient(135deg, #f3fffc, #ffffff);
+  border-radius: 18px;
+  padding: 14px;
+}
+.op-qr-info {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.op-qr-info span {
+  color: var(--op-muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+.op-qr-info code {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: #f1f6f9;
+  color: #33546b;
+  font-size: .78rem;
+}
+.op-qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+.op-qr-image {
+  width: 130px;
+  height: 130px;
+  border-radius: 16px;
+  border: 1px solid var(--op-border);
+  background: #fff;
+  padding: 6px;
+}
+.op-checkin-panel {
+  margin: 18px 0 0;
+}
+.op-checkin-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid rgba(10, 169, 155, .28);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffffff, #e9fbf7);
+  box-shadow: 0 16px 42px rgba(16,36,59,.08);
+  padding: 18px;
+}
+.op-checkin-card h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.35rem, 3vw, 2.2rem);
+  letter-spacing: -.04em;
+}
+.op-checkin-card p {
+  margin: 0;
+  color: var(--op-muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+.op-checkin-card.error {
+  border-color: rgba(140, 29, 29, .18);
+  background: #fff5f5;
+}
+.op-checkin-card.loading {
+  border-color: rgba(124, 90, 0, .16);
+  background: #fffbe8;
+}
+.op-checkin-main {
+  min-width: 0;
+}
+.op-checkin-action {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  min-width: 210px;
+}
+.op-checkin-action small {
+  color: var(--op-muted);
+  font-weight: 800;
+}
+.op-checkin-action .op-btn[disabled] {
+  opacity: .65;
+  cursor: not-allowed;
+  transform: none;
+}
+@media (max-width: 720px) {
+  .op-qr-panel,
+  .op-checkin-card {
+    grid-template-columns: 1fr;
+  }
+  .op-qr-image {
+    width: 180px;
+    height: 180px;
+  }
+  .op-checkin-action {
+    justify-items: stretch;
+    min-width: 0;
+  }
+}

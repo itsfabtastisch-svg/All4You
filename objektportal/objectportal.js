@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.6.0 Mitarbeiteransicht
+   V6.6.1 Mitarbeiteransicht FormatTime-Fix
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.6.0-OBJECTPORTAL-EMPLOYEE-VIEW
+   DBG: ALL4YOU-V6.6.1-OBJECTPORTAL-EMPLOYEE-VIEW-FIX
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -143,6 +143,19 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+}
+
+function formatDateTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function dateInputValue(value) {
@@ -481,7 +494,7 @@ function setPortalMode(mode) {
   $("#opOpenWizard")?.classList.toggle("is-hidden", isEmployee);
   $("#opOpenWizardTop")?.classList.toggle("is-hidden", isEmployee);
   const build = $("#opBuildBadge");
-  if (build) build.textContent = "DBG: ALL4YOU-V6.6.0-OBJECTPORTAL-EMPLOYEE-VIEW";
+  if (build) build.textContent = "DBG: ALL4YOU-V6.6.1-OBJECTPORTAL-EMPLOYEE-VIEW-FIX";
 }
 
 function getUnitLabel(object = {}, unitId) {

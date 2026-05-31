@@ -1399,6 +1399,7 @@ function bindDashboardCustomerAccounts() {
     button.classList.add("active");
     const account = dashboardCustomerAccountsCache.find(item => item.id === button.dataset.customerAccountId);
     renderDashboardCustomerAccountDetail(account || null);
+    if (account?.id) writeDashboardHistoryState("customers", { customer: account.id });
   });
 
   linkForm?.addEventListener("submit", async event => {
@@ -1957,6 +1958,7 @@ function bindDashboardEmployees() {
     button.classList.add("active");
     const employee = getDashboardEmployeeById(button.dataset.employeeId);
     renderDashboardEmployeeDetail(employee || null);
+    if (employee?.id) writeDashboardHistoryState("employees", { employee: employee.id });
   });
 
   detailBody?.addEventListener("click", async event => {
@@ -10657,6 +10659,120 @@ function bindTrailerWizard() {
 }
 
 
+
+const DASHBOARD_HISTORY_VIEWS = ["overview", "tickets", "status", "archive", "management", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
+const CUSTOMER_PORTAL_HISTORY_TABS = ["overview", "objects", "requests", "messages", "status"];
+let dashboardHistoryRoutingBound = false;
+let customerPortalHistoryRoutingBound = false;
+
+function portalUrlWithParams(params = {}, clearKeys = []) {
+  const url = new URL(window.location.href);
+  [...clearKeys, ...Object.keys(params)].forEach(key => url.searchParams.delete(key));
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  return url;
+}
+
+function pushPortalHistory(url, state = {}, options = {}) {
+  const method = options.replace ? "replaceState" : "pushState";
+  window.history[method]({ all4youPortal: true, ...state }, "", url);
+}
+
+function readDashboardHistoryState() {
+  const url = new URL(window.location.href);
+  let view = url.searchParams.get("view") || "";
+  if (!view && (window.location.hash || "").startsWith("#dashboard-")) {
+    view = window.location.hash.replace("#dashboard-", "");
+  }
+  view = DASHBOARD_HISTORY_VIEWS.includes(view) ? view : "overview";
+  return {
+    view,
+    ticket: url.searchParams.get("ticket") || "",
+    customer: url.searchParams.get("customer") || "",
+    employee: url.searchParams.get("employee") || "",
+    archive: url.searchParams.get("archive") || "",
+    message: url.searchParams.get("message") || ""
+  };
+}
+
+function writeDashboardHistoryState(view = "overview", extra = {}, options = {}) {
+  const normalized = DASHBOARD_HISTORY_VIEWS.includes(view) ? view : "overview";
+  const clearKeys = ["view", "ticket", "customer", "employee", "archive", "message"];
+  const url = portalUrlWithParams({ view: normalized, ...extra }, clearKeys);
+  pushPortalHistory(url, { portal: "dashboard", view: normalized, ...extra }, options);
+}
+
+function applyDashboardHistoryState() {
+  const state = readDashboardHistoryState();
+  if (state.ticket) dashboardSelectedRequestId = state.ticket;
+  if (state.customer) dashboardSelectedCustomerAccountId = state.customer;
+  if (state.employee) dashboardSelectedEmployeeId = state.employee;
+  if (state.archive) dashboardSelectedArchiveId = state.archive;
+  if (state.message) dashboardSelectedMessageRequestId = state.message;
+
+  setDashboardView(state.view, { updateHistory: false });
+
+  if (state.view === "tickets" && state.ticket) {
+    const ticket = getDashboardTicketByIdOrNumber(state.ticket);
+    if (ticket) renderDashboardDetail(ticket);
+  }
+  if (state.view === "customers") renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
+  if (state.view === "employees") renderDashboardEmployees(dashboardEmployeesCache);
+  if (state.view === "archive") renderDashboardArchiveList(dashboardArchiveCache);
+  if (state.view === "messages") renderDashboardMessagesCenter();
+}
+
+function bindDashboardHistoryRouting() {
+  if (dashboardHistoryRoutingBound) return;
+  dashboardHistoryRoutingBound = true;
+  window.addEventListener("popstate", () => {
+    const path = window.location.pathname || "";
+    if (path.includes("dashboard") || document.querySelector("[data-dashboard-view]")) {
+      applyDashboardHistoryState();
+    }
+  });
+}
+
+function readCustomerPortalHistoryState() {
+  const url = new URL(window.location.href);
+  const tab = CUSTOMER_PORTAL_HISTORY_TABS.includes(url.searchParams.get("tab")) ? url.searchParams.get("tab") : "overview";
+  return {
+    tab,
+    request: url.searchParams.get("request") || "",
+    object: url.searchParams.get("object") || ""
+  };
+}
+
+function writeCustomerPortalHistoryState(tab = "overview", extra = {}, options = {}) {
+  const normalized = CUSTOMER_PORTAL_HISTORY_TABS.includes(tab) ? tab : "overview";
+  const clearKeys = ["tab", "request", "object"];
+  const url = portalUrlWithParams({ tab: normalized, ...extra }, clearKeys);
+  pushPortalHistory(url, { portal: "kundenportal", tab: normalized, ...extra }, options);
+}
+
+function applyCustomerPortalHistoryState() {
+  const state = readCustomerPortalHistoryState();
+  if (state.request) customerPortalSelectedRequestId = state.request;
+  if (state.object) customerPortalSelectedObjectId = state.object;
+  setCustomerPortalTab(state.tab, { updateHistory: false });
+  if (state.tab === "requests" || state.tab === "messages") renderCustomerPortalRequests(customerPortalRequests);
+  if (state.tab === "objects") renderCustomerPortalObjects(customerPortalObjects);
+}
+
+function bindCustomerPortalHistoryRouting() {
+  if (customerPortalHistoryRoutingBound) return;
+  customerPortalHistoryRoutingBound = true;
+  window.addEventListener("popstate", () => {
+    const path = window.location.pathname || "";
+    if (path.includes("kundenportal") || document.querySelector("[data-customer-portal-section]")) {
+      applyCustomerPortalHistoryState();
+    }
+  });
+}
+
 function getDashboardStatusRows() {
   const tickets = dashboardAllRequestCache || [];
   const groups = [
@@ -10711,9 +10827,8 @@ function renderDashboardStatusOverview() {
   `).join("");
 }
 
-function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "tickets", "status", "archive", "management", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
-  const normalized = allowedViews.includes(view) ? view : "overview";
+function setDashboardView(view = "overview", options = {}) {
+  const normalized = DASHBOARD_HISTORY_VIEWS.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
   });
@@ -10721,6 +10836,9 @@ function setDashboardView(view = "overview") {
     const trigger = link.dataset.dashboardViewTrigger || "overview";
     link.classList.toggle("active", trigger === normalized);
   });
+  if (options.updateHistory !== false) {
+    writeDashboardHistoryState(normalized, options.extra || {}, { replace: Boolean(options.replace) });
+  }
   if (normalized === "trailer-calendar") {
     refreshDashboardTrailerCalendar();
   }
@@ -10763,6 +10881,7 @@ function bindDashboardShell() {
   const dashboardMessagesReplyText = document.querySelector("#dashboardMessagesReplyText");
   const dashboardMessagesReplyButton = document.querySelector("#dashboardMessagesReplyButton");
 
+  bindDashboardHistoryRouting();
   bindDashboardActionDirectGuard();
   bindDashboardCustomerAccounts();
   bindDashboardEmployees();
@@ -10775,7 +10894,13 @@ function bindDashboardShell() {
       setDashboardView(link.dataset.dashboardViewTrigger || "overview");
     });
   });
-  setDashboardView("overview");
+  const initialDashboardState = readDashboardHistoryState();
+  setDashboardView(initialDashboardState.view, { updateHistory: false });
+  if (initialDashboardState.ticket) dashboardSelectedRequestId = initialDashboardState.ticket;
+  if (initialDashboardState.customer) dashboardSelectedCustomerAccountId = initialDashboardState.customer;
+  if (initialDashboardState.employee) dashboardSelectedEmployeeId = initialDashboardState.employee;
+  if (initialDashboardState.archive) dashboardSelectedArchiveId = initialDashboardState.archive;
+  if (initialDashboardState.message) dashboardSelectedMessageRequestId = initialDashboardState.message;
 
   if (list) {
     list.addEventListener("click", event => {
@@ -10789,6 +10914,7 @@ function bindDashboardShell() {
       renderDashboardDetail(ticket || null);
 
       if (ticket?.id) {
+        writeDashboardHistoryState("tickets", { ticket: ticket.id });
         setTimeout(() => {
           if (dashboardSelectedRequestId === ticket.id) {
             markDashboardTicketSeen(ticket.id);
@@ -10808,6 +10934,7 @@ function bindDashboardShell() {
 
     const ticket = dashboardArchiveCache.find(item => item.id === ticketButton.dataset.archiveTicketId);
     renderDashboardArchiveDetail(ticket || null);
+    if (ticket?.id) writeDashboardHistoryState("archive", { archive: ticket.id });
   });
 
   archiveSearch?.addEventListener("input", filterDashboardArchiveTickets);
@@ -11065,6 +11192,7 @@ function bindDashboardShell() {
     const button = event.target.closest("[data-message-ticket-id]");
     if (!button) return;
     selectDashboardMessageTicket(button.dataset.messageTicketId);
+    if (button.dataset.messageTicketId) writeDashboardHistoryState("messages", { message: button.dataset.messageTicketId });
   });
 
   dashboardMessagesReplyForm?.addEventListener("submit", async event => {
@@ -11500,9 +11628,8 @@ function renderCustomerPortalStatusOverview(requests = customerPortalRequests, o
   }).join("");
 }
 
-function setCustomerPortalTab(tab = "overview") {
-  const allowed = ["overview", "objects", "requests", "messages", "status"];
-  customerPortalActiveTab = allowed.includes(tab) ? tab : "overview";
+function setCustomerPortalTab(tab = "overview", options = {}) {
+  customerPortalActiveTab = CUSTOMER_PORTAL_HISTORY_TABS.includes(tab) ? tab : "overview";
 
   document.querySelectorAll("[data-customer-portal-section]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.customerPortalSection !== customerPortalActiveTab);
@@ -11511,6 +11638,10 @@ function setCustomerPortalTab(tab = "overview") {
   document.querySelectorAll("[data-customer-portal-tab]").forEach(button => {
     button.classList.toggle("active", button.dataset.customerPortalTab === customerPortalActiveTab);
   });
+
+  if (options.updateHistory !== false) {
+    writeCustomerPortalHistoryState(customerPortalActiveTab, options.extra || {}, { replace: Boolean(options.replace) });
+  }
 
   const titles = {
     overview: "Übersicht",
@@ -11854,6 +11985,7 @@ function renderCustomerPortalObjects(objects = customerPortalObjects) {
   list.querySelectorAll("[data-customer-object-id]").forEach(button => {
     button.addEventListener("click", () => {
       customerPortalSelectedObjectId = button.dataset.customerObjectId || null;
+      writeCustomerPortalHistoryState("objects", { object: customerPortalSelectedObjectId });
       renderCustomerPortalObjects(customerPortalObjects);
     });
   });
@@ -12062,7 +12194,7 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   renderCustomerPortalObjects(customerPortalObjects);
   renderCustomerPortalHomeSummary(customerPortalRequests, customerPortalObjects);
   renderCustomerPortalStatusOverview(customerPortalRequests, customerPortalObjects);
-  setCustomerPortalTab(customerPortalActiveTab || "overview");
+  setCustomerPortalTab(customerPortalActiveTab || "overview", { updateHistory: false });
 
   if (liveStatus) {
     liveStatus.textContent = "Live verbunden";
@@ -12084,6 +12216,8 @@ function bindCustomerPortalPage() {
 
   if (!gate || !protectedArea || !form) return;
 
+  bindCustomerPortalHistoryRouting();
+
   protectedArea.addEventListener("click", event => {
     const button = event.target.closest("[data-customer-portal-tab]");
     if (!button) return;
@@ -12092,7 +12226,10 @@ function bindCustomerPortalPage() {
       customerPortalSelectedRequestId = customerPortalRequests[0].id;
       renderCustomerPortalRequests(customerPortalRequests);
     }
-    setCustomerPortalTab(tab);
+    const extra = {};
+    if ((tab === "messages" || tab === "requests") && customerPortalSelectedRequestId) extra.request = customerPortalSelectedRequestId;
+    if (tab === "objects" && customerPortalSelectedObjectId) extra.object = customerPortalSelectedObjectId;
+    setCustomerPortalTab(tab, { extra });
   });
 
   function showLogin() {
@@ -12111,6 +12248,10 @@ function bindCustomerPortalPage() {
 
   function showPortal(session) {
     customerPortalCurrentSession = session;
+    const historyState = readCustomerPortalHistoryState();
+    customerPortalActiveTab = historyState.tab || customerPortalActiveTab || "overview";
+    if (historyState.request) customerPortalSelectedRequestId = historyState.request;
+    if (historyState.object) customerPortalSelectedObjectId = historyState.object;
     gate.classList.add("is-hidden");
     protectedArea.classList.remove("is-hidden");
     loadCustomerPortal(session).catch(error => {
@@ -12232,6 +12373,7 @@ function bindCustomerPortalPage() {
     button.classList.add("active");
     const ticket = customerPortalRequests.find(item => item.id === button.dataset.customerPortalRequestId);
     renderCustomerPortalDetail(ticket || null);
+    if (ticket?.id) writeCustomerPortalHistoryState(customerPortalActiveTab === "messages" ? "messages" : "requests", { request: ticket.id });
   });
 
   messageForm?.addEventListener("submit", async event => {
@@ -12263,7 +12405,11 @@ function bindCustomerPortalPage() {
     }
   });
 
-  setCustomerPortalTab(customerPortalActiveTab || "overview");
+  const initialCustomerState = readCustomerPortalHistoryState();
+  customerPortalActiveTab = initialCustomerState.tab || customerPortalActiveTab || "overview";
+  if (initialCustomerState.request) customerPortalSelectedRequestId = initialCustomerState.request;
+  if (initialCustomerState.object) customerPortalSelectedObjectId = initialCustomerState.object;
+  setCustomerPortalTab(customerPortalActiveTab || "overview", { updateHistory: false });
   validateStoredSession();
 }
 

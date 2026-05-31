@@ -11158,34 +11158,59 @@ function getCustomerPortalStats(requests = customerPortalRequests) {
   return { total: rows.length, active, review, openQuestions, done, latest };
 }
 
-function renderCustomerPortalOverviewStats(requests = customerPortalRequests) {
+function getCustomerPortalCombinedStats(requests = customerPortalRequests, objects = customerPortalObjects) {
+  const requestStats = getCustomerPortalStats(requests);
+  const objectStats = getCustomerPortalObjectStats(objects);
+  const objectJobs = (Array.isArray(objects) ? objects : []).flatMap(object => getCustomerPortalObjectJobs(object));
+  const objectDates = objectJobs
+    .map(job => job.updated_at || job.finished_at || job.started_at || job.planned_date || job.created_at)
+    .filter(Boolean);
+  const latest = [requestStats.latest, ...objectDates]
+    .filter(Boolean)
+    .sort((a, b) => new Date(b) - new Date(a))[0] || null;
+
+  return {
+    tickets: requestStats.total,
+    objectJobs: objectJobs.length,
+    total: requestStats.total + objectJobs.length,
+    active: requestStats.active + objectStats.active + objectStats.planned,
+    openQuestions: requestStats.openQuestions,
+    done: requestStats.done + objectStats.completed,
+    latest
+  };
+}
+
+function renderCustomerPortalOverviewStats(requests = customerPortalRequests, objects = customerPortalObjects) {
   const box = document.querySelector("#customerPortalOverviewStats");
   if (!box) return;
-  const stats = getCustomerPortalStats(requests);
+  const stats = getCustomerPortalCombinedStats(requests, objects);
+  const totalHint = stats.objectJobs
+    ? `${stats.tickets} Ticket${stats.tickets === 1 ? "" : "s"} · ${stats.objectJobs} Einsatz${stats.objectJobs === 1 ? "" : "e"}`
+    : "gesamt zugeordnet";
 
   box.innerHTML = `
-    <article><span>Aufträge</span><strong>${stats.total}</strong><small>gesamt zugeordnet</small></article>
-    <article><span>Aktiv</span><strong>${stats.active}</strong><small>laufende Vorgänge</small></article>
+    <article><span>Aufträge</span><strong>${stats.total}</strong><small>${escapeHtml(totalHint)}</small></article>
+    <article><span>Aktiv</span><strong>${stats.active}</strong><small>laufende/geplante Vorgänge</small></article>
     <article class="${stats.openQuestions ? "attention" : ""}"><span>Rückfragen</span><strong>${stats.openQuestions}</strong><small>${stats.openQuestions ? "bitte prüfen" : "keine offen"}</small></article>
     <article><span>Abgeschlossen</span><strong>${stats.done}</strong><small>${stats.latest ? "letzte Änderung: " + escapeHtml(formatDashboardDate(stats.latest)) : "noch keine Daten"}</small></article>
   `;
 }
 
-function renderCustomerPortalSideSummary(requests = customerPortalRequests) {
+function renderCustomerPortalSideSummary(requests = customerPortalRequests, objects = customerPortalObjects) {
   const box = document.querySelector("#customerPortalSideSummary");
   if (!box) return;
-  const stats = getCustomerPortalStats(requests);
+  const stats = getCustomerPortalCombinedStats(requests, objects);
   const nextAction = stats.openQuestions > 0
     ? `${stats.openQuestions} Rückfrage${stats.openQuestions === 1 ? "" : "n"} offen`
     : stats.active > 0
-      ? `${stats.active} aktive${stats.active === 1 ? "r" : ""} Auftrag${stats.active === 1 ? "" : "e"}`
+      ? `${stats.active} aktive/geplante Vorgänge`
       : stats.total > 0
-        ? "Alle Aufträge im Blick"
+        ? "Alle Vorgänge im Blick"
         : "Noch keine Aufträge";
 
   box.innerHTML = `
     <strong>${escapeHtml(nextAction)}</strong>
-    <span>${stats.latest ? `Letzte Änderung: ${escapeHtml(formatDashboardDate(stats.latest))}` : "Sobald All4You ein Ticket zuordnet, erscheint es hier."}</span>
+    <span>${stats.latest ? `Letzte Änderung: ${escapeHtml(formatDashboardDate(stats.latest))}` : "Sobald All4You ein Ticket oder Objekt zuordnet, erscheint es hier."}</span>
   `;
 }
 
@@ -11520,6 +11545,8 @@ function renderCustomerPortalObjects(objects = customerPortalObjects) {
 
   const selected = rows.find(object => object.id === customerPortalSelectedObjectId) || rows[0] || null;
   renderCustomerPortalObjectDetail(selected);
+  renderCustomerPortalOverviewStats(customerPortalRequests, rows);
+  renderCustomerPortalSideSummary(customerPortalRequests, rows);
 }
 
 function renderCustomerPortalRequests(requests = customerPortalRequests) {
@@ -11530,8 +11557,8 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
 
   const rows = Array.isArray(requests) ? requests : [];
   if (count) count.textContent = `${rows.length} Auftrag${rows.length === 1 ? "" : "e"}`;
-  renderCustomerPortalOverviewStats(rows);
-  renderCustomerPortalSideSummary(rows);
+  renderCustomerPortalOverviewStats(rows, customerPortalObjects);
+  renderCustomerPortalSideSummary(rows, customerPortalObjects);
 
   if (!rows.length) {
     if (hint) hint.innerHTML = `<strong>Noch leer</strong><span>All4You kann bestehende Tickets Ihrem Kundenkonto zuordnen.</span>`;
@@ -11706,10 +11733,10 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   if (meta) meta.textContent = customerPortalAccount?.email || "angemeldet";
   if (welcomeTitle) welcomeTitle.textContent = `Willkommen, ${displayName}.`;
   if (heroText) {
-    const stats = getCustomerPortalStats(customerPortalRequests);
+    const stats = getCustomerPortalCombinedStats(customerPortalRequests, customerPortalObjects);
     heroText.textContent = stats.total
-      ? `Sie haben aktuell ${stats.total} zugeordnete${stats.total === 1 ? "n" : ""} Auftrag${stats.total === 1 ? "" : "e"}. Status, Details und Nachrichten bleiben hier gesammelt.`
-      : "Sobald All4You ein Ticket Ihrem Kundenkonto zuordnet, sehen Sie es hier übersichtlich gesammelt.";
+      ? `Sie haben aktuell ${stats.total} zugeordnete Vorgänge. Tickets, Objekte, Einsätze und Status bleiben hier gesammelt.`
+      : "Sobald All4You ein Ticket oder Objekt Ihrem Kundenkonto zuordnet, sehen Sie es hier übersichtlich gesammelt.";
   }
 
   renderCustomerPortalRequests(customerPortalRequests);

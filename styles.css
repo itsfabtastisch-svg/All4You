@@ -9586,3 +9586,205 @@ body.modal-open {
     justify-items: start;
   }
 }
+
+/* =========================================================
+   All4You V6.10.1 · Kundenportal Navigation & Übersicht Cleanup
+   Trennt Übersicht, Objekte, Aufträge, Nachrichten und Status in Tabs.
+   ========================================================= */
+.customer-portal-tab-section.is-hidden {
+  display: none !important;
+}
+
+.customer-portal-mini-nav button {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 15px;
+  min-height: 42px;
+  padding: 0 13px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.82);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.customer-portal-mini-nav button::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(10,169,155,.14);
+  flex: 0 0 auto;
+}
+
+.customer-portal-mini-nav button:hover,
+.customer-portal-mini-nav button.active {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.24);
+  background: rgba(255,255,255,.13);
+  color: #fff;
+}
+
+.customer-portal-mini-nav button.active::before {
+  background: #43e4cf;
+  box-shadow: 0 0 0 5px rgba(67,228,207,.18);
+}
+
+.customer-portal-home-panel,
+.customer-portal-messages-panel,
+.customer-portal-status-panel {
+  margin-top: 18px;
+}
+
+.customer-portal-home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.customer-portal-home-card {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(19,35,58,.1);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(10,169,155,.1), transparent 10rem),
+    rgba(255,255,255,.82);
+  box-shadow: 0 16px 34px rgba(16,38,60,.055);
+  padding: 18px;
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.customer-portal-home-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(10,169,155,.3);
+  box-shadow: 0 20px 44px rgba(10,169,155,.11);
+}
+
+.customer-portal-home-card span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.customer-portal-home-card strong {
+  color: var(--navy);
+  font-size: clamp(20px, 2.5vw, 30px);
+  letter-spacing: -.045em;
+}
+
+.customer-portal-home-card small {
+  color: var(--muted);
+  font-weight: 780;
+  line-height: 1.42;
+}
+
+.customer-portal-home-card em {
+  justify-self: start;
+  color: var(--teal-dark);
+  font-style: normal;
+  font-weight: 950;
+}
+
+.customer-portal-messages-panel .customer-portal-messages {
+  margin-top: 12px;
+  display: grid;
+  gap: 14px;
+}
+
+.customer-portal-status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.customer-status-column {
+  border: 1px solid rgba(19,35,58,.1);
+  border-radius: 22px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 16px 34px rgba(16,38,60,.055);
+  overflow: hidden;
+}
+
+.customer-status-column-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 15px;
+  background: rgba(10,169,155,.08);
+  border-bottom: 1px solid rgba(19,35,58,.08);
+}
+
+.customer-status-column-head strong {
+  color: var(--navy);
+  font-size: .9rem;
+  letter-spacing: .06em;
+}
+
+.customer-status-column-head span {
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.customer-status-column-list {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+}
+
+.customer-status-column-list > small {
+  color: var(--muted);
+  font-weight: 780;
+}
+
+.customer-status-row {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 15px;
+  background: rgba(238,246,250,.82);
+}
+
+.customer-status-row span {
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.customer-status-row strong {
+  color: var(--navy);
+  font-size: .95rem;
+}
+
+.customer-status-row small {
+  color: var(--muted);
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+@media (max-width: 980px) {
+  .customer-portal-home-grid,
+  .customer-portal-status-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -7513,11 +7513,11 @@ function pageCustomerPortal() {
           </div>
 
           <nav class="customer-portal-mini-nav" aria-label="Kundenportal Bereiche">
-            <span>Übersicht</span>
-            <span>Objekte</span>
-            <span>Aufträge</span>
-            <span>Nachrichten</span>
-            <span>Status</span>
+            <button class="active" type="button" data-customer-portal-tab="overview">Übersicht</button>
+            <button type="button" data-customer-portal-tab="objects">Objekte</button>
+            <button type="button" data-customer-portal-tab="requests">Aufträge</button>
+            <button type="button" data-customer-portal-tab="messages">Nachrichten</button>
+            <button type="button" data-customer-portal-tab="status">Status</button>
           </nav>
 
           <div class="customer-portal-side-summary" id="customerPortalSideSummary">
@@ -7544,14 +7544,27 @@ function pageCustomerPortal() {
             </div>
           </section>
 
-          <section class="customer-portal-overview" id="customerPortalOverviewStats" aria-label="Kundenportal Übersicht">
+          <section class="customer-portal-overview customer-portal-tab-section" id="customerPortalOverviewStats" data-customer-portal-section="overview" aria-label="Kundenportal Übersicht">
             <article><span>Aufträge</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>Aktiv</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>In Prüfung</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>Abgeschlossen</span><strong>—</strong><small>werden geladen</small></article>
           </section>
 
-          <section class="dashboard-panel customer-object-panel" id="customerPortalObjectsPanel" aria-label="Meine Objekte">
+          <section class="dashboard-panel customer-portal-home-panel customer-portal-tab-section" id="customerPortalHomePanel" data-customer-portal-section="overview" aria-label="Kundenportal Schnellübersicht">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Schnellübersicht</p>
+                <h2>Alles Wichtige auf einen Blick</h2>
+              </div>
+              <span class="status-pill">kompakt</span>
+            </div>
+            <div class="customer-portal-home-grid" id="customerPortalHomeGrid">
+              <article><strong>Portal wird geladen …</strong><span>Ihre wichtigsten Informationen erscheinen gleich.</span></article>
+            </div>
+          </section>
+
+          <section class="dashboard-panel customer-object-panel customer-portal-tab-section is-hidden" id="customerPortalObjectsPanel" data-customer-portal-section="objects" aria-label="Meine Objekte">
             <div class="panel-head customer-object-head">
               <div>
                 <p class="eyebrow">ObjektPortal</p>
@@ -7576,7 +7589,7 @@ function pageCustomerPortal() {
             </div>
           </section>
 
-          <section class="customer-portal-grid">
+          <section class="customer-portal-grid customer-portal-tab-section is-hidden" id="customerPortalRequestsPanel" data-customer-portal-section="requests">
             <div class="dashboard-panel customer-request-panel">
               <div class="panel-head">
                 <div>
@@ -7614,6 +7627,17 @@ function pageCustomerPortal() {
                 <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
               </div>
 
+            </aside>
+          </section>
+
+          <section class="dashboard-panel customer-portal-messages-panel customer-portal-tab-section is-hidden" id="customerPortalMessagesPanel" data-customer-portal-section="messages" aria-label="Nachrichten">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Nachrichten</p>
+                <h2>Nachrichten & Rückfragen</h2>
+              </div>
+              <span class="status-pill">Auftragsbezogen</span>
+            </div>
               <div class="dashboard-messages customer-portal-messages">
                 <div class="customer-message-head">
                   <div>
@@ -7636,7 +7660,23 @@ function pageCustomerPortal() {
                   <p class="dashboard-note-message" id="customerPortalMessageStatus">Bitte zuerst einen Auftrag auswählen.</p>
                 </form>
               </div>
-            </aside>
+
+          </section>
+
+          <section class="dashboard-panel customer-portal-status-panel customer-portal-tab-section is-hidden" id="customerPortalStatusPanel" data-customer-portal-section="status" aria-label="Status und Verlauf">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Status</p>
+                <h2>Status & Verlauf</h2>
+              </div>
+              <span class="status-pill">4 Status</span>
+            </div>
+            <div class="customer-portal-status-grid" id="customerPortalStatusGrid">
+              <div class="dashboard-mini-empty">
+                <strong>Status wird geladen …</strong>
+                <p>Ihre aktuellen Vorgänge erscheinen gleich.</p>
+              </div>
+            </div>
           </section>
         </main>
       </div>
@@ -11041,7 +11081,7 @@ function bindDashboardAuth() {
 
 
 /* ==========================================================================
-   Kundenportal Basis V5.9.0 + ObjektPortal-Kundenansicht V6.9.0
+   Kundenportal Basis V5.9.0 + ObjektPortal-Kundenansicht V6.10.1
    ========================================================================== */
 
 let customerPortalCurrentSession = null;
@@ -11051,6 +11091,7 @@ let customerPortalSelectedRequestId = null;
 let customerPortalObjects = [];
 let customerPortalSelectedObjectId = null;
 let customerPortalObjectLoadError = "";
+let customerPortalActiveTab = "overview";
 
 async function fetchCustomerPortalData(session) {
   if (!session?.access_token) {
@@ -11210,6 +11251,140 @@ function renderCustomerPortalOverviewStats(requests = customerPortalRequests, ob
     <article class="${stats.openQuestions ? "attention" : ""}"><span>In Prüfung</span><strong>${stats.openQuestions}</strong><small>${stats.openQuestions ? "wartet auf Prüfung" : "keine offen"}</small></article>
     <article><span>Abgeschlossen</span><strong>${stats.done}</strong><small>${stats.latest ? "letzte Änderung: " + escapeHtml(formatDashboardDate(stats.latest)) : "noch keine Daten"}</small></article>
   `;
+}
+
+function getCustomerPortalPublicMessageCount(requests = customerPortalRequests) {
+  return (Array.isArray(requests) ? requests : []).reduce((sum, ticket) => {
+    const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
+    return sum + publicMessages.length;
+  }, 0);
+}
+
+function renderCustomerPortalHomeSummary(requests = customerPortalRequests, objects = customerPortalObjects) {
+  const box = document.querySelector("#customerPortalHomeGrid");
+  if (!box) return;
+  const combined = getCustomerPortalCombinedStats(requests, objects);
+  const objectStats = getCustomerPortalObjectStats(objects);
+  const messages = getCustomerPortalPublicMessageCount(requests);
+  const nextObjectJob = (Array.isArray(objects) ? objects : [])
+    .flatMap(object => getCustomerPortalObjectJobs(object).map(job => ({ ...job, object })))
+    .filter(item => item.planned_date && !isCustomerPortalDoneStatus(item.status))
+    .sort((a, b) => new Date(a.planned_date) - new Date(b.planned_date))[0] || null;
+
+  const cards = [
+    {
+      label: "Objekte",
+      title: objectStats.objects ? `${objectStats.objects} Objekt${objectStats.objects === 1 ? "" : "e"}` : "Keine Objekte",
+      text: objectStats.objects ? `${objectStats.units} Bereich${objectStats.units === 1 ? "" : "e"} · ${objectStats.active} aktiv/in Bearbeitung` : "Sobald All4You ein Objekt zuordnet, erscheint es hier.",
+      tab: "objects"
+    },
+    {
+      label: "Aufträge",
+      title: combined.total ? `${combined.total} Vorgang${combined.total === 1 ? "" : "e"}` : "Noch keine Aufträge",
+      text: combined.active ? `${combined.active} aktiv/in Bearbeitung` : "Alle zugeordneten Anfragen bleiben hier gesammelt.",
+      tab: "requests"
+    },
+    {
+      label: "Nachrichten",
+      title: messages ? `${messages} Nachricht${messages === 1 ? "" : "en"}` : "Keine neuen Nachrichten",
+      text: messages ? "Öffentliche Nachrichten finden Sie im Bereich Nachrichten." : "Rückfragen erscheinen gesammelt im Nachrichtenbereich.",
+      tab: "messages"
+    },
+    {
+      label: "Nächster Termin",
+      title: nextObjectJob?.planned_date ? formatDashboardDate(nextObjectJob.planned_date) : "Noch nicht geplant",
+      text: nextObjectJob ? `${nextObjectJob.object?.name || "Objekt"} · ${nextObjectJob.unit?.name || "Bereich"}` : "Geplante Reinigungen werden von All4You eingetragen.",
+      tab: "status"
+    }
+  ];
+
+  box.innerHTML = cards.map(card => `
+    <button class="customer-portal-home-card" type="button" data-customer-portal-tab="${escapeHtml(card.tab)}">
+      <span>${escapeHtml(card.label)}</span>
+      <strong>${escapeHtml(card.title)}</strong>
+      <small>${escapeHtml(card.text)}</small>
+      <em>Öffnen ›</em>
+    </button>
+  `).join("");
+}
+
+function renderCustomerPortalStatusOverview(requests = customerPortalRequests, objects = customerPortalObjects) {
+  const box = document.querySelector("#customerPortalStatusGrid");
+  if (!box) return;
+  const requestRows = (Array.isArray(requests) ? requests : []).map(ticket => ({
+    type: "Auftrag",
+    title: ticket.ticket_number || serviceLabel(ticket.service) || "Auftrag",
+    subtitle: ticket.summary || ticket.subject || serviceLabel(ticket.service),
+    status: normalizeGlobalStatus(ticket.status),
+    date: ticket.updated_at || ticket.created_at
+  }));
+  const objectRows = (Array.isArray(objects) ? objects : []).flatMap(object =>
+    getCustomerPortalObjectJobs(object).map(job => ({
+      type: "ObjektPortal",
+      title: object.name || "Objekt",
+      subtitle: `${job.unit?.name || "Bereich"}${job.planned_date ? " · " + formatDashboardDate(job.planned_date) : ""}`,
+      status: normalizeGlobalStatus(job.status),
+      date: job.updated_at || job.finished_at || job.started_at || job.planned_date || job.created_at
+    }))
+  );
+  const rows = [...requestRows, ...objectRows]
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+  if (!rows.length) {
+    box.innerHTML = `<div class="dashboard-mini-empty"><strong>Noch kein Verlauf</strong><p>Wenn All4You Aufträge oder ObjektPortal-Einsätze zuordnet, erscheint hier der Statusverlauf.</p></div>`;
+    return;
+  }
+
+  const grouped = [
+    ["neu", "NEU"],
+    ["in_bearbeitung", "IN BEARBEITUNG"],
+    ["in_pruefung", "IN PRÜFUNG"],
+    ["abgeschlossen", "ABGESCHLOSSEN"]
+  ];
+
+  box.innerHTML = grouped.map(([key, label]) => {
+    const items = rows.filter(row => row.status === key);
+    return `
+      <article class="customer-status-column status-${escapeHtml(key)}">
+        <div class="customer-status-column-head">
+          <strong>${escapeHtml(label)}</strong>
+          <span>${items.length}</span>
+        </div>
+        <div class="customer-status-column-list">
+          ${items.length ? items.slice(0, 6).map(item => `
+            <div class="customer-status-row">
+              <span>${escapeHtml(item.type)}</span>
+              <strong>${escapeHtml(item.title)}</strong>
+              <small>${escapeHtml(item.subtitle || "")}</small>
+            </div>
+          `).join("") : `<small>Keine Vorgänge</small>`}
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function setCustomerPortalTab(tab = "overview") {
+  const allowed = ["overview", "objects", "requests", "messages", "status"];
+  customerPortalActiveTab = allowed.includes(tab) ? tab : "overview";
+
+  document.querySelectorAll("[data-customer-portal-section]").forEach(section => {
+    section.classList.toggle("is-hidden", section.dataset.customerPortalSection !== customerPortalActiveTab);
+  });
+
+  document.querySelectorAll("[data-customer-portal-tab]").forEach(button => {
+    button.classList.toggle("active", button.dataset.customerPortalTab === customerPortalActiveTab);
+  });
+
+  const titles = {
+    overview: "Übersicht",
+    objects: "Meine Objekte",
+    requests: "Aufträge",
+    messages: "Nachrichten",
+    status: "Status & Verlauf"
+  };
+  const liveStatus = document.querySelector("#customerPortalLiveStatus");
+  if (liveStatus) liveStatus.textContent = titles[customerPortalActiveTab] || "Live verbunden";
 }
 
 function renderCustomerPortalSideSummary(requests = customerPortalRequests, objects = customerPortalObjects) {
@@ -11551,6 +11726,8 @@ function renderCustomerPortalObjects(objects = customerPortalObjects) {
   renderCustomerPortalObjectDetail(selected);
   renderCustomerPortalOverviewStats(customerPortalRequests, rows);
   renderCustomerPortalSideSummary(customerPortalRequests, rows);
+  renderCustomerPortalHomeSummary(customerPortalRequests, rows);
+  renderCustomerPortalStatusOverview(customerPortalRequests, rows);
 }
 
 function renderCustomerPortalRequests(requests = customerPortalRequests) {
@@ -11563,6 +11740,8 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
   if (count) count.textContent = `${rows.length} Auftrag${rows.length === 1 ? "" : "e"}`;
   renderCustomerPortalOverviewStats(rows, customerPortalObjects);
   renderCustomerPortalSideSummary(rows, customerPortalObjects);
+  renderCustomerPortalHomeSummary(rows, customerPortalObjects);
+  renderCustomerPortalStatusOverview(rows, customerPortalObjects);
 
   if (!rows.length) {
     if (hint) hint.innerHTML = `<strong>Noch leer</strong><span>All4You kann bestehende Tickets Ihrem Kundenkonto zuordnen.</span>`;
@@ -11745,6 +11924,9 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
 
   renderCustomerPortalRequests(customerPortalRequests);
   renderCustomerPortalObjects(customerPortalObjects);
+  renderCustomerPortalHomeSummary(customerPortalRequests, customerPortalObjects);
+  renderCustomerPortalStatusOverview(customerPortalRequests, customerPortalObjects);
+  setCustomerPortalTab(customerPortalActiveTab || "overview");
 
   if (liveStatus) {
     liveStatus.textContent = "Live verbunden";
@@ -11765,6 +11947,17 @@ function bindCustomerPortalPage() {
   const messageButton = document.querySelector("#customerPortalMessageButton");
 
   if (!gate || !protectedArea || !form) return;
+
+  protectedArea.addEventListener("click", event => {
+    const button = event.target.closest("[data-customer-portal-tab]");
+    if (!button) return;
+    const tab = button.dataset.customerPortalTab || "overview";
+    if ((tab === "messages" || tab === "requests") && !customerPortalSelectedRequestId && customerPortalRequests.length) {
+      customerPortalSelectedRequestId = customerPortalRequests[0].id;
+      renderCustomerPortalRequests(customerPortalRequests);
+    }
+    setCustomerPortalTab(tab);
+  });
 
   function showLogin() {
     gate.classList.remove("is-hidden");
@@ -11934,6 +12127,7 @@ function bindCustomerPortalPage() {
     }
   });
 
+  setCustomerPortalTab(customerPortalActiveTab || "overview");
   validateStoredSession();
 }
 

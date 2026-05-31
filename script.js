@@ -7706,8 +7706,8 @@ function pageCustomerPortal() {
             </div>
           </section>
 
-          <section class="customer-portal-grid customer-portal-tab-section is-hidden" id="customerPortalRequestsPanel" data-customer-portal-section="requests">
-            <div class="dashboard-panel customer-request-panel">
+          <section class="customer-portal-requests-view customer-portal-tab-section is-hidden" id="customerPortalRequestsPanel" data-customer-portal-section="requests">
+            <div class="dashboard-panel customer-request-panel customer-request-panel-modern">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Aufträge</p>
@@ -7716,36 +7716,40 @@ function pageCustomerPortal() {
                 <span class="status-pill" id="customerPortalRequestCount">0 Aufträge</span>
               </div>
               <div class="customer-request-hint" id="customerPortalRequestHint">
-                <strong>Hinweis</strong>
-                <span>Wählen Sie einen Auftrag aus, um Details und Nachrichten zu sehen.</span>
+                <strong>Kompakte Ansicht</strong>
+                <span>Details und Nachrichten öffnen sich nur, wenn Sie sie brauchen.</span>
               </div>
-              <div class="dashboard-ticket-list customer-portal-request-list" id="customerPortalRequestList">
+              <div class="dashboard-ticket-list customer-portal-request-list customer-portal-request-list-modern" id="customerPortalRequestList">
                 <div class="dashboard-empty-state">
                   <strong>Aufträge werden geladen …</strong>
                   <p>Ihre zugeordneten Aufträge erscheinen hier.</p>
                 </div>
               </div>
             </div>
+          </section>
 
-            <aside class="dashboard-panel dashboard-detail customer-portal-detail">
-              <div class="panel-head customer-detail-head">
+          <div class="portal-modal-backdrop customer-request-modal-backdrop is-hidden" id="customerPortalRequestModal" aria-hidden="true">
+            <section class="portal-modal-card customer-request-modal-card" role="dialog" aria-modal="true" aria-labelledby="customerPortalDetailTitle">
+              <div class="portal-modal-head">
                 <div>
                   <p class="eyebrow">Auftragsdetails</p>
                   <h2 id="customerPortalDetailTitle">Auftrag auswählen</h2>
                 </div>
-                <span class="status-pill" id="customerPortalDetailStatus">—</span>
+                <button class="portal-modal-close" type="button" data-customer-request-modal-close aria-label="Fenster schließen">×</button>
               </div>
-
-              <div class="customer-detail-progress" id="customerPortalProgressTimeline">
-                <div class="summary-wide"><strong>Status</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
+              <div class="portal-modal-body customer-request-modal-body">
+                <div class="customer-request-modal-statusline">
+                  <span class="status-pill" id="customerPortalDetailStatus">—</span>
+                </div>
+                <div class="customer-detail-progress" id="customerPortalProgressTimeline">
+                  <div class="summary-wide"><strong>Status</strong><span>Wählen Sie einen Auftrag aus.</span></div>
+                </div>
+                <div class="dashboard-detail-body customer-detail-body" id="customerPortalDetailBody">
+                  <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie einen Auftrag aus.</span></div>
+                </div>
               </div>
-
-              <div class="dashboard-detail-body customer-detail-body" id="customerPortalDetailBody">
-                <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
-              </div>
-
-            </aside>
-          </section>
+            </section>
+          </div>
 
           <section class="dashboard-panel customer-portal-messages-panel customer-portal-tab-section is-hidden" id="customerPortalMessagesPanel" data-customer-portal-section="messages" aria-label="Nachrichten">
             <div class="panel-head">
@@ -10776,13 +10780,14 @@ function readCustomerPortalHistoryState() {
   return {
     tab,
     request: url.searchParams.get("request") || "",
-    object: url.searchParams.get("object") || ""
+    object: url.searchParams.get("object") || "",
+    modal: url.searchParams.get("modal") || ""
   };
 }
 
 function writeCustomerPortalHistoryState(tab = "overview", extra = {}, options = {}) {
   const normalized = CUSTOMER_PORTAL_HISTORY_TABS.includes(tab) ? tab : "overview";
-  const clearKeys = ["tab", "request", "object"];
+  const clearKeys = ["tab", "request", "object", "modal"];
   const url = portalUrlWithParams({ tab: normalized, ...extra }, clearKeys);
   pushPortalHistory(url, { portal: "kundenportal", tab: normalized, ...extra }, options);
 }
@@ -10794,6 +10799,18 @@ function applyCustomerPortalHistoryState() {
   setCustomerPortalTab(state.tab, { updateHistory: false });
   if (state.tab === "requests" || state.tab === "messages") renderCustomerPortalRequests(customerPortalRequests);
   if (state.tab === "objects") renderCustomerPortalObjects(customerPortalObjects);
+  if (state.tab === "requests" && state.modal === "details" && state.request) {
+    const ticket = getCustomerPortalTicketById(state.request);
+    if (ticket?.id) {
+      customerPortalSelectedRequestId = ticket.id;
+      renderCustomerPortalDetail(ticket);
+      const modal = document.querySelector("#customerPortalRequestModal");
+      modal?.classList.remove("is-hidden");
+      modal?.setAttribute("aria-hidden", "false");
+    }
+  } else {
+    closeCustomerPortalRequestModal({ updateHistory: false });
+  }
 }
 
 function bindCustomerPortalHistoryRouting() {
@@ -11946,6 +11963,10 @@ function setCustomerPortalTab(tab = "overview", options = {}) {
     button.classList.toggle("active", button.dataset.customerPortalTab === customerPortalActiveTab);
   });
 
+  if (customerPortalActiveTab !== "requests") {
+    closeCustomerPortalRequestModal({ updateHistory: false });
+  }
+
   if (options.updateHistory !== false) {
     writeCustomerPortalHistoryState(customerPortalActiveTab, options.extra || {}, { replace: Boolean(options.replace) });
   }
@@ -12335,7 +12356,7 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
     const stats = getCustomerPortalStats(rows);
     hint.innerHTML = stats.openQuestions
       ? `<strong>Rückfrage offen</strong><span>${stats.openQuestions} Auftrag${stats.openQuestions === 1 ? "" : "e"} benötigen Ihre Aufmerksamkeit.</span>`
-      : `<strong>Alles im Blick</strong><span>Wählen Sie einen Auftrag aus, um Details und Nachrichten zu sehen.</span>`;
+      : `<strong>Ruhige Übersicht</strong><span>Details und Nachrichten öffnen sich per Button in einem Fenster.</span>`;
   }
 
   if (!rows.some(ticket => ticket.id === customerPortalSelectedRequestId)) {
@@ -12346,23 +12367,57 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
     const isActive = ticket.id === customerPortalSelectedRequestId;
     const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
     return `
-      <button class="dashboard-ticket customer-portal-ticket ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" type="button" data-customer-portal-request-id="${escapeHtml(ticket.id)}">
-        <span class="customer-ticket-main">
-          <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
-          <strong>${escapeHtml(ticket.ticket_number || "Auftrag")}</strong>
-          <small>${escapeHtml(ticket.summary || ticket.subject || "Ihre Anfrage bei All4You")}</small>
-        </span>
-        <span class="customer-ticket-foot">
+      <article class="customer-portal-ticket-card ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" data-customer-portal-request-card="${escapeHtml(ticket.id)}">
+        <div class="customer-ticket-card-main">
+          <div>
+            <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
+            <h3>${escapeHtml(ticket.ticket_number || "Auftrag")}</h3>
+            <p>${escapeHtml(ticket.summary || ticket.subject || "Ihre Anfrage bei All4You")}</p>
+          </div>
           <em class="customer-status-badge status-${escapeHtml(normalizeGlobalStatus(ticket.status).replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(statusLabel(ticket.status))}</em>
-          <small>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</small>
-          ${publicMessages.length ? `<small>${publicMessages.length} Nachricht${publicMessages.length === 1 ? "" : "en"}</small>` : ""}
-        </span>
-      </button>
+        </div>
+        <div class="customer-ticket-card-meta">
+          <span>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</span>
+          ${publicMessages.length ? `<span>${publicMessages.length} Nachricht${publicMessages.length === 1 ? "" : "en"}</span>` : `<span>Keine neuen Nachrichten</span>`}
+        </div>
+        <div class="customer-ticket-card-actions">
+          <button class="btn ghost compact" type="button" data-customer-request-action="details" data-customer-request-id="${escapeHtml(ticket.id)}">Details ansehen</button>
+          <button class="btn ghost compact" type="button" data-customer-request-action="messages" data-customer-request-id="${escapeHtml(ticket.id)}">Nachrichten</button>
+        </div>
+      </article>
     `;
   }).join("");
 
   const selected = rows.find(ticket => ticket.id === customerPortalSelectedRequestId) || rows[0];
   renderCustomerPortalDetail(selected);
+}
+
+function getCustomerPortalTicketById(ticketId) {
+  if (!ticketId) return null;
+  return (customerPortalRequests || []).find(ticket => String(ticket.id) === String(ticketId)) || null;
+}
+
+function openCustomerPortalRequestModal(ticketId) {
+  const ticket = getCustomerPortalTicketById(ticketId);
+  if (!ticket?.id) return;
+  customerPortalSelectedRequestId = ticket.id;
+  renderCustomerPortalDetail(ticket);
+  document.querySelectorAll("[data-customer-portal-request-card]").forEach(card => {
+    card.classList.toggle("active", card.dataset.customerPortalRequestCard === ticket.id);
+  });
+  const modal = document.querySelector("#customerPortalRequestModal");
+  if (!modal) return;
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+  writeCustomerPortalHistoryState("requests", { request: ticket.id, modal: "details" });
+}
+
+function closeCustomerPortalRequestModal({ updateHistory = true } = {}) {
+  const modal = document.querySelector("#customerPortalRequestModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  if (updateHistory) writeCustomerPortalHistoryState(customerPortalActiveTab || "requests", customerPortalSelectedRequestId ? { request: customerPortalSelectedRequestId } : {});
 }
 
 function renderCustomerDetailFact(label, value) {
@@ -12674,13 +12729,39 @@ function bindCustomerPortalPage() {
   });
 
   requestList?.addEventListener("click", event => {
-    const button = event.target.closest("[data-customer-portal-request-id]");
-    if (!button) return;
-    requestList.querySelectorAll(".dashboard-ticket").forEach(item => item.classList.remove("active"));
-    button.classList.add("active");
-    const ticket = customerPortalRequests.find(item => item.id === button.dataset.customerPortalRequestId);
-    renderCustomerPortalDetail(ticket || null);
-    if (ticket?.id) writeCustomerPortalHistoryState(customerPortalActiveTab === "messages" ? "messages" : "requests", { request: ticket.id });
+    const actionButton = event.target.closest("[data-customer-request-action]");
+    if (actionButton) {
+      event.preventDefault();
+      const ticketId = actionButton.dataset.customerRequestId;
+      const ticket = getCustomerPortalTicketById(ticketId);
+      if (!ticket?.id) return;
+      customerPortalSelectedRequestId = ticket.id;
+      renderCustomerPortalDetail(ticket);
+      requestList.querySelectorAll("[data-customer-portal-request-card]").forEach(item => item.classList.toggle("active", item.dataset.customerPortalRequestCard === ticket.id));
+      if (actionButton.dataset.customerRequestAction === "messages") {
+        closeCustomerPortalRequestModal({ updateHistory: false });
+        setCustomerPortalTab("messages", { extra: { request: ticket.id } });
+      } else {
+        openCustomerPortalRequestModal(ticket.id);
+      }
+      return;
+    }
+
+    const card = event.target.closest("[data-customer-portal-request-card]");
+    if (!card) return;
+    const ticket = getCustomerPortalTicketById(card.dataset.customerPortalRequestCard);
+    if (!ticket?.id) return;
+    customerPortalSelectedRequestId = ticket.id;
+    renderCustomerPortalDetail(ticket);
+    requestList.querySelectorAll("[data-customer-portal-request-card]").forEach(item => item.classList.toggle("active", item === card));
+    openCustomerPortalRequestModal(ticket.id);
+  });
+
+  const customerRequestModal = document.querySelector("#customerPortalRequestModal");
+  customerRequestModal?.addEventListener("click", event => {
+    if (event.target === customerRequestModal || event.target.closest("[data-customer-request-modal-close]")) {
+      closeCustomerPortalRequestModal();
+    }
   });
 
   messageForm?.addEventListener("submit", async event => {

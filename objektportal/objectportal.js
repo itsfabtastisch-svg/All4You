@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.2.2 Unit Remove
+   V6.3.0 Job Foundation
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.2.2-OBJECTPORTAL-UNIT-REMOVE
+   DBG: ALL4YOU-V6.3.0-OBJECTPORTAL-JOB-FOUNDATION
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -28,6 +28,7 @@ const state = {
   },
   openObjectIds: new Set(),
   openUnitForms: new Set(),
+  openJobForms: new Set(),
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -63,6 +64,23 @@ function formatStatus(value) {
     in_progress: "In Arbeit",
   };
   return map[String(value || "active").toLowerCase()] || value || "Aktiv";
+}
+
+function formatJobStatus(value) {
+  const map = {
+    planned: "Geplant",
+    assigned: "Zugewiesen",
+    in_progress: "In Arbeit",
+    completed: "Abgeschlossen",
+    paused: "Pausiert",
+    cancelled: "Storniert",
+  };
+  return map[String(value || "planned").toLowerCase()] || value || "Geplant";
+}
+
+function jobStatusClass(value) {
+  const key = String(value || "planned").toLowerCase();
+  return `job-${key.replace(/[^a-z0-9_-]/g, "")}`;
 }
 
 function formatObjectType(value) {
@@ -318,20 +336,50 @@ function getAllUnits() {
   return state.objects.flatMap((object) => activeUnits(object.units));
 }
 
+function getObjectJobs(object = {}) {
+  const jobs = Array.isArray(object.jobs) ? object.jobs : [];
+  return jobs.slice().sort((a, b) => {
+    const aDate = a.planned_date ? new Date(a.planned_date).getTime() : Number.MAX_SAFE_INTEGER;
+    const bDate = b.planned_date ? new Date(b.planned_date).getTime() : Number.MAX_SAFE_INTEGER;
+    if (aDate !== bDate) return aDate - bDate;
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
+}
+
+function getAllJobs() {
+  return state.objects.flatMap((object) => getObjectJobs(object));
+}
+
+function getObjectJobSummary(object = {}) {
+  const jobs = getObjectJobs(object);
+  const current = jobs.find((job) => ["in_progress", "assigned"].includes(String(job.status || "").toLowerCase()));
+  const next = jobs.find((job) => ["planned", "assigned"].includes(String(job.status || "").toLowerCase()));
+  const last = jobs.slice().reverse().find((job) => String(job.status || "").toLowerCase() === "completed");
+  return { jobs, current, next, last };
+}
+
+function getUnitLabel(object = {}, unitId) {
+  if (!unitId) return "Objekt allgemein";
+  const unit = activeUnits(object.units).find((item) => item.id === unitId)
+    || (Array.isArray(object.units) ? object.units : []).find((item) => item.id === unitId);
+  return unit?.name || "Einheit";
+}
+
 function renderStats() {
   const stats = state.stats || {};
   const wrap = $("#opStats");
   if (!wrap) return;
 
   const units = getAllUnits();
-  const intervalsCount = units.filter((unit) => unit.cleaning_interval).length;
+  const jobs = getAllJobs();
   const activePackages = state.customers.filter((customer) => customer.object_portal_active || Number(customer.object_count || 0) > 0).length;
+  const activeJobs = jobs.filter((job) => ["assigned", "in_progress"].includes(String(job.status || "").toLowerCase())).length;
 
   wrap.innerHTML = `
     <article class="op-stat"><strong>${Number(stats.objects || state.objects.length || 0)}</strong><span>Objekte</span></article>
     <article class="op-stat"><strong>${Number(stats.units || units.length || 0)}</strong><span>Einheiten / Bereiche</span></article>
-    <article class="op-stat"><strong>${activePackages}</strong><span>ObjektPortal-Kunden</span></article>
-    <article class="op-stat"><strong>${intervalsCount}</strong><span>Intervalle hinterlegt</span></article>
+    <article class="op-stat"><strong>${Number(stats.jobs || jobs.length || 0)}</strong><span>Einsätze</span></article>
+    <article class="op-stat"><strong>${Number(stats.active_jobs || activeJobs || 0)}</strong><span>Aktiv / zugewiesen</span></article>
   `;
 }
 
@@ -397,6 +445,7 @@ function objectMatchesFilters(object) {
   if (packageKey !== "all" && String(customer.package_key || "basic") !== packageKey) return false;
 
   if (!q) return true;
+  const jobs = getObjectJobs(object);
   const haystack = [
     object.name,
     object.object_type,
@@ -408,6 +457,7 @@ function objectMatchesFilters(object) {
     customer.company,
     customer.email,
     ...units.flatMap((unit) => [unit.name, unit.unit_type, unit.cleaning_interval, unit.notes]),
+    ...jobs.flatMap((job) => [job.status, job.planned_date, job.assigned_employee_name, job.notes, getUnitLabel(object, job.unit_id)]),
   ].join(" ").toLowerCase();
   return haystack.includes(q);
 }
@@ -443,10 +493,40 @@ function renderUnits(units = []) {
   `).join("");
 }
 
+function renderJobs(object = {}) {
+  const jobs = getObjectJobs(object);
+  if (!jobs.length) {
+    return `<div class="op-empty">Noch kein Einsatz angelegt. Einsätze bilden später die Grundlage für QR-Check-in, Bilder und Abschlussberichte.</div>`;
+  }
+
+  return jobs.map((job) => `
+    <article class="op-job-card ${jobStatusClass(job.status)}">
+      <div class="op-job-main">
+        <strong>${escapeHtml(getUnitLabel(object, job.unit_id))}</strong>
+        <small>Geplant: ${escapeHtml(formatDate(job.planned_date))} · ${escapeHtml(job.assigned_employee_name || "Mitarbeiter noch offen")}</small>
+        ${job.notes ? `<p>${escapeHtml(job.notes)}</p>` : ""}
+      </div>
+      <div class="op-job-actions">
+        <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
+        <select data-job-status="${escapeHtml(job.id)}" aria-label="Einsatzstatus ändern">
+          <option value="planned" ${String(job.status || "planned") === "planned" ? "selected" : ""}>Geplant</option>
+          <option value="assigned" ${String(job.status || "") === "assigned" ? "selected" : ""}>Zugewiesen</option>
+          <option value="in_progress" ${String(job.status || "") === "in_progress" ? "selected" : ""}>In Arbeit</option>
+          <option value="completed" ${String(job.status || "") === "completed" ? "selected" : ""}>Abgeschlossen</option>
+          <option value="paused" ${String(job.status || "") === "paused" ? "selected" : ""}>Pausiert</option>
+          <option value="cancelled" ${String(job.status || "") === "cancelled" ? "selected" : ""}>Storniert</option>
+        </select>
+      </div>
+    </article>
+  `).join("");
+}
+
 function renderObjectDetail(object) {
   const units = activeUnits(object.units);
   const customer = object.customer || {};
   const isUnitFormOpen = state.openUnitForms.has(object.id);
+  const isJobFormOpen = state.openJobForms.has(object.id);
+  const jobSummary = getObjectJobSummary(object);
 
   return `
     <div class="op-detail-grid">
@@ -466,6 +546,15 @@ function renderObjectDetail(object) {
           <div><dt>Paket</dt><dd>${escapeHtml(formatPackage(customer.package_key))}</dd></div>
           <div><dt>Monatlich</dt><dd>${escapeHtml(formatCurrency(customer.monthly_price))}</dd></div>
           <div><dt>Kunde</dt><dd>${escapeHtml(customerLabel(customer))}</dd></div>
+        </dl>
+      </section>
+
+      <section class="op-detail-box">
+        <p class="op-eyebrow">Einsatzstatus</p>
+        <dl class="op-data-list">
+          <div><dt>Nächster</dt><dd>${escapeHtml(jobSummary.next ? `${formatDate(jobSummary.next.planned_date)} · ${formatJobStatus(jobSummary.next.status)}` : "Noch nicht geplant")}</dd></div>
+          <div><dt>Aktuell</dt><dd>${escapeHtml(jobSummary.current ? formatJobStatus(jobSummary.current.status) : "Kein aktiver Einsatz")}</dd></div>
+          <div><dt>Letzter</dt><dd>${escapeHtml(jobSummary.last ? `${formatDate(jobSummary.last.planned_date)} · abgeschlossen` : "Noch kein Abschluss")}</dd></div>
         </dl>
       </section>
     </div>
@@ -531,6 +620,44 @@ function renderObjectDetail(object) {
     </section>
 
     <section class="op-detail-box op-detail-box-full">
+      <div class="op-section-title">
+        <div>
+          <p class="op-eyebrow">Einsätze</p>
+          <h3>Geplante Reinigungseinsätze</h3>
+        </div>
+        <button class="op-btn op-btn-ghost" type="button" data-toggle-job-form="${escapeHtml(object.id)}">+ Einsatz anlegen</button>
+      </div>
+      <div class="op-job-list">${renderJobs(object)}</div>
+      <form class="op-job-form ${isJobFormOpen ? "" : "is-hidden"}" data-add-job="${escapeHtml(object.id)}">
+        <label>Einheit/Bereich
+          <select name="unitId">
+            <option value="">Objekt allgemein</option>
+            ${units.map((unit) => `<option value="${escapeHtml(unit.id)}">${escapeHtml(unit.name)} · ${escapeHtml(formatInterval(unit.cleaning_interval))}</option>`).join("")}
+          </select>
+        </label>
+        <label>Geplantes Datum
+          <input name="plannedDate" type="date">
+        </label>
+        <label>Status
+          <select name="status">
+            <option value="planned">Geplant</option>
+            <option value="assigned">Zugewiesen</option>
+            <option value="in_progress">In Arbeit</option>
+            <option value="completed">Abgeschlossen</option>
+            <option value="paused">Pausiert</option>
+          </select>
+        </label>
+        <label>Mitarbeiter optional
+          <input name="assignedEmployeeName" type="text" placeholder="z. B. Putzkraft / Team A">
+        </label>
+        <label class="op-job-note">Interne Notiz optional
+          <textarea name="notes" rows="2" placeholder="z. B. Erstbegehung, Schlüsselregelung, Besonderheit …"></textarea>
+        </label>
+        <button class="op-btn op-btn-primary" type="submit">Einsatz speichern</button>
+      </form>
+    </section>
+
+    <section class="op-detail-box op-detail-box-full">
       <p class="op-eyebrow">Kundenansicht Vorschau</p>
       <div class="op-customer-preview">
         <strong>${escapeHtml(object.name)}</strong>
@@ -568,6 +695,8 @@ function renderObjects() {
 
   list.innerHTML = objects.map((object) => {
     const units = activeUnits(object.units);
+    const jobs = getObjectJobs(object);
+    const jobSummary = getObjectJobSummary(object);
     const customer = object.customer || {};
     const isOpen = state.openObjectIds.has(object.id);
     return `
@@ -585,7 +714,8 @@ function renderObjects() {
               <span class="op-chip">${escapeHtml(formatObjectType(object.object_type))}</span>
               <span class="op-chip">${formatPackage(customer.package_key)}</span>
               <span class="op-chip">${units.length} Einheit${units.length === 1 ? "" : "en"}</span>
-              <span class="op-chip op-status-chip">${formatStatus(object.status)}</span>
+              <span class="op-chip">${jobs.length} Einsatz${jobs.length === 1 ? "" : "e"}</span>
+              <span class="op-chip op-status-chip">${escapeHtml(jobSummary.current ? formatJobStatus(jobSummary.current.status) : formatStatus(object.status))}</span>
             </div>
           </div>
           <div class="op-object-actions">
@@ -620,6 +750,24 @@ function renderObjects() {
 
   list.querySelectorAll("[data-add-unit]").forEach((form) => {
     form.addEventListener("submit", handleAddUnit);
+  });
+
+  list.querySelectorAll("[data-toggle-job-form]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.toggleJobForm;
+      if (state.openJobForms.has(id)) state.openJobForms.delete(id);
+      else state.openJobForms.add(id);
+      state.openObjectIds.add(id);
+      renderObjects();
+    });
+  });
+
+  list.querySelectorAll("[data-add-job]").forEach((form) => {
+    form.addEventListener("submit", handleAddJob);
+  });
+
+  list.querySelectorAll("[data-job-status]").forEach((select) => {
+    select.addEventListener("change", handleUpdateJobStatus);
   });
 
   list.querySelectorAll("[data-delete-unit]").forEach((button) => {
@@ -752,6 +900,55 @@ async function handleAddUnit(event) {
   }
 }
 
+
+async function handleAddJob(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const objectId = form.dataset.addJob;
+  const formData = new FormData(form);
+  try {
+    setStatus("Einsatz wird gespeichert …", "loading");
+    const data = await callRpc("admin_create_object_portal_job", {
+      p_object_id: objectId,
+      p_unit_id: formData.get("unitId") || null,
+      p_planned_date: formData.get("plannedDate") || null,
+      p_status: formData.get("status") || "planned",
+      p_assigned_employee_name: formData.get("assignedEmployeeName") || null,
+      p_notes: formData.get("notes") || null,
+    });
+
+    if (data?.success === false) throw new Error(data.message || "Einsatz konnte nicht gespeichert werden.");
+    form.reset();
+    state.openObjectIds.add(objectId);
+    state.openJobForms.delete(objectId);
+    await loadObjectPortal();
+    setStatus(data?.message || "Einsatz wurde gespeichert.", "success");
+  } catch (error) {
+    setStatus(error.message || "Einsatz konnte nicht gespeichert werden.", "error");
+  }
+}
+
+async function handleUpdateJobStatus(event) {
+  const select = event.currentTarget;
+  const jobId = select.dataset.jobStatus;
+  const status = select.value;
+  if (!jobId) return;
+
+  try {
+    setStatus("Einsatzstatus wird aktualisiert …", "loading");
+    const data = await callRpc("admin_update_object_portal_job_status", {
+      p_job_id: jobId,
+      p_status: status,
+    });
+
+    if (data?.success === false) throw new Error(data.message || "Einsatzstatus konnte nicht geändert werden.");
+    await loadObjectPortal();
+    setStatus(data?.message || "Einsatzstatus wurde aktualisiert.", "success");
+  } catch (error) {
+    setStatus(error.message || "Einsatzstatus konnte nicht geändert werden.", "error");
+    await loadObjectPortal();
+  }
+}
 
 async function handleDeleteUnit(event) {
   const button = event.currentTarget;

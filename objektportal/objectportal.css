@@ -181,3 +181,107 @@ button, input, select, textarea { font: inherit; }
   .op-unit { align-items: flex-start; flex-direction: column; }
   .op-unit-actions { justify-content: flex-start; }
 }
+
+/* =========================================================
+   V6.3.0 · ObjectPortal Job Foundation
+   Nur ObjektPortal-eigene Klassen.
+   ========================================================= */
+.op-job-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+.op-job-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--op-border);
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+}
+.op-job-card.job-in_progress {
+  border-color: rgba(10,169,155,.42);
+  background: linear-gradient(135deg, #eefcf9, #fff);
+}
+.op-job-card.job-completed {
+  background: #f6fbf8;
+}
+.op-job-card.job-paused,
+.op-job-card.job-cancelled {
+  background: #fff9ef;
+}
+.op-job-main strong { display: block; }
+.op-job-main small {
+  display: block;
+  margin-top: 3px;
+  color: var(--op-muted);
+  font-weight: 750;
+}
+.op-job-main p {
+  margin: 7px 0 0;
+  color: var(--op-muted);
+  line-height: 1.45;
+  font-size: .9rem;
+}
+.op-job-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.op-job-actions select,
+.op-job-form input,
+.op-job-form select,
+.op-job-form textarea {
+  border: 1px solid var(--op-border);
+  border-radius: 14px;
+  padding: 10px 11px;
+  background: #fff;
+  color: var(--op-text);
+  outline: none;
+}
+.op-job-actions select:focus,
+.op-job-form input:focus,
+.op-job-form select:focus,
+.op-job-form textarea:focus {
+  border-color: rgba(10,169,155,.72);
+  box-shadow: 0 0 0 4px rgba(10,169,155,.11);
+}
+.op-job-status.job-planned { background: #eef7fa; color: #30546d; }
+.op-job-status.job-assigned { background: #eef4ff; color: #214a8f; }
+.op-job-status.job-in_progress { background: #e7fbf6; color: #087d73; }
+.op-job-status.job-completed { background: #edf9ef; color: #25743a; }
+.op-job-status.job-paused { background: #fff3d8; color: #856200; }
+.op-job-status.job-cancelled { background: #fff0f0; color: #8c1d1d; }
+.op-job-form {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.2fr) minmax(135px, .8fr) minmax(135px, .8fr) minmax(160px, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--op-card-soft);
+}
+.op-job-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--op-muted);
+  font-weight: 800;
+  font-size: .88rem;
+}
+.op-job-form .op-job-note {
+  grid-column: 1 / -2;
+}
+@media (max-width: 1100px) {
+  .op-job-form { grid-template-columns: 1fr 1fr; }
+  .op-job-form .op-job-note { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .op-job-card { grid-template-columns: 1fr; }
+  .op-job-actions { justify-content: flex-start; }
+  .op-job-form { grid-template-columns: 1fr; }
+  .op-job-form .op-job-note { grid-column: auto; }
+}

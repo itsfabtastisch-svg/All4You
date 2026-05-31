@@ -12430,6 +12430,33 @@ function renderCustomerDetailFact(label, value) {
 }
 
 
+function renderCustomerModalInfoSection(title, entries, options = {}) {
+  const visibleEntries = (entries || []).filter(([_, value]) => value !== null && value !== undefined && value !== "");
+
+  if (!visibleEntries.length) return "";
+
+  const content = visibleEntries.map(([label, value, key]) => {
+    const valueText = detailValue(value);
+    const isLong = options.fullWidthFields || isLongDashboardField(key, valueText) || String(valueText || "").length > 85;
+    return `
+      <div class="customer-modal-info-item ${isLong ? "wide" : ""}">
+        <strong>${escapeHtml(label)}</strong>
+        <span>${escapeHtml(valueText)}</span>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <section class="customer-modal-info-section ${options.fullWidth ? "wide" : ""}">
+      <h3>${escapeHtml(title)}</h3>
+      <div class="customer-modal-info-grid">
+        ${content}
+      </div>
+    </section>
+  `;
+}
+
+
 function getCustomerRequestCardFacts(ticket) {
   const details = ticket?.details || {};
   const dateValue = ticket?.updated_at || ticket?.created_at;
@@ -12514,10 +12541,12 @@ function renderCustomerPortalDetail(ticket) {
     <section class="customer-detail-fact-grid customer-detail-fact-grid-primary">
       ${contactFacts}
     </section>
-    ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
-    ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
-    ${renderDashboardDetailSection("Weitere Angaben", groups["Anfrage-Details"], { fullWidth: true })}
-    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+    <div class="customer-modal-section-grid">
+      ${renderCustomerModalInfoSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+      ${renderCustomerModalInfoSection("Standort & Strecke", groups["Standort & Strecke"])}
+      ${renderCustomerModalInfoSection("Weitere Angaben", groups["Anfrage-Details"], { fullWidth: true })}
+      ${renderCustomerModalInfoSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true, fullWidthFields: true })}
+    </div>
   `;
 
   const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);

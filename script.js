@@ -7498,6 +7498,7 @@ function pageCustomerPortal() {
 
           <nav class="customer-portal-mini-nav" aria-label="Kundenportal Bereiche">
             <span>Übersicht</span>
+            <span>Objekte</span>
             <span>Aufträge</span>
             <span>Nachrichten</span>
             <span>Status</span>
@@ -7510,7 +7511,7 @@ function pageCustomerPortal() {
 
           <div class="dashboard-security-note">
             <strong>Privater Bereich</strong>
-            <p>Hier erscheinen nur Aufträge, die Ihrem Kundenkonto zugeordnet wurden.</p>
+            <p>Hier erscheinen nur Aufträge und Objekte, die Ihrem Kundenkonto zugeordnet wurden.</p>
           </div>
         </aside>
 
@@ -7532,6 +7533,31 @@ function pageCustomerPortal() {
             <article><span>Aktiv</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>Rückfragen</span><strong>—</strong><small>werden geladen</small></article>
             <article><span>Abgeschlossen</span><strong>—</strong><small>werden geladen</small></article>
+          </section>
+
+          <section class="dashboard-panel customer-object-panel" id="customerPortalObjectsPanel" aria-label="Meine Objekte">
+            <div class="panel-head customer-object-head">
+              <div>
+                <p class="eyebrow">ObjektPortal</p>
+                <h2>Meine Objekte</h2>
+              </div>
+              <span class="status-pill" id="customerPortalObjectCount">0 Objekte</span>
+            </div>
+            <div class="customer-object-hint" id="customerPortalObjectHint">
+              <strong>Lesemodus</strong>
+              <span>Sie sehen hier die freigegebenen Objekt-, Intervall- und Statusdaten aus dem All4You ObjektPortal.</span>
+            </div>
+            <div class="customer-object-layout">
+              <div class="customer-object-list" id="customerPortalObjectList">
+                <div class="dashboard-empty-state">
+                  <strong>Objekte werden geladen …</strong>
+                  <p>Ihre zugeordneten Objekte erscheinen hier.</p>
+                </div>
+              </div>
+              <div class="customer-object-detail" id="customerPortalObjectDetail">
+                <div class="summary-wide"><strong>Objekt auswählen</strong><span>Wählen Sie links ein Objekt aus, um Status, Einheiten und Einsätze zu sehen.</span></div>
+              </div>
+            </div>
           </section>
 
           <section class="customer-portal-grid">
@@ -10999,13 +11025,16 @@ function bindDashboardAuth() {
 
 
 /* ==========================================================================
-   Kundenportal Basis V5.9.0
+   Kundenportal Basis V5.9.0 + ObjektPortal-Kundenansicht V6.9.0
    ========================================================================== */
 
 let customerPortalCurrentSession = null;
 let customerPortalAccount = null;
 let customerPortalRequests = [];
 let customerPortalSelectedRequestId = null;
+let customerPortalObjects = [];
+let customerPortalSelectedObjectId = null;
+let customerPortalObjectLoadError = "";
 
 async function fetchCustomerPortalData(session) {
   if (!session?.access_token) {
@@ -11030,6 +11059,34 @@ async function fetchCustomerPortalData(session) {
 
   if (!data?.success) {
     throw new Error(data?.message || "Kein freigeschaltetes Kundenkonto gefunden.");
+  }
+
+  return data;
+}
+
+async function fetchCustomerPortalObjects(session) {
+  if (!session?.access_token) {
+    throw new Error("Keine gültige Kundensitzung vorhanden.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_my_customer_object_portal`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({})
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "ObjektPortal-Daten konnten nicht geladen werden.");
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Keine freigeschalteten ObjektPortal-Daten gefunden.");
   }
 
   return data;
@@ -11172,6 +11229,251 @@ function renderCustomerPortalProgress(ticket) {
       `).join("")}
     </div>
   `;
+}
+
+function formatCustomerObjectJobStatus(value) {
+  const map = {
+    planned: "Geplant",
+    assigned: "Zugewiesen",
+    in_progress: "In Arbeit",
+    completed: "Abgeschlossen",
+    paused: "Pausiert",
+    cancelled: "Storniert",
+    archived: "Archiviert"
+  };
+  return map[String(value || "planned").toLowerCase()] || statusLabel(value) || "Geplant";
+}
+
+function getCustomerPortalObjectUnits(object = {}) {
+  return (Array.isArray(object.units) ? object.units : []).filter(unit => String(unit.status || "active") !== "archived");
+}
+
+function getCustomerPortalObjectJobs(object = {}) {
+  return (Array.isArray(object.jobs) ? object.jobs : []).filter(job => String(job.status || "planned") !== "archived");
+}
+
+function getCustomerPortalNextJob(jobs = []) {
+  const now = new Date();
+  return [...jobs]
+    .filter(job => ["planned", "assigned", "in_progress"].includes(String(job.status || "planned")))
+    .sort((a, b) => {
+      const aDate = a.planned_date ? new Date(a.planned_date) : now;
+      const bDate = b.planned_date ? new Date(b.planned_date) : now;
+      return aDate - bDate;
+    })[0] || null;
+}
+
+function getCustomerPortalLastJob(jobs = []) {
+  return [...jobs]
+    .filter(job => String(job.status || "") === "completed" || job.finished_at || job.started_at || job.planned_date)
+    .sort((a, b) => new Date(b.finished_at || b.started_at || b.planned_date || b.created_at || 0) - new Date(a.finished_at || a.started_at || a.planned_date || a.created_at || 0))[0] || null;
+}
+
+function getCustomerPortalObjectState(object = {}) {
+  const jobs = getCustomerPortalObjectJobs(object);
+  const active = jobs.find(job => String(job.status || "") === "in_progress");
+  if (active) {
+    return {
+      key: "in_progress",
+      label: "In Arbeit",
+      hint: active.latest_checkin_at ? `Mitarbeiter vor Ort seit ${formatDashboardDate(active.latest_checkin_at)}` : "Mitarbeiter vor Ort",
+      job: active
+    };
+  }
+
+  const assigned = jobs.find(job => String(job.status || "") === "assigned");
+  if (assigned) {
+    return { key: "assigned", label: "Zugewiesen", hint: assigned.planned_date ? `Geplant: ${formatDashboardDate(assigned.planned_date)}` : "Einsatz zugewiesen", job: assigned };
+  }
+
+  const next = getCustomerPortalNextJob(jobs);
+  if (next) {
+    return { key: "planned", label: "Geplant", hint: next.planned_date ? `Nächster Einsatz: ${formatDashboardDate(next.planned_date)}` : "Einsatz vorbereitet", job: next };
+  }
+
+  const completed = jobs.find(job => String(job.status || "") === "completed");
+  if (completed) {
+    return { key: "completed", label: "Abgeschlossen", hint: completed.finished_at ? `Letzter Abschluss: ${formatDashboardDate(completed.finished_at)}` : "Letzter Einsatz abgeschlossen", job: completed };
+  }
+
+  return { key: "active", label: "Aktiv", hint: "Objekt ist im System hinterlegt", job: null };
+}
+
+function getCustomerPortalObjectStats(objects = customerPortalObjects) {
+  const rows = Array.isArray(objects) ? objects : [];
+  const jobs = rows.flatMap(object => getCustomerPortalObjectJobs(object));
+  return {
+    objects: rows.length,
+    units: rows.reduce((sum, object) => sum + getCustomerPortalObjectUnits(object).length, 0),
+    active: jobs.filter(job => String(job.status || "") === "in_progress").length,
+    planned: jobs.filter(job => ["planned", "assigned"].includes(String(job.status || "planned"))).length,
+    completed: jobs.filter(job => String(job.status || "") === "completed").length,
+  };
+}
+
+function customerObjectStatusBadge(state = {}) {
+  const clean = String(state.key || "active").replace(/[^a-z0-9_-]/gi, "");
+  return `<em class="customer-status-badge object-status-${escapeHtml(clean)}">${escapeHtml(state.label || "Aktiv")}</em>`;
+}
+
+function renderCustomerPortalObjectCard(object) {
+  const units = getCustomerPortalObjectUnits(object);
+  const jobs = getCustomerPortalObjectJobs(object);
+  const stateInfo = getCustomerPortalObjectState(object);
+  const isActive = object.id === customerPortalSelectedObjectId;
+  const intervalText = units.length
+    ? [...new Set(units.map(unit => formatInterval(unit.cleaning_interval)))].slice(0, 3).join(" · ")
+    : "Intervall noch nicht hinterlegt";
+
+  return `
+    <button class="customer-object-card ${isActive ? "active" : ""}" type="button" data-customer-object-id="${escapeHtml(object.id)}">
+      <span class="customer-object-card-main">
+        <strong>${escapeHtml(object.name || "Objekt")}</strong>
+        <small>${escapeHtml(objectAddress(object))}</small>
+      </span>
+      <span class="customer-object-card-foot">
+        ${customerObjectStatusBadge(stateInfo)}
+        <small>${escapeHtml(intervalText)}</small>
+        <small>${units.length} Bereich${units.length === 1 ? "" : "e"} · ${jobs.length} Einsatz${jobs.length === 1 ? "" : "e"}</small>
+      </span>
+    </button>
+  `;
+}
+
+function renderCustomerPortalObjectDetail(object) {
+  const detail = document.querySelector("#customerPortalObjectDetail");
+  if (!detail) return;
+
+  if (!object?.id) {
+    detail.innerHTML = `<div class="summary-wide"><strong>Objekt auswählen</strong><span>Wählen Sie links ein Objekt aus, um Status, Einheiten und Einsätze zu sehen.</span></div>`;
+    return;
+  }
+
+  const units = getCustomerPortalObjectUnits(object);
+  const jobs = getCustomerPortalObjectJobs(object);
+  const stateInfo = getCustomerPortalObjectState(object);
+  const nextJob = getCustomerPortalNextJob(jobs);
+  const lastJob = getCustomerPortalLastJob(jobs);
+
+  const unitHtml = units.length ? units.map(unit => `
+    <article class="customer-object-unit-row">
+      <div>
+        <strong>${escapeHtml(unit.name || "Bereich")}</strong>
+        <span>${escapeHtml(formatUnitType(unit.unit_type))}</span>
+      </div>
+      <em>${escapeHtml(formatInterval(unit.cleaning_interval))}</em>
+    </article>
+  `).join("") : `<div class="dashboard-mini-empty"><strong>Noch keine Einheiten</strong><p>All4You hat für dieses Objekt noch keine Bereiche freigegeben.</p></div>`;
+
+  const jobHtml = jobs.length ? jobs.slice(0, 6).map(job => {
+    const photoCount = Number(job.visible_photo_count || 0);
+    return `
+      <article class="customer-object-job-row">
+        <div>
+          <strong>${escapeHtml(job.unit?.name || job.title || "Reinigungseinsatz")}</strong>
+          <span>${escapeHtml(job.planned_date ? formatDashboardDate(job.planned_date) : "Datum noch offen")}</span>
+        </div>
+        <div class="customer-object-job-meta">
+          <em class="customer-status-badge object-status-${escapeHtml(String(job.status || "planned").replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(formatCustomerObjectJobStatus(job.status))}</em>
+          ${photoCount ? `<small>${photoCount} freigegebene${photoCount === 1 ? "s" : ""} Bild${photoCount === 1 ? "" : "er"}</small>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("") : `<div class="dashboard-mini-empty"><strong>Noch keine Einsätze</strong><p>Sobald All4You Einsätze plant, erscheinen sie hier.</p></div>`;
+
+  detail.innerHTML = `
+    <div class="customer-object-detail-card">
+      <div class="customer-object-detail-top">
+        <div>
+          <p class="eyebrow">Objektstatus</p>
+          <h3>${escapeHtml(object.name || "Objekt")}</h3>
+          <span>${escapeHtml(objectAddress(object))}</span>
+        </div>
+        ${customerObjectStatusBadge(stateInfo)}
+      </div>
+      <div class="customer-object-current-state">
+        <strong>${escapeHtml(stateInfo.label || "Aktiv")}</strong>
+        <span>${escapeHtml(stateInfo.hint || "Objekt ist im System hinterlegt")}</span>
+      </div>
+      <div class="customer-detail-fact-grid">
+        ${renderCustomerDetailFact("Bereiche", `${units.length}`)}
+        ${renderCustomerDetailFact("Nächster Einsatz", nextJob?.planned_date ? formatDashboardDate(nextJob.planned_date) : "Noch nicht geplant")}
+        ${renderCustomerDetailFact("Letzte Reinigung", lastJob ? formatDashboardDate(lastJob.finished_at || lastJob.started_at || lastJob.planned_date || lastJob.created_at) : "Noch keine Historie")}
+        ${renderCustomerDetailFact("Status", stateInfo.label || "Aktiv")}
+      </div>
+    </div>
+
+    <div class="customer-object-readonly-note">
+      <strong>Nur Ansicht</strong>
+      <span>Änderungen an Objekten, Intervallen und Einsätzen werden von All4You im ObjektPortal gepflegt.</span>
+    </div>
+
+    <section class="customer-object-subsection">
+      <div class="customer-message-head">
+        <div>
+          <p class="eyebrow">Einheiten</p>
+          <h3>Bereiche & Reinigungsintervalle</h3>
+        </div>
+      </div>
+      <div class="customer-object-unit-list">${unitHtml}</div>
+    </section>
+
+    <section class="customer-object-subsection">
+      <div class="customer-message-head">
+        <div>
+          <p class="eyebrow">Einsätze</p>
+          <h3>Status & Verlauf</h3>
+        </div>
+      </div>
+      <div class="customer-object-job-list">${jobHtml}</div>
+    </section>
+  `;
+}
+
+function renderCustomerPortalObjects(objects = customerPortalObjects) {
+  const list = document.querySelector("#customerPortalObjectList");
+  const count = document.querySelector("#customerPortalObjectCount");
+  const hint = document.querySelector("#customerPortalObjectHint");
+  if (!list) return;
+
+  const rows = Array.isArray(objects) ? objects : [];
+  const stats = getCustomerPortalObjectStats(rows);
+  if (count) count.textContent = `${stats.objects} Objekt${stats.objects === 1 ? "" : "e"}`;
+
+  if (customerPortalObjectLoadError) {
+    if (hint) hint.innerHTML = `<strong>Nicht geladen</strong><span>${escapeHtml(customerPortalObjectLoadError)}</span>`;
+    list.innerHTML = `<div class="dashboard-mini-empty"><strong>ObjektPortal-Daten nicht verfügbar</strong><p>Bitte später erneut prüfen oder All4You kontaktieren.</p></div>`;
+    renderCustomerPortalObjectDetail(null);
+    return;
+  }
+
+  if (!rows.length) {
+    if (hint) hint.innerHTML = `<strong>Noch keine Objekte</strong><span>Sobald All4You ein Objekt Ihrem Kundenkonto zuordnet, erscheint es hier.</span>`;
+    list.innerHTML = `<div class="dashboard-empty-state customer-empty-state"><strong>Noch keine Objekte zugeordnet</strong><p>All4You kann Ihre Objekte im ObjektPortal hinterlegen und Ihrem Kundenkonto zuordnen.</p></div>`;
+    renderCustomerPortalObjectDetail(null);
+    return;
+  }
+
+  if (hint) {
+    hint.innerHTML = stats.active
+      ? `<strong>Aktuell in Arbeit</strong><span>${stats.active} Objekt${stats.active === 1 ? "" : "e"} mit laufendem Einsatz.</span>`
+      : `<strong>Objektübersicht</strong><span>${stats.units} Bereich${stats.units === 1 ? "" : "e"} · ${stats.planned} geplant · ${stats.completed} abgeschlossen</span>`;
+  }
+
+  if (!rows.some(object => object.id === customerPortalSelectedObjectId)) {
+    customerPortalSelectedObjectId = rows[0]?.id || null;
+  }
+
+  list.innerHTML = rows.map(renderCustomerPortalObjectCard).join("");
+  list.querySelectorAll("[data-customer-object-id]").forEach(button => {
+    button.addEventListener("click", () => {
+      customerPortalSelectedObjectId = button.dataset.customerObjectId || null;
+      renderCustomerPortalObjects(customerPortalObjects);
+    });
+  });
+
+  const selected = rows.find(object => object.id === customerPortalSelectedObjectId) || rows[0] || null;
+  renderCustomerPortalObjectDetail(selected);
 }
 
 function renderCustomerPortalRequests(requests = customerPortalRequests) {
@@ -11338,6 +11640,16 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   customerPortalAccount = data.account;
   customerPortalRequests = Array.isArray(data.requests) ? data.requests : [];
 
+  customerPortalObjectLoadError = "";
+  try {
+    const objectData = await fetchCustomerPortalObjects(session);
+    customerPortalObjects = Array.isArray(objectData.objects) ? objectData.objects : [];
+  } catch (error) {
+    customerPortalObjects = [];
+    customerPortalSelectedObjectId = null;
+    customerPortalObjectLoadError = error.message || "ObjektPortal-Daten konnten nicht geladen werden.";
+  }
+
   const displayName = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
   const name = document.querySelector("#customerPortalName");
   const meta = document.querySelector("#customerPortalMeta");
@@ -11355,6 +11667,7 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   }
 
   renderCustomerPortalRequests(customerPortalRequests);
+  renderCustomerPortalObjects(customerPortalObjects);
 
   if (liveStatus) {
     liveStatus.textContent = "Live verbunden";
@@ -11498,7 +11811,10 @@ function bindCustomerPortalPage() {
     customerPortalCurrentSession = null;
     customerPortalAccount = null;
     customerPortalRequests = [];
+    customerPortalObjects = [];
     customerPortalSelectedRequestId = null;
+    customerPortalSelectedObjectId = null;
+    customerPortalObjectLoadError = "";
     showLogin();
     setCustomerPortalAuthMessage("success", "Abgemeldet", "Die Kundensitzung wurde beendet.");
   });

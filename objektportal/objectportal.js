@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.3.2 Job Employee-ID + Remove Job
+   V6.3.3 Job Edit + Employee-ID Label
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.3.2-OBJECTPORTAL-JOB-REMOVE
+   DBG: ALL4YOU-V6.3.3-OBJECTPORTAL-JOB-EDIT
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -29,6 +29,7 @@ const state = {
   openObjectIds: new Set(),
   openUnitForms: new Set(),
   openJobForms: new Set(),
+  openEditJobIds: new Set(),
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -137,6 +138,15 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+}
+
+function dateInputValue(value) {
+  if (!value) return "";
+  const raw = String(value);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
 }
 
 function customerLabel(customer) {
@@ -495,33 +505,79 @@ function renderUnits(units = []) {
   `).join("");
 }
 
+function renderJobEditForm(object = {}, job = {}) {
+  const units = activeUnits(object.units);
+  const status = String(job.status || "planned");
+
+  return `
+    <form class="op-job-form op-job-edit-form" data-update-job="${escapeHtml(job.id)}" data-update-job-object="${escapeHtml(object.id)}">
+      <label>Einheit/Bereich
+        <select name="unitId">
+          <option value="">Objekt allgemein</option>
+          ${units.map((unit) => `<option value="${escapeHtml(unit.id)}" ${String(job.unit_id || "") === String(unit.id) ? "selected" : ""}>${escapeHtml(unit.name)} · ${escapeHtml(formatInterval(unit.cleaning_interval))}</option>`).join("")}
+        </select>
+      </label>
+      <label>Geplantes Datum
+        <input name="plannedDate" type="date" value="${escapeHtml(dateInputValue(job.planned_date))}">
+      </label>
+      <label>Status
+        <select name="status">
+          <option value="planned" ${status === "planned" ? "selected" : ""}>Geplant</option>
+          <option value="assigned" ${status === "assigned" ? "selected" : ""}>Zugewiesen</option>
+          <option value="in_progress" ${status === "in_progress" ? "selected" : ""}>In Arbeit</option>
+          <option value="completed" ${status === "completed" ? "selected" : ""}>Abgeschlossen</option>
+          <option value="paused" ${status === "paused" ? "selected" : ""}>Pausiert</option>
+          <option value="cancelled" ${status === "cancelled" ? "selected" : ""}>Storniert</option>
+        </select>
+      </label>
+      <label>Mitarbeiter-ID
+        <input name="assignedEmployeeName" type="text" value="${escapeHtml(job.assigned_employee_name || "")}" placeholder="z. B. MA-001 / Mitarbeiter-ID">
+      </label>
+      <label class="op-job-note">Interne Notiz optional
+        <textarea name="notes" rows="2" placeholder="z. B. Erstbegehung, Schlüsselregelung, Besonderheit …">${escapeHtml(job.notes || "")}</textarea>
+      </label>
+      <div class="op-job-edit-actions">
+        <button class="op-btn op-btn-primary" type="submit">Änderungen speichern</button>
+        <button class="op-btn op-btn-ghost" type="button" data-cancel-edit-job="${escapeHtml(job.id)}">Abbrechen</button>
+      </div>
+    </form>
+  `;
+}
+
 function renderJobs(object = {}) {
   const jobs = getObjectJobs(object);
   if (!jobs.length) {
     return `<div class="op-empty">Noch kein Einsatz angelegt. Einsätze bilden später die Grundlage für QR-Check-in, Bilder und Abschlussberichte.</div>`;
   }
 
-  return jobs.map((job) => `
-    <article class="op-job-card ${jobStatusClass(job.status)}">
-      <div class="op-job-main">
-        <strong>${escapeHtml(getUnitLabel(object, job.unit_id))}</strong>
-        <small>Geplant: ${escapeHtml(formatDate(job.planned_date))} · ${escapeHtml(job.assigned_employee_name || "Mitarbeiter-ID offen")}</small>
-        ${job.notes ? `<p>${escapeHtml(job.notes)}</p>` : ""}
+  return jobs.map((job) => {
+    const isEditing = state.openEditJobIds.has(job.id);
+    return `
+      <div class="op-job-wrap">
+        <article class="op-job-card ${jobStatusClass(job.status)}">
+          <div class="op-job-main">
+            <strong>${escapeHtml(getUnitLabel(object, job.unit_id))}</strong>
+            <small>Geplant: ${escapeHtml(formatDate(job.planned_date))} · ${escapeHtml(job.assigned_employee_name || "Mitarbeiter-ID offen")}</small>
+            ${job.notes ? `<p>${escapeHtml(job.notes)}</p>` : ""}
+          </div>
+          <div class="op-job-actions">
+            <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
+            <select data-job-status="${escapeHtml(job.id)}" aria-label="Einsatzstatus ändern">
+              <option value="planned" ${String(job.status || "planned") === "planned" ? "selected" : ""}>Geplant</option>
+              <option value="assigned" ${String(job.status || "") === "assigned" ? "selected" : ""}>Zugewiesen</option>
+              <option value="in_progress" ${String(job.status || "") === "in_progress" ? "selected" : ""}>In Arbeit</option>
+              <option value="completed" ${String(job.status || "") === "completed" ? "selected" : ""}>Abgeschlossen</option>
+              <option value="paused" ${String(job.status || "") === "paused" ? "selected" : ""}>Pausiert</option>
+              <option value="cancelled" ${String(job.status || "") === "cancelled" ? "selected" : ""}>Storniert</option>
+            </select>
+            <button class="op-mini-edit" type="button" data-edit-job="${escapeHtml(job.id)}">Bearbeiten</button>
+            <button class="op-mini-danger" type="button" data-delete-job="${escapeHtml(job.id)}" data-job-label="${escapeHtml(`${getUnitLabel(object, job.unit_id)} · ${formatDate(job.planned_date)}`)}">Entfernen</button>
+          </div>
+        </article>
+        ${isEditing ? renderJobEditForm(object, job) : ""}
       </div>
-      <div class="op-job-actions">
-        <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
-        <select data-job-status="${escapeHtml(job.id)}" aria-label="Einsatzstatus ändern">
-          <option value="planned" ${String(job.status || "planned") === "planned" ? "selected" : ""}>Geplant</option>
-          <option value="assigned" ${String(job.status || "") === "assigned" ? "selected" : ""}>Zugewiesen</option>
-          <option value="in_progress" ${String(job.status || "") === "in_progress" ? "selected" : ""}>In Arbeit</option>
-          <option value="completed" ${String(job.status || "") === "completed" ? "selected" : ""}>Abgeschlossen</option>
-          <option value="paused" ${String(job.status || "") === "paused" ? "selected" : ""}>Pausiert</option>
-          <option value="cancelled" ${String(job.status || "") === "cancelled" ? "selected" : ""}>Storniert</option>
-        </select>
-        <button class="op-mini-danger" type="button" data-delete-job="${escapeHtml(job.id)}" data-job-label="${escapeHtml(`${getUnitLabel(object, job.unit_id)} · ${formatDate(job.planned_date)}`)}">Entfernen</button>
-      </div>
-    </article>
-  `).join("");
+    `;
+  }).join("");
 }
 
 function renderObjectDetail(object) {
@@ -650,8 +706,8 @@ function renderObjectDetail(object) {
             <option value="paused">Pausiert</option>
           </select>
         </label>
-        <label>Mitarbeiter-ID / Mitarbeiter optional
-          <input name="assignedEmployeeName" type="text" placeholder="z. B. MA-001 / Mitarbeiter-ID optional">
+        <label>Mitarbeiter-ID
+          <input name="assignedEmployeeName" type="text" placeholder="z. B. MA-001 / Mitarbeiter-ID">
         </label>
         <label class="op-job-note">Interne Notiz optional
           <textarea name="notes" rows="2" placeholder="z. B. Erstbegehung, Schlüsselregelung, Besonderheit …"></textarea>
@@ -767,6 +823,29 @@ function renderObjects() {
 
   list.querySelectorAll("[data-add-job]").forEach((form) => {
     form.addEventListener("submit", handleAddJob);
+  });
+
+  list.querySelectorAll("[data-edit-job]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.editJob;
+      if (!id) return;
+      if (state.openEditJobIds.has(id)) state.openEditJobIds.delete(id);
+      else state.openEditJobIds.add(id);
+      renderObjects();
+    });
+  });
+
+  list.querySelectorAll("[data-cancel-edit-job]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.cancelEditJob;
+      if (!id) return;
+      state.openEditJobIds.delete(id);
+      renderObjects();
+    });
+  });
+
+  list.querySelectorAll("[data-update-job]").forEach((form) => {
+    form.addEventListener("submit", handleUpdateJob);
   });
 
   list.querySelectorAll("[data-job-status]").forEach((select) => {
@@ -954,6 +1033,36 @@ async function handleUpdateJobStatus(event) {
   } catch (error) {
     setStatus(error.message || "Einsatzstatus konnte nicht geändert werden.", "error");
     await loadObjectPortal();
+  }
+}
+
+async function handleUpdateJob(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const jobId = form.dataset.updateJob;
+  const objectId = form.dataset.updateJobObject;
+  const formData = new FormData(form);
+
+  if (!jobId) return;
+
+  try {
+    setStatus("Einsatz wird aktualisiert …", "loading");
+    const data = await callRpc("admin_update_object_portal_job", {
+      p_job_id: jobId,
+      p_unit_id: formData.get("unitId") || null,
+      p_planned_date: formData.get("plannedDate") || null,
+      p_status: formData.get("status") || "planned",
+      p_assigned_employee_name: formData.get("assignedEmployeeName") || null,
+      p_notes: formData.get("notes") || null,
+    });
+
+    if (data?.success === false) throw new Error(data.message || "Einsatz konnte nicht aktualisiert werden.");
+    state.openEditJobIds.delete(jobId);
+    if (objectId) state.openObjectIds.add(objectId);
+    await loadObjectPortal();
+    setStatus(data?.message || "Einsatz wurde aktualisiert.", "success");
+  } catch (error) {
+    setStatus(error.message || "Einsatz konnte nicht aktualisiert werden.", "error");
   }
 }
 

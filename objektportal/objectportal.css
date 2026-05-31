@@ -285,3 +285,43 @@ button, input, select, textarea { font: inherit; }
   .op-job-form { grid-template-columns: 1fr; }
   .op-job-form .op-job-note { grid-column: auto; }
 }
+
+/* =========================================================
+   V6.3.3 · ObjectPortal Job Edit
+   Nur ObjektPortal-eigene Klassen.
+   ========================================================= */
+.op-job-wrap {
+  display: grid;
+  gap: 8px;
+}
+.op-mini-edit {
+  border: 1px solid rgba(170, 120, 0, .24);
+  background: #fff6d8;
+  color: #7a5500;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: .76rem;
+  padding: 7px 10px;
+  transition: transform .16s ease, background .16s ease;
+}
+.op-mini-edit:hover {
+  transform: translateY(-1px);
+  background: #ffedaa;
+}
+.op-job-edit-form {
+  border: 1px solid rgba(170, 120, 0, .18);
+  background: linear-gradient(135deg, #fff9e8, #ffffff);
+}
+.op-job-edit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .op-job-edit-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

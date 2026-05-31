@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.1.0 Core Data Polish
+   V6.2.0 App Entry & Direct Login
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.1.0-OBJECTPORTAL-CORE-DATA
+   DBG: ALL4YOU-V6.2.0-OBJECTPORTAL-APP-ENTRY
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -173,6 +173,85 @@ function getStoredEmployeeSession() {
   }
 }
 
+function storeEmployeeSession(session) {
+  localStorage.setItem(ALL4YOU_AUTH_STORAGE_KEY, JSON.stringify({
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: Date.now() + ((session.expires_in || 3600) * 1000),
+    user: session.user,
+  }));
+}
+
+function clearEmployeeSession() {
+  localStorage.removeItem(ALL4YOU_AUTH_STORAGE_KEY);
+}
+
+async function supabasePasswordLogin(email, password) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.error_description || data?.msg || data?.message || "Login fehlgeschlagen.");
+  }
+
+  return data;
+}
+
+async function supabaseLogout(accessToken) {
+  if (!accessToken) return;
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  }).catch(() => null);
+}
+
+async function fetchEmployeeProfile(session) {
+  if (!session?.access_token || !session?.user?.id) {
+    throw new Error("Keine gültige Mitarbeitersitzung vorhanden.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_my_employee_profile`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || data?.details || "Mitarbeiterprofil konnte nicht geladen werden.");
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.message || "Kein aktives Mitarbeiterprofil gefunden.");
+  }
+
+  return data;
+}
+
+function setLoginMessage(message, type = "") {
+  const node = $("#opLoginMessage");
+  if (!node) return;
+  node.className = `op-login-message ${type}`.trim();
+  node.textContent = message;
+}
+
 function setStatus(message, type = "") {
   const badge = $("#opStatusBadge");
   if (!badge) return;
@@ -202,13 +281,18 @@ async function callRpc(functionName, body = {}) {
 
 function showAppOrLogin() {
   state.session = getStoredEmployeeSession();
+  const logoutButton = $("#opLogoutButton");
+
   if (!state.session) {
     $("#opLoginHint")?.classList.remove("is-hidden");
     $("#opApp")?.classList.add("is-hidden");
+    logoutButton?.classList.add("is-hidden");
     return false;
   }
+
   $("#opLoginHint")?.classList.add("is-hidden");
   $("#opApp")?.classList.remove("is-hidden");
+  logoutButton?.classList.remove("is-hidden");
   return true;
 }
 
@@ -628,7 +712,46 @@ async function handleAddUnit(event) {
   }
 }
 
+async function handleObjectPortalLogin(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  const email = String(data.get("email") || "").trim();
+  const password = String(data.get("password") || "");
+
+  try {
+    setLoginMessage("Login läuft …", "loading");
+    const session = await supabasePasswordLogin(email, password);
+    storeEmployeeSession(session);
+    const storedSession = getStoredEmployeeSession();
+    await fetchEmployeeProfile(storedSession);
+    state.session = storedSession;
+    form.reset();
+    setLoginMessage("Login erfolgreich. ObjektPortal wird geladen …", "success");
+    showAppOrLogin();
+    await loadObjectPortal();
+  } catch (error) {
+    clearEmployeeSession();
+    showAppOrLogin();
+    setLoginMessage(error.message || "Login fehlgeschlagen. Bitte Zugangsdaten prüfen.", "error");
+  }
+}
+
+async function handleObjectPortalLogout() {
+  const session = getStoredEmployeeSession();
+  await supabaseLogout(session?.access_token);
+  clearEmployeeSession();
+  state.session = null;
+  state.customers = [];
+  state.objects = [];
+  state.stats = {};
+  showAppOrLogin();
+  setLoginMessage("Sie wurden aus dem ObjektPortal abgemeldet.", "success");
+}
+
 function bindEvents() {
+  $("#opLoginForm")?.addEventListener("submit", handleObjectPortalLogin);
+  $("#opLogoutButton")?.addEventListener("click", handleObjectPortalLogout);
   $("#opRefresh")?.addEventListener("click", loadObjectPortal);
   $("#opCustomerSearch")?.addEventListener("input", renderCustomers);
   $("#opOpenWizard")?.addEventListener("click", openWizard);

@@ -5722,7 +5722,7 @@ function pageDashboard() {
             <a href="#dashboard-tickets" data-dashboard-view-trigger="overview">Tickets</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
-            <a href="#dashboard-objectportal" data-dashboard-view-trigger="objectportal">ObjektPortal</a>
+            <a href="/objektportal/" target="_blank" rel="noopener">ObjektPortal</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>

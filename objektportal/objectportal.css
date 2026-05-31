@@ -134,3 +134,19 @@ button, input, select, textarea { font: inherit; }
   .op-section-title { align-items: flex-start; flex-direction: column; }
   .op-modal-card { padding: 18px; }
 }
+
+/* =========================================================
+   V6.2.0 · ObjectPortal App Entry
+   Direkter Login im ObjektPortal, keine Rückverlinkung ins Mitarbeiterportal.
+   ========================================================= */
+.op-login-card { display: grid; gap: 14px; max-width: 520px; }
+.op-login-card h2 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.35rem); letter-spacing: -.045em; }
+.op-login-card p { margin: 0; color: var(--op-muted); line-height: 1.55; }
+.op-login-form { display: grid; gap: 12px; margin-top: 4px; }
+.op-login-form label { display: grid; gap: 7px; color: var(--op-muted); font-weight: 900; font-size: .9rem; }
+.op-login-form input { width: 100%; border: 1px solid var(--op-border); border-radius: 16px; padding: 13px 14px; background: #fff; color: var(--op-text); outline: none; }
+.op-login-form input:focus { border-color: rgba(10,169,155,.72); box-shadow: 0 0 0 4px rgba(10,169,155,.11); }
+.op-login-message { margin-top: 2px; padding: 11px 13px; border-radius: 16px; background: #f4f8fb; border: 1px solid var(--op-border); color: var(--op-muted); font-weight: 800; }
+.op-login-message.success { background: #e5fbf6; color: #086b5d; border-color: rgba(10,169,155,.28); }
+.op-login-message.error { background: #fff0f0; color: #8c1d1d; border-color: rgba(140,29,29,.18); }
+.op-login-message.loading { background: #fff8db; color: #7c5a00; border-color: rgba(124,90,0,.16); }

@@ -16,21 +16,33 @@
         <p>Objekte, Einheiten, Reinigungsintervalle und Paketgrundlagen sauber verwalten. QR-Code, Bilder und Berichte folgen in den nächsten Phasen.</p>
       </div>
       <div class="op-hero-actions">
-        <a class="op-btn op-btn-ghost" href="/dashboard">Zurück zum Mitarbeiterportal</a>
+        <button class="op-btn op-btn-ghost" id="opLogoutButton" type="button">Abmelden</button>
         <button class="op-btn op-btn-primary" id="opOpenWizard" type="button">+ Objekt hinzufügen</button>
       </div>
     </header>
 
     <section class="op-login-hint is-hidden" id="opLoginHint">
-      <h2>Mitarbeiter-Login erforderlich</h2>
-      <p>Bitte zuerst im Mitarbeiterportal anmelden. Danach kann das ObjektPortal über diese Seite geöffnet werden.</p>
-      <a class="op-btn op-btn-primary" href="/dashboard">Zum Mitarbeiterportal</a>
+      <div class="op-login-card">
+        <p class="op-eyebrow">ObjektPortal Login</p>
+        <h2>Mitarbeiter-Login erforderlich</h2>
+        <p>Bitte mit einem freigeschalteten Mitarbeiterkonto anmelden. Das ObjektPortal läuft als eigener Arbeitsbereich und führt nicht zurück ins Mitarbeiterportal.</p>
+        <form class="op-login-form" id="opLoginForm">
+          <label>E-Mail
+            <input type="email" name="email" autocomplete="email" placeholder="mitarbeiter@example.de" required>
+          </label>
+          <label>Passwort
+            <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
+          </label>
+          <button class="op-btn op-btn-primary" type="submit">Einloggen</button>
+        </form>
+        <p class="op-login-message" id="opLoginMessage">Direkter Zugang zum All4You ObjektPortal.</p>
+      </div>
     </section>
 
     <section id="opApp" class="op-app is-hidden" aria-live="polite">
       <section class="op-status-row">
         <span id="opStatusBadge" class="op-status-badge">Bereit</span>
-        <span id="opBuildBadge" class="op-build">DBG: ALL4YOU-V6.1.0-OBJECTPORTAL-CORE-DATA</span>
+        <span id="opBuildBadge" class="op-build">DBG: ALL4YOU-V6.2.0-OBJECTPORTAL-APP-ENTRY</span>
       </section>
 
       <section class="op-stats" id="opStats"></section>

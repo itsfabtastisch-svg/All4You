@@ -1,6 +1,6 @@
 /* All4You Service München
    Virtueller Router / eigene URLs
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
 */
 
 :root {
@@ -1148,7 +1148,7 @@ textarea:focus {
 
 /* ==========================================================================
    Compact Design Tuning
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    Ziel: ruhiger, seriöser, weniger riesig, mehr Inhalt direkt sichtbar.
    ========================================================================== */
 
@@ -1566,7 +1566,7 @@ label {
 
 /* ==========================================================================
    Anhängervermietung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .trailer-tool {
@@ -1612,6 +1612,104 @@ label {
   height: 17px;
   min-height: auto;
   accent-color: var(--teal);
+}
+
+.trailer-choice-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.trailer-choice-head h3 {
+  margin: 0 0 8px;
+  color: var(--navy);
+  font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: -.04em;
+}
+
+.trailer-choice-head p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 760px;
+}
+
+.trailer-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trailer-choice-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 104px;
+  padding: 15px 16px;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 18px;
+  background: rgba(255,255,255,.76);
+  box-shadow: 0 12px 26px rgba(16,38,60,.07);
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.trailer-choice-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(10,169,155,.34);
+  box-shadow: 0 16px 30px rgba(16,38,60,.1);
+}
+
+.trailer-choice-card.featured {
+  background: linear-gradient(135deg, rgba(10,169,155,.12), rgba(255,255,255,.9));
+  border-color: rgba(10,169,155,.28);
+}
+
+.trailer-choice-card input {
+  width: 18px;
+  height: 18px;
+  min-height: auto;
+  margin-top: 3px;
+  accent-color: var(--teal);
+}
+
+.trailer-choice-card:has(input:checked) {
+  border-color: rgba(10,169,155,.72);
+  background: linear-gradient(135deg, rgba(10,169,155,.17), rgba(255,255,255,.95));
+  box-shadow: 0 18px 34px rgba(10,169,155,.15);
+}
+
+.trailer-choice-body {
+  display: grid;
+  gap: 6px;
+}
+
+.trailer-choice-body strong {
+  color: var(--navy);
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+
+.trailer-choice-body small {
+  color: #486077;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 750;
+}
+
+.trailer-choice-body em {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(4, 96, 133, .08);
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .06em;
 }
 
 .pill-list {
@@ -1676,7 +1774,7 @@ label {
 
 /* ==========================================================================
    Entrümpelung Detailseite
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .clearance-tool {
@@ -1700,7 +1798,7 @@ label {
 
 /* ==========================================================================
    Halteverbot-Ergänzung Räumungen
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .inline-extra-card {
@@ -1709,7 +1807,7 @@ label {
 
 /* ==========================================================================
    Leistungen Dropdown Navigation
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .nav-dropdown {
@@ -1859,7 +1957,7 @@ label {
 
 /* ==========================================================================
    Reinigungsservice Detailseite
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .cleaning-tool {
@@ -1873,7 +1971,7 @@ label {
 
 /* ==========================================================================
    Kontaktseite Anfrage-Auswahl
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .contact-intro-grid {
@@ -1950,7 +2048,7 @@ label {
 
 /* ==========================================================================
    Über-uns-Seite
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .about-hero-grid {
@@ -2182,7 +2280,7 @@ label {
 
 /* ==========================================================================
    Rechtliches / Impressum / Datenschutz
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .legal-layout {
@@ -2277,7 +2375,7 @@ label {
 
 /* ==========================================================================
    Breites Logo im Header/Footer
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .site-header {
@@ -2341,7 +2439,7 @@ label {
 
 /* ==========================================================================
    Anhänger-Daten und Preistabelle
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .price-table-card {
@@ -2417,7 +2515,7 @@ label {
 
 /* ==========================================================================
    Reinigungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .cleaning-wizard-card {
@@ -2593,7 +2691,7 @@ label {
 
 /* ==========================================================================
    Entrümpelungs-Wizard
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .clearance-wizard-card {
@@ -2621,7 +2719,7 @@ label {
 
 /* ==========================================================================
    Rollerabholservice-Wizard
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .roller-wizard-card {
@@ -2716,9 +2814,228 @@ label {
   }
 }
 
+
+/* ==========================================================================
+   Anhänger-Showcase / Kundenwunsch: 2 Anhänger mit Bild-Switcher
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   ========================================================================== */
+
+.trailer-showcase-section {
+  padding-top: 28px;
+}
+
+.trailer-model-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(390px, .82fr);
+  gap: 30px;
+  align-items: stretch;
+  padding: 28px;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(10,169,155,.16), transparent 23rem),
+    linear-gradient(135deg, rgba(255,255,255,.95), rgba(239,247,251,.92));
+  box-shadow: 0 24px 58px rgba(16,38,60,.14);
+  overflow: hidden;
+}
+
+.trailer-model-copy {
+  min-width: 0;
+}
+
+.trailer-model-count {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid rgba(10,169,155,.2);
+  border-radius: 999px;
+  color: var(--teal-2);
+  background: rgba(10,169,155,.09);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.trailer-model-copy h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: clamp(30px, 3vw, 48px);
+  letter-spacing: -.055em;
+}
+
+.trailer-spec-grid {
+  margin-top: 22px;
+}
+
+.trailer-spec-card {
+  min-height: 132px;
+}
+
+.trailer-spec-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--teal-2);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.trailer-spec-card h3 {
+  margin: 0 0 6px;
+  color: var(--navy);
+}
+
+.trailer-model-media {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  align-content: stretch;
+}
+
+.trailer-model-media figure {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(19,35,58,.11);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 18px 42px rgba(16,38,60,.13);
+}
+
+.trailer-model-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  max-height: 530px;
+  object-fit: contain;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff, #f5f9fc);
+}
+
+.trailer-model-media figcaption {
+  padding: 15px 18px 17px;
+  border-top: 1px solid rgba(19,35,58,.08);
+  color: var(--muted);
+  background: rgba(255,255,255,.82);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.trailer-model-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 12px 32px rgba(16,38,60,.17);
+  cursor: pointer;
+  font-size: 32px;
+  font-weight: 850;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.trailer-model-nav:hover {
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(16,38,60,.2);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.trailer-model-prev { left: 14px; }
+.trailer-model-next { right: 14px; }
+
+.trailer-model-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  z-index: 5;
+  display: inline-flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(19,35,58,.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 10px 24px rgba(16,38,60,.12);
+  transform: translateX(-50%);
+}
+
+.trailer-model-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(19,35,58,.23);
+  cursor: pointer;
+}
+
+.trailer-model-dot.active {
+  width: 26px;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+}
+
+.good-to-know-box {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(19,35,58,.11);
+}
+
+.compact-list {
+  gap: 9px;
+}
+
+@media (max-width: 1050px) {
+  .trailer-model-card {
+    grid-template-columns: 1fr;
+  }
+
+  .trailer-model-media img {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .trailer-model-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .trailer-model-media img {
+    min-height: 240px;
+    padding: 10px;
+  }
+
+  .trailer-model-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 26px;
+  }
+
+  .trailer-model-prev { left: 8px; }
+  .trailer-model-next { right: 8px; }
+
+  .trailer-model-dots {
+    bottom: 78px;
+  }
+}
+
 /* ==========================================================================
    Anhänger-Wizard mit Mietdauer/Preis
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .trailer-wizard-card {
@@ -2967,6 +3284,32 @@ label {
   display: none;
 }
 
+
+.trailer-handover-grid {
+  align-items: start;
+}
+
+.trailer-handover-grid label {
+  min-width: 0;
+}
+
+.trailer-handover-grid select,
+.trailer-handover-grid input {
+  min-height: 48px;
+  font-size: 14px;
+}
+
+.trailer-delivery-address-field {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 760px) {
+  .trailer-handover-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 #trailerWizardSubmit {
   display: none;
 }
@@ -2998,7 +3341,7 @@ label {
 
 /* ==========================================================================
    Supabase Teststatus
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .mail-preview-btn {
@@ -3012,7 +3355,7 @@ label {
 
 /* ==========================================================================
    Mitarbeiter-Dashboard Shell
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-shell {
@@ -3469,7 +3812,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .is-hidden {
@@ -3623,7 +3966,7 @@ label {
 
 /* ==========================================================================
    Dashboard Auth Binding Fix
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .auth-message.success {
@@ -3643,7 +3986,7 @@ label {
 
 /* ==========================================================================
    Dashboard Live Requests
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-empty-state {
@@ -3698,7 +4041,7 @@ label {
 
 /* ==========================================================================
    Dashboard Status Update
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-status-editor {
@@ -3775,7 +4118,7 @@ label {
 
 /* ==========================================================================
    Dashboard Detail Polish
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-detail {
@@ -3922,7 +4265,7 @@ label {
 
 /* ==========================================================================
    Dashboard Service-Farben + Header Polish
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .site-header {
@@ -4066,7 +4409,7 @@ label {
 
 /* ==========================================================================
    Header Logo Fix
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .site-header {
@@ -4124,7 +4467,7 @@ label {
 
 /* ==========================================================================
    Dashboard History & Messages
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-messages {
@@ -4244,7 +4587,7 @@ label {
 
 /* ==========================================================================
    Dashboard Internal Notes
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-internal-note {
@@ -4335,7 +4678,7 @@ label {
 
 /* ==========================================================================
    Internal Note Badge Fix
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-message-item.internal {
@@ -4380,7 +4723,7 @@ label {
 
 /* ==========================================================================
    Email Notification Ready
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .email-notification-note {
@@ -4405,7 +4748,7 @@ label {
 
 /* ==========================================================================
    Customer Status Page
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .customer-status-link {
@@ -4600,7 +4943,7 @@ label {
 
 /* ==========================================================================
    Customer Reply Messages
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .customer-reply-form {
@@ -4671,7 +5014,7 @@ label {
 
 /* ==========================================================================
    Attachments System
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .attachment-upload-box {
@@ -4823,7 +5166,7 @@ label {
 
 /* ==========================================================================
    Dashboard Activity Highlights
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-ticket.has-new-activity {
@@ -4887,7 +5230,7 @@ label {
 
 /* ==========================================================================
    Dashboard Filters & Search
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-search-row-advanced {
@@ -4943,7 +5286,7 @@ label {
 
 /* ==========================================================================
    Dashboard Ticket Actions
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-ticket-actions {
@@ -5031,7 +5374,7 @@ label {
 
 /* ==========================================================================
    System Polish / Abschlussrunde
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .system-status-board .roadmap-grid article {
@@ -5071,7 +5414,7 @@ label {
 
 /* ==========================================================================
    Footer Employee Login
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .footer-bottom-links {
@@ -5104,7 +5447,7 @@ label {
 
 /* ==========================================================================
    Footer Login Visible Fix
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .footer-employee-login {
@@ -5146,7 +5489,7 @@ label {
 
 /* ==========================================================================
    Footer Login Index Fix
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .site-footer .footer-employee-login {
@@ -5195,7 +5538,7 @@ label {
 
 /* ==========================================================================
    YouBot MVP
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .youbot-widget {
@@ -5401,7 +5744,7 @@ label {
 
 /* ==========================================================================
    YouBot Polish Compact
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .youbot-widget {
@@ -5507,7 +5850,7 @@ label {
 
 /* ==========================================================================
    Roller Google Address Route
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .roller-route-note {
@@ -5640,7 +5983,7 @@ label {
 
 /* ==========================================================================
    Hero Cleanup & Service Image Cards
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .hero-visual-clean-v532 {
@@ -5725,7 +6068,7 @@ label {
 
 /* ==========================================================================
    Service Image Swap + Hover Glow
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .service-icon {
@@ -5773,7 +6116,7 @@ label {
 
 /* ========================================================================
    Cookie Consent Banner
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ======================================================================== */
 
 .cookie-consent-shell {
@@ -5945,7 +6288,7 @@ label {
 
 /* ==========================================================================
    V5.6.1 Anhänger Kalenderpicker + Dashboard-Verfügbarkeit
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .trailer-period-control {
@@ -6176,7 +6519,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Trailer Kalender intern / Kundenansicht vereinfacht
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .legend-dot.status-selected {
@@ -6213,10 +6556,10 @@ button.calendar-day {
 
 /* ==========================================================================
    Anhänger Übergabe + interner Dashboard-Kalender
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
-#trailerPickupReturnField.field-editable input,
+#trailerReturnModeField select,
 #trailerDeliveryAddressField:not(.is-hidden) input {
   border-color: rgba(10, 169, 155, .35);
   background: rgba(255, 255, 255, .96);
@@ -6384,7 +6727,7 @@ button.calendar-day {
 
 /* ==========================================================================
    Dashboard Archiv-System
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ========================================================================== */
 
 .dashboard-archive-layout {
@@ -6436,7 +6779,7 @@ button.calendar-day {
 
 /* ========================================================================
    Wizard Upload Requirement Hints
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    ======================================================================== */
 
 .wizard-upload-requirement {
@@ -6508,7 +6851,7 @@ button.calendar-day {
 }
 
 /* ========================================================================== 
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    Kundenstatus-Nachrichten & Dashboard-Kundenantworten
    ========================================================================== */
 .customer-public-chat {
@@ -6601,7 +6944,7 @@ button.calendar-day {
 
 /* ===========================================================================
    Kundenportal Basis V5.9.0
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
    =========================================================================== */
 .customer-portal-page {
   min-height: 70vh;
@@ -6743,3 +7086,1775 @@ button.calendar-day {
   }
 }
 
+
+
+/* ===========================================================================
+   Kundenportal Einladung / Passwort-Setup V5.9.1
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   =========================================================================== */
+.dashboard-customer-invite-box {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(10,169,155,.22);
+  background: linear-gradient(135deg, rgba(10,169,155,.1), rgba(255,255,255,.95));
+}
+
+.dashboard-customer-invite-box div {
+  display: grid;
+  gap: 5px;
+}
+
+.dashboard-customer-invite-box strong {
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.dashboard-customer-invite-box span {
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.dashboard-customer-invite-box .btn {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 18px;
+}
+
+#customerPortalPasswordSetupForm {
+  margin-top: 24px;
+}
+
+@media (max-width: 760px) {
+  .dashboard-customer-invite-box {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-customer-invite-box .btn {
+    width: 100%;
+  }
+}
+
+
+/* ===========================================================================
+   Kundenportal Polish V5.9.3
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   =========================================================================== */
+.customer-login-wrap {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.05fr) minmax(320px, .72fr);
+  gap: 24px;
+  align-items: stretch;
+  min-height: 640px;
+}
+
+.customer-login-brand-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  padding: clamp(28px, 5vw, 54px);
+  color: #fff;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(10,169,155,.38), transparent 18rem),
+    radial-gradient(circle at 80% 18%, rgba(255,255,255,.12), transparent 15rem),
+    linear-gradient(135deg, #052036, #0b4e78 55%, #087f76);
+  box-shadow: 0 28px 70px rgba(16,38,60,.18);
+}
+
+.customer-login-brand-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto -80px -120px auto;
+  width: 300px;
+  height: 300px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.09);
+  filter: blur(2px);
+}
+
+.customer-login-brand-panel .auth-logo {
+  width: min(240px, 70%);
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+}
+
+.customer-login-brand-panel h1 {
+  max-width: 760px;
+  margin: 32px 0 16px;
+  font-size: clamp(38px, 5.8vw, 72px);
+  line-height: .94;
+  letter-spacing: -.07em;
+}
+
+.customer-login-brand-panel .lead {
+  max-width: 680px;
+  color: rgba(255,255,255,.82);
+}
+
+.customer-login-benefits {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.customer-login-benefits article {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 20px;
+  background: rgba(255,255,255,.09);
+  backdrop-filter: blur(12px);
+}
+
+.customer-login-benefits strong {
+  color: #84fff3;
+  font-size: 13px;
+  letter-spacing: .12em;
+}
+
+.customer-login-benefits span {
+  color: rgba(255,255,255,.88);
+  font-weight: 800;
+  line-height: 1.32;
+}
+
+.customer-auth-card {
+  align-self: center;
+}
+
+.auth-soft-copy {
+  margin: -4px 0 18px;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.customer-portal-page {
+  padding: clamp(18px, 3vw, 34px);
+}
+
+.customer-portal-shell {
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.customer-portal-sidebar {
+  position: sticky;
+  top: 118px;
+  min-height: calc(100vh - 170px);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(10,169,155,.22), transparent 15rem),
+    linear-gradient(180deg, #06233d, #0b3554 70%, #083246);
+}
+
+.customer-user-card .user-card-kicker {
+  color: rgba(255,255,255,.58);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.customer-portal-mini-nav {
+  display: grid;
+  gap: 9px;
+}
+
+.customer-portal-mini-nav span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 15px;
+  color: rgba(255,255,255,.82);
+  background: rgba(255,255,255,.06);
+  font-weight: 850;
+}
+
+.customer-portal-mini-nav span::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(10,169,155,.14);
+}
+
+.customer-portal-side-summary {
+  display: grid;
+  gap: 7px;
+  padding: 17px;
+  border-radius: 20px;
+  color: #fff;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.customer-portal-side-summary strong {
+  font-size: 1.04rem;
+}
+
+.customer-portal-side-summary span {
+  color: rgba(255,255,255,.72);
+  font-weight: 750;
+  line-height: 1.42;
+}
+
+.customer-portal-hero {
+  background:
+    radial-gradient(circle at 92% 0%, rgba(10,169,155,.14), transparent 18rem),
+    linear-gradient(135deg, rgba(255,255,255,.9), rgba(238,246,250,.76));
+}
+
+.customer-portal-hero h1 {
+  font-size: clamp(34px, 4vw, 58px);
+  letter-spacing: -.055em;
+}
+
+.customer-portal-actions .btn {
+  min-height: 40px;
+}
+
+.customer-portal-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.customer-portal-overview article {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 6px;
+  min-height: 132px;
+  padding: 20px;
+  border: 1px solid rgba(19,35,58,.1);
+  border-radius: 24px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 18px 38px rgba(16,38,60,.07);
+}
+
+.customer-portal-overview article::after {
+  content: "";
+  position: absolute;
+  width: 118px;
+  height: 118px;
+  right: -52px;
+  top: -54px;
+  border-radius: 999px;
+  background: rgba(10,169,155,.1);
+}
+
+.customer-portal-overview article.attention {
+  border-color: rgba(255,183,77,.44);
+  background: linear-gradient(135deg, rgba(255,183,77,.13), rgba(255,255,255,.88));
+}
+
+.customer-portal-overview span,
+.customer-portal-overview small {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.customer-portal-overview span {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 12px;
+}
+
+.customer-portal-overview strong {
+  color: var(--navy);
+  font-size: clamp(34px, 4vw, 50px);
+  line-height: .96;
+  letter-spacing: -.06em;
+}
+
+.customer-request-hint {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(10,169,155,.18);
+  background: rgba(10,169,155,.07);
+}
+
+.customer-request-hint strong {
+  color: var(--navy);
+}
+
+.customer-request-hint span {
+  color: var(--muted);
+  font-weight: 780;
+  text-align: right;
+}
+
+.customer-portal-ticket {
+  gap: 12px;
+  padding: 17px;
+}
+
+.customer-ticket-main,
+.customer-ticket-foot {
+  display: grid;
+  gap: 6px;
+}
+
+.customer-ticket-main strong {
+  color: var(--navy);
+  font-size: 1.08rem;
+}
+
+.customer-ticket-main small,
+.customer-ticket-foot small {
+  color: var(--muted);
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.customer-ticket-foot {
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.customer-status-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #075e58;
+  background: rgba(10,169,155,.12);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.customer-status-badge.status-rueckfrage_offen {
+  color: #8a5a00;
+  background: rgba(255,183,77,.22);
+}
+
+.customer-status-badge.status-erledigt {
+  color: #08786f;
+  background: rgba(10,169,155,.16);
+}
+
+.customer-status-badge.status-storniert {
+  color: #8a1f1f;
+  background: rgba(255,94,94,.14);
+}
+
+.customer-detail-head {
+  margin-bottom: 14px;
+}
+
+.customer-detail-progress {
+  margin-bottom: 16px;
+}
+
+.customer-progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 15px 16px;
+  border: 1px solid rgba(19,35,58,.1);
+  border-radius: 20px 20px 0 0;
+  background: rgba(238,246,250,.72);
+}
+
+.customer-progress-head strong {
+  color: var(--navy);
+}
+
+.customer-progress-head span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.customer-progress-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid rgba(19,35,58,.1);
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  background: rgba(19,35,58,.08);
+  overflow: hidden;
+}
+
+.customer-progress-steps.is-cancelled {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.customer-progress-step {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  color: var(--muted);
+  background: #fff;
+  font-weight: 850;
+  text-align: center;
+}
+
+.customer-progress-step i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(16,36,59,.08);
+  font-style: normal;
+  font-size: 12px;
+}
+
+.customer-progress-step.done i,
+.customer-progress-step.current i {
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+}
+
+.customer-progress-step.current {
+  color: var(--navy);
+  background: linear-gradient(180deg, rgba(10,169,155,.11), #fff);
+}
+
+.customer-detail-body {
+  display: grid;
+  gap: 15px;
+}
+
+.customer-detail-summary-card {
+  padding: 19px;
+  border-radius: 22px;
+  border: 1px solid var(--service-border);
+  background:
+    radial-gradient(circle at 90% 0%, var(--service-soft), transparent 12rem),
+    #fff;
+}
+
+.customer-detail-summary-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--service-accent);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.customer-detail-summary-card p {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.48;
+}
+
+.customer-detail-fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.customer-detail-fact {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid rgba(19,35,58,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.74);
+}
+
+.customer-detail-fact strong {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.customer-detail-fact span {
+  color: var(--navy);
+  font-weight: 850;
+}
+
+.customer-message-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.customer-message-head h3 {
+  margin: 4px 0 0;
+  color: var(--navy);
+}
+
+.customer-portal-message {
+  border-radius: 18px;
+}
+
+.customer-portal-reply {
+  margin-top: 14px;
+}
+
+.customer-empty-state .btn {
+  width: fit-content;
+  margin-top: 10px;
+}
+
+@media (max-width: 1200px) {
+  .customer-login-wrap,
+  .customer-portal-shell,
+  .customer-portal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-portal-sidebar {
+    position: relative;
+    top: auto;
+    min-height: auto;
+  }
+
+  .customer-portal-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .customer-portal-page {
+    padding: 12px;
+  }
+
+  .customer-login-wrap {
+    min-height: auto;
+  }
+
+  .customer-login-brand-panel {
+    border-radius: 24px;
+  }
+
+  .customer-login-benefits,
+  .customer-portal-overview,
+  .customer-detail-fact-grid,
+  .customer-ticket-foot,
+  .customer-progress-steps,
+  .customer-progress-steps.is-cancelled {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-progress-head,
+  .customer-request-hint,
+  .customer-message-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .customer-request-hint span {
+    text-align: left;
+  }
+}
+
+
+/* ========================================================================== 
+   Footer Portal Links Polish
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   ========================================================================== */
+
+.site-footer .footer-main .footer-employee-login {
+  display: none;
+}
+
+.site-footer .footer-bottom-links {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.site-footer .footer-bottom-links .footer-login-bottom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 7px 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.78);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.site-footer .footer-bottom-links .footer-login-bottom:hover {
+  color: #fff;
+  background: rgba(10,169,155,.18);
+  border-color: rgba(10,169,155,.42);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .site-footer .footer-bottom-links {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+
+/* ==========================================================================
+   Dashboard Compact Workbench
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   Ziel: Ticketliste kompakter, Arbeitsbereich breiter, Detaildaten aufklappbar.
+   ========================================================================== */
+
+.dashboard-shell {
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: calc(100vh - 96px);
+}
+
+.dashboard-sidebar {
+  gap: 16px;
+  padding: 22px;
+}
+
+.dashboard-menu {
+  gap: 6px;
+}
+
+.dashboard-menu a {
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.dashboard-main {
+  padding: 22px;
+}
+
+.dashboard-hero {
+  padding: 18px 20px;
+  border-radius: 22px;
+}
+
+.dashboard-hero h1 {
+  margin: 0 0 6px;
+  font-size: clamp(28px, 2.6vw, 42px);
+}
+
+.dashboard-hero .lead {
+  max-width: 780px;
+  margin-bottom: 0;
+}
+
+.dashboard-stats {
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dashboard-stats article {
+  padding: 14px 15px;
+  border-radius: 18px;
+}
+
+.dashboard-stats strong {
+  margin: 6px 0 2px;
+  font-size: 28px;
+}
+
+.dashboard-workbench-grid {
+  grid-template-columns: minmax(320px, 410px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.dashboard-ticket-panel,
+.dashboard-workspace-panel {
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.dashboard-ticket-panel .panel-head,
+.dashboard-workspace-panel .panel-head {
+  margin-bottom: 12px;
+}
+
+.dashboard-ticket-panel .panel-head {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-ticket-panel .panel-head h2,
+.dashboard-workspace-panel .panel-head h2 {
+  font-size: clamp(22px, 1.7vw, 30px);
+}
+
+.dashboard-ticket-panel .dashboard-filters {
+  gap: 6px;
+}
+
+.dashboard-ticket-panel .dashboard-filters button {
+  padding: 7px 9px;
+  font-size: 12px;
+}
+
+.dashboard-search-row-advanced {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.dashboard-search-row input,
+.dashboard-search-row select {
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.dashboard-filter-meta-row {
+  margin: 0 0 10px;
+}
+
+.dashboard-ticket-list {
+  gap: 8px;
+  max-height: calc(100vh - 430px);
+  min-height: 320px;
+}
+
+.dashboard-ticket {
+  gap: 5px;
+  padding: 12px 13px;
+  border-radius: 15px;
+  border-left-width: 5px;
+}
+
+.ticket-topline strong {
+  font-size: 14px;
+}
+
+.ticket-topline em {
+  font-size: 10px;
+}
+
+.ticket-service {
+  font-size: 12px;
+}
+
+.ticket-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: 13px;
+}
+
+.ticket-meta {
+  font-size: 12px;
+}
+
+.dashboard-workspace-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-workspace-panel .dashboard-detail-body {
+  gap: 12px;
+}
+
+.dashboard-workspace-panel .detail-ticket-hero {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: 18px;
+}
+
+.dashboard-workspace-panel .detail-ticket-hero div {
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.dashboard-workspace-panel .detail-ticket-hero strong {
+  font-size: 14px;
+}
+
+.detail-summary-block {
+  padding: 14px;
+  border-radius: 17px;
+}
+
+.detail-summary-block p {
+  margin-top: 6px;
+  line-height: 1.42;
+}
+
+.dashboard-quick-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashboard-quick-card {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  padding: 13px;
+  border-radius: 17px;
+  border: 1px solid rgba(19,35,58,.10);
+  background: rgba(255,255,255,.76);
+}
+
+.dashboard-quick-card.is-muted {
+  background: rgba(238,246,250,.58);
+}
+
+.dashboard-quick-card h3 {
+  margin: 0 0 2px;
+  color: var(--teal-2);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.dashboard-quick-card p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 760;
+}
+
+.dashboard-quick-row {
+  display: grid;
+  grid-template-columns: minmax(92px, .48fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding-top: 7px;
+  border-top: 1px solid rgba(19,35,58,.08);
+}
+
+.dashboard-quick-row:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.dashboard-quick-row span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.dashboard-quick-row strong {
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.32;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-more-details,
+.dashboard-toolbox {
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 18px;
+  background: rgba(238,246,250,.55);
+  overflow: hidden;
+}
+
+.dashboard-more-details summary,
+.dashboard-toolbox summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 13px 14px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.dashboard-more-details summary::-webkit-details-marker,
+.dashboard-toolbox summary::-webkit-details-marker {
+  display: none;
+}
+
+.dashboard-more-details summary::after,
+.dashboard-toolbox summary::after {
+  content: "+";
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+  font-weight: 950;
+}
+
+.dashboard-more-details[open] summary::after,
+.dashboard-toolbox[open] summary::after {
+  content: "−";
+}
+
+.dashboard-more-details summary small,
+.dashboard-toolbox summary small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-align: right;
+}
+
+.dashboard-more-details-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.dashboard-more-details-content .detail-section {
+  padding: 13px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.74);
+}
+
+.dashboard-more-details-content .detail-section-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-more-details-content .detail-field {
+  min-height: 68px;
+  padding: 11px;
+}
+
+.dashboard-focus-actions {
+  display: grid;
+  grid-template-columns: minmax(280px, .7fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.dashboard-focus-actions .dashboard-status-editor {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 17px;
+  background: rgba(255,255,255,.76);
+}
+
+.dashboard-focus-actions .dashboard-status-editor select {
+  min-height: 42px;
+  border-radius: 12px;
+}
+
+.dashboard-focus-actions .dashboard-action-message {
+  display: flex;
+  align-items: center;
+  min-height: 100%;
+  margin: 0;
+  padding: 12px 13px;
+  border-radius: 17px;
+}
+
+.dashboard-toolbox > .dashboard-ticket-actions,
+.dashboard-toolbox > .dashboard-messages,
+.dashboard-toolbox > .dashboard-attachments,
+.dashboard-toolbox > .dashboard-timeline {
+  margin: 0;
+  padding: 0 12px 12px;
+}
+
+.dashboard-toolbox .dashboard-ticket-actions {
+  border: 0;
+  background: transparent;
+}
+
+.dashboard-ticket-action-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-ticket-action-grid .btn {
+  min-height: 39px;
+  font-size: 12px;
+}
+
+.dashboard-messages,
+.dashboard-attachments,
+.dashboard-timeline {
+  gap: 10px;
+}
+
+.dashboard-customer-reply,
+.dashboard-internal-note {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.dashboard-customer-reply textarea,
+.dashboard-internal-note textarea {
+  min-height: 86px;
+}
+
+.system-status-board {
+  display: none;
+}
+
+@media (max-width: 1500px) {
+  .dashboard-workbench-grid {
+    grid-template-columns: minmax(300px, 370px) minmax(0, 1fr);
+  }
+
+  .dashboard-more-details-content .detail-section-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1220px) {
+  .dashboard-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-workbench-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-ticket-list {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 980px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-focus-actions,
+  .dashboard-quick-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-ticket-action-grid,
+  .dashboard-more-details-content .detail-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-more-details summary,
+  .dashboard-toolbox summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-more-details summary::after,
+  .dashboard-toolbox summary::after {
+    position: absolute;
+    right: 14px;
+    margin-top: -3px;
+  }
+
+  .dashboard-more-details,
+  .dashboard-toolbox {
+    position: relative;
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard-main {
+    padding: 14px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-workspace-panel .detail-ticket-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ===========================================================================
+   Dashboard Readability Polish
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   Ziel: Kurzüberblick als Punkte, kompaktere Ticketkarten, sauber zentrierte Infokacheln.
+   ========================================================================== */
+
+.dashboard-ticket-list {
+  gap: 7px;
+  max-height: calc(100vh - 410px);
+}
+
+.dashboard-ticket {
+  gap: 4px;
+  padding: 10px 12px;
+  min-height: 0;
+}
+
+.ticket-topline {
+  align-items: center;
+}
+
+.ticket-topline strong {
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.ticket-service {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.ticket-customer {
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.ticket-summary {
+  display: none;
+}
+
+.dashboard-ticket .ticket-activity-row {
+  margin-top: 2px;
+}
+
+.ticket-meta {
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.detail-summary-block {
+  padding: 13px;
+}
+
+.detail-summary-block > span {
+  display: block;
+  margin-bottom: 9px;
+}
+
+.detail-summary-block p {
+  display: none;
+}
+
+.detail-summary-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.detail-summary-list li {
+  display: grid;
+  grid-template-columns: minmax(92px, .58fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(255,255,255,.68);
+}
+
+.detail-summary-list strong {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.detail-summary-list span {
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-quick-card {
+  align-content: start;
+}
+
+.dashboard-quick-row {
+  grid-template-columns: 1fr;
+  gap: 4px;
+  align-content: center;
+  min-height: 50px;
+  padding: 8px 10px;
+  border-top: 0;
+  border-radius: 13px;
+  background: rgba(238,246,250,.68);
+}
+
+.dashboard-quick-row:first-of-type {
+  padding-top: 8px;
+}
+
+.dashboard-quick-row span {
+  font-size: 11px;
+  line-height: 1.15;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.dashboard-quick-row strong {
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.detail-field {
+  align-content: center;
+  min-height: 68px;
+}
+
+.detail-field strong,
+.detail-field span {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1380px) {
+  .detail-summary-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ===========================================================================
+   Dashboard Ticket Card Compact Polish
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   Ziel: Ticketliste niedriger, schneller scanbar und ohne unnötige Kartenhöhe.
+   ========================================================================== */
+
+.dashboard-ticket.dashboard-ticket-compact {
+  display: grid;
+  gap: 7px;
+  padding: 9px 12px 10px;
+  min-height: 104px;
+  align-content: center;
+}
+
+.dashboard-ticket-compact .ticket-topline {
+  min-width: 0;
+  align-items: center;
+}
+
+.dashboard-ticket-compact .ticket-topline strong {
+  font-size: 14px;
+  line-height: 1.12;
+}
+
+.dashboard-ticket-compact .ticket-topline em {
+  flex: 0 0 auto;
+  padding-left: 8px;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.ticket-compact-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ticket-compact-main .ticket-service {
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.ticket-compact-main .ticket-service::before {
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  box-shadow: 0 0 0 3px var(--service-soft);
+}
+
+.ticket-compact-main .ticket-customer {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticket-compact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ticket-compact-footer .ticket-activity-row {
+  margin-top: 0;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ticket-compact-footer .ticket-activity-badge {
+  padding: 4px 7px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: .03em;
+}
+
+.ticket-compact-footer .ticket-meta {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dashboard-ticket.dashboard-ticket-compact.has-new-activity::after {
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  box-shadow: 0 0 0 4px var(--service-soft);
+}
+
+.dashboard-ticket.dashboard-ticket-compact.has-new-activity .ticket-meta {
+  padding-right: 0;
+}
+
+@media (max-width: 860px) {
+  .dashboard-ticket.dashboard-ticket-compact {
+    min-height: 98px;
+  }
+}
+
+
+/* ===========================================================================
+   Dashboard Ticket List True Compact
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   Ziel: Einzelne Tickets bleiben echte kompakte Zeilen statt die komplette Listenhoehe auszufuellen.
+   ========================================================================== */
+
+.dashboard-ticket-list {
+  align-content: start;
+  align-items: start;
+  grid-auto-rows: max-content;
+}
+
+.dashboard-ticket.dashboard-ticket-compact {
+  min-height: 0;
+  height: auto;
+  align-content: start;
+  gap: 6px;
+  padding: 9px 11px;
+}
+
+.dashboard-ticket.dashboard-ticket-compact .ticket-topline,
+.dashboard-ticket.dashboard-ticket-compact .ticket-compact-main,
+.dashboard-ticket.dashboard-ticket-compact .ticket-compact-footer {
+  min-height: 0;
+}
+
+.dashboard-ticket.dashboard-ticket-compact .ticket-topline {
+  margin-bottom: 1px;
+}
+
+.dashboard-ticket.dashboard-ticket-compact .ticket-compact-footer {
+  margin-top: 1px;
+}
+
+@media (max-width: 860px) {
+  .dashboard-ticket.dashboard-ticket-compact {
+    min-height: 0;
+  }
+}
+
+
+/* ===========================================================================
+   Dashboard Messages Center
+   DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
+   Ziel: eigene kompakte Nachrichtenansicht fuer Kundenkommunikation.
+   ========================================================================== */
+
+.dashboard-messages-center {
+  margin-top: 14px;
+  padding: 18px;
+}
+
+.dashboard-messages-center-head {
+  align-items: center;
+}
+
+.dashboard-messages-center-head .dashboard-calendar-intro {
+  margin: 6px 0 0;
+  max-width: 760px;
+}
+
+.dashboard-message-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.dashboard-message-list-panel,
+.dashboard-message-thread-panel {
+  min-width: 0;
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 22px;
+  background: rgba(255,255,255,.74);
+  box-shadow: 0 14px 34px rgba(16,38,60,.055);
+}
+
+.dashboard-message-list-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 13px;
+}
+
+.dashboard-message-list-tools input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(19,35,58,.14);
+  border-radius: 14px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 760;
+  background: rgba(255,255,255,.92);
+}
+
+.dashboard-message-ticket-list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-height: calc(100vh - 330px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.dashboard-message-ticket {
+  --service-soft: rgba(10,169,155,.12);
+  --service-line: var(--teal);
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(19,35,58,.10);
+  border-left: 5px solid var(--service-line);
+  border-radius: 16px;
+  color: var(--navy);
+  background: rgba(255,255,255,.86);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.dashboard-message-ticket:hover,
+.dashboard-message-ticket.active {
+  transform: translateY(-1px);
+  border-color: rgba(10,169,155,.28);
+  background: linear-gradient(135deg, rgba(255,255,255,.96), var(--service-soft));
+  box-shadow: 0 12px 28px rgba(16,38,60,.08);
+}
+
+.dashboard-message-ticket.has-new-activity {
+  box-shadow: 0 0 0 1px rgba(10,169,155,.18), 0 14px 30px rgba(10,169,155,.08);
+}
+
+.message-ticket-topline,
+.message-ticket-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.message-ticket-topline strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.message-ticket-topline em {
+  flex: 0 0 auto;
+  color: var(--teal-2);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.message-ticket-person {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.message-ticket-meta small,
+.message-ticket-date {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1.15;
+}
+
+.message-ticket-meta small:last-child {
+  flex: 0 0 auto;
+  color: var(--navy);
+}
+
+.message-ticket-date {
+  display: block;
+  text-align: right;
+}
+
+.dashboard-message-thread-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(280px, 1fr) auto;
+  gap: 12px;
+  padding: 14px;
+}
+
+.dashboard-message-thread-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(238,246,250,.82), rgba(255,255,255,.92));
+  border: 1px solid rgba(19,35,58,.08);
+}
+
+.dashboard-message-thread-head h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(24px, 2vw, 34px);
+  line-height: 1.05;
+}
+
+.dashboard-message-contact-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-message-contact-strip > article,
+.dashboard-message-contact-strip > span {
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 15px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(238,246,250,.72);
+}
+
+.dashboard-message-contact-strip > span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-weight: 820;
+}
+
+.dashboard-message-contact-strip span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.dashboard-message-contact-strip strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.24;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-message-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 280px;
+  max-height: calc(100vh - 500px);
+  overflow: auto;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.08);
+  background: linear-gradient(180deg, rgba(238,246,250,.72), rgba(255,255,255,.78));
+}
+
+.dashboard-chat-bubble {
+  display: grid;
+  gap: 7px;
+  max-width: min(78%, 720px);
+  padding: 12px 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 10px 22px rgba(16,38,60,.055);
+}
+
+.dashboard-chat-bubble.team {
+  align-self: flex-end;
+  border-color: rgba(10,169,155,.22);
+  background: linear-gradient(135deg, rgba(10,169,155,.13), rgba(255,255,255,.94));
+}
+
+.dashboard-chat-bubble.customer {
+  align-self: flex-start;
+}
+
+.dashboard-chat-bubble div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-chat-bubble strong {
+  color: var(--navy);
+  font-weight: 950;
+}
+
+.dashboard-chat-bubble span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.dashboard-chat-bubble p {
+  margin: 0;
+  color: var(--navy);
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-message-composer {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(255,255,255,.86);
+}
+
+.dashboard-message-composer label {
+  display: grid;
+  gap: 8px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.dashboard-message-composer textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  border: 1px solid rgba(19,35,58,.13);
+  border-radius: 15px;
+  padding: 12px 13px;
+  font: inherit;
+  font-weight: 760;
+  background: rgba(238,246,250,.58);
+}
+
+.dashboard-message-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-message-composer-actions .dashboard-note-message {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.dashboard-message-composer-actions .btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-message-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-message-ticket-list,
+  .dashboard-message-thread {
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-messages-center {
+    padding: 14px;
+  }
+
+  .dashboard-message-contact-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-message-thread-head,
+  .dashboard-message-composer-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-chat-bubble {
+    max-width: 100%;
+  }
+}

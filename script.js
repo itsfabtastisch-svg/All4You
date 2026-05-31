@@ -109,6 +109,49 @@ async function supabaseLogout(accessToken) {
   }).catch(() => null);
 }
 
+async function supabaseGetUser(accessToken) {
+  if (!accessToken) throw new Error("Keine gültige Sitzung vorhanden.");
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: "GET",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message || data?.msg || "Benutzer konnte nicht geladen werden.");
+  }
+
+  return data;
+}
+
+async function supabaseSetPassword(accessToken, password) {
+  if (!accessToken) throw new Error("Der Einrichtungslink ist ungültig oder abgelaufen.");
+  if (!password || password.length < 8) throw new Error("Bitte ein Passwort mit mindestens 8 Zeichen wählen.");
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: "PUT",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ password })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.msg || "Passwort konnte nicht gesetzt werden.");
+  }
+
+  return data;
+}
+
 async function fetchEmployeeProfile(session) {
   if (!session?.access_token || !session?.user?.id) {
     throw new Error("Keine gültige Sitzung vorhanden.");
@@ -152,6 +195,8 @@ let dashboardArchiveCache = [];
 let dashboardSelectedArchiveId = null;
 let dashboardCustomerAccountsCache = [];
 let dashboardSelectedCustomerAccountId = null;
+let dashboardSelectedMessageRequestId = null;
+let dashboardMessagesCenterLoadId = 0;
 
 
 function serviceAccentClass(service) {
@@ -178,18 +223,60 @@ function serviceLabel(service) {
 function statusLabel(status) {
   const labels = {
     neu: "Neu",
-    in_pruefung: "In Prüfung",
-    rueckfrage_offen: "Rückfrage offen",
-    angebot_vorbereitet: "Angebot vorbereitet",
-    angebot_gesendet: "Angebot gesendet",
-    termin_vorgeschlagen: "Termin vorgeschlagen",
-    termin_bestaetigt: "Termin bestätigt",
+    in_pruefung: "In Bearbeitung",
+    rueckfrage_offen: "Rückfragen",
+    angebot_vorbereitet: "In Bearbeitung",
+    angebot_gesendet: "In Bearbeitung",
+    termin_vorgeschlagen: "In Bearbeitung",
+    termin_bestaetigt: "In Bearbeitung",
     in_bearbeitung: "In Bearbeitung",
     erledigt: "Abgeschlossen",
     storniert: "Storniert"
   };
 
   return labels[status] || status || "Unbekannt";
+}
+
+/* ========================================================================== 
+   Dashboard Statusmodell
+   --------------------------------------------------------------------------
+   Kundenwunsch V5.9.6: Im Mitarbeiterportal werden nur noch vier aktive
+   Statuswerte angeboten. Alte/feinere Statuswerte bleiben lesbar und werden
+   für Filter/Anzeige sauber auf diese vier Gruppen gemappt.
+   ========================================================================== */
+
+const DASHBOARD_PRIMARY_STATUSES = ["neu", "in_bearbeitung", "rueckfrage_offen", "erledigt"];
+
+const DASHBOARD_STATUS_GROUPS = {
+  neu: ["neu"],
+  in_bearbeitung: [
+    "in_bearbeitung",
+    "in_pruefung",
+    "angebot_vorbereitet",
+    "angebot_gesendet",
+    "termin_vorgeschlagen",
+    "termin_bestaetigt"
+  ],
+  rueckfrage_offen: ["rueckfrage_offen", "rueckfrage", "rueckfragen"],
+  erledigt: ["erledigt", "abgeschlossen"]
+};
+
+function normalizeDashboardStatusOption(status) {
+  const clean = String(status || "").trim().toLowerCase();
+
+  for (const [primaryStatus, aliases] of Object.entries(DASHBOARD_STATUS_GROUPS)) {
+    if (aliases.includes(clean)) return primaryStatus;
+  }
+
+  return DASHBOARD_PRIMARY_STATUSES.includes(clean) ? clean : "neu";
+}
+
+function dashboardStatusMatches(ticketStatus, filterStatus) {
+  if (!filterStatus || filterStatus === "all") return true;
+  const cleanTicketStatus = String(ticketStatus || "").trim().toLowerCase();
+  const cleanFilterStatus = normalizeDashboardStatusOption(filterStatus);
+  const aliases = DASHBOARD_STATUS_GROUPS[cleanFilterStatus] || [cleanFilterStatus];
+  return aliases.includes(cleanTicketStatus);
 }
 
 function formatDashboardDate(value) {
@@ -319,7 +406,7 @@ function getFilteredDashboardRequests() {
   if (state.quick === "activity") {
     list = list.filter(ticket => getTicketActivity(ticket.id).hasNewActivity);
   } else if (state.quick !== "all") {
-    list = list.filter(ticket => ticket.status === state.quick);
+    list = list.filter(ticket => dashboardStatusMatches(ticket.status, state.quick));
   }
 
   if (state.service !== "all") {
@@ -327,7 +414,7 @@ function getFilteredDashboardRequests() {
   }
 
   if (state.status !== "all") {
-    list = list.filter(ticket => ticket.status === state.status);
+    list = list.filter(ticket => dashboardStatusMatches(ticket.status, state.status));
   }
 
   if (state.search) {
@@ -433,15 +520,19 @@ function renderDashboardTickets(tickets) {
     const activity = getTicketActivity(ticket.id);
     const isActive = ticket.id === currentSelectionId;
     return `
-      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
+      <button class="dashboard-ticket dashboard-ticket-compact ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-ticket-id="${escapeHtml(ticket.id)}">
         <span class="ticket-topline">
           <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
           <em>${escapeHtml(statusLabel(ticket.status))}</em>
         </span>
-        <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
-        <span class="ticket-summary">${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</span>
-        ${renderTicketActivityBadges(ticket)}
-        <span class="ticket-meta">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")} · ${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+        <span class="ticket-compact-main">
+          <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
+          <span class="ticket-customer">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</span>
+        </span>
+        <span class="ticket-compact-footer">
+          ${renderTicketActivityBadges(ticket) || "<span></span>"}
+          <span class="ticket-meta">${escapeHtml(formatDashboardDate(ticket.created_at))}</span>
+        </span>
       </button>
     `;
   }).join("");
@@ -504,12 +595,26 @@ function renderDashboardDetail(ticket) {
   body.innerHTML = `
     ${renderDashboardDetailHero(ticket)}
     ${renderDashboardSummaryBlock(ticket)}
-    ${renderDashboardDetailSection("Kunde & Kontakt", groups["Kunde & Kontakt"])}
-    ${renderDashboardDetailSection("Ticket", groups["Ticket"])}
-    ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
-    ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
-    ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"])}
-    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+    <div class="dashboard-quick-detail-grid">
+      ${renderDashboardQuickDetailCard("Kunde & Kontakt", groups["Kunde & Kontakt"], 3)}
+      ${renderDashboardQuickDetailCard("Ticket", groups["Ticket"], 4)}
+      ${renderDashboardQuickDetailCard("Termin", groups["Termin & Zeitraum"], 3)}
+      ${renderDashboardQuickDetailCard("Standort", groups["Standort & Strecke"], 3)}
+    </div>
+    <details class="dashboard-more-details">
+      <summary>
+        <span>Alle Ticketdetails anzeigen</span>
+        <small>Kontakt, Zeitraum, Strecke, Anfrage-Details und Hinweise öffnen</small>
+      </summary>
+      <div class="dashboard-more-details-content">
+        ${renderDashboardDetailSection("Kunde & Kontakt", groups["Kunde & Kontakt"])}
+        ${renderDashboardDetailSection("Ticket", groups["Ticket"])}
+        ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
+        ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
+        ${renderDashboardDetailSection("Anfrage-Details", groups["Anfrage-Details"])}
+        ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
+      </div>
+    </details>
   `;
 
   setDashboardInternalNoteEnabled(true);
@@ -523,10 +628,10 @@ function renderDashboardDetail(ticket) {
 }
 function updateDashboardStats(tickets) {
   const list = tickets || [];
-  const totalNew = list.filter(ticket => ticket.status === "neu").length;
-  const inReview = list.filter(ticket => ticket.status === "in_pruefung").length;
-  const openQuestions = list.filter(ticket => ticket.status === "rueckfrage_offen").length;
-  const done = list.filter(ticket => ticket.status === "erledigt").length;
+  const totalNew = list.filter(ticket => dashboardStatusMatches(ticket.status, "neu")).length;
+  const inReview = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_bearbeitung")).length;
+  const openQuestions = list.filter(ticket => dashboardStatusMatches(ticket.status, "rueckfrage_offen")).length;
+  const done = list.filter(ticket => dashboardStatusMatches(ticket.status, "erledigt")).length;
   const archived = dashboardArchiveCache.length;
 
   const stats = {
@@ -572,6 +677,9 @@ async function loadDashboardRequests(session) {
     renderDashboardArchiveDetail(null);
     updateDashboardStats(dashboardAllRequestCache);
     updateDashboardActivityStats(dashboardAllRequestCache);
+    if (!document.querySelector("#dashboardMessagesCenter")?.classList.contains("is-hidden")) {
+      renderDashboardMessagesCenter();
+    }
 
     if (liveStatus) {
       liveStatus.textContent = "Live verbunden";
@@ -601,21 +709,10 @@ async function loadDashboardRequests(session) {
 let dashboardSelectedRequestId = null;
 
 function getDashboardStatusOptions(currentStatus) {
-  const statuses = [
-    "neu",
-    "in_pruefung",
-    "rueckfrage_offen",
-    "angebot_vorbereitet",
-    "angebot_gesendet",
-    "termin_vorgeschlagen",
-    "termin_bestaetigt",
-    "in_bearbeitung",
-    "erledigt",
-    "storniert"
-  ];
+  const selectedStatus = normalizeDashboardStatusOption(currentStatus);
 
-  return statuses
-    .map(status => `<option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`)
+  return DASHBOARD_PRIMARY_STATUSES
+    .map(status => `<option value="${escapeHtml(status)}" ${status === selectedStatus ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`)
     .join("");
 }
 
@@ -1038,6 +1135,37 @@ async function unlinkDashboardCustomerRequest(session, accountId, requestId) {
   return data;
 }
 
+async function inviteDashboardCustomerAccount(session, accountId) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Mitarbeitersitzung vorhanden.");
+  }
+
+  if (!accountId) {
+    throw new Error("Bitte zuerst ein Kundenkonto auswählen.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/invite-customer-account`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      account_id: accountId,
+      redirect_to: `${window.location.origin}/kundenportal`
+    })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.error || "Einladung konnte nicht versendet werden.");
+  }
+
+  return data;
+}
+
 function dashboardCustomerDisplayName(account) {
   return account?.display_name || account?.company || account?.email || "Kundenkonto";
 }
@@ -1136,11 +1264,19 @@ function renderDashboardCustomerAccountDetail(account) {
       <span>${escapeHtml(account.email || "Keine E-Mail")}</span>
       <span>${escapeHtml(account.phone || "Keine Telefonnummer")}</span>
       ${account.company ? `<span>${escapeHtml(account.company)}</span>` : ""}
+      ${account.last_invite_sent_at ? `<span>Letzte Einladung: ${escapeHtml(formatDashboardDate(account.last_invite_sent_at))}</span>` : ""}
       ${account.notes ? `<p>${escapeHtml(account.notes)}</p>` : ""}
     </div>
     <div class="summary-wide">
       <strong>Login-Hinweis</strong>
-      <span>Der Kunde kann sich im Kundenportal einloggen, sobald in Supabase Auth ein Benutzer mit dieser E-Mail existiert. Diese Basis legt die Portal-Zuordnung und Ticketrechte an.</span>
+      <span>Der Kunde kann sich nach einer Einladung selbst ein Passwort setzen und sich danach im Kundenportal anmelden.</span>
+    </div>
+    <div class="dashboard-customer-invite-box">
+      <div>
+        <strong>${account.auth_user_id ? "Login verbunden" : "Einladung / Passwort einrichten"}</strong>
+        <span>${account.auth_user_id ? "Dieses Kundenkonto ist bereits mit einem Supabase-Login verbunden." : "Sendet dem Kunden einen sicheren Einrichtungslink per E-Mail."}</span>
+      </div>
+      <button class="btn primary" type="button" data-customer-send-invite="${escapeHtml(account.id)}">${account.auth_user_id ? "Passwortlink erneut senden" : "Einladung senden"} <span>›</span></button>
     </div>
     <div class="dashboard-linked-request-list">
       ${requests.length ? requests.map(ticket => `
@@ -1213,7 +1349,7 @@ function bindDashboardCustomerAccounts() {
       dashboardSelectedCustomerAccountId = account.id;
       createForm.reset();
       await loadDashboardCustomerAccounts(dashboardCurrentSession);
-      setDashboardCustomersMessage("success", "Kundenkonto wurde vorbereitet. Supabase-Auth-Benutzer mit gleicher E-Mail anlegen/prüfen.");
+      setDashboardCustomersMessage("success", "Kundenkonto wurde vorbereitet. Jetzt kann direkt eine Einladung bzw. ein Passwortlink gesendet werden.");
     } catch (error) {
       setDashboardCustomersMessage("error", error.message || "Kundenkonto konnte nicht gespeichert werden.");
     } finally {
@@ -1252,6 +1388,25 @@ function bindDashboardCustomerAccounts() {
   });
 
   detailBody?.addEventListener("click", async event => {
+    const inviteButton = event.target.closest("[data-customer-send-invite]");
+    if (inviteButton) {
+      const accountId = inviteButton.dataset.customerSendInvite;
+      if (!accountId) return;
+
+      inviteButton.disabled = true;
+      setDashboardCustomersMessage("loading", "Kundeneinladung wird gesendet …");
+      try {
+        const result = await inviteDashboardCustomerAccount(dashboardCurrentSession, accountId);
+        await loadDashboardCustomerAccounts(dashboardCurrentSession);
+        setDashboardCustomersMessage("success", result?.message || "Kundeneinladung wurde gesendet.");
+      } catch (error) {
+        setDashboardCustomersMessage("error", error.message || "Kundeneinladung konnte nicht gesendet werden.");
+      } finally {
+        inviteButton.disabled = false;
+      }
+      return;
+    }
+
     const button = event.target.closest("[data-customer-unlink-request]");
     if (!button || !dashboardSelectedCustomerAccountId) return;
     if (!confirm("Diese Ticket-Zuordnung wirklich entfernen? Das Ticket wird nicht gelöscht.")) return;
@@ -1388,9 +1543,15 @@ async function updateDashboardRequestStatus(session, requestId, newStatus) {
     throw new Error("Kein Ticket ausgewählt.");
   }
 
+  const cleanStatus = normalizeDashboardStatusOption(newStatus);
+
+  if (!DASHBOARD_PRIMARY_STATUSES.includes(cleanStatus)) {
+    throw new Error("Dieser Status ist im Mitarbeiterportal nicht freigegeben.");
+  }
+
   const data = await callDashboardRequestAdminRpc(session, "admin_update_request_status", {
     p_request_id: requestId,
-    p_status: newStatus
+    p_status: cleanStatus
   });
 
   if (!data?.request) {
@@ -1473,6 +1634,8 @@ function dashboardFieldLabel(key) {
     rental_end: "Mietende",
     rental_days: "Mietdauer",
     rental_price: "Mietpreis",
+    trailer_model: "Anhängerwunsch",
+    trailer_preference: "Anhängerwunsch",
     deposit: "Kaution",
     handover: "Übergabe",
     delivery_address: "Wunschort / Lieferung",
@@ -1612,6 +1775,33 @@ function renderDashboardDetailSection(title, entries, options = {}) {
     </section>
   `;
 }
+function renderDashboardQuickDetailCard(title, entries, limit = 3) {
+  const visibleEntries = (entries || []).filter(([_, value]) => value !== null && value !== undefined && value !== "").slice(0, limit);
+
+  if (!visibleEntries.length) {
+    return `
+      <article class="dashboard-quick-card is-muted">
+        <h3>${escapeHtml(title)}</h3>
+        <p>Noch keine Angaben hinterlegt.</p>
+      </article>
+    `;
+  }
+
+  const rows = visibleEntries.map(([label, value]) => `
+    <div class="dashboard-quick-row">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(detailValue(value))}</strong>
+    </div>
+  `).join("");
+
+  return `
+    <article class="dashboard-quick-card">
+      <h3>${escapeHtml(title)}</h3>
+      ${rows}
+    </article>
+  `;
+}
+
 
 function renderDashboardDetailHero(ticket) {
   return `
@@ -1632,13 +1822,102 @@ function renderDashboardDetailHero(ticket) {
   `;
 }
 
+function addDashboardSummaryItem(items, label, value) {
+  if (value === null || value === undefined || value === "") return;
+
+  const text = detailValue(value);
+  if (!text || text === "—") return;
+
+  const normalized = String(text).trim();
+  const duplicate = items.some(item => item.label === label && item.value === normalized);
+
+  if (!duplicate) {
+    items.push({ label, value: normalized });
+  }
+}
+
+function getDashboardCompactSummaryItems(ticket) {
+  const details = ticket.details || {};
+  const items = [];
+
+  addDashboardSummaryItem(items, "Kunde", ticket.customer_name);
+  addDashboardSummaryItem(items, "Leistung", serviceLabel(ticket.service));
+
+  if (details.trailer_model) addDashboardSummaryItem(items, "Anhängerwunsch", details.trailer_model);
+  if (details.vehicle) addDashboardSummaryItem(items, "Fahrzeug", details.vehicle);
+  if (details.property_type) addDashboardSummaryItem(items, "Objekt", details.property_type);
+
+  if (details.rental_start || details.rental_end) {
+    addDashboardSummaryItem(
+      items,
+      "Zeitraum",
+      `${detailValue(details.rental_start || "offen")} bis ${detailValue(details.rental_end || "offen")}`
+    );
+  } else {
+    addDashboardSummaryItem(items, "Wunschtermin", details.desired_date);
+  }
+
+  addDashboardSummaryItem(items, "Mietdauer", details.rental_days);
+  addDashboardSummaryItem(items, "Preis", details.rental_price);
+  addDashboardSummaryItem(items, "Intervall", details.interval);
+  addDashboardSummaryItem(items, "Status", details.availability_note || statusLabel(ticket.status));
+  addDashboardSummaryItem(items, "Übergabe", details.handover);
+  addDashboardSummaryItem(items, "Ort", details.pickup_return_address || details.delivery_address || details.address);
+
+  if (details.pickup || details.dropoff) {
+    addDashboardSummaryItem(
+      items,
+      "Strecke",
+      `${detailValue(details.pickup || "offen")} → ${detailValue(details.dropoff || "offen")}`
+    );
+  }
+
+  addDashboardSummaryItem(items, "Distanz", details.distance);
+  addDashboardSummaryItem(items, "Transportgut", details.cargo);
+  addDashboardSummaryItem(items, "Menge", details.cargo_size);
+  addDashboardSummaryItem(items, "Nachricht", details.message);
+
+  if (items.length >= 4) return items.slice(0, 9);
+
+  const summaryParts = String(ticket.summary || ticket.subject || "")
+    .split(/\s+[•|]\s+/)
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  summaryParts.forEach((part) => {
+    const cleaned = part.replace(/^.+Mietanfrage:\s*/i, "").trim();
+    const match = cleaned.match(/^([^:]{2,32}):\s*(.+)$/);
+
+    if (match) {
+      addDashboardSummaryItem(items, match[1].trim(), match[2].trim());
+    } else if (/\d{4}-\d{2}-\d{2}/.test(cleaned)) {
+      addDashboardSummaryItem(items, "Zeitraum", cleaned);
+    } else {
+      addDashboardSummaryItem(items, "Info", cleaned);
+    }
+  });
+
+  return items.slice(0, 9);
+}
+
 function renderDashboardSummaryBlock(ticket) {
-  if (!ticket.summary && !ticket.subject) return "";
+  const items = getDashboardCompactSummaryItems(ticket);
+
+  if (!items.length) return "";
+
+  const list = items.map(item => `
+    <li>
+      <strong>${escapeHtml(item.label)}</strong>
+      <span>${escapeHtml(item.value)}</span>
+    </li>
+  `).join("");
 
   return `
     <section class="detail-summary-block ${serviceAccentClass(ticket.service)}">
-      <span>Zusammenfassung</span>
-      <p>${escapeHtml(ticket.summary || ticket.subject)}</p>
+      <span>Kurzüberblick</span>
+      <ul class="detail-summary-list">
+        ${list}
+      </ul>
     </section>
   `;
 }
@@ -2176,6 +2455,271 @@ function updateDashboardActivityStats(tickets) {
 }
 
 
+/* ==========================================================================
+   Dashboard Nachrichten-Zentrale V5.9.13
+   --------------------------------------------------------------------------
+   Eigene kompakte Arbeitsansicht fuer Kundenkommunikation: wenig Auftragsdaten,
+   klarer Nachrichtenverlauf und direkte Antwort an den Kunden.
+   ========================================================================== */
+
+function getDashboardMessagesCenterTickets() {
+  return [...(dashboardAllRequestCache || [])].sort((a, b) => {
+    const aActivity = new Date(getTicketActivity(a.id).latestActivityAt || a.updated_at || a.created_at || 0).getTime();
+    const bActivity = new Date(getTicketActivity(b.id).latestActivityAt || b.updated_at || b.created_at || 0).getTime();
+    return bActivity - aActivity;
+  });
+}
+
+function ticketMessageSearchText(ticket) {
+  return [
+    ticket.ticket_number,
+    ticket.customer_name,
+    ticket.customer_email,
+    ticket.customer_phone,
+    serviceLabel(ticket.service),
+    statusLabel(ticket.status),
+    ticket.summary,
+    JSON.stringify(ticket.details || {})
+  ].join(" ").toLowerCase();
+}
+
+function getDashboardMessagesCenterFilteredTickets() {
+  const search = String(document.querySelector("#dashboardMessagesSearchInput")?.value || "").trim().toLowerCase();
+  const tickets = getDashboardMessagesCenterTickets();
+  if (!search) return tickets;
+  return tickets.filter(ticket => ticketMessageSearchText(ticket).includes(search));
+}
+
+function dashboardTicketContactLine(ticket) {
+  const parts = [];
+  if (ticket?.customer_email) parts.push(ticket.customer_email);
+  if (ticket?.customer_phone) parts.push(ticket.customer_phone);
+  return parts.length ? parts.join(" · ") : "Keine direkte Kontaktangabe";
+}
+
+function renderDashboardMessageTicketCard(ticket) {
+  const activity = getTicketActivity(ticket.id);
+  const isActive = ticket.id === dashboardSelectedMessageRequestId;
+  const countLabel = activity.customerMessages > 0
+    ? `${activity.customerMessages} Kundennachricht${activity.customerMessages === 1 ? "" : "en"}`
+    : "Keine Kundennachricht";
+
+  return `
+    <button class="dashboard-message-ticket ${serviceAccentClass(ticket.service)} ${activity.hasNewActivity ? "has-new-activity" : ""} ${isActive ? "active" : ""}" type="button" data-message-ticket-id="${escapeHtml(ticket.id)}">
+      <span class="message-ticket-topline">
+        <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
+        <em>${escapeHtml(statusLabel(ticket.status))}</em>
+      </span>
+      <span class="message-ticket-person">${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</span>
+      <span class="message-ticket-meta">
+        <small>${escapeHtml(serviceLabel(ticket.service))}</small>
+        <small>${escapeHtml(countLabel)}</small>
+      </span>
+      <span class="message-ticket-date">${escapeHtml(formatDashboardDate(activity.latestActivityAt || ticket.updated_at || ticket.created_at))}</span>
+    </button>
+  `;
+}
+
+function renderDashboardMessagesCenterList(tickets) {
+  const list = document.querySelector("#dashboardMessagesCenterList");
+  const count = document.querySelector("#dashboardMessagesCenterCount");
+  if (!list) return;
+
+  const rows = Array.isArray(tickets) ? tickets : [];
+  if (count) count.textContent = `${rows.length} Gespräch${rows.length === 1 ? "" : "e"}`;
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <div class="dashboard-empty-state">
+        <strong>Keine passenden Gespräche gefunden</strong>
+        <p>Suche anpassen oder über die Ticketliste einen Auftrag prüfen.</p>
+      </div>
+    `;
+    renderDashboardMessageThreadEmpty("Kein Gespräch ausgewählt", "Zu dieser Suche wurde kein Auftrag gefunden.");
+    return;
+  }
+
+  const selectedStillVisible = dashboardSelectedMessageRequestId && rows.some(ticket => ticket.id === dashboardSelectedMessageRequestId);
+  if (!selectedStillVisible) {
+    dashboardSelectedMessageRequestId = rows[0]?.id || null;
+  }
+
+  list.innerHTML = rows.map(renderDashboardMessageTicketCard).join("");
+}
+
+function renderDashboardMessageThreadEmpty(title = "Kein Gespräch ausgewählt", text = "Wählen Sie links einen Auftrag aus, um Nachrichten zu lesen und zu antworten.") {
+  const head = document.querySelector("#dashboardMessagesThreadHead");
+  const contact = document.querySelector("#dashboardMessagesContactStrip");
+  const thread = document.querySelector("#dashboardMessagesThread");
+  const textInput = document.querySelector("#dashboardMessagesReplyText");
+  const button = document.querySelector("#dashboardMessagesReplyButton");
+
+  if (head) {
+    head.innerHTML = `
+      <div>
+        <p class="eyebrow">Gespräch</p>
+        <h3>${escapeHtml(title)}</h3>
+      </div>
+      <span class="status-pill">—</span>
+    `;
+  }
+  if (contact) contact.innerHTML = `<span>${escapeHtml(text)}</span>`;
+  if (thread) {
+    thread.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>${escapeHtml(title)}</strong>
+        <p>${escapeHtml(text)}</p>
+      </div>
+    `;
+  }
+  if (textInput) textInput.disabled = true;
+  if (button) button.disabled = true;
+  setDashboardMessagesReplyMessage("", "Bitte zuerst einen Auftrag auswählen.");
+}
+
+function setDashboardMessagesReplyMessage(type, text) {
+  const message = document.querySelector("#dashboardMessagesReplyMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function renderDashboardMessageThread(ticket, messages = []) {
+  const head = document.querySelector("#dashboardMessagesThreadHead");
+  const contact = document.querySelector("#dashboardMessagesContactStrip");
+  const thread = document.querySelector("#dashboardMessagesThread");
+  const textInput = document.querySelector("#dashboardMessagesReplyText");
+  const button = document.querySelector("#dashboardMessagesReplyButton");
+
+  if (!ticket?.id) {
+    renderDashboardMessageThreadEmpty();
+    return;
+  }
+
+  const publicMessages = (messages || [])
+    .filter(message => !message.is_internal)
+    .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+
+  if (head) {
+    head.innerHTML = `
+      <div>
+        <p class="eyebrow">${escapeHtml(serviceLabel(ticket.service))}</p>
+        <h3>${escapeHtml(ticket.ticket_number || "Ticket")}</h3>
+      </div>
+      <span class="status-pill">${escapeHtml(statusLabel(ticket.status))}</span>
+    `;
+  }
+
+  if (contact) {
+    contact.innerHTML = `
+      <article>
+        <span>Kunde</span>
+        <strong>${escapeHtml(ticket.customer_name || "Unbekannter Kunde")}</strong>
+      </article>
+      <article>
+        <span>Kontakt</span>
+        <strong>${escapeHtml(dashboardTicketContactLine(ticket))}</strong>
+      </article>
+      <article>
+        <span>Auftrag</span>
+        <strong>${escapeHtml(serviceLabel(ticket.service))}</strong>
+      </article>
+    `;
+  }
+
+  if (thread) {
+    thread.innerHTML = publicMessages.length
+      ? publicMessages.map(message => {
+          const isTeam = message.sender_type === "team" || message.sender_type === "system";
+          return `
+            <article class="dashboard-chat-bubble ${isTeam ? "team" : "customer"}">
+              <div>
+                <strong>${escapeHtml(senderTypeLabel(message.sender_type))}</strong>
+                <span>${escapeHtml(message.sender_name || "—")} · ${escapeHtml(formatDashboardDate(message.created_at))}</span>
+              </div>
+              <p>${escapeHtml(message.message || "—")}</p>
+            </article>
+          `;
+        }).join("")
+      : `
+        <div class="dashboard-mini-empty">
+          <strong>Noch kein öffentlicher Nachrichtenverlauf</strong>
+          <p>Sie können dem Kunden hier direkt eine erste Antwort zum Auftrag senden.</p>
+        </div>
+      `;
+  }
+
+  if (textInput) textInput.disabled = false;
+  if (button) button.disabled = false;
+  setDashboardMessagesReplyMessage("", "Antworten sind für Kunden sichtbar und werden dem Auftrag zugeordnet.");
+}
+
+async function loadDashboardMessagesCenterThread(ticket) {
+  if (!ticket?.id || !dashboardCurrentSession) {
+    renderDashboardMessageThreadEmpty();
+    return;
+  }
+
+  const loadId = ++dashboardMessagesCenterLoadId;
+  const thread = document.querySelector("#dashboardMessagesThread");
+  if (thread) {
+    thread.innerHTML = `
+      <div class="dashboard-mini-empty">
+        <strong>Nachrichten werden geladen …</strong>
+        <p>Der Nachrichtenverlauf wird aus Supabase geladen.</p>
+      </div>
+    `;
+  }
+
+  try {
+    const messages = await fetchDashboardMessages(dashboardCurrentSession, ticket.id);
+    if (loadId !== dashboardMessagesCenterLoadId || dashboardSelectedMessageRequestId !== ticket.id) return;
+    renderDashboardMessageThread(ticket, messages);
+    markDashboardTicketSeen(ticket.id);
+    renderDashboardMessagesCenterList(getDashboardMessagesCenterFilteredTickets());
+    updateDashboardActivityStats(dashboardAllRequestCache);
+  } catch (error) {
+    if (loadId !== dashboardMessagesCenterLoadId) return;
+    if (thread) {
+      thread.innerHTML = `
+        <div class="dashboard-mini-empty error">
+          <strong>Nachrichten konnten nicht geladen werden</strong>
+          <p>${escapeHtml(error.message || "Unbekannter Fehler")}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+function selectDashboardMessageTicket(ticketId) {
+  const ticket = getDashboardTicketByIdOrNumber(ticketId);
+  if (!ticket?.id) {
+    renderDashboardMessageThreadEmpty();
+    return;
+  }
+
+  dashboardSelectedMessageRequestId = ticket.id;
+  document.querySelectorAll("#dashboardMessagesCenterList [data-message-ticket-id]").forEach(button => {
+    button.classList.toggle("active", button.dataset.messageTicketId === ticket.id);
+  });
+  loadDashboardMessagesCenterThread(ticket);
+}
+
+function renderDashboardMessagesCenter() {
+  const tickets = getDashboardMessagesCenterFilteredTickets();
+  renderDashboardMessagesCenterList(tickets);
+
+  const ticket = getDashboardTicketByIdOrNumber(dashboardSelectedMessageRequestId) || tickets[0] || null;
+  if (ticket?.id) {
+    dashboardSelectedMessageRequestId = ticket.id;
+    selectDashboardMessageTicket(ticket.id);
+  } else {
+    renderDashboardMessageThreadEmpty();
+  }
+}
+
+
 
 const TEAM_NOTIFICATION_EMAIL = "info@all4you-muenchen.de";
 
@@ -2218,7 +2762,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS notify payload", {
+  console.log("ALL4YOU-ROUTER-V5.9.3-CUSTOMER-PORTAL-POLISH notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -3181,6 +3725,7 @@ function buildRollerSummaryText(summary) {
 
 function buildTrailerSummaryText(summary) {
   const parts = [
+    summary.trailerModel ? `Anhängerwunsch: ${summary.trailerModel}` : "",
     summary.rentalStart && summary.rentalEnd ? `${summary.rentalStart} bis ${summary.rentalEnd}` : "",
     summary.rentalDays ? `Mietdauer: ${summary.rentalDays}` : "",
     summary.rentalPrice ? `Preis: ${summary.rentalPrice}` : "",
@@ -3231,13 +3776,121 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+// DBG: ALL4YOU-V5.9.17-TRAILER-HANDOVER-SPLIT
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
 const mainNav = document.querySelector(".main-nav");
 
 const SITE_ORIGIN = "https://all4you-muenchen.de";
+
+const ALL4YOU_TRAILER_MODELS = [
+  {
+    key: "woermann-multicase-7525-136",
+    name: "Wörmann Multicase 7525/136",
+    shortName: "Wörmann Multicase",
+    type: "Plywood-Kofferanhänger",
+    image: "/assets/trailer-woermann-multicase-7525-136.jpeg",
+    imageAlt: "Wörmann Multicase Kofferanhänger mit geöffneter Heckklappe",
+    caption: "Geschlossener Kofferanhänger mit Hecktür, Innenbeleuchtung und Verzurrpunkten.",
+    lead: "Ein geschlossener 1-Achs-Plywood-Kofferanhänger für Umzug, Möbeltransport, Baumarkt-Einkäufe, Material oder private Transporte.",
+    specs: [
+      { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
+      { label: "Nutzlast", value: "ca. 365 kg", text: "bei ca. 385 kg Leergewicht" },
+      { label: "Leergewicht", value: "ca. 385 kg", text: "Eigengewicht des Anhängers" },
+      { label: "Innenmaß", value: "ca. 251 × 132 × 150 cm", text: "Länge × Breite × Höhe" },
+      { label: "Aufbau", value: "Plywood-Koffer", text: "geschlossener Kofferaufbau" },
+      { label: "Sicherung", value: "6 Zurrösen", text: "innenliegende Verzurrpunkte" }
+    ]
+  },
+  {
+    key: "brenderup-cd260ubd750",
+    name: "Brenderup CD260UBD750",
+    shortName: "Brenderup Cargo Dynamic Tür",
+    type: "Cargo Dynamic™ Kofferanhänger mit Tür",
+    image: "/assets/trailer-brenderup-cd260ubd750.jpg",
+    imageAlt: "Brenderup CD260UBD750 Kofferanhänger von hinten",
+    caption: "Leichter Cargo Dynamic™ Kofferanhänger mit Tür, 13-poligem Stecker und innenliegenden Verzurrpunkten.",
+    lead: "Ein moderner, leichter Cargo Dynamic™ Kofferanhänger mit glatten Flächen und geschütztem Laderaum für professionelle und private Transporte.",
+    specs: [
+      { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
+      { label: "Nutzlast", value: "450 kg", text: "bei 300 kg Leergewicht" },
+      { label: "Leergewicht", value: "300 kg", text: "Eigengewicht des Anhängers" },
+      { label: "Innenmaß", value: "260 × 130 × 150 cm", text: "Länge × Breite × Höhe" },
+      { label: "Aufbau", value: "Cargo Dynamic™ mit Tür", text: "geschlossener Kofferaufbau" },
+      { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegende Verzurrpunkte" }
+    ]
+  },
+  {
+    key: "brenderup-cd260ubr750",
+    name: "Brenderup CD260UBR750",
+    shortName: "Brenderup Cargo Dynamic Rampe",
+    type: "Cargo Dynamic™ Kofferanhänger mit Rampe",
+    image: "/assets/trailer-brenderup-cd260ubr750.jpg",
+    imageAlt: "Brenderup CD260UBR750 Kofferanhänger mit Rampe von hinten",
+    caption: "Leichter Cargo Dynamic™ Kofferanhänger mit Rampe, 13-poligem Stecker und innenliegenden Verzurrpunkten.",
+    lead: "Ein moderner, leichter Cargo Dynamic™ Kofferanhänger mit Rampe für Transportgut, das bequem ein- und ausgeladen werden soll.",
+    specs: [
+      { label: "Gesamtgewicht", value: "750 kg", text: "zulässiges Gesamtgewicht" },
+      { label: "Nutzlast", value: "450 kg", text: "bei 300 kg Leergewicht" },
+      { label: "Leergewicht", value: "300 kg", text: "Eigengewicht des Anhängers" },
+      { label: "Innenmaß", value: "260 × 130 × 150 cm", text: "Länge × Breite × Höhe" },
+      { label: "Aufbau", value: "Cargo Dynamic™ mit Rampe", text: "geschlossener Kofferaufbau" },
+      { label: "Sicherung", value: "6 Zurrpunkte", text: "innenliegende Verzurrpunkte" }
+    ]
+  }
+];
+
+function renderTrailerSpecCards(trailer) {
+  return (trailer?.specs || []).map(spec => `
+    <div class="mini-card trailer-spec-card">
+      <span>${escapeHtml(spec.label)}</span>
+      <h3>${escapeHtml(spec.value)}</h3>
+      <p>${escapeHtml(spec.text)}</p>
+    </div>
+  `).join("");
+}
+
+function renderTrailerDots(activeIndex = 0) {
+  return ALL4YOU_TRAILER_MODELS.map((trailer, index) => `
+    <button class="trailer-model-dot ${index === activeIndex ? "active" : ""}" type="button" data-trailer-index="${index}" aria-label="${escapeHtml(trailer.shortName)} anzeigen"></button>
+  `).join("");
+}
+
+function renderTrailerPreferenceCards() {
+  const modelCards = ALL4YOU_TRAILER_MODELS.map((trailer, index) => `
+    <label class="trailer-choice-card">
+      <input type="radio" name="trailerPreference" value="${escapeHtml(trailer.name)}">
+      <span class="trailer-choice-body">
+        <strong>${escapeHtml(trailer.shortName || trailer.name)}</strong>
+        <small>${escapeHtml(trailer.type || "Kofferanhänger")}</small>
+        <em>${index === 0 ? "klassischer Kofferanhänger" : (trailer.name.toLowerCase().includes("ubr") ? "mit Rampe" : "mit Tür")}</em>
+      </span>
+    </label>
+  `).join("");
+
+  return `
+    <div class="trailer-choice-grid">
+      <label class="trailer-choice-card featured">
+        <input type="radio" name="trailerPreference" value="Egal / All4You darf passend auswählen" checked>
+        <span class="trailer-choice-body">
+          <strong>Egal / passend auswählen</strong>
+          <small>All4You darf das passende verfügbare Modell auswählen.</small>
+          <em>empfohlen, wenn kein bestimmter Anhänger nötig ist</em>
+        </span>
+      </label>
+      ${modelCards}
+      <label class="trailer-choice-card">
+        <input type="radio" name="trailerPreference" value="Unsicher / bitte beraten">
+        <span class="trailer-choice-body">
+          <strong>Unsicher / bitte beraten</strong>
+          <small>Der Kunde ist sich nicht sicher, welches Modell passt.</small>
+          <em>Rücksprache erwünscht</em>
+        </span>
+      </label>
+    </div>
+  `;
+}
 
 const SEO_ROUTES = {
   "/": {
@@ -3259,7 +3912,7 @@ const SEO_ROUTES = {
   },
   "/leistungen/anhaenger": {
     title: "Anhängervermietung München | Kofferanhänger mieten | All4You",
-    description: "Kofferanhänger in München mieten: Wörmann Multicase 750 kg, flexibel für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
+    description: "Kofferanhänger in München mieten: Wörmann Multicase sowie Brenderup Cargo Dynamic mit Tür oder Rampe für Transport, Umzug und private oder gewerbliche Einsätze anfragen.",
     canonicalPath: "/leistungen/anhaenger",
     serviceName: "Anhängervermietung München"
   },
@@ -3413,7 +4066,7 @@ const services = [
     sub: "Wörmann Multicase 750 kg",
     icon: serviceIconTrailer,
     color: "",
-    text: "Plywood-Kofferanhänger flexibel mieten – mit Hecktür, Innenbeleuchtung und Zurrösen."
+    text: "Kofferanhänger flexibel mieten – je nach Modell mit Hecktür, Rampe, Innenbeleuchtung und Zurrösen."
   },
   {
     slug: "raeumungen",
@@ -3827,6 +4480,7 @@ function rollerPage() {
 
 function trailerPage() {
   document.title = "Anhänger mieten in München | All4You Service München";
+  const firstTrailer = ALL4YOU_TRAILER_MODELS[0];
   return `
     <section class="page page-head">
       <div class="breadcrumb">
@@ -3837,7 +4491,7 @@ function trailerPage() {
       <p class="eyebrow">Anhängervermietung München</p>
       <h1>Anhänger mieten in München – flexibel, unkompliziert und passend für Ihren Transport.</h1>
       <p class="lead">
-        Mieten Sie einen Wörmann Multicase 7525/136 Plywood-Kofferanhänger für Umzug, Möbeltransport,
+        Mieten Sie den passenden Kofferanhänger für Umzug, Möbeltransport,
         Baumarkt-Einkäufe, Material oder private Transporte in München und Umgebung.
       </p>
       <div class="inline-actions">
@@ -3848,34 +4502,30 @@ function trailerPage() {
 
     ${featureBand()}
 
-    <section class="section-pad two-col">
-      <div class="info-card">
-        <p class="eyebrow">Der Anhänger</p>
-        <h2>Wörmann Multicase 7525/136.</h2>
-        <p class="lead">
-          Der angebotene Anhänger ist ein 1-Achs-Plywood-Kofferanhänger mit 750 kg zulässigem Gesamtgewicht.
-          Durch den geschlossenen Aufbau eignet er sich besonders für Transporte, bei denen das Ladegut geschützt stehen soll.
-        </p>
-        <div class="info-grid">
-          <div class="mini-card"><h3>750 kg Gesamtgewicht</h3><p>Zulässiges Gesamtgewicht: 750 kg. Leergewicht ca. 385 kg.</p></div>
-          <div class="mini-card"><h3>Kofferaufbau</h3><p>1-Achs-Plywood-Kofferanhänger mit Hecktür für geschützten Transport.</p></div>
-          <div class="mini-card"><h3>Innenmaß ca.</h3><p>Maße ca. 2510 × 1320 × 1500 mm.</p></div>
-          <div class="mini-card"><h3>Sicherung</h3><p>Innenbeleuchtung und 6 verschiebbare Zurrösen für die Ladungssicherung.</p></div>
+    <section class="section-pad trailer-showcase-section">
+      <div class="trailer-model-card" id="trailerModelShowcase" data-current-index="0">
+        <div class="trailer-model-copy">
+          <p class="eyebrow">Anhänger-Auswahl</p>
+          <span class="trailer-model-count" id="trailerModelCount">Anhänger 1 von ${ALL4YOU_TRAILER_MODELS.length}</span>
+          <h2 id="trailerModelName">${escapeHtml(firstTrailer.name)}</h2>
+          <p class="lead" id="trailerModelLead">${escapeHtml(firstTrailer.lead)}</p>
+          <div class="info-grid trailer-spec-grid" id="trailerModelSpecs">
+            ${renderTrailerSpecCards(firstTrailer)}
+          </div>
+        </div>
+
+        <div class="trailer-model-media">
+          <button class="trailer-model-nav trailer-model-prev" type="button" id="trailerModelPrev" aria-label="Vorherigen Anhänger anzeigen">‹</button>
+          <figure>
+            <img id="trailerModelImage" src="${escapeHtml(firstTrailer.image)}" alt="${escapeHtml(firstTrailer.imageAlt)}" loading="lazy">
+            <figcaption id="trailerModelCaption">${escapeHtml(firstTrailer.caption)}</figcaption>
+          </figure>
+          <button class="trailer-model-nav trailer-model-next" type="button" id="trailerModelNext" aria-label="Nächsten Anhänger anzeigen">›</button>
+          <div class="trailer-model-dots" id="trailerModelDots">
+            ${renderTrailerDots(0)}
+          </div>
         </div>
       </div>
-
-      <aside class="check-card">
-        <p class="eyebrow">Gut zu wissen</p>
-        <ul class="list">
-          <li>Führerscheinklasse B ausreichend</li>
-          <li>Versicherung vorhanden</li>
-          <li>Mietvertrag vorhanden</li>
-          <li>Kaution je nach Mietdauer und Absprache</li>
-          <li>Abholung/Rückgabe: Sachsenstraße Höhe 25, 81543 München</li>
-          <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
-          <li>Abholung nach Absprache gegen Aufpreis möglich</li>
-        </ul>
-      </aside>
     </section>
 
     <section class="section-pad" id="preise">
@@ -3922,7 +4572,7 @@ function trailerPage() {
         <div class="trailer-wizard" id="trailerWizard" data-current-step="0">
           <div class="wizard-top">
             <div>
-              <span class="wizard-kicker" id="trailerWizardCounter">Schritt 1 von 5</span>
+              <span class="wizard-kicker" id="trailerWizardCounter">Schritt 1 von 6</span>
               <h3 id="trailerWizardTitle">Mietzeitraum & Preis</h3>
             </div>
             <div class="wizard-progress">
@@ -3931,6 +4581,7 @@ function trailerPage() {
           </div>
 
           <form id="trailerWizardForm" class="wizard-form">
+            <input type="hidden" name="trailerModel" id="trailerSelectedModel" value="${escapeHtml(firstTrailer.name)}">
             <div class="wizard-step active" data-title="Mietzeitraum & Preis">
               <div class="trailer-period-control">
                 <div class="trailer-period-info">
@@ -3991,24 +4642,50 @@ function trailerPage() {
               </p>
             </div>
 
+            <div class="wizard-step" data-title="Anhängerwunsch">
+              <div class="trailer-choice-panel">
+                <div class="trailer-choice-head">
+                  <div>
+                    <p class="eyebrow">Anhängerwunsch</p>
+                    <h3>Welcher Anhänger soll es sein?</h3>
+                    <p>
+                      Wählen Sie ein bestimmtes Modell aus oder lassen Sie All4You passend nach Transportgut,
+                      Zeitraum und Verfügbarkeit auswählen.
+                    </p>
+                  </div>
+                </div>
+                ${renderTrailerPreferenceCards()}
+                <p class="form-note">
+                  Bei einem festen Anhängerwunsch prüft All4You gezielt dieses Modell. Wenn es egal ist,
+                  wird das passende verfügbare Modell vorgeschlagen.
+                </p>
+              </div>
+            </div>
+
             <div class="wizard-step" data-title="Übergabe & Standort">
-              <div class="form-grid">
-                <label>Wunschübergabe
-                  <select name="handover" id="trailerHandover">
-                    <option value="Abholung/Rückgabe am Standort Sachsenstraße">Abholung/Rückgabe am Standort Sachsenstraße</option>
-                    <option value="Lieferung zum Wunschort gegen Aufpreis">Lieferung zum Wunschort gegen Aufpreis</option>
-                    <option value="Lieferung & Abholung gegen Aufpreis">Lieferung & Abholung gegen Aufpreis</option>
-                    <option value="All4You soll Rücksprache halten">All4You soll Rücksprache halten</option>
+              <div class="form-grid trailer-handover-grid">
+                <input type="hidden" name="handover" id="trailerHandover" value="Abholung am Standort Sachsenstraße / Rückgabe am Standort Sachsenstraße">
+                <input type="hidden" name="pickupReturnAddress" id="trailerPickupReturnAddress" value="Sachsenstraße Höhe 25, 81543 München">
+                <input type="hidden" name="handoverNote" id="trailerHandoverNote" value="">
+
+                <label>Abholung / Lieferung
+                  <select id="trailerPickupMode">
+                    <option value="pickup_sachsen">Abholung am Standort Sachsenstraße</option>
+                    <option value="pickup_karolingerallee">Abholung am Standort Karolingerallee</option>
+                    <option value="delivery_only">Lieferung zum Wunschort gegen Aufpreis</option>
+                    <option value="delivery_and_collection">Lieferung und Abholung gegen Aufpreis</option>
                   </select>
                 </label>
-                <label class="delivery-field is-hidden" id="trailerDeliveryAddressField">Wunschort / Lieferadresse
-                  <input name="deliveryAddress" id="trailerDeliveryAddress" placeholder="Adresse für Lieferung oder Übergabe">
+
+                <label id="trailerReturnModeField">Rückgabe
+                  <select id="trailerReturnMode">
+                    <option value="return_sachsen">Rückgabe am Standort Sachsenstraße</option>
+                    <option value="return_karolingerallee">Rückgabe am Standort Karolingerallee</option>
+                  </select>
                 </label>
-                <label id="trailerPickupReturnField">Abholung/Rückgabe
-                  <input name="pickupReturnAddress" id="trailerPickupReturnAddress" value="Sachsenstraße Höhe 25, 81543 München" readonly>
-                </label>
-                <label id="trailerHandoverNoteField">Hinweis
-                  <input name="handoverNote" id="trailerHandoverNote" value="Abholung und Rückgabe am Standort Sachsenstraße Höhe 25, 81543 München." readonly>
+
+                <label class="delivery-field is-hidden trailer-delivery-address-field" id="trailerDeliveryAddressField">Lieferadresse
+                  <input name="deliveryAddress" id="trailerDeliveryAddress" placeholder="Adresse für Lieferung">
                 </label>
               </div>
             </div>
@@ -4127,6 +4804,18 @@ function trailerPage() {
           <li>Ist das Transportgut sicher verladbar?</li>
           <li>Wird Zubehör wie Spanngurte oder Plane benötigt?</li>
         </ul>
+
+        <div class="good-to-know-box">
+          <p class="eyebrow">Gut zu wissen</p>
+          <ul class="list compact-list">
+            <li>Versicherung vorhanden</li>
+            <li>Mietvertrag vorhanden</li>
+            <li>Kaution je nach Mietdauer und Absprache</li>
+            <li>Abholung: Sachsenstraße oder Karolingerallee · Rückgabe flexibel an einem der beiden Standorte möglich</li>
+            <li>Lieferung zum Wunschort gegen Aufpreis möglich</li>
+            <li>Abholung nach Absprache gegen Aufpreis möglich</li>
+          </ul>
+        </div>
       </aside>
     </section>
 
@@ -4146,9 +4835,9 @@ function trailerPage() {
       <div class="faq-card">
         <p class="eyebrow">FAQ</p>
         <div class="faq-list">
-          <article class="faq-item"><h3>Welcher Anhänger wird vermietet?</h3><p>Vermietet wird ein Wörmann Multicase 7525/136, 1-Achs-Plywood-Kofferanhänger mit 750 kg zulässigem Gesamtgewicht.</p></article>
+          <article class="faq-item"><h3>Welche Anhänger werden vermietet?</h3><p>Zur Auswahl stehen aktuell ein Wörmann Multicase 7525/136, ein Brenderup CD260UBD750 mit Tür und ein Brenderup CD260UBR750 mit Rampe. Die konkrete Auswahl kann im Anhänger-Bereich durchgeschaltet werden.</p></article>
           <article class="faq-item"><h3>Welche Führerscheinklasse brauche ich?</h3><p>Für diesen Anhänger ist Führerscheinklasse B ausreichend.</p></article>
-          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die reguläre Abholung und Rückgabe erfolgt in der Sachsenstraße Höhe 25, 81543 München.</p></article>
+          <article class="faq-item"><h3>Wo wird der Anhänger abgeholt?</h3><p>Die Abholung kann am Standort Sachsenstraße oder Karolingerallee erfolgen. Die Rückgabe kann ebenfalls an einem dieser beiden Standorte ausgewählt werden.</p></article>
           <article class="faq-item"><h3>Kann der Anhänger geliefert werden?</h3><p>Ja, auf Wunsch kann der Anhänger gegen Aufpreis direkt zum Wunschort gebracht und nach Absprache wieder abgeholt werden.</p></article>
         </div>
       </div>
@@ -5034,7 +5723,7 @@ function pageDashboard() {
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
             <a href="#dashboard-customers" data-dashboard-view-trigger="customers">Kundenkonten</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger-Kalender</a>
-            <a href="#dashboard-messages" data-dashboard-view-trigger="overview">Nachrichten</a>
+            <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
             <a href="#dashboard-attachments" data-dashboard-view-trigger="overview">Anhänge</a>
             <a href="#dashboard-status-history" data-dashboard-view-trigger="overview">Statusverlauf</a>
           </nav>
@@ -5057,7 +5746,7 @@ function pageDashboard() {
               <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
               <h1>Anfragen zentral verwalten.</h1>
               <p class="lead">
-                Alle Anfragen, Nachrichten, Anhänge und Statusänderungen werden live aus Supabase geladen.
+                Kompakte Arbeitsansicht für neue Anfragen, Statuswechsel, Nachrichten und Kundenrückfragen.
               </p>
             </div>
             <div class="dashboard-hero-actions">
@@ -5070,8 +5759,67 @@ function pageDashboard() {
             <article><span>Neue Anfragen</span><strong id="dashboardStatNew">0</strong><small>Live-Daten</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
             <article><span>Archiv</span><strong id="dashboardStatArchive">0</strong><small>Abgeschlossene Aufträge</small></article>
-            <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfrage offen</small></article>
+            <article><span>Offene Rückfragen</span><strong id="dashboardStatQuestions">0</strong><small>Status: Rückfragen</small></article>
             <article><span>Anhänge</span><strong id="dashboardStatAttachments">0</strong><small>Dateien gesamt</small></article>
+          </section>
+
+
+          <section class="dashboard-panel dashboard-messages-center is-hidden" id="dashboardMessagesCenter" data-dashboard-view="messages">
+            <div class="panel-head dashboard-messages-center-head">
+              <div>
+                <p class="eyebrow">Nachrichten</p>
+                <h2>Nachrichten-Zentrale</h2>
+                <p class="dashboard-calendar-intro">
+                  Kompakte Kundenkommunikation pro Auftrag. Links Auftrag auswählen, rechts Verlauf lesen und dem Kunden antworten.
+                </p>
+              </div>
+              <span class="status-pill" id="dashboardMessagesCenterCount">0 Gespräche</span>
+            </div>
+
+            <div class="dashboard-message-workspace">
+              <aside class="dashboard-message-list-panel">
+                <div class="dashboard-message-list-tools">
+                  <input id="dashboardMessagesSearchInput" type="search" placeholder="Suche nach Ticket, Kunde, E-Mail oder Telefon">
+                </div>
+                <div class="dashboard-message-ticket-list" id="dashboardMessagesCenterList">
+                  <div class="dashboard-empty-state">
+                    <strong>Nachrichten werden nach Login geladen …</strong>
+                    <p>Aufträge mit Kundenkontakt erscheinen hier.</p>
+                  </div>
+                </div>
+              </aside>
+
+              <article class="dashboard-message-thread-panel">
+                <div class="dashboard-message-thread-head" id="dashboardMessagesThreadHead">
+                  <div>
+                    <p class="eyebrow">Gespräch</p>
+                    <h3>Auftrag auswählen</h3>
+                  </div>
+                  <span class="status-pill">—</span>
+                </div>
+
+                <div class="dashboard-message-contact-strip" id="dashboardMessagesContactStrip">
+                  <span>Wählen Sie links einen Auftrag aus, um Kontakt und Nachrichtenverlauf zu sehen.</span>
+                </div>
+
+                <div class="dashboard-message-thread" id="dashboardMessagesThread">
+                  <div class="dashboard-mini-empty">
+                    <strong>Kein Gespräch ausgewählt</strong>
+                    <p>Nachrichten werden kompakt und chronologisch angezeigt.</p>
+                  </div>
+                </div>
+
+                <form class="dashboard-message-composer" id="dashboardMessagesReplyForm">
+                  <label>Antwort an Kunden
+                    <textarea id="dashboardMessagesReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde im Kundenportal/Statusbereich sehen kann …" disabled></textarea>
+                  </label>
+                  <div class="dashboard-message-composer-actions">
+                    <p class="dashboard-note-message" id="dashboardMessagesReplyMessage">Bitte zuerst einen Auftrag auswählen.</p>
+                    <button class="btn primary" type="submit" id="dashboardMessagesReplyButton" disabled>Antwort senden <span>›</span></button>
+                  </div>
+                </form>
+              </article>
+            </div>
           </section>
 
           <section class="dashboard-panel dashboard-customers-manager is-hidden" id="dashboardCustomersManager" data-dashboard-view="customers">
@@ -5110,7 +5858,7 @@ function pageDashboard() {
                   <button class="btn primary" type="submit">Kundenkonto speichern <span>›</span></button>
                 </form>
                 <p class="dashboard-ticket-action-message" id="dashboardCustomersMessage">
-                  Hinweis: Für den Login muss zusätzlich ein Supabase-Auth-Benutzer mit gleicher E-Mail existieren.
+                  Hinweis: Nach dem Speichern können Sie dem Kunden direkt einen Einrichtungslink per E-Mail senden.
                 </p>
               </aside>
 
@@ -5268,8 +6016,8 @@ function pageDashboard() {
             </div>
           </section>
 
-          <section class="dashboard-grid" data-dashboard-view="overview">
-            <div class="dashboard-panel">
+          <section class="dashboard-grid dashboard-workbench-grid" data-dashboard-view="overview">
+            <div class="dashboard-panel dashboard-ticket-panel">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Ticketliste</p>
@@ -5278,7 +6026,7 @@ function pageDashboard() {
                 <div class="dashboard-filters">
                   <button class="active" type="button" data-filter="all">Alle</button>
                   <button type="button" data-filter="neu">Neu</button>
-                  <button type="button" data-filter="in_pruefung">In Prüfung</button>
+                  <button type="button" data-filter="in_bearbeitung">In Bearbeitung</button>
                   <button type="button" data-filter="rueckfrage_offen">Rückfrage</button>
                   <button type="button" data-filter="activity">Neue Aktivität</button>
                 </div>
@@ -5296,15 +6044,9 @@ function pageDashboard() {
                 <select id="dashboardStatusFilter" aria-label="Status filtern">
                   <option value="all">Alle Status</option>
                   <option value="neu">Neu</option>
-                  <option value="in_pruefung">In Prüfung</option>
-                  <option value="rueckfrage_offen">Rückfrage offen</option>
-                  <option value="angebot_vorbereitet">Angebot vorbereitet</option>
-                  <option value="angebot_gesendet">Angebot gesendet</option>
-                  <option value="termin_vorgeschlagen">Termin vorgeschlagen</option>
-                  <option value="termin_bestaetigt">Termin bestätigt</option>
                   <option value="in_bearbeitung">In Bearbeitung</option>
+                  <option value="rueckfrage_offen">Rückfragen</option>
                   <option value="erledigt">Abgeschlossen</option>
-                  <option value="storniert">Storniert</option>
                 </select>
                 <select id="dashboardSortSelect" aria-label="Sortierung">
                   <option value="newest">Neueste zuerst</option>
@@ -5328,7 +6070,7 @@ function pageDashboard() {
               </div>
             </div>
 
-            <aside class="dashboard-panel dashboard-detail">
+            <aside class="dashboard-panel dashboard-detail dashboard-workspace-panel">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Ticketdetails</p>
@@ -5341,79 +6083,101 @@ function pageDashboard() {
                 <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links ein Ticket aus, um Details, Nachrichten, Anhänge und Verlauf zu sehen.</span></div>
               </div>
 
-              <div class="dashboard-status-editor">
-                <label>Status ändern
-                  <select id="dashboardStatusSelect" disabled>
-                    <option>Ticket auswählen</option>
-                  </select>
-                </label>
-                <button class="btn primary" type="button" id="dashboardSaveStatusButton" disabled>Status speichern <span>›</span></button>
-              </div>
-
-              <p class="dashboard-action-message" id="dashboardActionMessage">
-                Statusänderungen werden automatisch im Verlauf dokumentiert.
-              </p>
-
-              <div class="dashboard-ticket-actions">
-                <p class="eyebrow">Ticket-Aktionen</p>
-                <div class="dashboard-ticket-action-grid">
-                  <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
-                  <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
-                  <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
-                  <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
-                  <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
-                  <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
+              <div class="dashboard-focus-actions">
+                <div class="dashboard-status-editor">
+                  <label>Status ändern
+                    <select id="dashboardStatusSelect" disabled>
+                      <option>Ticket auswählen</option>
+                    </select>
+                  </label>
+                  <button class="btn primary" type="button" id="dashboardSaveStatusButton" disabled>Status speichern <span>›</span></button>
                 </div>
-                <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
-                  Bitte zuerst ein Ticket auswählen.
+
+                <p class="dashboard-action-message" id="dashboardActionMessage">
+                  Statusänderungen werden automatisch im Verlauf dokumentiert.
                 </p>
               </div>
 
-              <div class="dashboard-messages">
-                <p class="eyebrow">Nachrichten & interne Notizen</p>
-                <div class="dashboard-messages-list" id="dashboardMessagesList">
-                  <div class="dashboard-mini-empty">
-                    <strong>Nachrichten werden geladen …</strong>
-                    <p>Kundennachrichten und interne Notizen erscheinen hier.</p>
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Ticket-Aktionen</span>
+                  <small>Kopieren, archivieren oder abschließen</small>
+                </summary>
+                <div class="dashboard-ticket-actions">
+                  <div class="dashboard-ticket-action-grid">
+                    <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="copy-status-link" disabled>Statuslink kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="copy-ticket" disabled>Ticketdaten kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
+                    <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
+                    <button class="btn primary soft-action" type="button" data-ticket-action="mark-done" disabled>Als abgeschlossen markieren</button>
+                  </div>
+                  <p class="dashboard-ticket-action-message" id="dashboardTicketActionMessage">
+                    Bitte zuerst ein Ticket auswählen.
+                  </p>
+                </div>
+              </details>
+
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Nachrichten & interne Notizen</span>
+                  <small>Antworten schreiben und Teamnotizen speichern</small>
+                </summary>
+                <div class="dashboard-messages">
+                  <div class="dashboard-messages-list" id="dashboardMessagesList">
+                    <div class="dashboard-mini-empty">
+                      <strong>Nachrichten werden geladen …</strong>
+                      <p>Kundennachrichten und interne Notizen erscheinen hier.</p>
+                    </div>
+                  </div>
+
+                  <form class="dashboard-customer-reply" id="dashboardCustomerReplyForm">
+                    <label>Antwort an Kunden
+                      <textarea id="dashboardCustomerReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde auf der Statusseite sehen kann …" disabled></textarea>
+                    </label>
+                    <button class="btn primary" type="submit" id="dashboardCustomerReplyButton" disabled>Antwort senden <span>›</span></button>
+                    <p class="dashboard-note-message" id="dashboardCustomerReplyMessage">Bitte zuerst ein Ticket auswählen.</p>
+                  </form>
+
+                  <form class="dashboard-internal-note" id="dashboardInternalNoteForm">
+                    <label>Interne Notiz
+                      <textarea id="dashboardInternalNoteText" rows="3" placeholder="z. B. Kunden zurückrufen, Preis prüfen, Fotos fehlen noch …" disabled></textarea>
+                    </label>
+                    <button class="btn primary" type="submit" id="dashboardInternalNoteButton" disabled>Notiz speichern <span>›</span></button>
+                    <p class="dashboard-note-message" id="dashboardInternalNoteMessage">Bitte zuerst ein Ticket auswählen.</p>
+                  </form>
+                </div>
+              </details>
+
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Anhänge</span>
+                  <small>Fotos und Dokumente zum Ticket</small>
+                </summary>
+                <div class="dashboard-attachments">
+                  <div class="dashboard-attachments-list" id="dashboardAttachmentsList">
+                    <div class="dashboard-mini-empty">
+                      <strong>Anhänge werden geladen …</strong>
+                      <p>Fotos und Dokumente erscheinen hier.</p>
+                    </div>
                   </div>
                 </div>
+              </details>
 
-                <form class="dashboard-customer-reply" id="dashboardCustomerReplyForm">
-                  <label>Antwort an Kunden
-                    <textarea id="dashboardCustomerReplyText" rows="3" placeholder="Nachricht schreiben, die der Kunde auf der Statusseite sehen kann …" disabled></textarea>
-                  </label>
-                  <button class="btn primary" type="submit" id="dashboardCustomerReplyButton" disabled>Antwort senden <span>›</span></button>
-                  <p class="dashboard-note-message" id="dashboardCustomerReplyMessage">Bitte zuerst ein Ticket auswählen.</p>
-                </form>
-
-                <form class="dashboard-internal-note" id="dashboardInternalNoteForm">
-                  <label>Interne Notiz
-                    <textarea id="dashboardInternalNoteText" rows="3" placeholder="z. B. Kunden zurückrufen, Preis prüfen, Fotos fehlen noch …" disabled></textarea>
-                  </label>
-                  <button class="btn primary" type="submit" id="dashboardInternalNoteButton" disabled>Notiz speichern <span>›</span></button>
-                  <p class="dashboard-note-message" id="dashboardInternalNoteMessage">Bitte zuerst ein Ticket auswählen.</p>
-                </form>
-              </div>
-
-              <div class="dashboard-attachments">
-                <p class="eyebrow">Anhänge</p>
-                <div class="dashboard-attachments-list" id="dashboardAttachmentsList">
-                  <div class="dashboard-mini-empty">
-                    <strong>Anhänge werden geladen …</strong>
-                    <p>Fotos und Dokumente erscheinen hier.</p>
+              <details class="dashboard-toolbox">
+                <summary>
+                  <span>Statusverlauf</span>
+                  <small>Chronik der bisherigen Änderungen</small>
+                </summary>
+                <div class="dashboard-timeline">
+                  <div class="dashboard-timeline-list" id="dashboardTimelineList">
+                    <div class="dashboard-mini-empty">
+                      <strong>Statusverlauf wird geladen …</strong>
+                      <p>Die Statushistorie erscheint hier.</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="dashboard-timeline">
-                <p class="eyebrow">Statusverlauf</p>
-                <div class="dashboard-timeline-list" id="dashboardTimelineList">
-                  <div class="dashboard-mini-empty">
-                    <strong>Statusverlauf wird geladen …</strong>
-                    <p>Die Statushistorie erscheint hier.</p>
-                  </div>
-                </div>
-              </div>
+              </details>
             </aside>
           </section>
 
@@ -5972,35 +6736,59 @@ function pageCustomerPortal() {
   return `
     <section class="customer-portal-page page">
       <div class="customer-portal-gate" id="customerPortalAuthGate">
-        <div class="auth-card customer-auth-card">
-          <a class="auth-logo" href="/" data-link>
-            <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
-          </a>
-
-          <p class="eyebrow">Kundenportal</p>
-          <h1>Aufträge und Nachrichten einsehen.</h1>
-          <p class="lead">
-            Dieser Bereich ist für freigeschaltete Bestandskunden. Einmalige Anfragen können weiterhin über den Statuslink geprüft werden.
-          </p>
-
-          <form class="auth-form" id="customerPortalLoginForm">
-            <label>E-Mail
-              <input type="email" name="email" autocomplete="email" placeholder="kunde@example.de" required>
-            </label>
-            <label>Passwort
-              <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
-            </label>
-            <button class="btn primary" type="submit">Einloggen <span>›</span></button>
-          </form>
-
-          <div class="auth-message" id="customerPortalAuthMessage">
-            <strong>Hinweis</strong>
-            <p>Bitte mit einem freigeschalteten Kundenkonto anmelden.</p>
+        <div class="customer-login-wrap">
+          <div class="customer-login-brand-panel">
+            <a class="auth-logo" href="/" data-link>
+              <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
+            </a>
+            <p class="eyebrow">Kundenportal</p>
+            <h1>Ihr direkter Blick auf Aufträge, Status und Rückfragen.</h1>
+            <p class="lead">
+              Für freigeschaltete Bestandskunden: übersichtlich anmelden, laufende Aufträge prüfen und direkt mit All4You kommunizieren.
+            </p>
+            <div class="customer-login-benefits">
+              <article><strong>01</strong><span>Aufträge gesammelt an einem Ort</span></article>
+              <article><strong>02</strong><span>Status & Rückfragen nachvollziehbar</span></article>
+              <article><strong>03</strong><span>Nachrichten direkt zum Auftrag senden</span></article>
+            </div>
           </div>
 
-          <div class="inline-actions auth-inline-actions">
-            <a class="btn ghost" href="/status" data-link>Statuslink nutzen</a>
-            <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
+          <div class="auth-card customer-auth-card">
+            <p class="eyebrow">Anmelden</p>
+            <h2>Kundenkonto öffnen</h2>
+            <p class="auth-soft-copy">
+              Einmalige Anfragen können weiterhin bequem über den Statuslink geprüft werden.
+            </p>
+
+            <form class="auth-form" id="customerPortalLoginForm">
+              <label>E-Mail
+                <input type="email" name="email" autocomplete="email" placeholder="kunde@example.de" required>
+              </label>
+              <label>Passwort
+                <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
+              </label>
+              <button class="btn primary" type="submit">Einloggen <span>›</span></button>
+            </form>
+
+            <form class="auth-form is-hidden" id="customerPortalPasswordSetupForm">
+              <label>Neues Passwort
+                <input type="password" name="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" minlength="8" required>
+              </label>
+              <label>Passwort wiederholen
+                <input type="password" name="password_repeat" autocomplete="new-password" placeholder="Passwort erneut eingeben" minlength="8" required>
+              </label>
+              <button class="btn primary" type="submit">Passwort speichern <span>›</span></button>
+            </form>
+
+            <div class="auth-message" id="customerPortalAuthMessage">
+              <strong>Hinweis</strong>
+              <p>Bitte mit einem freigeschalteten Kundenkonto anmelden.</p>
+            </div>
+
+            <div class="inline-actions auth-inline-actions">
+              <a class="btn ghost" href="/status" data-link>Statuslink nutzen</a>
+              <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
+            </div>
           </div>
         </div>
       </div>
@@ -6011,11 +6799,26 @@ function pageCustomerPortal() {
             <img src="./assets/logo-all4you.jpeg" alt="All4You Service München">
             <span>Kundenportal</span>
           </a>
-          <div class="dashboard-user-card">
+
+          <div class="dashboard-user-card customer-user-card">
+            <span class="user-card-kicker">Angemeldet als</span>
             <strong id="customerPortalName">Kunde</strong>
             <span id="customerPortalMeta">angemeldet</span>
             <button class="btn ghost" type="button" id="customerPortalLogoutButton">Abmelden</button>
           </div>
+
+          <nav class="customer-portal-mini-nav" aria-label="Kundenportal Bereiche">
+            <span>Übersicht</span>
+            <span>Aufträge</span>
+            <span>Nachrichten</span>
+            <span>Status</span>
+          </nav>
+
+          <div class="customer-portal-side-summary" id="customerPortalSideSummary">
+            <strong>Portal wird geladen …</strong>
+            <span>Ihre Aufträge erscheinen gleich.</span>
+          </div>
+
           <div class="dashboard-security-note">
             <strong>Privater Bereich</strong>
             <p>Hier erscheinen nur Aufträge, die Ihrem Kundenkonto zugeordnet wurden.</p>
@@ -6026,16 +6829,24 @@ function pageCustomerPortal() {
           <section class="dashboard-hero customer-portal-hero">
             <div>
               <p class="eyebrow">All4You Kundenportal</p>
-              <h1>Ihre Aufträge im Überblick.</h1>
-              <p class="lead">Status, öffentliche Nachrichten und Auftragsdetails werden live aus dem System geladen.</p>
+              <h1 id="customerPortalWelcomeTitle">Willkommen im Kundenportal.</h1>
+              <p class="lead" id="customerPortalHeroText">Status, öffentliche Nachrichten und Auftragsdetails werden live aus dem System geladen.</p>
             </div>
-            <div class="dashboard-hero-actions">
+            <div class="dashboard-hero-actions customer-portal-actions">
               <span class="status-pill success" id="customerPortalLiveStatus">Live verbunden</span>
+              <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
             </div>
           </section>
 
+          <section class="customer-portal-overview" id="customerPortalOverviewStats" aria-label="Kundenportal Übersicht">
+            <article><span>Aufträge</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>Aktiv</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>Rückfragen</span><strong>—</strong><small>werden geladen</small></article>
+            <article><span>Abgeschlossen</span><strong>—</strong><small>werden geladen</small></article>
+          </section>
+
           <section class="customer-portal-grid">
-            <div class="dashboard-panel">
+            <div class="dashboard-panel customer-request-panel">
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Aufträge</p>
@@ -6043,7 +6854,11 @@ function pageCustomerPortal() {
                 </div>
                 <span class="status-pill" id="customerPortalRequestCount">0 Aufträge</span>
               </div>
-              <div class="dashboard-ticket-list" id="customerPortalRequestList">
+              <div class="customer-request-hint" id="customerPortalRequestHint">
+                <strong>Hinweis</strong>
+                <span>Wählen Sie einen Auftrag aus, um Details und Nachrichten zu sehen.</span>
+              </div>
+              <div class="dashboard-ticket-list customer-portal-request-list" id="customerPortalRequestList">
                 <div class="dashboard-empty-state">
                   <strong>Aufträge werden geladen …</strong>
                   <p>Ihre zugeordneten Aufträge erscheinen hier.</p>
@@ -6052,26 +6867,37 @@ function pageCustomerPortal() {
             </div>
 
             <aside class="dashboard-panel dashboard-detail customer-portal-detail">
-              <div class="panel-head">
+              <div class="panel-head customer-detail-head">
                 <div>
                   <p class="eyebrow">Auftragsdetails</p>
                   <h2 id="customerPortalDetailTitle">Auftrag auswählen</h2>
                 </div>
                 <span class="status-pill" id="customerPortalDetailStatus">—</span>
               </div>
-              <div class="dashboard-detail-body" id="customerPortalDetailBody">
+
+              <div class="customer-detail-progress" id="customerPortalProgressTimeline">
+                <div class="summary-wide"><strong>Status</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
+              </div>
+
+              <div class="dashboard-detail-body customer-detail-body" id="customerPortalDetailBody">
                 <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>
               </div>
 
-              <div class="dashboard-messages">
-                <p class="eyebrow">Nachrichten</p>
+              <div class="dashboard-messages customer-portal-messages">
+                <div class="customer-message-head">
+                  <div>
+                    <p class="eyebrow">Nachrichten</p>
+                    <h3>Öffentlicher Verlauf</h3>
+                  </div>
+                  <span class="status-pill" id="customerPortalMessageCount">0</span>
+                </div>
                 <div class="dashboard-messages-list" id="customerPortalMessagesList">
                   <div class="dashboard-mini-empty">
                     <strong>Keine Nachrichten geladen</strong>
                     <p>Nachrichten erscheinen nach Auswahl eines Auftrags.</p>
                   </div>
                 </div>
-                <form class="dashboard-customer-reply" id="customerPortalMessageForm">
+                <form class="dashboard-customer-reply customer-portal-reply" id="customerPortalMessageForm">
                   <label>Nachricht an All4You
                     <textarea id="customerPortalMessageText" rows="3" placeholder="Nachricht zu diesem Auftrag schreiben …" disabled></textarea>
                   </label>
@@ -6128,6 +6954,7 @@ function renderRoute() {
   bindForms();
   bindRouteTool();
   bindTrailerTool();
+  bindTrailerModelShowcase();
   bindClearanceTool();
   bindCleaningTool();
   bindCleaningWizard();
@@ -7793,7 +8620,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -8213,6 +9040,53 @@ function bindDashboardTrailerCalendarManager() {
 }
 
 
+
+function bindTrailerModelShowcase() {
+  const showcase = document.querySelector("#trailerModelShowcase");
+  if (!showcase) return;
+
+  const name = showcase.querySelector("#trailerModelName");
+  const lead = showcase.querySelector("#trailerModelLead");
+  const image = showcase.querySelector("#trailerModelImage");
+  const caption = showcase.querySelector("#trailerModelCaption");
+  const count = showcase.querySelector("#trailerModelCount");
+  const specs = showcase.querySelector("#trailerModelSpecs");
+  const dots = showcase.querySelector("#trailerModelDots");
+  const prev = showcase.querySelector("#trailerModelPrev");
+  const next = showcase.querySelector("#trailerModelNext");
+  const selectedModelInput = document.querySelector("#trailerSelectedModel");
+
+  let current = Number(showcase.dataset.currentIndex || 0);
+
+  function setTrailer(index) {
+    current = (index + ALL4YOU_TRAILER_MODELS.length) % ALL4YOU_TRAILER_MODELS.length;
+    const trailer = ALL4YOU_TRAILER_MODELS[current];
+    showcase.dataset.currentIndex = String(current);
+
+    if (name) name.textContent = trailer.name;
+    if (lead) lead.textContent = trailer.lead;
+    if (image) {
+      image.src = trailer.image;
+      image.alt = trailer.imageAlt;
+    }
+    if (caption) caption.textContent = trailer.caption;
+    if (count) count.textContent = `Anhänger ${current + 1} von ${ALL4YOU_TRAILER_MODELS.length}`;
+    if (specs) specs.innerHTML = renderTrailerSpecCards(trailer);
+    if (dots) dots.innerHTML = renderTrailerDots(current);
+    if (selectedModelInput) selectedModelInput.value = trailer.name;
+  }
+
+  prev?.addEventListener("click", () => setTrailer(current - 1));
+  next?.addEventListener("click", () => setTrailer(current + 1));
+  dots?.addEventListener("click", event => {
+    const button = event.target.closest("[data-trailer-index]");
+    if (!button) return;
+    setTrailer(Number(button.dataset.trailerIndex || 0));
+  });
+
+  setTrailer(current);
+}
+
 function bindTrailerWizard() {
   const wizard = document.querySelector("#trailerWizard");
   const form = document.querySelector("#trailerWizardForm");
@@ -8243,6 +9117,9 @@ function bindTrailerWizard() {
   const prevMonthButton = document.querySelector("#trailerCalendarPrevMonth");
   const nextMonthButton = document.querySelector("#trailerCalendarNextMonth");
   const handover = document.querySelector("#trailerHandover");
+  const pickupMode = document.querySelector("#trailerPickupMode");
+  const returnMode = document.querySelector("#trailerReturnMode");
+  const returnModeField = document.querySelector("#trailerReturnModeField");
   const deliveryAddressField = document.querySelector("#trailerDeliveryAddressField");
 
   if (!wizard || !form || !result || !prev || !next || !submit) return;
@@ -8565,13 +9442,26 @@ function bindTrailerWizard() {
   }
 
   function updateDeliveryField() {
-    if (!handover) return;
+    if (!handover || !pickupMode) return;
 
-    const value = handover.value.toLowerCase();
     const deliveryInput = document.querySelector("#trailerDeliveryAddress");
-    const pickupField = document.querySelector("#trailerPickupReturnField");
-    const pickupInput = document.querySelector("#trailerPickupReturnAddress");
+    const pickupReturnInput = document.querySelector("#trailerPickupReturnAddress");
     const noteInput = document.querySelector("#trailerHandoverNote");
+
+    const locations = {
+      sachsen: {
+        label: "Sachsenstraße",
+        address: "Sachsenstraße Höhe 25, 81543 München",
+        pickupText: "Abholung am Standort Sachsenstraße",
+        returnText: "Rückgabe am Standort Sachsenstraße"
+      },
+      karolingerallee: {
+        label: "Karolingerallee",
+        address: "Karolingerallee, 81545 München",
+        pickupText: "Abholung am Standort Karolingerallee",
+        returnText: "Rückgabe am Standort Karolingerallee"
+      }
+    };
 
     const setDelivery = (visible, label, placeholder, required = false) => {
       if (!deliveryAddressField || !deliveryInput) return;
@@ -8583,41 +9473,52 @@ function bindTrailerWizard() {
       if (!visible) deliveryInput.value = "";
     };
 
-    const setPickup = (label, value, placeholder, readonly = true, required = false) => {
-      if (!pickupField || !pickupInput) return;
-      const labelNode = Array.from(pickupField.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-      if (labelNode) labelNode.textContent = label + "\n                  ";
-      pickupInput.readOnly = readonly;
-      pickupInput.required = required;
-      pickupInput.placeholder = placeholder || "";
-      if (value !== null) pickupInput.value = value;
-      pickupField.classList.toggle("field-editable", !readonly);
+    const ensureReturnOptions = (mode) => {
+      if (!returnMode) return;
+      const current = returnMode.value || "return_sachsen";
+      const options = mode === "delivery_and_collection"
+        ? [["collection_by_all4you", "Abholung durch All4You gegen Aufpreis"]]
+        : [
+            ["return_sachsen", "Rückgabe am Standort Sachsenstraße"],
+            ["return_karolingerallee", "Rückgabe am Standort Karolingerallee"]
+          ];
+
+      returnMode.innerHTML = options.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+      const optionValues = options.map(([value]) => value);
+      returnMode.value = optionValues.includes(current) ? current : optionValues[0];
     };
 
-    if (value.includes("lieferung & abholung")) {
-      setDelivery(true, "Lieferadresse", "Adresse, an die der Anhänger geliefert werden soll", true);
-      setPickup("Abhol-/Rückgabeadresse", "", "Adresse, an der All4You den Anhänger wieder abholen soll", false, true);
-      if (noteInput) noteInput.value = "Lieferung und spätere Abholung erfolgen gegen Aufpreis nach Bestätigung durch All4You.";
+    const mode = pickupMode.value || "pickup_sachsen";
+    ensureReturnOptions(mode);
+
+    if (mode === "delivery_and_collection") {
+      setDelivery(true, "Liefer-/Abholadresse", "Adresse für Lieferung und spätere Abholung", true);
+      if (returnModeField) returnModeField.classList.remove("is-hidden");
+      handover.value = "Lieferung und Abholung gegen Aufpreis";
+      if (pickupReturnInput) pickupReturnInput.value = "Abholung durch All4You am Wunschort gegen Aufpreis";
+      if (noteInput) noteInput.value = "";
       return;
     }
 
-    if (value.includes("lieferung")) {
-      setDelivery(true, "Wunschort / Lieferadresse", "Adresse für die Lieferung des Anhängers", true);
-      setPickup("Rückgabe / Abholung", "Sachsenstraße Höhe 25, 81543 München", "", true, false);
-      if (noteInput) noteInput.value = "Lieferung zum Wunschort gegen Aufpreis. Rückgabe/Abholung wird final durch All4You bestätigt.";
+    const returnValue = returnMode?.value || "return_sachsen";
+    const returnLocation = returnValue === "return_karolingerallee" ? locations.karolingerallee : locations.sachsen;
+
+    if (mode === "delivery_only") {
+      setDelivery(true, "Lieferadresse", "Adresse für Lieferung zum Wunschort", true);
+      if (returnModeField) returnModeField.classList.remove("is-hidden");
+      handover.value = `Lieferung zum Wunschort gegen Aufpreis / ${returnLocation.returnText}`;
+      if (pickupReturnInput) pickupReturnInput.value = returnLocation.address;
+      if (noteInput) noteInput.value = "";
       return;
     }
 
-    if (value.includes("rücksprache")) {
-      setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
-      setPickup("Gewünschter Ort / Hinweis zur Übergabe", "", "z. B. Adresse, Stadtteil oder kurzer Hinweis zur Übergabe", false, false);
-      if (noteInput) noteInput.value = "All4You soll zur Übergabe Rücksprache halten.";
-      return;
-    }
+    setDelivery(false, "Lieferadresse", "Adresse für Lieferung", false);
+    if (returnModeField) returnModeField.classList.remove("is-hidden");
 
-    setDelivery(false, "Wunschort / Lieferadresse", "Adresse für Lieferung oder Übergabe", false);
-    setPickup("Abholung/Rückgabe", "Sachsenstraße Höhe 25, 81543 München", "", true, false);
-    if (noteInput) noteInput.value = "Abholung und Rückgabe am Standort Sachsenstraße Höhe 25, 81543 München.";
+    const pickupLocation = mode === "pickup_karolingerallee" ? locations.karolingerallee : locations.sachsen;
+    handover.value = `${pickupLocation.pickupText} / ${returnLocation.returnText}`;
+    if (pickupReturnInput) pickupReturnInput.value = returnLocation.address;
+    if (noteInput) noteInput.value = "";
   }
 
   function collectSummary() {
@@ -8626,6 +9527,7 @@ function bindTrailerWizard() {
     const rental = calculateRental();
 
     return {
+      trailerModel: data.get("trailerPreference") || data.get("trailerModel") || ALL4YOU_TRAILER_MODELS[0]?.name || "",
       rentalStart: data.get("rentalStart") || "",
       rentalEnd: data.get("rentalEnd") || "",
       rentalDays: rental.daysText,
@@ -8653,6 +9555,7 @@ function bindTrailerWizard() {
     if (!summaryBox) return;
     const summary = collectSummary();
     summaryBox.innerHTML = `
+      <div><strong>Anhängerwunsch</strong><span>${escapeHtml(summary.trailerModel || "—")}</span></div>
       <div><strong>Mietbeginn</strong><span>${escapeHtml(summary.rentalStart ? formatGermanDate(summary.rentalStart) : "—")}</span></div>
       <div><strong>Mietende</strong><span>${escapeHtml(summary.rentalEnd ? formatGermanDate(summary.rentalEnd) : "—")}</span></div>
       <div><strong>Mietdauer</strong><span>${escapeHtml(summary.rentalDays || "—")}</span></div>
@@ -8786,7 +9689,8 @@ function bindTrailerWizard() {
     renderTrailerCalendar();
   });
 
-  handover?.addEventListener("change", updateDeliveryField);
+  pickupMode?.addEventListener("change", updateDeliveryField);
+  returnMode?.addEventListener("change", updateDeliveryField);
 
   // Öffentliche Anhänger-Seite zeigt keine internen Belegungen aus dem Mitarbeiterkalender.
   // Kunden wählen nur einen Zeitraum und senden eine unverbindliche Anfrage.
@@ -8813,6 +9717,7 @@ function bindTrailerWizard() {
     const subject = encodeURIComponent("Anfrage über die Webseite: Anhängervermietung");
     const body = encodeURIComponent(
       `Neue Anhänger-Mietanfrage\n\n` +
+      `Anhänger: ${summary.trailerModel}\n` +
       `Mietbeginn: ${summary.rentalStart}\n` +
       `Mietende: ${summary.rentalEnd}\n` +
       `Mietdauer: ${summary.rentalDays}\n` +
@@ -8853,6 +9758,8 @@ function bindTrailerWizard() {
         p_subject: "Anhänger-Mietanfrage",
         p_summary: buildTrailerSummaryText(summary),
         p_details: {
+          trailer_model: summary.trailerModel,
+          trailer_preference: summary.trailerModel,
           rental_start: summary.rentalStart,
           rental_end: summary.rentalEnd,
           rental_days: summary.rentalDays,
@@ -8898,7 +9805,7 @@ function bindTrailerWizard() {
 }
 
 function setDashboardView(view = "overview") {
-  const allowedViews = ["overview", "archive", "customers", "trailer-calendar"];
+  const allowedViews = ["overview", "archive", "customers", "trailer-calendar", "messages"];
   const normalized = allowedViews.includes(view) ? view : "overview";
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
@@ -8919,6 +9826,9 @@ function setDashboardView(view = "overview") {
   if (normalized === "customers") {
     renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
   }
+  if (normalized === "messages") {
+    renderDashboardMessagesCenter();
+  }
 }
 
 function bindDashboardShell() {
@@ -8937,6 +9847,11 @@ function bindDashboardShell() {
   const archiveRestoreButton = document.querySelector("#dashboardArchiveRestoreButton");
   const archiveDeleteButton = document.querySelector("#dashboardArchiveDeleteButton");
   const dashboardViewLinks = Array.from(document.querySelectorAll("[data-dashboard-view-trigger]"));
+  const dashboardMessagesSearchInput = document.querySelector("#dashboardMessagesSearchInput");
+  const dashboardMessagesCenterList = document.querySelector("#dashboardMessagesCenterList");
+  const dashboardMessagesReplyForm = document.querySelector("#dashboardMessagesReplyForm");
+  const dashboardMessagesReplyText = document.querySelector("#dashboardMessagesReplyText");
+  const dashboardMessagesReplyButton = document.querySelector("#dashboardMessagesReplyButton");
 
   bindDashboardActionDirectGuard();
   bindDashboardCustomerAccounts();
@@ -9233,6 +10148,54 @@ function bindDashboardShell() {
     }
   });
 
+  dashboardMessagesSearchInput?.addEventListener("input", () => renderDashboardMessagesCenter());
+
+  dashboardMessagesCenterList?.addEventListener("click", event => {
+    const button = event.target.closest("[data-message-ticket-id]");
+    if (!button) return;
+    selectDashboardMessageTicket(button.dataset.messageTicketId);
+  });
+
+  dashboardMessagesReplyForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const ticket = getDashboardTicketByIdOrNumber(dashboardSelectedMessageRequestId);
+    const text = String(dashboardMessagesReplyText?.value || "").trim();
+
+    if (!ticket?.id) {
+      setDashboardMessagesReplyMessage("error", "Bitte zuerst einen Auftrag auswählen.");
+      return;
+    }
+
+    if (!text) {
+      setDashboardMessagesReplyMessage("error", "Bitte eine Antwort an den Kunden eintragen.");
+      return;
+    }
+
+    if (dashboardMessagesReplyButton) dashboardMessagesReplyButton.disabled = true;
+    setDashboardMessagesReplyMessage("loading", "Antwort wird gespeichert …");
+
+    try {
+      await createDashboardCustomerReply(
+        dashboardCurrentSession,
+        ticket.id,
+        text,
+        dashboardCurrentEmployeeProfile
+      );
+
+      if (dashboardMessagesReplyText) dashboardMessagesReplyText.value = "";
+      setDashboardMessagesReplyMessage("success", "Antwort wurde gespeichert und ist für den Kunden sichtbar.");
+      await fetchDashboardActivitySummary(dashboardCurrentSession, dashboardAllRequestCache);
+      renderDashboardMessagesCenterList(getDashboardMessagesCenterFilteredTickets());
+      await loadDashboardMessagesCenterThread(ticket);
+      updateDashboardActivityStats(dashboardAllRequestCache);
+    } catch (error) {
+      setDashboardMessagesReplyMessage("error", error.message || "Antwort konnte nicht gespeichert werden.");
+    } finally {
+      if (dashboardMessagesReplyButton) dashboardMessagesReplyButton.disabled = !dashboardSelectedMessageRequestId;
+    }
+  });
+
   bindDashboardFilters();
   bindDashboardAuth();
 }
@@ -9422,36 +10385,150 @@ function setCustomerPortalMessage(type, text) {
   message.textContent = text || "";
 }
 
+function isCustomerPortalDoneStatus(status) {
+  return ["erledigt", "storniert"].includes(String(status || ""));
+}
+
+function isCustomerPortalActiveStatus(status) {
+  return Boolean(status) && !isCustomerPortalDoneStatus(status);
+}
+
+function getCustomerPortalStats(requests = customerPortalRequests) {
+  const rows = Array.isArray(requests) ? requests : [];
+  const active = rows.filter(ticket => isCustomerPortalActiveStatus(ticket.status)).length;
+  const review = rows.filter(ticket => ["neu", "in_pruefung", "angebot_vorbereitet"].includes(String(ticket.status || ""))).length;
+  const openQuestions = rows.filter(ticket => String(ticket.status || "") === "rueckfrage_offen").length;
+  const done = rows.filter(ticket => isCustomerPortalDoneStatus(ticket.status)).length;
+  const latest = rows
+    .map(ticket => ticket.updated_at || ticket.created_at)
+    .filter(Boolean)
+    .sort((a, b) => new Date(b) - new Date(a))[0] || null;
+
+  return { total: rows.length, active, review, openQuestions, done, latest };
+}
+
+function renderCustomerPortalOverviewStats(requests = customerPortalRequests) {
+  const box = document.querySelector("#customerPortalOverviewStats");
+  if (!box) return;
+  const stats = getCustomerPortalStats(requests);
+
+  box.innerHTML = `
+    <article><span>Aufträge</span><strong>${stats.total}</strong><small>gesamt zugeordnet</small></article>
+    <article><span>Aktiv</span><strong>${stats.active}</strong><small>laufende Vorgänge</small></article>
+    <article class="${stats.openQuestions ? "attention" : ""}"><span>Rückfragen</span><strong>${stats.openQuestions}</strong><small>${stats.openQuestions ? "bitte prüfen" : "keine offen"}</small></article>
+    <article><span>Abgeschlossen</span><strong>${stats.done}</strong><small>${stats.latest ? "letzte Änderung: " + escapeHtml(formatDashboardDate(stats.latest)) : "noch keine Daten"}</small></article>
+  `;
+}
+
+function renderCustomerPortalSideSummary(requests = customerPortalRequests) {
+  const box = document.querySelector("#customerPortalSideSummary");
+  if (!box) return;
+  const stats = getCustomerPortalStats(requests);
+  const nextAction = stats.openQuestions > 0
+    ? `${stats.openQuestions} Rückfrage${stats.openQuestions === 1 ? "" : "n"} offen`
+    : stats.active > 0
+      ? `${stats.active} aktive${stats.active === 1 ? "r" : ""} Auftrag${stats.active === 1 ? "" : "e"}`
+      : stats.total > 0
+        ? "Alle Aufträge im Blick"
+        : "Noch keine Aufträge";
+
+  box.innerHTML = `
+    <strong>${escapeHtml(nextAction)}</strong>
+    <span>${stats.latest ? `Letzte Änderung: ${escapeHtml(formatDashboardDate(stats.latest))}` : "Sobald All4You ein Ticket zuordnet, erscheint es hier."}</span>
+  `;
+}
+
+function getCustomerPortalStageIndex(status) {
+  const clean = String(status || "");
+  if (clean === "storniert") return -1;
+  if (["neu"].includes(clean)) return 0;
+  if (["in_pruefung", "rueckfrage_offen"].includes(clean)) return 1;
+  if (["angebot_vorbereitet", "angebot_gesendet", "termin_vorgeschlagen"].includes(clean)) return 2;
+  if (["termin_bestaetigt", "in_bearbeitung"].includes(clean)) return 3;
+  if (["erledigt"].includes(clean)) return 4;
+  return 0;
+}
+
+function renderCustomerPortalProgress(ticket) {
+  const box = document.querySelector("#customerPortalProgressTimeline");
+  if (!box) return;
+
+  if (!ticket?.id) {
+    box.innerHTML = `<div class="summary-wide"><strong>Status</strong><span>Wählen Sie links einen Auftrag aus.</span></div>`;
+    return;
+  }
+
+  const current = getCustomerPortalStageIndex(ticket.status);
+  const isCancelled = String(ticket.status || "") === "storniert";
+  const steps = isCancelled
+    ? ["Eingegangen", "Geprüft", "Storniert"]
+    : ["Eingang", "Prüfung", "Abstimmung", "Bearbeitung", "Abschluss"];
+
+  box.innerHTML = `
+    <div class="customer-progress-head">
+      <strong>${escapeHtml(statusLabel(ticket.status))}</strong>
+      <span>${ticket.updated_at ? `Aktualisiert: ${escapeHtml(formatDashboardDate(ticket.updated_at))}` : "Status wird laufend aktualisiert"}</span>
+    </div>
+    <div class="customer-progress-steps ${isCancelled ? "is-cancelled" : ""}">
+      ${steps.map((label, index) => `
+        <div class="customer-progress-step ${index <= current || isCancelled ? "done" : ""} ${index === current ? "current" : ""}">
+          <i>${index + 1}</i>
+          <span>${escapeHtml(label)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderCustomerPortalRequests(requests = customerPortalRequests) {
   const list = document.querySelector("#customerPortalRequestList");
   const count = document.querySelector("#customerPortalRequestCount");
+  const hint = document.querySelector("#customerPortalRequestHint");
   if (!list) return;
 
   const rows = Array.isArray(requests) ? requests : [];
   if (count) count.textContent = `${rows.length} Auftrag${rows.length === 1 ? "" : "e"}`;
+  renderCustomerPortalOverviewStats(rows);
+  renderCustomerPortalSideSummary(rows);
 
   if (!rows.length) {
+    if (hint) hint.innerHTML = `<strong>Noch leer</strong><span>All4You kann bestehende Tickets Ihrem Kundenkonto zuordnen.</span>`;
     list.innerHTML = `
-      <div class="dashboard-empty-state">
+      <div class="dashboard-empty-state customer-empty-state">
         <strong>Noch keine zugeordneten Aufträge</strong>
         <p>Wenn Sie ein Bestandskunde sind, kann All4You Ihre bestehenden Anfragen Ihrem Kundenkonto zuordnen.</p>
+        <a class="btn primary" href="/kontakt" data-link>Neue Anfrage starten <span>›</span></a>
       </div>
     `;
     renderCustomerPortalDetail(null);
     return;
   }
 
+  if (hint) {
+    const stats = getCustomerPortalStats(rows);
+    hint.innerHTML = stats.openQuestions
+      ? `<strong>Rückfrage offen</strong><span>${stats.openQuestions} Auftrag${stats.openQuestions === 1 ? "" : "e"} benötigen Ihre Aufmerksamkeit.</span>`
+      : `<strong>Alles im Blick</strong><span>Wählen Sie einen Auftrag aus, um Details und Nachrichten zu sehen.</span>`;
+  }
+
+  if (!rows.some(ticket => ticket.id === customerPortalSelectedRequestId)) {
+    customerPortalSelectedRequestId = rows[0]?.id || null;
+  }
+
   list.innerHTML = rows.map(ticket => {
     const isActive = ticket.id === customerPortalSelectedRequestId;
+    const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
     return `
-      <button class="dashboard-ticket ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" type="button" data-customer-portal-request-id="${escapeHtml(ticket.id)}">
-        <span>
+      <button class="dashboard-ticket customer-portal-ticket ${serviceAccentClass(ticket.service)} ${isActive ? "active" : ""}" type="button" data-customer-portal-request-id="${escapeHtml(ticket.id)}">
+        <span class="customer-ticket-main">
+          <span class="ticket-service">${escapeHtml(serviceLabel(ticket.service))}</span>
           <strong>${escapeHtml(ticket.ticket_number || "Auftrag")}</strong>
-          <small>${escapeHtml(serviceLabel(ticket.service))}</small>
+          <small>${escapeHtml(ticket.summary || ticket.subject || "Ihre Anfrage bei All4You")}</small>
         </span>
-        <span class="ticket-meta">
-          <small>${escapeHtml(statusLabel(ticket.status))}</small>
-          <small>${escapeHtml(formatDashboardDate(ticket.created_at))}</small>
+        <span class="customer-ticket-foot">
+          <em class="customer-status-badge status-${escapeHtml(String(ticket.status || "unknown").replace(/[^a-z0-9_-]/gi, ""))}">${escapeHtml(statusLabel(ticket.status))}</em>
+          <small>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</small>
+          ${publicMessages.length ? `<small>${publicMessages.length} Nachricht${publicMessages.length === 1 ? "" : "en"}</small>` : ""}
         </span>
       </button>
     `;
@@ -9461,11 +10538,22 @@ function renderCustomerPortalRequests(requests = customerPortalRequests) {
   renderCustomerPortalDetail(selected);
 }
 
+function renderCustomerDetailFact(label, value) {
+  if (value === null || value === undefined || value === "") return "";
+  return `
+    <div class="customer-detail-fact">
+      <strong>${escapeHtml(label)}</strong>
+      <span>${escapeHtml(detailValue(value))}</span>
+    </div>
+  `;
+}
+
 function renderCustomerPortalDetail(ticket) {
   const title = document.querySelector("#customerPortalDetailTitle");
   const status = document.querySelector("#customerPortalDetailStatus");
   const body = document.querySelector("#customerPortalDetailBody");
   const messagesList = document.querySelector("#customerPortalMessagesList");
+  const messageCount = document.querySelector("#customerPortalMessageCount");
   const text = document.querySelector("#customerPortalMessageText");
   const button = document.querySelector("#customerPortalMessageButton");
 
@@ -9475,8 +10563,10 @@ function renderCustomerPortalDetail(ticket) {
     customerPortalSelectedRequestId = null;
     title.textContent = "Auftrag auswählen";
     if (status) status.textContent = "—";
+    renderCustomerPortalProgress(null);
     body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links einen Auftrag aus.</span></div>`;
     if (messagesList) messagesList.innerHTML = `<div class="dashboard-mini-empty"><strong>Keine Nachrichten geladen</strong><p>Nachrichten erscheinen nach Auswahl eines Auftrags.</p></div>`;
+    if (messageCount) messageCount.textContent = "0";
     if (text) text.disabled = true;
     if (button) button.disabled = true;
     setCustomerPortalMessage("", "Bitte zuerst einen Auftrag auswählen.");
@@ -9485,19 +10575,39 @@ function renderCustomerPortalDetail(ticket) {
 
   customerPortalSelectedRequestId = ticket.id;
   title.textContent = ticket.ticket_number || "Auftrag";
-  if (status) status.textContent = statusLabel(ticket.status);
+  if (status) {
+    status.textContent = statusLabel(ticket.status);
+    status.className = `status-pill customer-status-badge status-${String(ticket.status || "unknown").replace(/[^a-z0-9_-]/gi, "")}`;
+  }
+
+  renderCustomerPortalProgress(ticket);
 
   const groups = getDashboardDetailGroups(ticket);
+  const details = ticket.details || {};
+  const summary = ticket.summary || ticket.subject || details.message || "Noch keine kurze Zusammenfassung vorhanden.";
+  const contactFacts = [
+    renderCustomerDetailFact("Leistung", serviceLabel(ticket.service)),
+    renderCustomerDetailFact("Status", statusLabel(ticket.status)),
+    renderCustomerDetailFact("Erstellt", formatDashboardDate(ticket.created_at)),
+    renderCustomerDetailFact("Aktualisiert", formatDashboardDate(ticket.updated_at || ticket.created_at))
+  ].join("");
+
   body.innerHTML = `
-    ${renderDashboardDetailHero(ticket)}
-    ${renderDashboardSummaryBlock(ticket)}
-    ${renderDashboardDetailSection("Auftrag", groups["Ticket"])}
+    <section class="customer-detail-summary-card ${serviceAccentClass(ticket.service)}">
+      <span>Zusammenfassung</span>
+      <p>${escapeHtml(summary)}</p>
+    </section>
+    <section class="customer-detail-fact-grid">
+      ${contactFacts}
+    </section>
     ${renderDashboardDetailSection("Termin & Zeitraum", groups["Termin & Zeitraum"])}
     ${renderDashboardDetailSection("Standort & Strecke", groups["Standort & Strecke"])}
-    ${renderDashboardDetailSection("Details", groups["Anfrage-Details"], { fullWidth: true })}
+    ${renderDashboardDetailSection("Weitere Angaben", groups["Anfrage-Details"], { fullWidth: true })}
+    ${renderDashboardDetailSection("Nachricht & Hinweise", groups["Nachricht & Hinweise"], { fullWidth: true })}
   `;
 
   const publicMessages = (ticket.messages || []).filter(message => !message.is_internal);
+  if (messageCount) messageCount.textContent = String(publicMessages.length);
   if (messagesList) renderCustomerPortalMessages(publicMessages, messagesList);
   if (text) text.disabled = false;
   if (button) button.disabled = false;
@@ -9512,10 +10622,10 @@ function renderCustomerPortalMessages(messages, list) {
   }
 
   list.innerHTML = messages.map(message => `
-    <article class="message-card ${message.sender_type === "kunde" ? "customer-message" : "team-message"}">
+    <article class="message-card customer-portal-message ${message.sender_type === "kunde" ? "customer-message" : "team-message"}">
       <div class="message-meta">
-        <strong>${escapeHtml(senderTypeLabel(message.sender_type))}</strong>
-        <span>${escapeHtml(message.sender_name || "")}${message.created_at ? " · " + escapeHtml(formatDashboardDate(message.created_at)) : ""}</span>
+        <strong>${escapeHtml(message.sender_type === "kunde" ? "Sie" : "All4You")}</strong>
+        <span>${message.created_at ? escapeHtml(formatDashboardDate(message.created_at)) : ""}</span>
       </div>
       <p>${escapeHtml(message.message || "")}</p>
     </article>
@@ -9534,10 +10644,21 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   customerPortalAccount = data.account;
   customerPortalRequests = Array.isArray(data.requests) ? data.requests : [];
 
+  const displayName = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
   const name = document.querySelector("#customerPortalName");
   const meta = document.querySelector("#customerPortalMeta");
-  if (name) name.textContent = customerPortalAccount?.display_name || customerPortalAccount?.email || "Kunde";
+  const welcomeTitle = document.querySelector("#customerPortalWelcomeTitle");
+  const heroText = document.querySelector("#customerPortalHeroText");
+
+  if (name) name.textContent = displayName;
   if (meta) meta.textContent = customerPortalAccount?.email || "angemeldet";
+  if (welcomeTitle) welcomeTitle.textContent = `Willkommen, ${displayName}.`;
+  if (heroText) {
+    const stats = getCustomerPortalStats(customerPortalRequests);
+    heroText.textContent = stats.total
+      ? `Sie haben aktuell ${stats.total} zugeordnete${stats.total === 1 ? "n" : ""} Auftrag${stats.total === 1 ? "" : "e"}. Status, Details und Nachrichten bleiben hier gesammelt.`
+      : "Sobald All4You ein Ticket Ihrem Kundenkonto zuordnet, sehen Sie es hier übersichtlich gesammelt.";
+  }
 
   renderCustomerPortalRequests(customerPortalRequests);
 
@@ -9552,6 +10673,7 @@ function bindCustomerPortalPage() {
   const gate = document.querySelector("#customerPortalAuthGate");
   const protectedArea = document.querySelector("#customerPortalProtectedArea");
   const form = document.querySelector("#customerPortalLoginForm");
+  const setupForm = document.querySelector("#customerPortalPasswordSetupForm");
   const logoutButton = document.querySelector("#customerPortalLogoutButton");
   const requestList = document.querySelector("#customerPortalRequestList");
   const messageForm = document.querySelector("#customerPortalMessageForm");
@@ -9563,6 +10685,15 @@ function bindCustomerPortalPage() {
   function showLogin() {
     gate.classList.remove("is-hidden");
     protectedArea.classList.add("is-hidden");
+    form.classList.remove("is-hidden");
+    setupForm?.classList.add("is-hidden");
+  }
+
+  function showPasswordSetup() {
+    gate.classList.remove("is-hidden");
+    protectedArea.classList.add("is-hidden");
+    form.classList.add("is-hidden");
+    setupForm?.classList.remove("is-hidden");
   }
 
   function showPortal(session) {
@@ -9576,7 +10707,33 @@ function bindCustomerPortalPage() {
     });
   }
 
+  function getCustomerPortalSetupParams() {
+    const hash = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
+    const search = new URLSearchParams(window.location.search || "");
+    const accessToken = hash.get("access_token") || search.get("access_token");
+    const refreshToken = hash.get("refresh_token") || search.get("refresh_token") || "";
+    const expiresIn = Number(hash.get("expires_in") || search.get("expires_in") || 3600);
+    const type = hash.get("type") || search.get("type") || "";
+    const error = hash.get("error_description") || hash.get("error") || search.get("error_description") || search.get("error") || "";
+
+    return { accessToken, refreshToken, expiresIn, type, error };
+  }
+
   async function validateStoredSession() {
+    const setup = getCustomerPortalSetupParams();
+
+    if (setup.error) {
+      showLogin();
+      setCustomerPortalAuthMessage("error", "Link konnte nicht geöffnet werden", setup.error);
+      return;
+    }
+
+    if (setup.accessToken && (!setup.type || ["invite", "recovery", "signup", "magiclink"].includes(setup.type))) {
+      showPasswordSetup();
+      setCustomerPortalAuthMessage("loading", "Passwort einrichten", "Bitte vergeben Sie jetzt Ihr persönliches Kundenportal-Passwort.");
+      return;
+    }
+
     const session = getStoredCustomerSession();
     if (!session) {
       showLogin();
@@ -9603,6 +10760,40 @@ function bindCustomerPortalPage() {
       clearCustomerSession();
       showLogin();
       setCustomerPortalAuthMessage("error", "Login fehlgeschlagen", error.message || "Bitte Zugangsdaten prüfen.");
+    }
+  });
+
+  setupForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const setup = getCustomerPortalSetupParams();
+    const data = new FormData(setupForm);
+    const password = String(data.get("password") || "");
+    const passwordRepeat = String(data.get("password_repeat") || "");
+
+    if (password !== passwordRepeat) {
+      setCustomerPortalAuthMessage("error", "Passwörter stimmen nicht überein", "Bitte beide Passwortfelder identisch ausfüllen.");
+      return;
+    }
+
+    setCustomerPortalAuthMessage("loading", "Passwort wird gespeichert", "Der Kundenportal-Zugang wird eingerichtet.");
+
+    try {
+      const userData = await supabaseSetPassword(setup.accessToken, password);
+      const user = userData?.user || await supabaseGetUser(setup.accessToken);
+      storeCustomerSession({
+        access_token: setup.accessToken,
+        refresh_token: setup.refreshToken,
+        expires_in: setup.expiresIn || 3600,
+        user
+      });
+      window.history.replaceState({}, "", "/kundenportal");
+      setupForm.reset();
+      setCustomerPortalAuthMessage("success", "Passwort gespeichert", "Kundenportal wird geladen.");
+      showPortal(getStoredCustomerSession());
+    } catch (error) {
+      clearCustomerSession();
+      showPasswordSetup();
+      setCustomerPortalAuthMessage("error", "Passwort konnte nicht gespeichert werden", error.message || "Bitte den Einrichtungslink erneut anfordern.");
     }
   });
 
@@ -10098,7 +11289,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V5.9.0-CUSTOMER-PORTAL-BASIS
+   DBG: ALL4YOU-V5.9.11-DASHBOARD-TICKET-CARD-COMPACT
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

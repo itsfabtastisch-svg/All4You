@@ -1,13 +1,13 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.4.0 QR-Code Check-in
+   V6.6.0 Mitarbeiteransicht
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Datei.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Bestehende Supabase-Funktionen aus V6.0.0 werden weiterverwendet.
 
-   DBG: ALL4YOU-V6.4.0-OBJECTPORTAL-QR-CHECKIN
+   DBG: ALL4YOU-V6.6.0-OBJECTPORTAL-EMPLOYEE-VIEW
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -34,6 +34,7 @@ const state = {
   openQrUnitIds: new Set(),
   checkinToken: new URLSearchParams(window.location.search).get("checkin") || "",
   checkinData: null,
+  portalMode: "admin",
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -414,6 +415,75 @@ function getObjectJobSummary(object = {}) {
   return { jobs, current, next, last };
 }
 
+
+function normalizeRole(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isManagerProfile(profile = state.employeeProfile) {
+  const role = normalizeRole(profile?.role);
+  return ["admin", "chef", "owner", "leitung"].includes(role);
+}
+
+function currentEmployeeNumber() {
+  return String(state.employeeProfile?.employee_number || "").trim().toUpperCase();
+}
+
+function employeeOwnsJob(job = {}) {
+  if (isManagerProfile()) return true;
+  const number = currentEmployeeNumber();
+  const assigned = String(job.assigned_employee_name || "").trim().toUpperCase();
+  const checkedInNumber = String(job.checked_in_employee_number || "").trim().toUpperCase();
+  const checkedInId = String(job.checked_in_employee_id || "");
+  const employeeId = String(state.employeeProfile?.id || "");
+  return Boolean(
+    (number && (assigned === number || checkedInNumber === number))
+    || (employeeId && checkedInId === employeeId)
+  );
+}
+
+function getEmployeeJobRows() {
+  const rows = [];
+  state.objects.forEach((object) => {
+    getObjectJobs(object).forEach((job) => {
+      if (!employeeOwnsJob(job)) return;
+      rows.push({
+        object,
+        job,
+        unit: activeUnits(object.units).find((unit) => unit.id === job.unit_id) || job.unit || null,
+        customer: object.customer || {},
+      });
+    });
+  });
+
+  return rows.sort((a, b) => {
+    const statusOrder = { in_progress: 0, assigned: 1, planned: 2, completed: 8, paused: 9, cancelled: 10 };
+    const aStatus = statusOrder[String(a.job.status || "planned").toLowerCase()] ?? 5;
+    const bStatus = statusOrder[String(b.job.status || "planned").toLowerCase()] ?? 5;
+    if (aStatus !== bStatus) return aStatus - bStatus;
+    const aDate = a.job.planned_date ? new Date(a.job.planned_date).getTime() : Number.MAX_SAFE_INTEGER;
+    const bDate = b.job.planned_date ? new Date(b.job.planned_date).getTime() : Number.MAX_SAFE_INTEGER;
+    return aDate - bDate;
+  });
+}
+
+function isToday(value) {
+  if (!value) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return String(value).slice(0, 10) === today;
+}
+
+function setPortalMode(mode) {
+  state.portalMode = mode === "employee" ? "employee" : "admin";
+  const isEmployee = state.portalMode === "employee";
+  document.body.classList.toggle("op-employee-mode", isEmployee);
+  $("#opApp")?.classList.toggle("is-employee-mode", isEmployee);
+  $("#opOpenWizard")?.classList.toggle("is-hidden", isEmployee);
+  $("#opOpenWizardTop")?.classList.toggle("is-hidden", isEmployee);
+  const build = $("#opBuildBadge");
+  if (build) build.textContent = "DBG: ALL4YOU-V6.6.0-OBJECTPORTAL-EMPLOYEE-VIEW";
+}
+
 function getUnitLabel(object = {}, unitId) {
   if (!unitId) return "Objekt allgemein";
   const unit = activeUnits(object.units).find((item) => item.id === unitId)
@@ -543,6 +613,131 @@ function openQrPrintWindow(link, name) {
   }
   win.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#10243b;text-align:center}img{width:260px;height:260px}code{display:block;margin-top:18px;word-break:break-all;color:#65758a}.box{border:1px solid #dbe8ef;border-radius:20px;padding:24px;max-width:420px;margin:0 auto}</style></head><body><div class="box"><h1>All4You ObjektPortal</h1><h2>${escapeHtml(name || "QR-Code")}</h2><img src="${escapeHtml(qr)}" alt="QR-Code"><code>${escapeHtml(link)}</code></div><script>window.onload=()=>window.print();<\/script></body></html>`);
   win.document.close();
+}
+
+
+function renderEmployeeStats() {
+  const wrap = $("#opStats");
+  if (!wrap) return;
+  const rows = getEmployeeJobRows();
+  const today = rows.filter((row) => isToday(row.job.planned_date)).length;
+  const planned = rows.filter((row) => ["planned", "assigned"].includes(String(row.job.status || "").toLowerCase())).length;
+  const active = rows.filter((row) => String(row.job.status || "").toLowerCase() === "in_progress").length;
+  const completed = rows.filter((row) => String(row.job.status || "").toLowerCase() === "completed").length;
+
+  wrap.innerHTML = `
+    <article class="op-stat"><strong>${today}</strong><span>Heute</span></article>
+    <article class="op-stat"><strong>${planned}</strong><span>Geplant / zugewiesen</span></article>
+    <article class="op-stat"><strong>${active}</strong><span>In Arbeit</span></article>
+    <article class="op-stat"><strong>${completed}</strong><span>Abgeschlossen</span></article>
+  `;
+}
+
+function renderEmployeeJobCard(row) {
+  const { object, job, unit, customer } = row;
+  const status = String(job.status || "planned").toLowerCase();
+  const isActive = status === "in_progress";
+  return `
+    <article class="op-employee-job-card ${isActive ? "active" : ""}">
+      <div class="op-employee-job-head">
+        <div>
+          <p class="op-eyebrow">${escapeHtml(formatJobStatus(job.status))}</p>
+          <h3>${escapeHtml(object.name || "Objekt")}</h3>
+          <span>${escapeHtml(objectAddress(object))}</span>
+        </div>
+        <span class="op-chip op-job-status ${jobStatusClass(job.status)}">${escapeHtml(formatJobStatus(job.status))}</span>
+      </div>
+      <div class="op-employee-job-grid">
+        <div><strong>Einheit</strong><span>${escapeHtml(unit?.name || getUnitLabel(object, job.unit_id))}</span></div>
+        <div><strong>Geplant</strong><span>${escapeHtml(formatDate(job.planned_date))}</span></div>
+        <div><strong>Kunde</strong><span>${escapeHtml(customerLabel(customer))}</span></div>
+        <div><strong>Mitarbeiter-ID</strong><span>${escapeHtml(job.assigned_employee_name || state.employeeProfile?.employee_number || "MA offen")}</span></div>
+      </div>
+      ${job.notes ? `<p class="op-employee-note">${escapeHtml(job.notes)}</p>` : ""}
+      ${isActive ? `
+        <div class="op-employee-active-box">
+          <strong>Du bist für diesen Einsatz eingecheckt.</strong>
+          <span>Vor Ort seit: ${escapeHtml(formatDateTime(job.checked_in_at || job.started_at))}</span>
+        </div>
+      ` : `
+        <div class="op-employee-hint-box">
+          <strong>QR-Code vor Ort scannen</strong>
+          <span>Zum Starten des Einsatzes bitte den QR-Code an der passenden Einheit scannen.</span>
+        </div>
+      `}
+    </article>
+  `;
+}
+
+function renderEmployeeWorkspace() {
+  const list = $("#opObjectList");
+  const title = $("#opObjectTitle");
+  const sideList = $("#opCustomerList");
+  const search = $("#opCustomerSearch");
+  if (title) title.textContent = "Meine Einsätze & Aufgaben";
+  if (sideList) sideList.innerHTML = "";
+  if (search) search.value = "";
+  if (!list) return;
+
+  const rows = getEmployeeJobRows();
+  const name = state.employeeProfile?.display_name || state.employeeProfile?.employee_number || "Mitarbeiter";
+  const activeRows = rows.filter((row) => String(row.job.status || "").toLowerCase() === "in_progress");
+  const upcomingRows = rows.filter((row) => ["planned", "assigned"].includes(String(row.job.status || "").toLowerCase()));
+  const doneRows = rows.filter((row) => String(row.job.status || "").toLowerCase() === "completed").slice(0, 6);
+
+  if (!rows.length) {
+    list.innerHTML = `
+      <section class="op-employee-home">
+        <div class="op-employee-hero">
+          <p class="op-eyebrow">Mitarbeiter-Oberfläche</p>
+          <h2>Hallo ${escapeHtml(name)}</h2>
+          <p>Aktuell sind deiner Mitarbeiter-ID noch keine Einsätze zugeordnet. Sobald der Chef einen Einsatz mit deiner Mitarbeiter-ID plant, erscheint er hier.</p>
+        </div>
+        <div class="op-employee-section">
+          <div class="op-section-title"><div><p class="op-eyebrow">QR-Check-in</p><h3>Vor Ort starten</h3></div></div>
+          <div class="op-empty">Wenn du am Objekt bist, scanne den QR-Code an der Einheit. Danach öffnet sich hier der passende Check-in.</div>
+        </div>
+      </section>
+    `;
+    return;
+  }
+
+  list.innerHTML = `
+    <section class="op-employee-home">
+      <div class="op-employee-hero">
+        <p class="op-eyebrow">Mitarbeiter-Oberfläche</p>
+        <h2>Hallo ${escapeHtml(name)}</h2>
+        <p>Hier siehst du nur deine eigenen Einsätze, Aufgaben und später Kundenhinweise. Verwaltungsfunktionen bleiben Chef/Admin vorbehalten.</p>
+        <div class="op-object-meta">
+          <span class="op-chip">${escapeHtml(state.employeeProfile?.employee_number || "MA-ID offen")}</span>
+          <span class="op-chip">${rows.length} Einsatz${rows.length === 1 ? "" : "e"}</span>
+        </div>
+      </div>
+
+      <div class="op-employee-section">
+        <div class="op-section-title"><div><p class="op-eyebrow">Aktiv</p><h3>Gerade in Arbeit</h3></div></div>
+        ${activeRows.length ? activeRows.map(renderEmployeeJobCard).join("") : `<div class="op-empty">Kein aktiver Einsatz. Zum Start bitte QR-Code am Objekt scannen.</div>`}
+      </div>
+
+      <div class="op-employee-section">
+        <div class="op-section-title"><div><p class="op-eyebrow">Geplant</p><h3>Meine nächsten Einsätze</h3></div></div>
+        ${upcomingRows.length ? upcomingRows.map(renderEmployeeJobCard).join("") : `<div class="op-empty">Keine geplanten Einsätze für deine Mitarbeiter-ID.</div>`}
+      </div>
+
+      <div class="op-employee-section">
+        <div class="op-section-title"><div><p class="op-eyebrow">Anfragen & Aufgaben</p><h3>Kundenhinweise</h3></div></div>
+        <div class="op-employee-hint-box">
+          <strong>Vorbereitet für den nächsten Ausbauschritt.</strong>
+          <span>Hier erscheinen später Kundenhinweise, Bildanforderungen und Aufgaben, auf die Mitarbeiter strukturiert reagieren können.</span>
+        </div>
+      </div>
+
+      <div class="op-employee-section">
+        <div class="op-section-title"><div><p class="op-eyebrow">Historie</p><h3>Zuletzt abgeschlossen</h3></div></div>
+        ${doneRows.length ? doneRows.map(renderEmployeeJobCard).join("") : `<div class="op-empty">Noch keine abgeschlossenen Einsätze.</div>`}
+      </div>
+    </section>
+  `;
 }
 
 function renderStats() {
@@ -1092,18 +1287,35 @@ async function loadObjectPortal() {
   try {
     setStatus("ObjektPortal wird geladen …", "loading");
     state.employeeProfile = await fetchEmployeeProfile(state.session).catch(() => null);
-    const data = await callRpc("admin_list_object_portal", {});
+    const data = await callRpc("object_portal_list_for_current_user", {});
+    if (data?.success === false) throw new Error(data.message || "ObjektPortal konnte nicht geladen werden.");
+
+    state.portalMode = data.portal_mode || (isManagerProfile(state.employeeProfile) ? "admin" : "employee");
+    setPortalMode(state.portalMode);
     state.customers = data.customers || [];
     state.objects = data.objects || [];
     state.stats = data.stats || {};
+
     if (state.selectedCustomerId && !state.customers.some((customer) => customer.id === state.selectedCustomerId)) {
       state.selectedCustomerId = null;
     }
-    renderStats();
-    renderCustomers();
-    renderObjects();
+
+    if (state.portalMode === "employee") {
+      renderEmployeeStats();
+      renderEmployeeWorkspace();
+    } else {
+      renderStats();
+      renderCustomers();
+      renderObjects();
+    }
+
     await loadCheckinFromUrl();
-    setStatus(state.checkinToken ? "ObjektPortal + QR-Check-in geladen" : "ObjektPortal geladen", "success");
+    setStatus(
+      state.checkinToken
+        ? "ObjektPortal + QR-Check-in geladen"
+        : (state.portalMode === "employee" ? "Mitarbeiter-Oberfläche geladen" : "ObjektPortal geladen"),
+      "success"
+    );
   } catch (error) {
     setStatus(error.message || "ObjektPortal konnte nicht geladen werden.", "error");
   }

@@ -6745,53 +6745,103 @@ button.calendar-day {
 
 
 
-/* ==========================================================================
-   All4You ObjektPortal Foundation
-   DBG: ALL4YOU-ROUTER-V6.0.0-OBJECTPORTAL-FOUNDATION
+/* ========================================================================== 
+   All4You ObjektPortal UX Polish
+   DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
    ========================================================================== */
 
 .object-portal-manager {
-  gap: 20px;
+  gap: 18px;
+}
+
+.object-portal-main-head {
+  align-items: flex-start;
+}
+
+.object-portal-actionbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(10, 169, 155, .10), rgba(11, 78, 145, .06));
+  border: 1px solid rgba(10, 169, 155, .16);
+}
+
+.object-portal-actionbar strong {
+  display: block;
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.object-portal-actionbar p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.object-portal-actionbar-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .object-portal-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin: 18px 0 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
 }
 
 .object-portal-stats article {
-  padding: 18px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(10, 169, 155, .12), rgba(11, 78, 145, .08));
-  border: 1px solid rgba(10, 169, 155, .18);
-  box-shadow: 0 18px 42px rgba(16, 38, 60, .08);
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .78);
+  border: 1px solid rgba(10, 169, 155, .15);
+  box-shadow: 0 14px 32px rgba(16, 38, 60, .06);
 }
 
 .object-portal-stats span,
 .object-portal-stats small {
   display: block;
   color: var(--muted);
-  font-size: .82rem;
+  font-size: .78rem;
 }
 
 .object-portal-stats strong {
   display: block;
-  margin: 7px 0 3px;
+  margin: 5px 0 2px;
   color: var(--navy);
-  font-size: clamp(1.65rem, 3vw, 2.4rem);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
   line-height: 1;
+}
+
+.object-portal-help {
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(238, 246, 250, .58);
+  border: 1px solid rgba(16, 36, 59, .08);
+}
+
+.object-portal-help summary {
+  cursor: pointer;
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.object-portal-help p {
+  margin: 8px 0 0;
+  color: var(--muted);
 }
 
 .object-portal-admin-layout {
   display: grid;
-  grid-template-columns: minmax(260px, .9fr) minmax(280px, 1fr) minmax(320px, 1.15fr);
+  grid-template-columns: minmax(300px, .95fr) minmax(360px, 1.25fr);
   gap: 16px;
   align-items: start;
 }
 
-.object-portal-create-panel,
 .object-portal-list-panel,
 .object-portal-detail-panel {
   min-width: 0;
@@ -6818,7 +6868,7 @@ button.calendar-day {
   border-radius: 15px;
   padding: 11px 12px;
   color: var(--text);
-  background: rgba(255, 255, 255, .92);
+  background: rgba(255, 255, 255, .94);
   font: inherit;
   outline: none;
   transition: border .2s ease, box-shadow .2s ease, transform .2s ease;
@@ -6847,7 +6897,7 @@ button.calendar-day {
 }
 
 .object-portal-object-list {
-  max-height: 760px;
+  max-height: 690px;
   overflow: auto;
   padding-right: 4px;
 }
@@ -6856,12 +6906,60 @@ button.calendar-day {
   text-align: left;
 }
 
+.object-portal-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.object-portal-card-meta b,
+.object-portal-card-meta small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(10, 169, 155, .10);
+  color: var(--teal-2);
+  font-size: .76rem;
+  font-weight: 900;
+}
+
+.object-portal-card-meta small {
+  background: rgba(16, 36, 59, .06);
+  color: var(--muted);
+}
+
+.object-portal-detail-empty {
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(238, 246, 250, .9), rgba(255, 255, 255, .9));
+  border: 1px dashed rgba(10, 169, 155, .26);
+  color: var(--muted);
+}
+
+.object-portal-detail-empty strong {
+  color: var(--navy);
+  font-size: 1.05rem;
+}
+
+.object-portal-detail-empty p {
+  margin: 0;
+}
+
 .object-portal-detail-hero {
   padding: 18px;
   border-radius: 22px;
   background: linear-gradient(135deg, rgba(16, 36, 59, .96), rgba(10, 169, 155, .82));
   color: #fff;
-  box-shadow: 0 18px 45px rgba(16, 36, 59, .2);
+  box-shadow: 0 18px 45px rgba(16, 36, 59, .18);
+}
+
+.object-portal-detail-hero.compact {
+  padding: 16px;
 }
 
 .object-portal-detail-hero span {
@@ -6876,12 +6974,66 @@ button.calendar-day {
 
 .object-portal-detail-hero h3 {
   margin: 0 0 6px;
-  font-size: clamp(1.2rem, 2vw, 1.65rem);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
 }
 
 .object-portal-detail-hero p {
   margin: 0;
   color: rgba(255, 255, 255, .84);
+}
+
+.object-portal-detail-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.object-portal-detail-mini-grid article,
+.object-portal-next-info {
+  padding: 13px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid rgba(16, 36, 59, .09);
+}
+
+.object-portal-detail-mini-grid span,
+.object-portal-next-info span {
+  display: block;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.object-portal-detail-mini-grid strong,
+.object-portal-next-info strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--navy);
+}
+
+.object-portal-next-info p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.object-portal-details-block {
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: rgba(238, 246, 250, .62);
+  border: 1px solid rgba(16, 36, 59, .08);
+}
+
+.object-portal-details-block summary {
+  cursor: pointer;
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.object-portal-details-block p {
+  margin: 8px 0 0;
+  color: var(--muted);
 }
 
 .object-portal-unit-section {
@@ -6894,6 +7046,10 @@ button.calendar-day {
 .customer-object-units {
   display: grid;
   gap: 10px;
+}
+
+.object-portal-unit-list.compact {
+  margin-top: 12px;
 }
 
 .object-portal-unit-card,
@@ -6934,6 +7090,164 @@ button.calendar-day {
   color: var(--muted);
 }
 
+.object-portal-unit-form-card {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(16, 36, 59, .08);
+}
+
+.object-portal-modal-open {
+  overflow: hidden;
+}
+
+.object-portal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+}
+
+.object-portal-modal.is-hidden {
+  display: none !important;
+}
+
+.object-portal-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(7, 20, 35, .56);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.object-portal-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  max-height: min(780px, calc(100vh - 44px));
+  overflow: auto;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(244, 250, 252, .98));
+  box-shadow: 0 28px 90px rgba(7, 20, 35, .35);
+  border: 1px solid rgba(255, 255, 255, .72);
+}
+
+.object-portal-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 36, 59, .10);
+  background: rgba(255, 255, 255, .88);
+  color: var(--navy);
+  font-size: 1.45rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.object-portal-wizard-form {
+  padding: clamp(20px, 4vw, 30px);
+  gap: 18px;
+}
+
+.object-portal-wizard-head h2 {
+  margin: 2px 0 6px;
+  color: var(--navy);
+}
+
+.object-portal-wizard-head span {
+  color: var(--muted);
+}
+
+.object-portal-wizard-progress {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.object-portal-wizard-progress span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(16, 36, 59, .06);
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.object-portal-wizard-progress span.is-active,
+.object-portal-wizard-progress span.is-done {
+  background: linear-gradient(135deg, rgba(10, 169, 155, .95), rgba(11, 78, 145, .82));
+  color: #fff;
+}
+
+.object-portal-wizard-step {
+  display: none;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(238, 246, 250, .62);
+  border: 1px solid rgba(16, 36, 59, .08);
+}
+
+.object-portal-wizard-step.is-active {
+  display: grid;
+}
+
+.object-portal-wizard-step h3 {
+  margin: 0;
+  color: var(--navy);
+}
+
+.object-portal-wizard-summary {
+  display: grid;
+  gap: 10px;
+}
+
+.object-portal-wizard-summary article {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid rgba(16, 36, 59, .08);
+}
+
+.object-portal-wizard-summary span,
+.object-portal-wizard-summary small {
+  display: block;
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.object-portal-wizard-summary strong {
+  display: block;
+  margin: 3px 0;
+  color: var(--navy);
+}
+
+.object-portal-wizard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(16, 36, 59, .08);
+}
+
+.object-portal-wizard-footer > div {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .customer-portal-object-panel {
   margin-bottom: 18px;
 }
@@ -6951,12 +7265,27 @@ button.calendar-day {
   box-shadow: 0 18px 42px rgba(16, 38, 60, .09);
 }
 
+.customer-object-card.compact {
+  padding: 0;
+  overflow: hidden;
+}
+
+.customer-object-card summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.customer-object-card summary::-webkit-details-marker {
+  display: none;
+}
+
 .customer-object-card-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 14px;
+  padding: clamp(18px, 3vw, 24px);
+  margin: 0;
 }
 
 .customer-object-card-head h3 {
@@ -6970,8 +7299,44 @@ button.calendar-day {
   color: var(--muted);
 }
 
+.customer-object-card-status {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+.customer-object-primary-unit {
+  margin: 0 clamp(18px, 3vw, 24px) 14px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(10, 169, 155, .08);
+  border: 1px solid rgba(10, 169, 155, .14);
+}
+
+.customer-object-primary-unit span {
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.customer-object-primary-unit strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--navy);
+}
+
+.customer-object-primary-unit p {
+  margin: 3px 0 0;
+  color: var(--muted);
+}
+
 .customer-object-units {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0 clamp(18px, 3vw, 24px) clamp(18px, 3vw, 24px);
 }
 
 .customer-object-unit {
@@ -6989,7 +7354,7 @@ button.calendar-day {
   }
 
   .object-portal-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .object-portal-object-list {
@@ -6998,13 +7363,41 @@ button.calendar-day {
 }
 
 @media (max-width: 760px) {
+  .object-portal-actionbar,
+  .object-portal-wizard-footer,
+  .customer-object-card-head {
+    display: grid;
+  }
+
+  .object-portal-actionbar-buttons,
+  .object-portal-wizard-footer > div,
+  .customer-object-card-status {
+    justify-content: stretch;
+    justify-items: stretch;
+  }
+
+  .object-portal-actionbar-buttons .btn,
+  .object-portal-wizard-footer .btn {
+    width: 100%;
+  }
+
   .object-portal-stats,
   .form-grid.compact,
-  .customer-object-units {
+  .customer-object-units,
+  .object-portal-detail-mini-grid {
     grid-template-columns: 1fr;
   }
 
-  .customer-object-card-head {
-    display: grid;
+  .object-portal-wizard-progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .object-portal-modal {
+    padding: 10px;
+  }
+
+  .object-portal-modal-card {
+    max-height: calc(100vh - 20px);
+    border-radius: 22px;
   }
 }

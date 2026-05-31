@@ -155,6 +155,8 @@ let dashboardSelectedCustomerAccountId = null;
 let dashboardObjectPortalCustomersCache = [];
 let dashboardObjectPortalObjectsCache = [];
 let dashboardObjectPortalSelectedObjectId = null;
+let dashboardObjectPortalWizardStep = 1;
+const DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP = 5;
 
 
 function serviceAccentClass(service) {
@@ -1273,7 +1275,7 @@ function bindDashboardCustomerAccounts() {
 
 
 /* ==========================================================================
-   All4You ObjektPortal Foundation V6.0.0
+   All4You ObjektPortal UX Polish V6.0.1
    --------------------------------------------------------------------------
    MVP: Kunden -> Objekte -> Einheiten/Bereiche -> Reinigungsintervalle.
    QR-Code-Check-in, Bilder, Berichte und kontrollierte Kundenhinweise folgen.
@@ -1362,6 +1364,103 @@ function setDashboardObjectPortalUnitMessage(type, text) {
   message.textContent = text || "";
 }
 
+
+function setDashboardObjectPortalWizardStep(step) {
+  const modal = document.querySelector("#dashboardObjectPortalObjectModal");
+  const form = document.querySelector("#dashboardObjectPortalObjectForm");
+  if (!modal || !form) return;
+
+  dashboardObjectPortalWizardStep = Math.max(1, Math.min(DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP, Number(step) || 1));
+
+  modal.querySelectorAll("[data-object-portal-wizard-step]").forEach(section => {
+    section.classList.toggle("is-active", Number(section.dataset.objectPortalWizardStep) === dashboardObjectPortalWizardStep);
+  });
+
+  modal.querySelectorAll("[data-object-portal-wizard-progress]").forEach(item => {
+    const itemStep = Number(item.dataset.objectPortalWizardProgress);
+    item.classList.toggle("is-active", itemStep === dashboardObjectPortalWizardStep);
+    item.classList.toggle("is-done", itemStep < dashboardObjectPortalWizardStep);
+  });
+
+  const prevButton = modal.querySelector("#dashboardObjectPortalWizardPrev");
+  const nextButton = modal.querySelector("#dashboardObjectPortalWizardNext");
+  const submitButton = modal.querySelector("#dashboardObjectPortalWizardSubmit");
+
+  if (prevButton) prevButton.disabled = dashboardObjectPortalWizardStep <= 1;
+  if (nextButton) nextButton.classList.toggle("is-hidden", dashboardObjectPortalWizardStep >= DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP);
+  if (submitButton) submitButton.classList.toggle("is-hidden", dashboardObjectPortalWizardStep < DASHBOARD_OBJECT_PORTAL_WIZARD_MAX_STEP);
+
+  updateDashboardObjectPortalWizardSummary();
+}
+
+function updateDashboardObjectPortalWizardSummary() {
+  const form = document.querySelector("#dashboardObjectPortalObjectForm");
+  const summary = document.querySelector("#dashboardObjectPortalWizardSummary");
+  if (!form || !summary) return;
+
+  const data = new FormData(form);
+  const customerSelect = form.querySelector("#dashboardObjectPortalCustomerSelect");
+  const selectedCustomer = customerSelect?.selectedOptions?.[0]?.textContent?.trim() || "Noch nicht ausgewählt";
+  const objectName = String(data.get("name") || "Neues Objekt").trim() || "Neues Objekt";
+  const street = String(data.get("street") || "").trim();
+  const zip = String(data.get("zip") || "").trim();
+  const city = String(data.get("city") || "").trim();
+  const unitName = String(data.get("unit_name") || "").trim() || "Noch keine erste Einheit";
+  const interval = String(data.get("cleaning_interval") || "").trim() || "Intervall später ergänzen";
+  const packageKey = String(data.get("package_key") || "basic").trim();
+  const monthly = String(data.get("monthly_price") || "").trim();
+  const address = [street, [zip, city].filter(Boolean).join(" ")].filter(Boolean).join(", ") || "Adresse kann später ergänzt werden";
+
+  summary.innerHTML = `
+    <article><span>Kunde</span><strong>${escapeHtml(selectedCustomer)}</strong></article>
+    <article><span>Objekt</span><strong>${escapeHtml(objectName)}</strong><small>${escapeHtml(address)}</small></article>
+    <article><span>Paket</span><strong>${escapeHtml(objectPortalPackageLabel(packageKey))}</strong><small>${monthly ? `${escapeHtml(monthly.replace(".", ","))} € monatlich` : "Monatskosten optional"}</small></article>
+    <article><span>Erste Einheit</span><strong>${escapeHtml(unitName)}</strong><small>${escapeHtml(interval)}</small></article>
+  `;
+}
+
+function validateDashboardObjectPortalWizardStep() {
+  const form = document.querySelector("#dashboardObjectPortalObjectForm");
+  if (!form) return true;
+  const data = new FormData(form);
+
+  if (dashboardObjectPortalWizardStep === 1 && !String(data.get("customer_account_id") || "").trim()) {
+    setDashboardObjectPortalMessage("error", "Bitte zuerst ein Kundenkonto auswählen.");
+    return false;
+  }
+
+  if (dashboardObjectPortalWizardStep === 2 && !String(data.get("name") || "").trim()) {
+    setDashboardObjectPortalMessage("error", "Bitte einen Objektnamen eintragen.");
+    return false;
+  }
+
+  setDashboardObjectPortalMessage("", "Objekt wird Schritt für Schritt vorbereitet.");
+  return true;
+}
+
+function openDashboardObjectPortalWizard() {
+  const modal = document.querySelector("#dashboardObjectPortalObjectModal");
+  const form = document.querySelector("#dashboardObjectPortalObjectForm");
+  if (!modal) return;
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("object-portal-modal-open");
+  setDashboardObjectPortalWizardStep(1);
+  window.setTimeout(() => {
+    const firstField = form?.querySelector("select, input, textarea, button");
+    firstField?.focus?.();
+  }, 50);
+}
+
+function closeDashboardObjectPortalWizard() {
+  const modal = document.querySelector("#dashboardObjectPortalObjectModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("object-portal-modal-open");
+  setDashboardObjectPortalWizardStep(1);
+}
+
 function renderDashboardObjectPortalCustomerOptions() {
   const select = document.querySelector("#dashboardObjectPortalCustomerSelect");
   if (!select) return;
@@ -1408,7 +1507,7 @@ function renderDashboardObjectPortalList(objects = dashboardObjectPortalObjectsC
     list.innerHTML = `
       <div class="dashboard-empty-state">
         <strong>Noch keine Objekte</strong>
-        <p>Legen Sie links das erste Objekt für einen Bestandskunden an.</p>
+        <p>Klicken Sie oben auf „Objekt hinzufügen“, um den geführten Objekt-Wizard zu starten.</p>
       </div>
     `;
     renderDashboardObjectPortalDetail(null);
@@ -1425,15 +1524,18 @@ function renderDashboardObjectPortalList(objects = dashboardObjectPortalObjectsC
           <strong>${escapeHtml(object.name || "Objekt")}</strong>
           <em>${escapeHtml(objectPortalStatusLabel(object.status))}</em>
         </span>
-        <span class="ticket-service">${escapeHtml(objectPortalCustomerName(customer))}</span>
         <span class="ticket-summary">${escapeHtml(objectPortalAddress(object))}</span>
-        <span class="ticket-meta">${unitCount} Einheit${unitCount === 1 ? "" : "en"} · ${escapeHtml(objectPortalPackageLabel(customer?.package_key))}</span>
+        <span class="object-portal-card-meta">
+          <b>${escapeHtml(objectPortalCustomerName(customer))}</b>
+          <small>${unitCount} Bereich${unitCount === 1 ? "" : "e"}</small>
+          <small>${escapeHtml(objectPortalPackageLabel(customer?.package_key))}</small>
+        </span>
       </button>
     `;
   }).join("");
 
-  const selected = rows.find(object => object.id === dashboardObjectPortalSelectedObjectId) || rows[0];
-  renderDashboardObjectPortalDetail(selected);
+  const selected = rows.find(object => object.id === dashboardObjectPortalSelectedObjectId);
+  renderDashboardObjectPortalDetail(selected || null);
 }
 
 function renderDashboardObjectPortalDetail(object) {
@@ -1448,16 +1550,25 @@ function renderDashboardObjectPortalDetail(object) {
   if (!object?.id) {
     dashboardObjectPortalSelectedObjectId = null;
     title.textContent = "Objekt auswählen";
-    if (status) status.textContent = "—";
+    if (status) status.textContent = "Details";
     if (unitForm) unitForm.classList.add("is-hidden");
     if (unitObjectId) unitObjectId.value = "";
-    body.innerHTML = `<div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links ein Objekt aus oder legen Sie ein neues an.</span></div>`;
+    body.innerHTML = `
+      <div class="object-portal-detail-empty">
+        <strong>Erst auswählen, dann Details sehen</strong>
+        <p>Die Übersicht bleibt bewusst kompakt. Wählen Sie links ein Objekt aus oder starten Sie oben den Wizard für ein neues Objekt.</p>
+      </div>
+    `;
     return;
   }
 
   dashboardObjectPortalSelectedObjectId = object.id;
   const customer = getObjectPortalCustomerForObject(object);
   const units = Array.isArray(object.units) ? object.units : [];
+  const primaryUnit = units[0] || null;
+  const monthlyPrice = customer?.monthly_price !== null && customer?.monthly_price !== undefined
+    ? `${String(customer.monthly_price).replace(".", ",")} €`
+    : "—";
 
   title.textContent = object.name || "Objekt";
   if (status) status.textContent = objectPortalStatusLabel(object.status);
@@ -1465,29 +1576,37 @@ function renderDashboardObjectPortalDetail(object) {
   if (unitObjectId) unitObjectId.value = object.id;
 
   body.innerHTML = `
-    <section class="object-portal-detail-hero">
-      <span>Objekt</span>
+    <section class="object-portal-detail-hero compact">
+      <span>Ausgewähltes Objekt</span>
       <h3>${escapeHtml(object.name || "Objekt")}</h3>
       <p>${escapeHtml(objectPortalAddress(object))}</p>
     </section>
 
-    <div class="dashboard-detail-grid">
+    <div class="object-portal-detail-mini-grid">
       <article><span>Kunde</span><strong>${escapeHtml(objectPortalCustomerName(customer))}</strong></article>
+      <article><span>Bereiche</span><strong>${units.length}</strong></article>
       <article><span>Paket</span><strong>${escapeHtml(objectPortalPackageLabel(customer?.package_key))}</strong></article>
-      <article><span>Monatlich</span><strong>${customer?.monthly_price !== null && customer?.monthly_price !== undefined ? escapeHtml(String(customer.monthly_price).replace(".", ",")) + " €" : "—"}</strong></article>
-      <article><span>Objektart</span><strong>${escapeHtml(object.object_type || "—")}</strong></article>
+      <article><span>Monatlich</span><strong>${escapeHtml(monthlyPrice)}</strong></article>
     </div>
 
-    ${object.notes ? `<section class="detail-summary-block"><span>Interne Notiz</span><p>${escapeHtml(object.notes)}</p></section>` : ""}
+    ${primaryUnit ? `
+      <section class="object-portal-next-info">
+        <span>Erstes Intervall</span>
+        <strong>${escapeHtml(primaryUnit.name || "Einheit")}</strong>
+        <p>${escapeHtml(primaryUnit.cleaning_interval || "Intervall noch nicht hinterlegt")}</p>
+      </section>
+    ` : ""}
 
-    <section class="object-portal-unit-section">
-      <div class="panel-head compact">
-        <div>
-          <p class="eyebrow">Einheiten & Reinigungsintervalle</p>
-          <h3>${units.length} Bereich${units.length === 1 ? "" : "e"}</h3>
-        </div>
-      </div>
-      <div class="object-portal-unit-list">
+    ${object.notes ? `
+      <details class="object-portal-details-block">
+        <summary>Interne Notiz anzeigen</summary>
+        <p>${escapeHtml(object.notes)}</p>
+      </details>
+    ` : ""}
+
+    <details class="object-portal-details-block">
+      <summary>${units.length} Einheit${units.length === 1 ? "" : "en"} / Bereich${units.length === 1 ? "" : "e"} anzeigen</summary>
+      <div class="object-portal-unit-list compact">
         ${units.length ? units.map(unit => `
           <article class="object-portal-unit-card">
             <div>
@@ -1504,7 +1623,7 @@ function renderDashboardObjectPortalDetail(object) {
           </div>
         `}
       </div>
-    </section>
+    </details>
   `;
 }
 
@@ -1549,6 +1668,31 @@ function bindDashboardObjectPortal() {
   const unitForm = document.querySelector("#dashboardObjectPortalUnitForm");
   const list = document.querySelector("#dashboardObjectPortalObjectList");
   const reloadButton = document.querySelector("#dashboardObjectPortalReload");
+  const openWizardButton = document.querySelector("#dashboardObjectPortalOpenWizard");
+  const wizardPrevButton = document.querySelector("#dashboardObjectPortalWizardPrev");
+  const wizardNextButton = document.querySelector("#dashboardObjectPortalWizardNext");
+
+  openWizardButton?.addEventListener("click", () => {
+    objectForm?.reset();
+    setDashboardObjectPortalMessage("", "Objekt wird Schritt für Schritt vorbereitet.");
+    openDashboardObjectPortalWizard();
+  });
+
+  document.querySelectorAll("[data-object-portal-modal-close]").forEach(button => {
+    button.addEventListener("click", () => closeDashboardObjectPortalWizard());
+  });
+
+  wizardPrevButton?.addEventListener("click", () => {
+    setDashboardObjectPortalWizardStep(dashboardObjectPortalWizardStep - 1);
+  });
+
+  wizardNextButton?.addEventListener("click", () => {
+    if (!validateDashboardObjectPortalWizardStep()) return;
+    setDashboardObjectPortalWizardStep(dashboardObjectPortalWizardStep + 1);
+  });
+
+  objectForm?.addEventListener("input", updateDashboardObjectPortalWizardSummary);
+  objectForm?.addEventListener("change", updateDashboardObjectPortalWizardSummary);
 
   objectForm?.addEventListener("submit", async event => {
     event.preventDefault();
@@ -1587,6 +1731,7 @@ function bindDashboardObjectPortal() {
       });
       dashboardObjectPortalSelectedObjectId = object.id;
       objectForm.reset();
+      closeDashboardObjectPortalWizard();
       await loadDashboardObjectPortal(dashboardCurrentSession);
       setDashboardObjectPortalMessage("success", "Objekt wurde gespeichert.");
     } catch (error) {
@@ -1706,16 +1851,27 @@ function renderCustomerPortalObjects(objects = customerPortalObjects, errorMessa
 
   list.innerHTML = rows.map(object => {
     const units = Array.isArray(object.units) ? object.units : [];
+    const primaryUnit = units[0] || null;
     return `
-      <article class="customer-object-card">
-        <div class="customer-object-card-head">
+      <details class="customer-object-card compact">
+        <summary class="customer-object-card-head">
           <div>
             <span class="eyebrow">Objekt</span>
             <h3>${escapeHtml(object.name || "Objekt")}</h3>
             <p>${escapeHtml(objectPortalAddress(object))}</p>
           </div>
-          <span class="status-pill">${escapeHtml(objectPortalStatusLabel(object.status))}</span>
-        </div>
+          <div class="customer-object-card-status">
+            <span class="status-pill">${escapeHtml(objectPortalStatusLabel(object.status))}</span>
+            <small>${units.length} Bereich${units.length === 1 ? "" : "e"}</small>
+          </div>
+        </summary>
+        ${primaryUnit ? `
+          <div class="customer-object-primary-unit">
+            <span>Nächstes sichtbares Intervall</span>
+            <strong>${escapeHtml(primaryUnit.name || "Einheit")}</strong>
+            <p>${escapeHtml(primaryUnit.cleaning_interval || "Intervall noch nicht hinterlegt")}</p>
+          </div>
+        ` : ""}
         <div class="customer-object-units">
           ${units.length ? units.map(unit => `
             <div class="customer-object-unit">
@@ -1730,10 +1886,11 @@ function renderCustomerPortalObjects(objects = customerPortalObjects, errorMessa
             </div>
           `}
         </div>
-      </article>
+      </details>
     `;
   }).join("");
 }
+
 
 
 async function archiveDashboardRequest(session, requestId, reason = "Manuell archiviert") {
@@ -2687,7 +2844,7 @@ async function notifyTeamAboutRequest(requestResult, fallbacks = {}) {
     requestResult.service ||
     null;
 
-  console.log("ALL4YOU-ROUTER-V6.0.0-OBJECTPORTAL-FOUNDATION notify payload", {
+  console.log("ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH notify payload", {
     requestId: requestResult.id,
     ticket: requestResult.ticket_number || null,
     customerEmailOverride: directCustomerEmail || null,
@@ -3700,7 +3857,7 @@ function appendMailPreviewButton(result, href, text = "E-Mail-Kopie öffnen") {
 
 // All4You Service München
 // Virtueller Router mit History API
-// DBG: ALL4YOU-ROUTER-V6.0.0-OBJECTPORTAL-FOUNDATION
+// DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
 
 const app = document.querySelector("#app");
 const navToggle = document.querySelector(".nav-toggle");
@@ -5669,122 +5826,43 @@ function pageDashboard() {
 
 
           <section class="dashboard-panel object-portal-manager is-hidden" id="dashboardObjectPortalManager" data-dashboard-view="object-portal">
-            <div class="panel-head">
+            <div class="panel-head object-portal-main-head">
               <div>
                 <p class="eyebrow">All4You ObjektPortal</p>
                 <h2>Digitales Objekt- &amp; Reinigungsportal</h2>
               </div>
-              <span class="status-pill" id="dashboardObjectPortalStatus">Fundament</span>
+              <span class="status-pill" id="dashboardObjectPortalStatus">Übersicht</span>
             </div>
 
-            <p class="dashboard-calendar-intro">
-              MVP-Grundlage für Bestandskunden: Kunden aktivieren, Objekte anlegen, Einheiten/Bereiche erfassen
-              und Reinigungsintervalle im Kundenportal sichtbar machen. QR-Code-Check-in, Bilder und Berichte folgen in den nächsten Stufen.
-            </p>
+            <div class="object-portal-actionbar">
+              <div>
+                <strong>Objekte kompakt verwalten</strong>
+                <p>Erst Übersicht, dann Details: Neue Objekte werden geführt über einen Wizard angelegt.</p>
+              </div>
+              <div class="object-portal-actionbar-buttons">
+                <button class="btn primary" type="button" id="dashboardObjectPortalOpenWizard">+ Objekt hinzufügen</button>
+                <button class="btn ghost" type="button" id="dashboardObjectPortalReload">Neu laden</button>
+              </div>
+            </div>
 
-            <div class="object-portal-stats">
-              <article><span>Objekte</span><strong id="objectPortalStatObjects">0</strong><small>angelegte Objekte</small></article>
+            <div class="object-portal-stats compact">
+              <article><span>Objekte</span><strong id="objectPortalStatObjects">0</strong><small>angelegt</small></article>
               <article><span>Einheiten</span><strong id="objectPortalStatUnits">0</strong><small>Bereiche / Räume</small></article>
-              <article><span>Kunden</span><strong id="objectPortalStatCustomers">0</strong><small>ObjektPortal aktiv</small></article>
-              <article><span>Nächster Schritt</span><strong>QR</strong><small>Check-in folgt</small></article>
+              <article><span>Kunden</span><strong id="objectPortalStatCustomers">0</strong><small>aktiv</small></article>
             </div>
 
-            <div class="object-portal-admin-layout">
-              <aside class="dashboard-panel object-portal-create-panel">
-                <p class="eyebrow">Objekt anlegen</p>
-                <form class="object-portal-form" id="dashboardObjectPortalObjectForm">
-                  <label>Kunde
-                    <select name="customer_account_id" id="dashboardObjectPortalCustomerSelect" required>
-                      <option value="">Kundenkonten werden geladen …</option>
-                    </select>
-                  </label>
+            <details class="object-portal-help">
+              <summary>Was kommt als nächstes?</summary>
+              <p>Dieses Fundament verwaltet Kunden, Objekte, Einheiten und Intervalle. QR-Code-Check-in, Bilder, Berichte und kontrollierte Kundenhinweise folgen in den nächsten Stufen.</p>
+            </details>
 
-                  <div class="form-grid compact">
-                    <label>Paket
-                      <select name="package_key">
-                        <option value="basic">ObjektPortal Basic</option>
-                        <option value="plus">ObjektPortal Plus</option>
-                        <option value="pro">ObjektPortal Pro</option>
-                        <option value="custom">Individuell</option>
-                      </select>
-                    </label>
-                    <label>Monatlich €
-                      <input type="number" name="monthly_price" step="0.01" min="0" placeholder="optional">
-                    </label>
-                  </div>
-
-                  <label>Objektname
-                    <input type="text" name="name" placeholder="z. B. Musterstraße 12 / Wohnanlage Nord" required>
-                  </label>
-
-                  <div class="form-grid compact">
-                    <label>Objektart
-                      <select name="object_type">
-                        <option value="wohnanlage">Wohnanlage</option>
-                        <option value="hausverwaltung">Hausverwaltung</option>
-                        <option value="buero">Büro / Gewerbe</option>
-                        <option value="treppenhaus">Treppenhaus</option>
-                        <option value="sonstiges">Sonstiges</option>
-                      </select>
-                    </label>
-                    <label>Status
-                      <select name="status">
-                        <option value="active">Aktiv</option>
-                        <option value="paused">Pausiert</option>
-                        <option value="draft">Entwurf</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <label>Straße / Adresse
-                    <input type="text" name="street" placeholder="Straße und Hausnummer">
-                  </label>
-
-                  <div class="form-grid compact">
-                    <label>PLZ
-                      <input type="text" name="zip" placeholder="z. B. 80331">
-                    </label>
-                    <label>Ort
-                      <input type="text" name="city" placeholder="München">
-                    </label>
-                  </div>
-
-                  <label>Erste Einheit / Bereich
-                    <input type="text" name="unit_name" placeholder="z. B. Treppenhaus A, Keller, Eingangsbereich">
-                  </label>
-
-                  <div class="form-grid compact">
-                    <label>Einheit-Typ
-                      <select name="unit_type">
-                        <option value="treppenhaus">Treppenhaus</option>
-                        <option value="keller">Keller</option>
-                        <option value="eingang">Eingang</option>
-                        <option value="aussenbereich">Außenbereich</option>
-                        <option value="raum">Raum</option>
-                        <option value="sonstiges">Sonstiges</option>
-                      </select>
-                    </label>
-                    <label>Intervall
-                      <input type="text" name="cleaning_interval" placeholder="z. B. wöchentlich montags">
-                    </label>
-                  </div>
-
-                  <label>Interne Notiz
-                    <textarea name="notes" rows="3" placeholder="z. B. Schlüssel, Besonderheiten, abgesprochener Umfang …"></textarea>
-                  </label>
-
-                  <button class="btn primary" type="submit">Objekt speichern <span>›</span></button>
-                  <p class="dashboard-ticket-action-message" id="dashboardObjectPortalMessage">Bereit für ObjektPortal-Grunddaten.</p>
-                </form>
-              </aside>
-
+            <div class="object-portal-admin-layout polished">
               <div class="dashboard-panel object-portal-list-panel">
                 <div class="panel-head compact">
                   <div>
                     <p class="eyebrow">Objekte</p>
                     <h3>Angelegte Objekte</h3>
                   </div>
-                  <button class="btn ghost" type="button" id="dashboardObjectPortalReload">Neu laden</button>
                 </div>
                 <div class="dashboard-ticket-list object-portal-object-list" id="dashboardObjectPortalObjectList">
                   <div class="dashboard-empty-state">
@@ -5800,15 +5878,20 @@ function pageDashboard() {
                     <p class="eyebrow">Objektdetails</p>
                     <h2 id="dashboardObjectPortalDetailTitle">Objekt auswählen</h2>
                   </div>
-                  <span class="status-pill" id="dashboardObjectPortalDetailStatus">—</span>
+                  <span class="status-pill" id="dashboardObjectPortalDetailStatus">Details</span>
                 </div>
                 <div class="dashboard-detail-body" id="dashboardObjectPortalDetailBody">
-                  <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie links ein Objekt aus.</span></div>
+                  <div class="object-portal-detail-empty"><strong>Erst auswählen, dann Details sehen</strong><p>Die Übersicht bleibt bewusst kompakt.</p></div>
                 </div>
 
-                <form class="object-portal-form is-hidden" id="dashboardObjectPortalUnitForm">
+                <form class="object-portal-form object-portal-unit-form-card is-hidden" id="dashboardObjectPortalUnitForm">
                   <input type="hidden" name="object_id" id="dashboardObjectPortalUnitObjectId">
-                  <p class="eyebrow">Einheit / Bereich ergänzen</p>
+                  <div class="panel-head compact">
+                    <div>
+                      <p class="eyebrow">Einheit ergänzen</p>
+                      <h3>Bereich / Intervall hinzufügen</h3>
+                    </div>
+                  </div>
                   <label>Name
                     <input type="text" name="name" placeholder="z. B. Treppenhaus B" required>
                   </label>
@@ -5834,6 +5917,131 @@ function pageDashboard() {
                   <p class="dashboard-ticket-action-message" id="dashboardObjectPortalUnitMessage">Einheiten werden dem ausgewählten Objekt zugeordnet.</p>
                 </form>
               </aside>
+            </div>
+
+            <div class="object-portal-modal is-hidden" id="dashboardObjectPortalObjectModal" aria-hidden="true">
+              <button class="object-portal-modal-backdrop" type="button" aria-label="Objekt-Wizard schließen" data-object-portal-modal-close></button>
+              <section class="object-portal-modal-card" role="dialog" aria-modal="true" aria-labelledby="objectPortalWizardTitle">
+                <button class="object-portal-modal-close" type="button" aria-label="Schließen" data-object-portal-modal-close>×</button>
+                <form class="object-portal-form object-portal-wizard-form" id="dashboardObjectPortalObjectForm">
+                  <div class="object-portal-wizard-head">
+                    <div>
+                      <p class="eyebrow">Objekt hinzufügen</p>
+                      <h2 id="objectPortalWizardTitle">Geführte Objekterstellung</h2>
+                      <span>Nur die wichtigen Daten pro Schritt — der Rest bleibt übersichtlich.</span>
+                    </div>
+                  </div>
+
+                  <div class="object-portal-wizard-progress" aria-label="Fortschritt">
+                    <span data-object-portal-wizard-progress="1">Kunde</span>
+                    <span data-object-portal-wizard-progress="2">Objekt</span>
+                    <span data-object-portal-wizard-progress="3">Adresse</span>
+                    <span data-object-portal-wizard-progress="4">Einheit</span>
+                    <span data-object-portal-wizard-progress="5">Prüfen</span>
+                  </div>
+
+                  <section class="object-portal-wizard-step is-active" data-object-portal-wizard-step="1">
+                    <h3>Kunde &amp; Paket</h3>
+                    <label>Kunde
+                      <select name="customer_account_id" id="dashboardObjectPortalCustomerSelect" required>
+                        <option value="">Kundenkonten werden geladen …</option>
+                      </select>
+                    </label>
+                    <div class="form-grid compact">
+                      <label>Paket
+                        <select name="package_key">
+                          <option value="basic">ObjektPortal Basic</option>
+                          <option value="plus">ObjektPortal Plus</option>
+                          <option value="pro">ObjektPortal Pro</option>
+                          <option value="custom">Individuell</option>
+                        </select>
+                      </label>
+                      <label>Monatlich €
+                        <input type="number" name="monthly_price" step="0.01" min="0" placeholder="optional">
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="2">
+                    <h3>Objekt-Grunddaten</h3>
+                    <label>Objektname
+                      <input type="text" name="name" placeholder="z. B. Musterstraße 12 / Wohnanlage Nord" required>
+                    </label>
+                    <div class="form-grid compact">
+                      <label>Objektart
+                        <select name="object_type">
+                          <option value="wohnanlage">Wohnanlage</option>
+                          <option value="hausverwaltung">Hausverwaltung</option>
+                          <option value="buero">Büro / Gewerbe</option>
+                          <option value="treppenhaus">Treppenhaus</option>
+                          <option value="sonstiges">Sonstiges</option>
+                        </select>
+                      </label>
+                      <label>Status
+                        <select name="status">
+                          <option value="active">Aktiv</option>
+                          <option value="paused">Pausiert</option>
+                          <option value="draft">Entwurf</option>
+                        </select>
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="3">
+                    <h3>Adresse</h3>
+                    <label>Straße / Adresse
+                      <input type="text" name="street" placeholder="Straße und Hausnummer">
+                    </label>
+                    <div class="form-grid compact">
+                      <label>PLZ
+                        <input type="text" name="zip" placeholder="z. B. 80331">
+                      </label>
+                      <label>Ort
+                        <input type="text" name="city" placeholder="München">
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="4">
+                    <h3>Erste Einheit / Bereich</h3>
+                    <label>Erste Einheit / Bereich
+                      <input type="text" name="unit_name" placeholder="z. B. Treppenhaus A, Keller, Eingangsbereich">
+                    </label>
+                    <div class="form-grid compact">
+                      <label>Einheit-Typ
+                        <select name="unit_type">
+                          <option value="treppenhaus">Treppenhaus</option>
+                          <option value="keller">Keller</option>
+                          <option value="eingang">Eingang</option>
+                          <option value="aussenbereich">Außenbereich</option>
+                          <option value="raum">Raum</option>
+                          <option value="sonstiges">Sonstiges</option>
+                        </select>
+                      </label>
+                      <label>Intervall
+                        <input type="text" name="cleaning_interval" placeholder="z. B. wöchentlich montags">
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="object-portal-wizard-step" data-object-portal-wizard-step="5">
+                    <h3>Zusammenfassung</h3>
+                    <div class="object-portal-wizard-summary" id="dashboardObjectPortalWizardSummary"></div>
+                    <label>Interne Notiz
+                      <textarea name="notes" rows="3" placeholder="z. B. Schlüssel, Besonderheiten, abgesprochener Umfang …"></textarea>
+                    </label>
+                  </section>
+
+                  <footer class="object-portal-wizard-footer">
+                    <p class="dashboard-ticket-action-message" id="dashboardObjectPortalMessage">Objekt wird Schritt für Schritt vorbereitet.</p>
+                    <div>
+                      <button class="btn ghost" type="button" id="dashboardObjectPortalWizardPrev" disabled>Zurück</button>
+                      <button class="btn primary" type="button" id="dashboardObjectPortalWizardNext">Weiter <span>›</span></button>
+                      <button class="btn primary is-hidden" type="submit" id="dashboardObjectPortalWizardSubmit">Objekt speichern <span>›</span></button>
+                    </div>
+                  </footer>
+                </form>
+              </section>
             </div>
           </section>
 
@@ -8454,7 +8662,7 @@ function bindRollerWizard() {
 
 /* ============================================================================
    Anhänger-Kalender / Supabase Sync
-   DBG: ALL4YOU-ROUTER-V6.0.0-OBJECTPORTAL-FOUNDATION
+   DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
    ========================================================================== */
 
 let all4youTrailerCalendarRows = [];
@@ -10784,7 +10992,7 @@ function installWizardButtonFallback() {
 
 /* ==========================================================================
    Cookie Consent
-   DBG: ALL4YOU-ROUTER-V6.0.0-OBJECTPORTAL-FOUNDATION
+   DBG: ALL4YOU-ROUTER-V6.0.1-OBJECTPORTAL-UX-POLISH
    ========================================================================== */
 
 const ALL4YOU_COOKIE_CONSENT_KEY = "all4you_cookie_consent_v1";

@@ -7657,7 +7657,7 @@ function pageCustomerPortal() {
             </div>
             <div class="dashboard-hero-actions customer-portal-actions">
               <span class="status-pill success" id="customerPortalLiveStatus">Live verbunden</span>
-              <a class="btn ghost" href="/kontakt" data-link>Neue Anfrage</a>
+              <button class="btn ghost" type="button" data-customer-new-request>Neue Anfrage</button>
             </div>
           </section>
 
@@ -7747,6 +7747,79 @@ function pageCustomerPortal() {
                 <div class="dashboard-detail-body customer-detail-body" id="customerPortalDetailBody">
                   <div class="summary-wide"><strong>Hinweis</strong><span>Wählen Sie einen Auftrag aus.</span></div>
                 </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="portal-modal-backdrop customer-new-request-backdrop is-hidden" id="customerPortalNewRequestModal" aria-hidden="true">
+            <section class="portal-modal-card customer-new-request-card" role="dialog" aria-modal="true" aria-labelledby="customerPortalNewRequestTitle">
+              <div class="portal-modal-head">
+                <div>
+                  <p class="eyebrow">Neue Anfrage</p>
+                  <h2 id="customerPortalNewRequestTitle">Anfrage aus dem Kundenportal</h2>
+                </div>
+                <button class="portal-modal-close" type="button" data-customer-new-request-close aria-label="Fenster schließen">×</button>
+              </div>
+              <div class="portal-modal-body customer-new-request-body">
+                <div class="customer-new-request-steps" id="customerNewRequestSteps">
+                  <span class="active" data-customer-new-request-indicator="0">1 Leistung</span>
+                  <span data-customer-new-request-indicator="1">2 Kontakt</span>
+                  <span data-customer-new-request-indicator="2">3 Details</span>
+                  <span data-customer-new-request-indicator="3">4 Prüfen</span>
+                </div>
+                <form class="customer-new-request-form" id="customerPortalNewRequestForm">
+                  <section class="customer-new-request-step active" data-customer-new-request-step="0">
+                    <p class="customer-new-request-copy">Wählen Sie aus, wobei All4You helfen soll. Ihre bekannten Kundendaten werden automatisch übernommen.</p>
+                    <div class="customer-new-request-service-grid">
+                      <button type="button" class="customer-new-request-service active" data-customer-new-service="rollerabholservice">
+                        <strong>Motorrad- & Rollertransport</strong><span>Abholung, Transport oder Überführung.</span>
+                      </button>
+                      <button type="button" class="customer-new-request-service" data-customer-new-service="anhaenger">
+                        <strong>Anhängervermietung</strong><span>Mietzeitraum, Übergabe und Transportgut.</span>
+                      </button>
+                      <button type="button" class="customer-new-request-service" data-customer-new-service="entruempelung">
+                        <strong>Entrümpelung</strong><span>Objekt, Umfang, Zugang und Hinweise.</span>
+                      </button>
+                      <button type="button" class="customer-new-request-service" data-customer-new-service="reinigung">
+                        <strong>Reinigungsservice</strong><span>Objekt, Turnus, Bereich und Wunschzeit.</span>
+                      </button>
+                    </div>
+                  </section>
+
+                  <section class="customer-new-request-step" data-customer-new-request-step="1" hidden>
+                    <div class="customer-new-request-grid">
+                      <label>Name / Ansprechpartner
+                        <input type="text" name="name" required>
+                      </label>
+                      <label>E-Mail
+                        <input type="email" name="email" required>
+                      </label>
+                      <label>Telefon
+                        <input type="tel" name="phone" placeholder="Telefonnummer">
+                      </label>
+                      <label>Firma / Objekt
+                        <input type="text" name="company" placeholder="optional">
+                      </label>
+                    </div>
+                    <p class="customer-new-request-note">Die Daten stammen aus Ihrem Kundenkonto und können für diese Anfrage angepasst werden.</p>
+                  </section>
+
+                  <section class="customer-new-request-step" data-customer-new-request-step="2" hidden>
+                    <div id="customerNewRequestServiceFields"></div>
+                  </section>
+
+                  <section class="customer-new-request-step" data-customer-new-request-step="3" hidden>
+                    <div class="customer-new-request-summary" id="customerNewRequestSummary"></div>
+                    <p class="customer-new-request-note">Nach dem Absenden erscheint die Anfrage automatisch in Ihrem Kundenportal und im All4You-Mitarbeiterportal.</p>
+                  </section>
+
+                  <div class="customer-new-request-actions">
+                    <button class="btn ghost" type="button" data-customer-new-request-prev>Zurück</button>
+                    <button class="btn primary" type="button" data-customer-new-request-next>Weiter <span>›</span></button>
+                    <button class="btn primary" type="submit" data-customer-new-request-submit hidden>Anfrage senden <span>›</span></button>
+                  </div>
+                  <p class="dashboard-note-message" id="customerNewRequestMessage"></p>
+                </form>
               </div>
             </section>
           </div>
@@ -10818,6 +10891,17 @@ function applyCustomerPortalHistoryState() {
   } else {
     closeCustomerPortalStatusModal({ updateHistory: false });
   }
+
+  if (state.modal === "new-request") {
+    const modal = document.querySelector("#customerPortalNewRequestModal");
+    if (modal && customerPortalCurrentSession && customerPortalAccount) {
+      if (modal.classList.contains("is-hidden")) resetCustomerNewRequestWizard();
+      modal.classList.remove("is-hidden");
+      modal.setAttribute("aria-hidden", "false");
+    }
+  } else {
+    closeCustomerNewRequestModal({ updateHistory: false });
+  }
 }
 
 function bindCustomerPortalHistoryRouting() {
@@ -11688,6 +11772,9 @@ let customerPortalSelectedObjectId = null;
 let customerPortalObjectLoadError = "";
 let customerPortalActiveTab = "overview";
 let customerPortalStatusRows = [];
+let customerPortalNewRequestStep = 0;
+let customerPortalNewRequestService = "rollerabholservice";
+let customerPortalNewRequestGlobalClickBound = false;
 
 async function fetchCustomerPortalData(session) {
   if (!session?.access_token) {
@@ -12754,6 +12841,370 @@ function renderCustomerPortalMessages(messages, list) {
   `).join("");
 }
 
+
+const CUSTOMER_PORTAL_NEW_REQUEST_SERVICES = {
+  rollerabholservice: {
+    label: "Motorrad- & Rollertransport",
+    service: "rollerabholservice",
+    subject: "Motorrad- & Rollertransport-Anfrage",
+    summaryLabel: "Motorrad-/Rollertransport"
+  },
+  anhaenger: {
+    label: "Anhängervermietung",
+    service: "anhaenger",
+    subject: "Anhänger-Mietanfrage",
+    summaryLabel: "Anhängervermietung"
+  },
+  entruempelung: {
+    label: "Entrümpelung",
+    service: "entruempelung",
+    subject: "Entrümpelungsanfrage",
+    summaryLabel: "Entrümpelung"
+  },
+  reinigung: {
+    label: "Reinigungsservice",
+    service: "reinigung",
+    subject: "Reinigungsanfrage",
+    summaryLabel: "Reinigungsservice"
+  }
+};
+
+function customerPortalAccountPrefill() {
+  return {
+    name: customerPortalAccount?.display_name || customerPortalAccount?.company || "",
+    email: customerPortalAccount?.email || customerPortalCurrentSession?.user?.email || "",
+    phone: customerPortalAccount?.phone || "",
+    company: customerPortalAccount?.company || ""
+  };
+}
+
+function setCustomerNewRequestMessage(type, text) {
+  const message = document.querySelector("#customerNewRequestMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function customerPortalServiceFieldsTemplate(serviceKey = customerPortalNewRequestService) {
+  switch (serviceKey) {
+    case "anhaenger":
+      return `
+        <div class="customer-new-request-grid">
+          <label>Mietbeginn
+            <input type="date" name="rental_start" required>
+          </label>
+          <label>Mietende
+            <input type="date" name="rental_end" required>
+          </label>
+          <label>Übergabe / Standort
+            <select name="handover" required>
+              <option value="">Bitte wählen</option>
+              <option>Abholung/Rückgabe am Standort Sachsenstraße</option>
+              <option>Abholung/Rückgabe am Standort Karolinger Allee</option>
+              <option>Lieferung zum Wunschort gegen Aufpreis</option>
+              <option>Lieferung und Abholung gegen Aufpreis</option>
+            </select>
+          </label>
+          <label>Transportgut
+            <input type="text" name="transport_goods" placeholder="z. B. Möbel, Kartons, Motorrad">
+          </label>
+          <label class="customer-new-request-wide">Nachricht / Hinweise
+            <textarea name="message" rows="4" placeholder="Worum geht es genau?"></textarea>
+          </label>
+        </div>
+      `;
+    case "entruempelung":
+      return `
+        <div class="customer-new-request-grid">
+          <label>Adresse / Objekt
+            <input type="text" name="address" placeholder="Straße, PLZ, Ort" required>
+          </label>
+          <label>Objektart
+            <select name="object_type" required>
+              <option value="">Bitte wählen</option>
+              <option>Wohnung</option>
+              <option>Haus</option>
+              <option>Keller</option>
+              <option>Dachboden</option>
+              <option>Garage</option>
+              <option>Gewerbe / Büro</option>
+              <option>Sonstiges</option>
+            </select>
+          </label>
+          <label>Umfang
+            <input type="text" name="scope" placeholder="z. B. 2 Zimmer, Kellerraum, komplette Wohnung">
+          </label>
+          <label>Wunschtermin
+            <input type="date" name="desired_date">
+          </label>
+          <label class="customer-new-request-wide">Nachricht / Hinweise
+            <textarea name="message" rows="4" placeholder="Was soll entrümpelt werden? Gibt es Bilder, Zugang oder Besonderheiten?"></textarea>
+          </label>
+        </div>
+      `;
+    case "reinigung":
+      return `
+        <div class="customer-new-request-grid">
+          <label>Adresse / Objekt
+            <input type="text" name="address" placeholder="Straße, PLZ, Ort" required>
+          </label>
+          <label>Reinigungsart
+            <select name="cleaning_type" required>
+              <option value="">Bitte wählen</option>
+              <option>Treppenhausreinigung</option>
+              <option>Büroreinigung</option>
+              <option>Grundreinigung</option>
+              <option>Objektreinigung</option>
+              <option>Sonderreinigung</option>
+              <option>Sonstiges</option>
+            </select>
+          </label>
+          <label>Intervall / Turnus
+            <select name="interval">
+              <option>Einmalig</option>
+              <option>Wöchentlich</option>
+              <option>Alle 2 Wochen</option>
+              <option>Monatlich</option>
+              <option>Nach Bedarf</option>
+            </select>
+          </label>
+          <label>Wunschtermin
+            <input type="date" name="desired_date">
+          </label>
+          <label class="customer-new-request-wide">Nachricht / Hinweise
+            <textarea name="message" rows="4" placeholder="Welche Bereiche sollen gereinigt werden? Gibt es Besonderheiten?"></textarea>
+          </label>
+        </div>
+      `;
+    case "rollerabholservice":
+    default:
+      return `
+        <div class="customer-new-request-grid">
+          <label>Abholort
+            <input type="text" name="pickup" placeholder="Adresse / Ort" required>
+          </label>
+          <label>Zielort
+            <input type="text" name="destination" placeholder="Adresse / Ort" required>
+          </label>
+          <label>Fahrzeugart
+            <select name="vehicle_type" required>
+              <option value="">Bitte wählen</option>
+              <option>Motorrad</option>
+              <option>Roller</option>
+              <option>Moped</option>
+              <option>Sonstiges Zweirad</option>
+            </select>
+          </label>
+          <label>Zustand
+            <select name="vehicle_condition">
+              <option>fahrbereit</option>
+              <option>nicht fahrbereit</option>
+              <option>Unfall / Schaden</option>
+              <option>nicht bekannt</option>
+            </select>
+          </label>
+          <label class="customer-new-request-wide">Nachricht / Hinweise
+            <textarea name="message" rows="4" placeholder="Wann soll abgeholt werden? Gibt es Besonderheiten beim Zugang?"></textarea>
+          </label>
+        </div>
+      `;
+  }
+}
+
+function renderCustomerNewRequestServiceFields() {
+  const box = document.querySelector("#customerNewRequestServiceFields");
+  if (!box) return;
+  box.innerHTML = customerPortalServiceFieldsTemplate(customerPortalNewRequestService);
+}
+
+function collectCustomerNewRequestData() {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  const data = form ? new FormData(form) : new FormData();
+  const contact = {
+    name: String(data.get("name") || "").trim(),
+    email: String(data.get("email") || "").trim(),
+    phone: String(data.get("phone") || "").trim(),
+    company: String(data.get("company") || "").trim()
+  };
+  const details = {};
+  for (const [key, value] of data.entries()) {
+    if (["name", "email", "phone", "company"].includes(key)) continue;
+    details[key] = String(value || "").trim();
+  }
+  return { contact, details, serviceKey: customerPortalNewRequestService };
+}
+
+function customerNewRequestDetailPairs(details = {}, serviceKey = customerPortalNewRequestService) {
+  const labels = {
+    pickup: "Abholort",
+    destination: "Zielort",
+    vehicle_type: "Fahrzeugart",
+    vehicle_condition: "Zustand",
+    rental_start: "Mietbeginn",
+    rental_end: "Mietende",
+    handover: "Übergabe",
+    transport_goods: "Transportgut",
+    address: "Adresse / Objekt",
+    object_type: "Objektart",
+    scope: "Umfang",
+    desired_date: "Wunschtermin",
+    cleaning_type: "Reinigungsart",
+    interval: "Intervall",
+    message: "Nachricht"
+  };
+  return Object.entries(details)
+    .filter(([, value]) => String(value || "").trim())
+    .map(([key, value]) => [labels[key] || key, value]);
+}
+
+function buildCustomerNewRequestSummaryText(data) {
+  const config = CUSTOMER_PORTAL_NEW_REQUEST_SERVICES[data.serviceKey] || CUSTOMER_PORTAL_NEW_REQUEST_SERVICES.rollerabholservice;
+  const pairs = customerNewRequestDetailPairs(data.details, data.serviceKey).filter(([label]) => label !== "Nachricht");
+  const short = pairs.slice(0, 4).map(([label, value]) => `${label}: ${value}`).join(" · ");
+  return `${config.summaryLabel}-Anfrage aus dem Kundenportal${short ? `: ${short}` : "."}`;
+}
+
+function renderCustomerNewRequestSummary() {
+  const box = document.querySelector("#customerNewRequestSummary");
+  if (!box) return;
+  const data = collectCustomerNewRequestData();
+  const config = CUSTOMER_PORTAL_NEW_REQUEST_SERVICES[data.serviceKey] || CUSTOMER_PORTAL_NEW_REQUEST_SERVICES.rollerabholservice;
+  const detailPairs = customerNewRequestDetailPairs(data.details, data.serviceKey);
+  box.innerHTML = `
+    <div class="customer-new-request-review-head">
+      <span class="status-pill">${escapeHtml(config.label)}</span>
+      <strong>${escapeHtml(data.contact.name || "Ohne Namen")}</strong>
+    </div>
+    <div class="customer-new-request-review-grid">
+      <article><span>E-Mail</span><strong>${escapeHtml(data.contact.email || "—")}</strong></article>
+      <article><span>Telefon</span><strong>${escapeHtml(data.contact.phone || "—")}</strong></article>
+      <article><span>Firma / Objekt</span><strong>${escapeHtml(data.contact.company || "—")}</strong></article>
+      ${detailPairs.map(([label, value]) => `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || "—")}</strong></article>`).join("")}
+    </div>
+  `;
+}
+
+function setCustomerNewRequestStep(step) {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  if (!form) return;
+  const steps = Array.from(form.querySelectorAll("[data-customer-new-request-step]"));
+  customerPortalNewRequestStep = Math.max(0, Math.min(steps.length - 1, Number(step || 0)));
+  steps.forEach((panel, index) => {
+    panel.hidden = index !== customerPortalNewRequestStep;
+    panel.classList.toggle("active", index === customerPortalNewRequestStep);
+  });
+  document.querySelectorAll("[data-customer-new-request-indicator]").forEach(indicator => {
+    indicator.classList.toggle("active", Number(indicator.dataset.customerNewRequestIndicator) === customerPortalNewRequestStep);
+  });
+  const prev = form.querySelector("[data-customer-new-request-prev]");
+  const next = form.querySelector("[data-customer-new-request-next]");
+  const submit = form.querySelector("[data-customer-new-request-submit]");
+  if (prev) prev.disabled = customerPortalNewRequestStep === 0;
+  if (next) next.hidden = customerPortalNewRequestStep === steps.length - 1;
+  if (submit) submit.hidden = customerPortalNewRequestStep !== steps.length - 1;
+  if (customerPortalNewRequestStep === 2) renderCustomerNewRequestServiceFields();
+  if (customerPortalNewRequestStep === 3) renderCustomerNewRequestSummary();
+}
+
+function resetCustomerNewRequestWizard() {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  if (!form) return;
+  form.reset();
+  const prefill = customerPortalAccountPrefill();
+  form.elements.name.value = prefill.name || "";
+  form.elements.email.value = prefill.email || "";
+  form.elements.phone.value = prefill.phone || "";
+  form.elements.company.value = prefill.company || "";
+  customerPortalNewRequestService = "rollerabholservice";
+  document.querySelectorAll("[data-customer-new-service]").forEach(button => {
+    button.classList.toggle("active", button.dataset.customerNewService === customerPortalNewRequestService);
+  });
+  renderCustomerNewRequestServiceFields();
+  setCustomerNewRequestMessage("", "");
+  setCustomerNewRequestStep(0);
+}
+
+function openCustomerNewRequestModal() {
+  const modal = document.querySelector("#customerPortalNewRequestModal");
+  if (!modal) return;
+  if (!customerPortalCurrentSession || !customerPortalAccount) {
+    setCustomerPortalAuthMessage("error", "Bitte einloggen", "Neue Anfragen können direkt im Kundenportal nach dem Login erstellt werden.");
+    return;
+  }
+  resetCustomerNewRequestWizard();
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+  writeCustomerPortalHistoryState(customerPortalActiveTab || "overview", { modal: "new-request" });
+}
+
+function closeCustomerNewRequestModal(options = {}) {
+  const modal = document.querySelector("#customerPortalNewRequestModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  if (options.updateHistory !== false) {
+    writeCustomerPortalHistoryState(customerPortalActiveTab || "overview", {});
+  }
+}
+
+function validateCustomerNewRequestStep() {
+  const form = document.querySelector("#customerPortalNewRequestForm");
+  if (!form) return false;
+  const panel = form.querySelector(`[data-customer-new-request-step="${customerPortalNewRequestStep}"]`);
+  const fields = Array.from(panel?.querySelectorAll("input, select, textarea") || []);
+  for (const field of fields) {
+    if (!field.checkValidity()) {
+      field.reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+async function createCustomerPortalRequest(session, payload) {
+  if (!session?.access_token) throw new Error("Keine gültige Kundensitzung vorhanden.");
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/customer_portal_create_request`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.hint || data?.details || "Anfrage konnte nicht erstellt werden.");
+  }
+  return data;
+}
+
+function buildCustomerPortalRequestPayload() {
+  const data = collectCustomerNewRequestData();
+  const config = CUSTOMER_PORTAL_NEW_REQUEST_SERVICES[data.serviceKey] || CUSTOMER_PORTAL_NEW_REQUEST_SERVICES.rollerabholservice;
+  const summary = buildCustomerNewRequestSummaryText(data);
+  const message = data.details.message || "";
+  return {
+    p_service: config.service,
+    p_customer_name: data.contact.name,
+    p_customer_email: data.contact.email,
+    p_customer_phone: data.contact.phone,
+    p_subject: config.subject,
+    p_summary: summary,
+    p_details: {
+      ...data.details,
+      customer_name: data.contact.name,
+      customer_email: data.contact.email,
+      customer_phone: data.contact.phone,
+      company: data.contact.company,
+      service_label: config.label,
+      source_label: "Kundenportal"
+    },
+    p_initial_message: message
+  };
+}
+
 async function loadCustomerPortal(session = customerPortalCurrentSession) {
   const liveStatus = document.querySelector("#customerPortalLiveStatus");
   if (liveStatus) {
@@ -12821,6 +13272,13 @@ function bindCustomerPortalPage() {
   bindCustomerPortalHistoryRouting();
 
   protectedArea.addEventListener("click", event => {
+    const newRequestButton = event.target.closest("[data-customer-new-request]");
+    if (newRequestButton) {
+      event.preventDefault();
+      openCustomerNewRequestModal();
+      return;
+    }
+
     const statusDetailButton = event.target.closest("[data-customer-status-detail]");
     if (statusDetailButton) {
       event.preventDefault();
@@ -12840,6 +13298,16 @@ function bindCustomerPortalPage() {
     if (tab === "objects" && customerPortalSelectedObjectId) extra.object = customerPortalSelectedObjectId;
     setCustomerPortalTab(tab, { extra });
   });
+
+  if (!customerPortalNewRequestGlobalClickBound) {
+    customerPortalNewRequestGlobalClickBound = true;
+    document.addEventListener("click", event => {
+      const contactLink = event.target.closest('a[href="/kontakt"], a[href="/kontakt/"]');
+      if (!contactLink || window.location.pathname !== "/kundenportal" || !customerPortalCurrentSession) return;
+      event.preventDefault();
+      openCustomerNewRequestModal();
+    });
+  }
 
   function showLogin() {
     gate.classList.remove("is-hidden");
@@ -13015,6 +13483,60 @@ function bindCustomerPortalPage() {
   customerStatusModal?.addEventListener("click", event => {
     if (event.target === customerStatusModal || event.target.closest("[data-customer-status-modal-close]")) {
       closeCustomerPortalStatusModal();
+    }
+  });
+
+  const customerNewRequestModal = document.querySelector("#customerPortalNewRequestModal");
+  const customerNewRequestForm = document.querySelector("#customerPortalNewRequestForm");
+  customerNewRequestModal?.addEventListener("click", event => {
+    if (event.target === customerNewRequestModal || event.target.closest("[data-customer-new-request-close]")) {
+      closeCustomerNewRequestModal();
+      return;
+    }
+    const serviceButton = event.target.closest("[data-customer-new-service]");
+    if (serviceButton) {
+      event.preventDefault();
+      customerPortalNewRequestService = serviceButton.dataset.customerNewService || "rollerabholservice";
+      customerNewRequestModal.querySelectorAll("[data-customer-new-service]").forEach(button => {
+        button.classList.toggle("active", button === serviceButton);
+      });
+      renderCustomerNewRequestServiceFields();
+      return;
+    }
+    if (event.target.closest("[data-customer-new-request-prev]")) {
+      event.preventDefault();
+      setCustomerNewRequestStep(customerPortalNewRequestStep - 1);
+      return;
+    }
+    if (event.target.closest("[data-customer-new-request-next]")) {
+      event.preventDefault();
+      if (!validateCustomerNewRequestStep()) return;
+      setCustomerNewRequestStep(customerPortalNewRequestStep + 1);
+    }
+  });
+
+  customerNewRequestForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!validateCustomerNewRequestStep()) return;
+    const submit = customerNewRequestForm.querySelector("[data-customer-new-request-submit]");
+    if (submit) submit.disabled = true;
+    setCustomerNewRequestMessage("loading", "Anfrage wird erstellt …");
+    try {
+      const payload = buildCustomerPortalRequestPayload();
+      const response = await createCustomerPortalRequest(customerPortalCurrentSession, payload);
+      await tryNotifyTeam(document.createElement("div"), response, buildNotificationFallbacks({
+        name: payload.p_customer_name,
+        email: payload.p_customer_email,
+        contact: payload.p_customer_phone
+      }, payload.p_service));
+      setCustomerNewRequestMessage("success", `Anfrage wurde erstellt: ${response.ticket_number || "neues Ticket"}`);
+      await loadCustomerPortal(customerPortalCurrentSession);
+      setCustomerPortalTab("requests", { updateHistory: true });
+      setTimeout(() => closeCustomerNewRequestModal(), 900);
+    } catch (error) {
+      setCustomerNewRequestMessage("error", error.message || "Anfrage konnte nicht erstellt werden.");
+    } finally {
+      if (submit) submit.disabled = false;
     }
   });
 

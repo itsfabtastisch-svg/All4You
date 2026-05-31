@@ -11268,6 +11268,15 @@ function formatInterval(value) {
   return map[String(value || "").toLowerCase()] || value || "Noch nicht hinterlegt";
 }
 
+function objectAddress(object = {}) {
+  const street = String(object.street || object.address || object.object_address || "").trim();
+  const zip = String(object.zip || object.postal_code || object.plz || "").trim();
+  const city = String(object.city || object.location || "").trim();
+  const zipCity = [zip, city].filter(Boolean).join(" ");
+  const parts = [street, zipCity].filter(Boolean);
+  return parts.join(", ") || "Adresse noch nicht hinterlegt";
+}
+
 function formatCustomerObjectJobStatus(value) {
   const map = {
     planned: "Geplant",

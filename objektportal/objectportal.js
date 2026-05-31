@@ -80,9 +80,23 @@ function formatUnitType(value) {
   const map = {
     treppenhaus: "Treppenhaus",
     eingang: "Eingangsbereich",
+    flur: "Flur / Allgemeinfläche",
     keller: "Keller",
     aussenbereich: "Außenbereich",
-    raum: "Raum / Einheit",
+    garten: "Garten / Grünfläche",
+    garage: "Garage",
+    tiefgarage: "Tiefgarage / Parkfläche",
+    buero: "Büroräume / Praxisräume",
+    sanitaer: "Sanitäranlagen",
+    kueche: "Küche / Aufenthaltsraum",
+    aufzug: "Aufzug",
+    muellraum: "Müllraum / Tonnenbereich",
+    waschkueche: "Waschküche",
+    lager: "Lagerraum",
+    technikraum: "Technikraum",
+    fenster: "Fenster / Glasflächen",
+    gemeinschaftsraum: "Gemeinschaftsraum",
+    raum: "Sonstige Räume / Einheit",
     sonstiges: "Sonstiges",
   };
   return map[String(value || "").toLowerCase()] || value || "Bereich";
@@ -474,10 +488,24 @@ function renderObjectDetail(object) {
         <label>Art
           <select name="unitType">
             <option value="treppenhaus">Treppenhaus</option>
-            <option value="eingang">Eingang</option>
+            <option value="eingang">Eingangsbereich</option>
+            <option value="flur">Flur / Allgemeinfläche</option>
             <option value="keller">Keller</option>
             <option value="aussenbereich">Außenbereich</option>
-            <option value="raum">Raum / Einheit</option>
+            <option value="garten">Garten / Grünfläche</option>
+            <option value="garage">Garage</option>
+            <option value="tiefgarage">Tiefgarage / Parkfläche</option>
+            <option value="buero">Büroräume / Praxisräume</option>
+            <option value="sanitaer">Sanitäranlagen</option>
+            <option value="kueche">Küche / Aufenthaltsraum</option>
+            <option value="aufzug">Aufzug</option>
+            <option value="muellraum">Müllraum / Tonnenbereich</option>
+            <option value="waschkueche">Waschküche</option>
+            <option value="lager">Lagerraum</option>
+            <option value="technikraum">Technikraum</option>
+            <option value="fenster">Fenster / Glasflächen</option>
+            <option value="gemeinschaftsraum">Gemeinschaftsraum</option>
+            <option value="raum">Sonstige Räume / Einheit</option>
             <option value="sonstiges">Sonstiges</option>
           </select>
         </label>

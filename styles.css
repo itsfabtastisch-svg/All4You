@@ -11225,3 +11225,57 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 }
+
+/* ======================================================================
+   V6.11.7 · Public Status Summary Modal Cleanup
+   Zusammenfassung nicht dauerhaft anzeigen, sondern kompakt per Modal öffnen
+   ====================================================================== */
+.customer-status-actions {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.customer-status-summary-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 18px;
+}
+
+.customer-status-summary-modal-grid article {
+  padding: 13px 14px;
+  border: 1px solid rgba(19,35,58,.09);
+  border-radius: 16px;
+  background: rgba(238,246,250,.72);
+  display: grid;
+  gap: 6px;
+}
+
+.customer-status-summary-modal-grid span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.customer-status-summary-modal-grid strong,
+.customer-status-summary-modal-text {
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.42;
+}
+
+.customer-status-summary-modal-text {
+  margin: 14px 0 18px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(19,35,58,.09);
+  background: rgba(238,246,250,.72);
+}
+
+@media (max-width: 720px) {
+  .customer-status-summary-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3563,6 +3563,66 @@ function renderPublicStatusMessageList(messages) {
   }).join("");
 }
 
+
+function renderPublicStatusSummaryFacts(summary) {
+  const clean = String(summary || "").replace(/\s+/g, " ").trim();
+
+  if (!clean) {
+    return `<p class="customer-status-summary-modal-text">Keine Zusammenfassung vorhanden.</p>`;
+  }
+
+  const parts = clean
+    .split(/\s+·\s+|\s+\|\s+|\s+;\s+/)
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  if (parts.length <= 1) {
+    return `<p class="customer-status-summary-modal-text">${escapeHtml(clean)}</p>`;
+  }
+
+  return `
+    <div class="customer-status-summary-modal-grid">
+      ${parts.map((part, index) => {
+        const colonIndex = part.indexOf(":");
+        let label = index === 0 ? "Anfrage" : `Angabe ${index + 1}`;
+        let value = part;
+
+        if (colonIndex > 0 && colonIndex < 42) {
+          label = part.slice(0, colonIndex).trim();
+          value = part.slice(colonIndex + 1).trim();
+        }
+
+        return `
+          <article>
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value || "—")}</strong>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderPublicStatusSummaryModal(ticket) {
+  if (!ticket?.summary) return "";
+
+  return `
+    <div class="customer-status-modal" id="customerStatusSummaryModal" hidden>
+      <div class="customer-status-modal-backdrop" data-status-modal-close></div>
+      <section class="customer-status-modal-card customer-status-summary-modal-card" role="dialog" aria-modal="true" aria-label="Zusammenfassung der Anfrage ansehen">
+        <button class="customer-status-modal-close" type="button" data-status-modal-close aria-label="Fenster schließen">×</button>
+        <p class="eyebrow">Zusammenfassung</p>
+        <h3>Angaben zur Anfrage</h3>
+        <p class="customer-status-modal-lead">Hier sehen Sie die zusammengefassten Daten dieser Anfrage.</p>
+        ${renderPublicStatusSummaryFacts(ticket.summary)}
+        <div class="customer-status-modal-actions">
+          <button class="btn primary" type="button" data-status-modal-close>Schließen <span>›</span></button>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
 function renderCustomerStatusResult(result, ticket, options = {}) {
   const history = Array.isArray(ticket.history) ? ticket.history : [];
   const messages = Array.isArray(ticket.messages) ? ticket.messages : [];
@@ -3595,12 +3655,6 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
         </article>
       </div>
 
-      ${ticket.summary ? `
-        <div class="customer-status-summary">
-          <span>Zusammenfassung</span>
-          <p>${escapeHtml(ticket.summary)}</p>
-        </div>
-      ` : ""}
 
       <div class="customer-status-timeline">
         <p class="eyebrow">Statusverlauf</p>
@@ -3632,6 +3686,13 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
       </p>
 
       <div class="customer-status-actions">
+        ${ticket.summary ? `
+          <button class="customer-status-action-card" type="button" data-status-modal="summary">
+            <span>Zusammenfassung</span>
+            <strong>Angaben ansehen</strong>
+            <small>Alle zusammengefassten Daten dieser Anfrage kompakt öffnen.</small>
+          </button>
+        ` : ""}
         <button class="customer-status-action-card" type="button" data-status-modal="message">
           <span>Nachricht</span>
           <strong>Nachricht senden</strong>
@@ -3643,6 +3704,8 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
           <small>Fotos, PDFs oder weitere Unterlagen nachreichen.</small>
         </button>
       </div>
+
+      ${renderPublicStatusSummaryModal(ticket)}
 
       <div class="customer-status-modal" id="customerStatusMessageModal" hidden>
         <div class="customer-status-modal-backdrop" data-status-modal-close></div>
@@ -3742,9 +3805,12 @@ function bindCustomerStatusPage() {
   if (!form || !result) return;
 
   function setPublicStatusModalOpen(modalName, isOpen) {
-    const modal = modalName === "files"
-      ? result.querySelector("#customerStatusFilesModal")
-      : result.querySelector("#customerStatusMessageModal");
+    const modalMap = {
+      files: "#customerStatusFilesModal",
+      message: "#customerStatusMessageModal",
+      summary: "#customerStatusSummaryModal"
+    };
+    const modal = result.querySelector(modalMap[modalName] || "#customerStatusMessageModal");
 
     if (!modal) return;
 

@@ -11391,3 +11391,140 @@ body.modal-open {
     min-width: 0;
   }
 }
+
+/* ========================================================================== 
+   ALL4YOU-V6.11.9 · Kundenkonto-Wizard für Verwaltung & Auftrag
+   ========================================================================== */
+.dashboard-customer-create-compact {
+  align-content: start;
+  gap: 14px;
+}
+
+.dashboard-customer-create-compact h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.15rem;
+}
+
+.dashboard-customer-create-compact .btn {
+  justify-content: center;
+}
+
+.dashboard-customer-wizard-card {
+  width: min(760px, 100%);
+}
+
+.dashboard-customer-wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.dashboard-customer-wizard-steps span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(15, 38, 65, .06);
+  border: 1px solid rgba(15, 38, 65, .08);
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+.dashboard-customer-wizard-steps span.active,
+.dashboard-customer-wizard-steps span.done {
+  color: #fff;
+  background: linear-gradient(135deg, var(--teal), var(--teal-2));
+  border-color: transparent;
+  box-shadow: 0 12px 26px rgba(10, 169, 155, .20);
+}
+
+.dashboard-customer-wizard-form,
+.dashboard-customer-wizard-step {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-customer-wizard-step h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.18rem;
+}
+
+.dashboard-customer-wizard-source-card {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(10, 169, 155, .10), rgba(47, 111, 237, .08));
+  border: 1px solid rgba(10, 169, 155, .18);
+}
+
+.dashboard-customer-wizard-source-card span,
+.dashboard-customer-wizard-source-card small {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.dashboard-customer-wizard-source-card strong {
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.dashboard-customer-wizard-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashboard-customer-wizard-summary-row {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(15, 38, 65, .08);
+}
+
+.dashboard-customer-wizard-summary-row span {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.dashboard-customer-wizard-summary-row strong {
+  color: var(--navy);
+  font-size: .92rem;
+  overflow-wrap: anywhere;
+}
+
+.success-soft {
+  background: linear-gradient(135deg, rgba(39, 197, 139, .12), rgba(10, 169, 155, .10));
+  border-color: rgba(39, 197, 139, .24);
+}
+
+.dashboard-customer-wizard-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .dashboard-customer-wizard-steps,
+  .dashboard-customer-wizard-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-customer-wizard-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

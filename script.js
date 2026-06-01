@@ -920,6 +920,11 @@ async function handleDashboardTicketActionDirect(button) {
       return;
     }
 
+    if (action === "create-customer") {
+      openDashboardCustomerAccountWizard(ticket);
+      return;
+    }
+
     if (action === "copy-status-link") {
       await copyTextToClipboard(buildPublicStatusLink(ticket));
       setDashboardTicketActionMessage("success", "Statuslink wurde kopiert.");
@@ -1162,7 +1167,7 @@ async function linkDashboardCustomerRequest(session, accountId, requestId) {
     p_account_id: accountId,
     p_request_id: requestId
   });
-  if (!data?.success) throw new Error(data?.message || "Ticket konnte nicht zugeordnet werden.");
+  if (!data?.success) throw new Error(data?.message || "Auftrag konnte nicht zugeordnet werden.");
   return data;
 }
 
@@ -1331,11 +1336,307 @@ function renderDashboardCustomerAccountDetail(account) {
       `).join("") : `
         <div class="dashboard-mini-empty">
           <strong>Noch keine zugeordneten Aufträge</strong>
-          <p>Ordnen Sie rechts ein bestehendes Ticket zu.</p>
+          <p>Ordnen Sie rechts einen bestehenden Auftrag zu.</p>
         </div>
       `}
     </div>
   `;
+}
+
+
+function getDashboardCustomerWizardTicketPrefill(ticket) {
+  const details = ticket?.details && typeof ticket.details === "object" ? ticket.details : {};
+  return {
+    display_name: ticket?.customer_name || details.name || details.customer_name || details.contact_name || "",
+    email: String(ticket?.customer_email || details.email || details.customer_email || details.contact_email || "").trim().toLowerCase(),
+    phone: ticket?.customer_phone || details.phone || details.customer_phone || details.contact_phone || details.contact || "",
+    company: details.company || details.firma || details.object || details.property_name || details.address || details.pickup || details.delivery_address || "",
+    notes: ticket?.id ? `Erstellt aus Auftrag ${ticket.ticket_number || ticket.id}.` : ""
+  };
+}
+
+function ensureDashboardCustomerAccountWizardModal() {
+  let modal = document.querySelector("#dashboardCustomerAccountWizardModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "dashboardCustomerAccountWizardModal";
+  modal.className = "dashboard-modal is-hidden";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="dashboard-modal-backdrop" data-customer-wizard-close></div>
+    <article class="dashboard-modal-card dashboard-customer-wizard-card" role="dialog" aria-modal="true" aria-labelledby="dashboardCustomerWizardTitle">
+      <div class="dashboard-modal-head">
+        <div>
+          <p class="eyebrow" id="dashboardCustomerWizardEyebrow">Kundenkonto</p>
+          <h2 id="dashboardCustomerWizardTitle">Kundenkonto anlegen</h2>
+          <p id="dashboardCustomerWizardSubtitle">Geführter Ablauf für Kundenportalzugang und Einladung.</p>
+        </div>
+        <button class="modal-close" type="button" aria-label="Schließen" data-customer-wizard-close>×</button>
+      </div>
+      <div class="dashboard-customer-wizard-steps" id="dashboardCustomerWizardSteps"></div>
+      <form class="dashboard-customer-wizard-form" id="dashboardCustomerAccountWizardForm">
+        <input type="hidden" name="source_ticket_id">
+        <section class="dashboard-customer-wizard-step" data-customer-wizard-step="1">
+          <p class="eyebrow">Schritt 1 von 3</p>
+          <h3>Kundendaten</h3>
+          <div class="form-grid">
+            <label>Name / Anzeige
+              <input type="text" name="display_name" placeholder="z. B. Herr Müller / Firma Muster" required>
+            </label>
+            <label>E-Mail für Login
+              <input type="email" name="email" placeholder="kunde@example.de" required>
+            </label>
+            <label>Telefon
+              <input type="tel" name="phone" placeholder="optional">
+            </label>
+            <label>Firma / Objekt
+              <input type="text" name="company" placeholder="optional">
+            </label>
+          </div>
+        </section>
+        <section class="dashboard-customer-wizard-step is-hidden" data-customer-wizard-step="2">
+          <p class="eyebrow">Schritt 2 von 3</p>
+          <h3>Zuordnung & Hinweis</h3>
+          <div class="dashboard-customer-wizard-source" id="dashboardCustomerWizardSourceBox"></div>
+          <label>Interne Notiz
+            <textarea name="notes" rows="4" placeholder="z. B. Rücksprache erfolgt, Bestandskunde, regelmäßige Reinigung …"></textarea>
+          </label>
+        </section>
+        <section class="dashboard-customer-wizard-step is-hidden" data-customer-wizard-step="3">
+          <p class="eyebrow">Schritt 3 von 3</p>
+          <h3>Prüfen & erstellen</h3>
+          <div class="dashboard-customer-wizard-summary" id="dashboardCustomerWizardSummary"></div>
+          <div class="summary-wide success-soft">
+            <strong>Einladung</strong>
+            <span>Nach dem Speichern wird automatisch ein Passwort-/Einrichtungslink an die Kunden-E-Mail gesendet.</span>
+          </div>
+        </section>
+        <p class="dashboard-ticket-action-message" id="dashboardCustomerWizardMessage">Bereit.</p>
+        <div class="dashboard-customer-wizard-actions">
+          <button class="btn ghost" type="button" data-customer-wizard-back>Zurück</button>
+          <button class="btn primary" type="button" data-customer-wizard-next>Weiter <span>›</span></button>
+        </div>
+      </form>
+    </article>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", event => {
+    if (event.target.closest("[data-customer-wizard-close]")) closeDashboardCustomerAccountWizard();
+  });
+
+  const form = modal.querySelector("#dashboardCustomerAccountWizardForm");
+  form?.addEventListener("input", () => {
+    updateDashboardCustomerWizardSummary();
+  });
+
+  modal.querySelector("[data-customer-wizard-back]")?.addEventListener("click", () => {
+    const current = Number(modal.dataset.step || "1");
+    if (current <= 1) {
+      closeDashboardCustomerAccountWizard();
+      return;
+    }
+    setDashboardCustomerWizardStep(current - 1);
+  });
+
+  modal.querySelector("[data-customer-wizard-next]")?.addEventListener("click", () => {
+    handleDashboardCustomerWizardNext();
+  });
+
+  return modal;
+}
+
+function setDashboardCustomerWizardMessage(type, text) {
+  const message = document.querySelector("#dashboardCustomerWizardMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function setDashboardCustomerWizardStep(step) {
+  const modal = ensureDashboardCustomerAccountWizardModal();
+  const normalized = Math.max(1, Math.min(3, Number(step) || 1));
+  modal.dataset.step = String(normalized);
+  modal.querySelectorAll("[data-customer-wizard-step]").forEach(section => {
+    section.classList.toggle("is-hidden", Number(section.dataset.customerWizardStep) !== normalized);
+  });
+  modal.querySelector("[data-customer-wizard-back]").textContent = normalized === 1 ? "Schließen" : "Zurück";
+  modal.querySelector("[data-customer-wizard-next]").innerHTML = normalized === 3 ? "Kundenkonto anlegen & Einladung senden <span>›</span>" : "Weiter <span>›</span>";
+  renderDashboardCustomerWizardSteps(normalized);
+  updateDashboardCustomerWizardSummary();
+}
+
+function renderDashboardCustomerWizardSteps(activeStep = 1) {
+  const holder = document.querySelector("#dashboardCustomerWizardSteps");
+  if (!holder) return;
+  const labels = ["Kundendaten", "Zuordnung", "Prüfen"];
+  holder.innerHTML = labels.map((label, index) => {
+    const step = index + 1;
+    return `<span class="${step === activeStep ? "active" : step < activeStep ? "done" : ""}">${step}. ${escapeHtml(label)}</span>`;
+  }).join("");
+}
+
+function openDashboardCustomerAccountWizard(ticketOrId = null) {
+  const ticket = typeof ticketOrId === "string" ? getDashboardTicketById(ticketOrId) : ticketOrId;
+  const modal = ensureDashboardCustomerAccountWizardModal();
+  const form = modal.querySelector("#dashboardCustomerAccountWizardForm");
+  if (!form) return;
+
+  const prefill = getDashboardCustomerWizardTicketPrefill(ticket || null);
+  form.reset();
+  form.elements.source_ticket_id.value = ticket?.id || "";
+  form.elements.display_name.value = prefill.display_name || "";
+  form.elements.email.value = prefill.email || "";
+  form.elements.phone.value = prefill.phone || "";
+  form.elements.company.value = prefill.company || "";
+  form.elements.notes.value = prefill.notes || "";
+
+  const eyebrow = modal.querySelector("#dashboardCustomerWizardEyebrow");
+  const title = modal.querySelector("#dashboardCustomerWizardTitle");
+  const subtitle = modal.querySelector("#dashboardCustomerWizardSubtitle");
+  if (eyebrow) eyebrow.textContent = ticket?.id ? "Aus Auftrag erstellen" : "Verwaltung";
+  if (title) title.textContent = ticket?.id ? "Kundenkonto aus Auftrag anlegen" : "Kundenkonto anlegen";
+  if (subtitle) subtitle.textContent = ticket?.id
+    ? "Daten aus der Anfrage werden übernommen, der Auftrag wird zugeordnet und der Kunde erhält direkt seinen Einrichtungslink."
+    : "Manuelles Kundenkonto erstellen und direkt einen Passwort-/Einrichtungslink senden.";
+
+  const sourceBox = modal.querySelector("#dashboardCustomerWizardSourceBox");
+  if (sourceBox) {
+    sourceBox.innerHTML = ticket?.id ? `
+      <div class="dashboard-customer-wizard-source-card">
+        <span>Auftrag wird verknüpft</span>
+        <strong>${escapeHtml(ticket.ticket_number || "Auftrag")}</strong>
+        <small>${escapeHtml(serviceLabel(ticket.service))} · ${escapeHtml(statusLabel(ticket.status))}</small>
+      </div>
+    ` : `
+      <div class="dashboard-customer-wizard-source-card">
+        <span>Manuelle Anlage</span>
+        <strong>Kein Auftrag vorausgewählt</strong>
+        <small>Das Kundenkonto kann später mit Aufträgen verknüpft werden.</small>
+      </div>
+    `;
+  }
+
+  setDashboardCustomerWizardMessage("", "Bereit.");
+  setDashboardCustomerWizardStep(1);
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeDashboardCustomerAccountWizard() {
+  const modal = document.querySelector("#dashboardCustomerAccountWizardModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function updateDashboardCustomerWizardSummary() {
+  const modal = document.querySelector("#dashboardCustomerAccountWizardModal");
+  const form = modal?.querySelector("#dashboardCustomerAccountWizardForm");
+  const summary = modal?.querySelector("#dashboardCustomerWizardSummary");
+  if (!form || !summary) return;
+
+  const rows = [
+    ["Name", form.elements.display_name.value || "—"],
+    ["E-Mail", form.elements.email.value || "—"],
+    ["Telefon", form.elements.phone.value || "—"],
+    ["Firma / Objekt", form.elements.company.value || "—"],
+    ["Auftragszuordnung", form.elements.source_ticket_id.value ? "wird direkt verknüpft" : "keine direkte Zuordnung"],
+    ["Einladung", "wird direkt gesendet"]
+  ];
+
+  summary.innerHTML = rows.map(([label, value]) => `
+    <div class="dashboard-customer-wizard-summary-row">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </div>
+  `).join("");
+}
+
+function validateDashboardCustomerWizardStep(step) {
+  const modal = ensureDashboardCustomerAccountWizardModal();
+  const form = modal.querySelector("#dashboardCustomerAccountWizardForm");
+  if (!form) return false;
+  if (step === 1) {
+    const displayName = String(form.elements.display_name.value || "").trim();
+    const email = String(form.elements.email.value || "").trim().toLowerCase();
+    if (!displayName) {
+      setDashboardCustomerWizardMessage("error", "Bitte einen Namen oder Anzeigenamen eintragen.");
+      return false;
+    }
+    if (!email || !email.includes("@")) {
+      setDashboardCustomerWizardMessage("error", "Bitte eine gültige E-Mail für den Login eintragen.");
+      return false;
+    }
+  }
+  setDashboardCustomerWizardMessage("", "Bereit.");
+  return true;
+}
+
+async function handleDashboardCustomerWizardNext() {
+  const modal = ensureDashboardCustomerAccountWizardModal();
+  const current = Number(modal.dataset.step || "1");
+  if (!validateDashboardCustomerWizardStep(current)) return;
+  if (current < 3) {
+    setDashboardCustomerWizardStep(current + 1);
+    return;
+  }
+  await submitDashboardCustomerAccountWizard();
+}
+
+async function submitDashboardCustomerAccountWizard() {
+  const modal = ensureDashboardCustomerAccountWizardModal();
+  const form = modal.querySelector("#dashboardCustomerAccountWizardForm");
+  const button = modal.querySelector("[data-customer-wizard-next]");
+  if (!form) return;
+
+  const session = dashboardCurrentSession || getStoredEmployeeSession();
+  const email = String(form.elements.email.value || "").trim().toLowerCase();
+  const displayName = String(form.elements.display_name.value || "").trim();
+  const requestId = String(form.elements.source_ticket_id.value || "").trim();
+
+  if (!session?.access_token) {
+    setDashboardCustomerWizardMessage("error", "Keine aktive Mitarbeitersitzung vorhanden.");
+    return;
+  }
+
+  if (button) button.disabled = true;
+  setDashboardCustomerWizardMessage("loading", "Kundenkonto wird angelegt …");
+
+  try {
+    const account = await upsertDashboardCustomerAccount(session, {
+      p_email: email,
+      p_display_name: displayName || email,
+      p_phone: String(form.elements.phone.value || "").trim(),
+      p_company: String(form.elements.company.value || "").trim(),
+      p_notes: String(form.elements.notes.value || "").trim()
+    });
+
+    if (requestId) {
+      setDashboardCustomerWizardMessage("loading", "Auftrag wird dem Kundenkonto zugeordnet …");
+      await linkDashboardCustomerRequest(session, account.id, requestId);
+    }
+
+    setDashboardCustomerWizardMessage("loading", "Einladung wird gesendet …");
+    await inviteDashboardCustomerAccount(session, account.id);
+
+    dashboardSelectedCustomerAccountId = account.id;
+    dashboardCustomerAccountsCache = await fetchDashboardCustomerAccounts(session);
+    renderDashboardCustomerAccounts(dashboardCustomerAccountsCache);
+    applyDashboardFilters?.();
+    setDashboardCustomersMessage("success", "Kundenkonto wurde angelegt und die Einladung wurde gesendet.");
+    setDashboardModalMessage("dashboardModalActionMessage", "success", "Kundenkonto wurde angelegt, zugeordnet und die Einladung wurde gesendet.");
+    closeDashboardCustomerAccountWizard();
+    if (requestId) {
+      await openDashboardRequestModal(requestId, "assign");
+    }
+  } catch (error) {
+    setDashboardCustomerWizardMessage("error", error.message || "Kundenkonto konnte nicht angelegt werden.");
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
 async function loadDashboardCustomerAccounts(session = dashboardCurrentSession) {
@@ -1359,9 +1660,14 @@ async function loadDashboardCustomerAccounts(session = dashboardCurrentSession) 
 
 function bindDashboardCustomerAccounts() {
   const createForm = document.querySelector("#dashboardCustomerAccountForm");
+  const openWizardButton = document.querySelector("#dashboardOpenCustomerAccountWizard");
   const list = document.querySelector("#dashboardCustomerAccountsList");
   const detailBody = document.querySelector("#dashboardCustomerDetailBody");
   const linkForm = document.querySelector("#dashboardCustomerLinkForm");
+
+  openWizardButton?.addEventListener("click", () => {
+    openDashboardCustomerAccountWizard(null);
+  });
 
   createForm?.addEventListener("submit", async event => {
     event.preventDefault();
@@ -1418,13 +1724,13 @@ function bindDashboardCustomerAccounts() {
       return;
     }
 
-    setDashboardCustomersMessage("loading", "Ticket wird dem Kundenkonto zugeordnet …");
+    setDashboardCustomersMessage("loading", "Auftrag wird dem Kundenkonto zugeordnet …");
     try {
       await linkDashboardCustomerRequest(dashboardCurrentSession, accountId, requestId);
       await loadDashboardCustomerAccounts(dashboardCurrentSession);
-      setDashboardCustomersMessage("success", "Ticket wurde dem Kundenkonto zugeordnet.");
+      setDashboardCustomersMessage("success", "Auftrag wurde dem Kundenkonto zugeordnet.");
     } catch (error) {
-      setDashboardCustomersMessage("error", error.message || "Ticket konnte nicht zugeordnet werden.");
+      setDashboardCustomersMessage("error", error.message || "Auftrag konnte nicht zugeordnet werden.");
     }
   });
 
@@ -1450,7 +1756,7 @@ function bindDashboardCustomerAccounts() {
 
     const button = event.target.closest("[data-customer-unlink-request]");
     if (!button || !dashboardSelectedCustomerAccountId) return;
-    if (!confirm("Diese Ticket-Zuordnung wirklich entfernen? Das Ticket wird nicht gelöscht.")) return;
+    if (!confirm("Diese Ticket-Zuordnung wirklich entfernen? Der Auftrag wird nicht gelöscht.")) return;
 
     setDashboardCustomersMessage("loading", "Zuordnung wird entfernt …");
     try {
@@ -6483,7 +6789,7 @@ function pageDashboard() {
             <div class="dashboard-hub-grid">
               <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="tickets">
                 <span>Anfragen / Aufträge</span>
-                <strong>Tickets bearbeiten</strong>
+                <strong>Aufträge bearbeiten</strong>
                 <small>Liste, Filter, Details, Aktionen und Statusänderungen.</small>
               </button>
               <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="messages">
@@ -6628,28 +6934,17 @@ function pageDashboard() {
             </p>
 
             <div class="dashboard-customers-layout">
-              <aside class="dashboard-panel dashboard-customer-create-panel">
-                <p class="eyebrow">Kundenkonto vorbereiten</p>
-                <form class="dashboard-customer-account-form" id="dashboardCustomerAccountForm">
-                  <label>Name / Anzeigename
-                    <input type="text" name="display_name" placeholder="z. B. Herr Müller / Firma Muster">
-                  </label>
-                  <label>E-Mail für Login
-                    <input type="email" name="email" placeholder="kunde@example.de" required>
-                  </label>
-                  <label>Telefon
-                    <input type="tel" name="phone" placeholder="optional">
-                  </label>
-                  <label>Firma / Objekt
-                    <input type="text" name="company" placeholder="optional">
-                  </label>
-                  <label>Interne Notiz
-                    <textarea name="notes" rows="3" placeholder="z. B. Bestandskunde, regelmäßige Reinigung, Hausverwaltung …"></textarea>
-                  </label>
-                  <button class="btn primary" type="submit">Kundenkonto speichern <span>›</span></button>
-                </form>
+              <aside class="dashboard-panel dashboard-customer-create-panel dashboard-customer-create-compact">
+                <p class="eyebrow">Kundenportalzugang</p>
+                <h3>Kundenkonto anlegen</h3>
+                <p class="dashboard-calendar-intro">
+                  Lege neue Kundenkonten jetzt über einen kompakten Wizard an. Bei Bedarf wird direkt der Passwort-/Einladungslink verschickt.
+                </p>
+                <button class="btn primary" type="button" id="dashboardOpenCustomerAccountWizard" data-dashboard-customer-wizard-open="manual">
+                  Kundenkonto anlegen <span>›</span>
+                </button>
                 <p class="dashboard-ticket-action-message" id="dashboardCustomersMessage">
-                  Hinweis: Nach dem Speichern können Sie dem Kunden direkt einen Einrichtungslink per E-Mail senden.
+                  Hinweis: Der Wizard kann auch direkt aus einem Auftrag heraus mit vorausgefüllten Daten geöffnet werden.
                 </p>
               </aside>
 
@@ -6677,10 +6972,10 @@ function pageDashboard() {
                 </div>
 
                 <form class="dashboard-customer-link-form is-hidden" id="dashboardCustomerLinkForm">
-                  <label>Bestehendes Ticket zuordnen
+                  <label>Bestehenden Auftrag zuordnen
                     <select id="dashboardCustomerRequestSelect" name="request_id"></select>
                   </label>
-                  <button class="btn primary" type="submit" id="dashboardCustomerLinkButton">Ticket zuordnen <span>›</span></button>
+                  <button class="btn primary" type="submit" id="dashboardCustomerLinkButton">Auftrag zuordnen <span>›</span></button>
                 </form>
               </aside>
             </div>
@@ -7046,12 +7341,12 @@ function pageDashboard() {
 
               <details class="dashboard-toolbox">
                 <summary>
-                  <span>Ticket-Aktionen</span>
-                  <small>Kopieren, archivieren oder abschließen</small>
+                  <span>Auftragsaktionen</span>
+                  <small>Kundenkonto anlegen, archivieren oder abschließen</small>
                 </summary>
                 <div class="dashboard-ticket-actions">
                   <div class="dashboard-ticket-action-grid">
-                    <button class="btn ghost" type="button" data-ticket-action="copy-contact" disabled>Kontakt kopieren</button>
+                    <button class="btn ghost" type="button" data-ticket-action="create-customer" disabled>Kundenkonto anlegen</button>
                     <button class="btn ghost" type="button" data-ticket-action="assign-customer" disabled>Kundenkonto zuordnen</button>
                     <button class="btn ghost" type="button" data-ticket-action="archive-ticket" disabled>Archivieren</button>
                     <button class="btn ghost danger-action" type="button" data-ticket-action="delete-ticket" disabled>Endgültig löschen</button>
@@ -11289,9 +11584,9 @@ function renderDashboardRequestModalActions(ticket) {
       </section>
       <section class="dashboard-modal-action-card">
         <p class="eyebrow">Schnellaktionen</p>
-        <h3>Ticket-Aktionen</h3>
+        <h3>Auftragsaktionen</h3>
         <div class="dashboard-modal-button-grid">
-          <button class="btn ghost" type="button" data-modal-ticket-action="copy-contact">Kontakt kopieren</button>
+          <button class="btn ghost" type="button" data-modal-ticket-action="create-customer">Kundenkonto anlegen</button>
           <button class="btn ghost" type="button" data-modal-ticket-action="archive-ticket">Archivieren</button>
           <button class="btn primary soft-action" type="button" data-modal-ticket-action="mark-done">Als abgeschlossen markieren</button>
           <button class="btn ghost danger-action" type="button" data-modal-ticket-action="delete-ticket">Endgültig löschen</button>
@@ -11311,7 +11606,7 @@ function renderDashboardRequestModalAssign(ticket) {
       <div class="dashboard-modal-action-card">
         <p class="eyebrow">Kundenkonto</p>
         <h3>Bereits zugeordnet</h3>
-        <p>Dieses Ticket ist aktuell mit <strong>${escapeHtml(dashboardCustomerDisplayName(alreadyLinked))}</strong> verbunden.</p>
+        <p>Dieser Auftrag ist aktuell mit <strong>${escapeHtml(dashboardCustomerDisplayName(alreadyLinked))}</strong> verbunden.</p>
         <button class="btn ghost" type="button" data-modal-ticket-action="open-customers">Kundenkonto öffnen</button>
       </div>
     `;
@@ -11319,14 +11614,14 @@ function renderDashboardRequestModalAssign(ticket) {
   return `
     <div class="dashboard-modal-action-card">
       <p class="eyebrow">Kundenkonto</p>
-      <h3>Ticket einem Kundenkonto zuordnen</h3>
-      <p class="dashboard-calendar-intro">Wähle ein bestehendes Kundenkonto aus. Der Kunde sieht das Ticket danach im Kundenportal.</p>
+      <h3>Auftrag einem Kundenkonto zuordnen</h3>
+      <p class="dashboard-calendar-intro">Wähle ein bestehendes Kundenkonto aus. Der Kunde sieht den Auftrag danach im Kundenportal.</p>
       <label>Kundenkonto
         <select id="dashboardModalCustomerAccountSelect">
           ${accounts.length ? accounts.map(account => `<option value="${escapeHtml(account.id)}">${escapeHtml(dashboardCustomerDisplayName(account))} · ${escapeHtml(account.email || "ohne E-Mail")}</option>`).join("") : `<option value="">Keine freien Kundenkonten verfügbar</option>`}
         </select>
       </label>
-      <button class="btn primary" type="button" data-modal-ticket-action="assign-customer" ${accounts.length ? "" : "disabled"}>Ticket zuordnen <span>›</span></button>
+      <button class="btn primary" type="button" data-modal-ticket-action="assign-customer" ${accounts.length ? "" : "disabled"}>Auftrag zuordnen <span>›</span></button>
       <p class="dashboard-ticket-action-message" id="dashboardModalAssignMessage">Zuordnung wird sofort im Kundenportal sichtbar.</p>
     </div>
   `;
@@ -11410,6 +11705,11 @@ async function handleDashboardModalAction(button) {
       return;
     }
 
+    if (action === "create-customer") {
+      openDashboardCustomerAccountWizard(ticket);
+      return;
+    }
+
     if (action === "archive-ticket") {
       if (!confirm("Dieses Ticket wirklich archivieren?")) return;
       button.disabled = true;
@@ -11450,7 +11750,7 @@ async function handleDashboardModalAction(button) {
       setDashboardModalMessage("dashboardModalAssignMessage", "loading", "Ticket wird zugeordnet …");
       await linkDashboardCustomerRequest(dashboardCurrentSession || getStoredEmployeeSession(), accountId, ticket.id);
       dashboardCustomerAccountsCache = await fetchDashboardCustomerAccounts(dashboardCurrentSession || getStoredEmployeeSession());
-      setDashboardModalMessage("dashboardModalAssignMessage", "success", "Ticket wurde dem Kundenkonto zugeordnet.");
+      setDashboardModalMessage("dashboardModalAssignMessage", "success", "Auftrag wurde dem Kundenkonto zugeordnet.");
       await openDashboardRequestModal(ticket.id, "assign");
       return;
     }
@@ -11683,6 +11983,11 @@ function bindDashboardShell() {
       if (action === "copy-contact") {
         await copyTextToClipboard(buildTicketContactText(ticket));
         setDashboardTicketActionMessage("success", "Kontaktdaten wurden kopiert.");
+        return;
+      }
+
+      if (action === "create-customer") {
+        openDashboardCustomerAccountWizard(ticket);
         return;
       }
 

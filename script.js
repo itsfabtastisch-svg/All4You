@@ -1972,6 +1972,30 @@ async function deleteDashboardEmployeeAccount(session, employeeId) {
   return data;
 }
 
+async function resetDashboardEmployeePassword(session, employeeId, password) {
+  if (!session?.access_token) {
+    throw new Error("Keine aktive Chef-/Admin-Sitzung vorhanden.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/reset-employee-password`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ employee_id: employeeId, password })
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.message || data?.error || "Mitarbeiter-Passwort konnte nicht zurückgesetzt werden.");
+  }
+
+  return data;
+}
+
 function dashboardEmployeeDisplayName(employee) {
   return employee?.display_name || employee?.email || employee?.employee_number || "Mitarbeiter";
 }
@@ -2106,6 +2130,7 @@ function renderDashboardEmployeeDetail(employee) {
     </div>
     <div class="dashboard-ticket-action-grid">
       <button class="btn ghost" type="button" data-employee-edit="${escapeHtml(employee.id)}">Bearbeiten</button>
+      <button class="btn ghost soft-action" type="button" data-employee-password-reset="${escapeHtml(employee.id)}">Passwort zurücksetzen</button>
       <button class="btn ghost danger-action" type="button" data-employee-delete="${escapeHtml(employee.id)}">Konto löschen</button>
     </div>
     <div class="summary-wide">
@@ -2169,6 +2194,46 @@ function openDashboardEmployeeWizard(mode = "create", employee = null) {
 
 function closeDashboardEmployeeWizard() {
   const modal = document.querySelector("#dashboardEmployeeWizardModal");
+  if (!modal) return;
+  modal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+function setDashboardEmployeePasswordMessage(type, text) {
+  const message = document.querySelector("#dashboardEmployeePasswordMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function openDashboardEmployeePasswordModal(employee) {
+  const modal = document.querySelector("#dashboardEmployeePasswordModal");
+  const form = document.querySelector("#dashboardEmployeePasswordForm");
+  const title = document.querySelector("#dashboardEmployeePasswordTitle");
+  const intro = document.querySelector("#dashboardEmployeePasswordIntro");
+  const target = document.querySelector("#dashboardEmployeePasswordTarget");
+  if (!modal || !form || !employee?.id) return;
+
+  form.reset();
+  form.elements.employee_id.value = employee.id;
+  if (title) title.textContent = "Passwort zurücksetzen";
+  if (intro) intro.textContent = "Vergib ein neues Passwort für das ausgewählte Mitarbeiterkonto.";
+  if (target) {
+    target.innerHTML = `
+      <strong>${escapeHtml(employee.employee_number || "Mitarbeiter")}</strong>
+      <span>${escapeHtml(dashboardEmployeeDisplayName(employee))}</span>
+      <span>${escapeHtml(employee.email || "Keine E-Mail hinterlegt")}</span>
+    `;
+  }
+  setDashboardEmployeePasswordMessage("", "");
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+  setTimeout(() => form.elements.password?.focus(), 50);
+}
+
+function closeDashboardEmployeePasswordModal() {
+  const modal = document.querySelector("#dashboardEmployeePasswordModal");
   if (!modal) return;
   modal.hidden = true;
   document.body.classList.remove("modal-open");
@@ -2284,6 +2349,8 @@ function bindDashboardEmployees() {
   const createButton = document.querySelector("#dashboardEmployeeCreateButton");
   const modal = document.querySelector("#dashboardEmployeeWizardModal");
   const form = document.querySelector("#dashboardEmployeeWizardForm");
+  const passwordModal = document.querySelector("#dashboardEmployeePasswordModal");
+  const passwordForm = document.querySelector("#dashboardEmployeePasswordForm");
   const list = document.querySelector("#dashboardEmployeesList");
   const detailBody = document.querySelector("#dashboardEmployeeDetailBody");
 
@@ -2292,6 +2359,13 @@ function bindDashboardEmployees() {
   modal?.addEventListener("click", event => {
     if (event.target.matches("[data-employee-wizard-close]")) {
       closeDashboardEmployeeWizard();
+    }
+  });
+
+
+  passwordModal?.addEventListener("click", event => {
+    if (event.target.matches("[data-employee-password-close]")) {
+      closeDashboardEmployeePasswordModal();
     }
   });
 
@@ -2367,6 +2441,42 @@ function bindDashboardEmployees() {
     }
   });
 
+
+  passwordForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const formData = new FormData(passwordForm);
+    const employeeId = String(formData.get("employee_id") || "").trim();
+    const password = String(formData.get("password") || "");
+    const confirm = String(formData.get("password_confirm") || "");
+
+    if (!employeeId) {
+      setDashboardEmployeePasswordMessage("error", "Kein Mitarbeiter ausgewählt.");
+      return;
+    }
+    if (password.length < 8) {
+      setDashboardEmployeePasswordMessage("error", "Bitte ein Passwort mit mindestens 8 Zeichen eintragen.");
+      return;
+    }
+    if (password !== confirm) {
+      setDashboardEmployeePasswordMessage("error", "Die Passwörter stimmen nicht überein.");
+      return;
+    }
+
+    const submitButton = passwordForm.querySelector("#dashboardEmployeePasswordSubmit");
+    if (submitButton) submitButton.disabled = true;
+    setDashboardEmployeePasswordMessage("loading", "Passwort wird gesetzt …");
+
+    try {
+      await resetDashboardEmployeePassword(dashboardCurrentSession, employeeId, password);
+      closeDashboardEmployeePasswordModal();
+      setDashboardEmployeesMessage("success", "Mitarbeiter-Passwort wurde zurückgesetzt. Das neue Passwort kann intern weitergegeben werden.");
+    } catch (error) {
+      setDashboardEmployeePasswordMessage("error", error.message || "Passwort konnte nicht zurückgesetzt werden.");
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+
   list?.addEventListener("click", event => {
     const button = event.target.closest("[data-employee-id]");
     if (!button) return;
@@ -2382,6 +2492,13 @@ function bindDashboardEmployees() {
     if (editButton) {
       const employee = getDashboardEmployeeById(editButton.dataset.employeeEdit);
       if (employee) openDashboardEmployeeWizard("edit", employee);
+      return;
+    }
+
+    const passwordButton = event.target.closest("[data-employee-password-reset]");
+    if (passwordButton) {
+      const employee = getDashboardEmployeeById(passwordButton.dataset.employeePasswordReset);
+      if (employee) openDashboardEmployeePasswordModal(employee);
       return;
     }
 
@@ -7227,7 +7344,7 @@ function pageDashboard() {
                     <label>Erstpasswort
                       <input type="text" name="password" placeholder="mindestens 8 Zeichen">
                     </label>
-                    <p class="dashboard-wizard-hint">Das Erstpasswort wird vom Chef intern an den Mitarbeiter weitergegeben. Später kann ein Passwort-Reset ergänzt werden.</p>
+                    <p class="dashboard-wizard-hint">Das Erstpasswort wird vom Chef intern an den Mitarbeiter weitergegeben. Später kann es über „Passwort zurücksetzen“ neu vergeben werden.</p>
                   </section>
 
                   <section class="dashboard-employee-wizard-panel" data-employee-wizard-step="3" hidden>
@@ -7256,6 +7373,39 @@ function pageDashboard() {
                     <button class="btn ghost" type="button" id="dashboardEmployeeWizardBack">Zurück</button>
                     <button class="btn primary" type="button" id="dashboardEmployeeWizardNext">Weiter <span>›</span></button>
                     <button class="btn primary" type="submit" id="dashboardEmployeeWizardSubmit" hidden>Mitarbeiterkonto speichern <span>›</span></button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="dashboard-modal" id="dashboardEmployeePasswordModal" hidden>
+              <div class="dashboard-modal-backdrop" data-employee-password-close></div>
+              <div class="dashboard-modal-card dashboard-employee-password-card" role="dialog" aria-modal="true" aria-labelledby="dashboardEmployeePasswordTitle">
+                <div class="dashboard-modal-head">
+                  <div>
+                    <p class="eyebrow">Mitarbeiterzugang</p>
+                    <h2 id="dashboardEmployeePasswordTitle">Passwort zurücksetzen</h2>
+                    <p id="dashboardEmployeePasswordIntro">Vergib ein neues Passwort für das ausgewählte Mitarbeiterkonto.</p>
+                  </div>
+                  <button class="btn ghost" type="button" data-employee-password-close>Schließen</button>
+                </div>
+
+                <form class="dashboard-employee-wizard dashboard-employee-password-form" id="dashboardEmployeePasswordForm">
+                  <input type="hidden" name="employee_id">
+                  <section class="dashboard-employee-wizard-panel">
+                    <div class="dashboard-employee-password-target" id="dashboardEmployeePasswordTarget"></div>
+                    <label>Neues Passwort
+                      <input type="text" name="password" placeholder="mindestens 8 Zeichen" required autocomplete="new-password">
+                    </label>
+                    <label>Passwort wiederholen
+                      <input type="text" name="password_confirm" placeholder="Passwort erneut eingeben" required autocomplete="new-password">
+                    </label>
+                    <p class="dashboard-wizard-hint">Das neue Passwort wird direkt für das Supabase-Login gesetzt und kann intern an den Mitarbeiter weitergegeben werden.</p>
+                  </section>
+                  <p class="dashboard-ticket-action-message" id="dashboardEmployeePasswordMessage"></p>
+                  <div class="dashboard-employee-actions dashboard-employee-wizard-actions">
+                    <button class="btn ghost" type="button" data-employee-password-close>Abbrechen</button>
+                    <button class="btn primary" type="submit" id="dashboardEmployeePasswordSubmit">Passwort speichern <span>›</span></button>
                   </div>
                 </form>
               </div>

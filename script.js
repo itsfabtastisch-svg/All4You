@@ -8037,6 +8037,78 @@ function pageNotFound() {
   `;
 }
 
+
+const UNIFIED_REQUEST_SERVICE_BY_ANCHOR = {
+  "#roller-anfrage": "rollerabholservice",
+  "#anhaenger-anfrage": "anhaenger",
+  "#entruempelungs-anfrage": "entruempelung",
+  "#reinigungs-anfrage": "reinigung"
+};
+
+const SERVICE_REQUEST_CTA_CONFIGS = {
+  "roller-anfrage": {
+    service: "rollerabholservice",
+    eyebrow: "Transport-Anfrage",
+    title: "Motorrad- & Rollertransport anfragen.",
+    text: "Starten Sie die Anfrage direkt im kompakten Wizard. Abholort, Zielort, Fahrzeugdaten und Hinweise werden Schritt für Schritt abgefragt.",
+    primary: "Transport-Anfrage starten",
+    bullets: ["Abhol- & Zieladresse", "Fahrzeugzustand", "Zugang & Hinweise"]
+  },
+  "anhaenger-anfrage": {
+    service: "anhaenger",
+    eyebrow: "Anhänger-Anfrage",
+    title: "Anhänger unverbindlich anfragen.",
+    text: "Mietzeitraum, Übergabe, Transportgut und Kontaktdaten werden im modernen Anfrage-Wizard gesammelt. All4You prüft danach Verfügbarkeit und bestätigt den Ablauf.",
+    primary: "Anhänger-Anfrage starten",
+    bullets: ["Mietzeitraum", "Übergabe & Standort", "Transportgut"]
+  },
+  "entruempelungs-anfrage": {
+    service: "entruempelung",
+    eyebrow: "Entrümpelungs-Anfrage",
+    title: "Entrümpelung in wenigen Schritten anfragen.",
+    text: "Objekt, Umfang, Terminwunsch und Besonderheiten werden kompakt abgefragt. Die ausführlichen Angaben öffnen sich erst im Wizard.",
+    primary: "Entrümpelung anfragen",
+    bullets: ["Objekt & Umfang", "Terminwunsch", "Besichtigung / Hinweise"]
+  },
+  "reinigungs-anfrage": {
+    service: "reinigung",
+    eyebrow: "Reinigungs-Anfrage",
+    title: "Reinigung kompakt anfragen.",
+    text: "Objekt, Reinigungsart, Turnus und Wunschdatum werden im Wizard abgefragt. Die Leistungsseite bleibt dadurch ruhig und übersichtlich.",
+    primary: "Reinigung anfragen",
+    bullets: ["Objekt & Adresse", "Reinigungsart", "Turnus & Termin"]
+  }
+};
+
+function serviceRequestCtaMarkup(id, config) {
+  return `
+    <section class="section-pad service-request-cta-section" id="${escapeHtml(id)}">
+      <div class="service-request-cta-card">
+        <div class="service-request-cta-copy">
+          <p class="eyebrow">${escapeHtml(config.eyebrow)}</p>
+          <h2>${escapeHtml(config.title)}</h2>
+          <p class="lead">${escapeHtml(config.text)}</p>
+          <div class="service-request-chip-row">
+            ${(config.bullets || []).map(item => `<span>${escapeHtml(item)}</span>`).join("")}
+          </div>
+        </div>
+        <div class="service-request-cta-action">
+          <button class="btn primary" type="button" data-open-unified-request data-unified-request-service="${escapeHtml(config.service)}" data-unified-request-skip-service="true">${escapeHtml(config.primary)} <span>›</span></button>
+          <small>Öffnet den Anfrage-Wizard direkt für diese Leistung.</small>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function installServiceRequestCtas() {
+  Object.entries(SERVICE_REQUEST_CTA_CONFIGS).forEach(([id, config]) => {
+    const section = document.getElementById(id);
+    if (!section || section.dataset.serviceCtaInstalled === "true") return;
+    section.outerHTML = serviceRequestCtaMarkup(id, config);
+  });
+}
+
 function renderRoute() {
   const path = normalizePath(window.location.pathname);
   let html = "";
@@ -8059,6 +8131,7 @@ function renderRoute() {
   else html = pageNotFound();
 
   app.innerHTML = html;
+  installServiceRequestCtas();
   setActiveNav(path);
   applySeoForPath(path);
   bindForms();
@@ -13446,6 +13519,14 @@ function openCustomerNewRequestModal(options = {}) {
   customerPortalNewRequestSource = requestedSource === "customer" && customerPortalCurrentSession && customerPortalAccount ? "customer" : "public";
   syncCustomerNewRequestModalCopy();
   resetCustomerNewRequestWizard();
+  if (options.service && CUSTOMER_PORTAL_NEW_REQUEST_SERVICES[options.service]) {
+    customerPortalNewRequestService = options.service;
+    modal.querySelectorAll("[data-customer-new-service]").forEach(button => {
+      button.classList.toggle("active", button.dataset.customerNewService === customerPortalNewRequestService);
+    });
+    renderCustomerNewRequestServiceFields();
+    if (options.skipServiceStep) setCustomerNewRequestStep(1);
+  }
   modal.classList.remove("is-hidden");
   modal.setAttribute("aria-hidden", "false");
   if (customerPortalNewRequestSource === "customer" && options.updateHistory !== false && window.location.pathname === "/kundenportal") {
@@ -13613,27 +13694,46 @@ async function loadCustomerPortal(session = customerPortalCurrentSession) {
   }
 }
 
-function shouldOpenUnifiedRequestWizardLink(link) {
-  if (!link) return false;
-  const url = new URL(link.href, window.location.origin);
-  if (url.origin !== window.location.origin) return false;
+function unifiedRequestOptionsFromLink(link) {
+  if (!link) return null;
+  const url = new URL(link.href || window.location.href, window.location.origin);
+  if (url.origin !== window.location.origin) return null;
   const path = normalizePath(url.pathname);
-  if (path !== "/kontakt") return false;
   const text = String(link.textContent || "").toLowerCase();
-  return link.classList.contains("header-cta") || text.includes("anfrage");
+  const serviceFromData = link.dataset.unifiedRequestService || link.dataset.customerNewService || "";
+  const serviceFromQuery = url.searchParams.get("service") || "";
+  const serviceFromHash = UNIFIED_REQUEST_SERVICE_BY_ANCHOR[url.hash] || "";
+  const service = serviceFromData || serviceFromQuery || serviceFromHash || "";
+  const isGeneralRequest = path === "/kontakt" && (link.classList.contains("header-cta") || text.includes("anfrage"));
+  const isServiceRequest = Boolean(service && CUSTOMER_PORTAL_NEW_REQUEST_SERVICES[service]);
+  if (!isGeneralRequest && !isServiceRequest) return null;
+  return {
+    service: isServiceRequest ? service : null,
+    skipServiceStep: isServiceRequest && (link.dataset.unifiedRequestSkipService === "true" || Boolean(serviceFromHash) || Boolean(serviceFromData))
+  };
+}
+
+function shouldOpenUnifiedRequestWizardLink(link) {
+  return Boolean(unifiedRequestOptionsFromLink(link));
 }
 
 function installUnifiedRequestWizardLinkHandler() {
   if (window.__all4youUnifiedRequestWizardHandlerInstalled) return;
   window.__all4youUnifiedRequestWizardHandlerInstalled = true;
   document.addEventListener("click", event => {
-    const link = event.target.closest("a[data-link]");
+    const link = event.target.closest("a");
     if (!shouldOpenUnifiedRequestWizardLink(link)) return;
     event.preventDefault();
     event.stopPropagation();
     if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
     const portalMode = Boolean(customerPortalCurrentSession && customerPortalAccount);
-    openCustomerNewRequestModal({ source: portalMode ? "customer" : "public", updateHistory: portalMode && window.location.pathname === "/kundenportal" });
+    const wizardOptions = unifiedRequestOptionsFromLink(link) || {};
+    openCustomerNewRequestModal({
+      source: portalMode ? "customer" : "public",
+      updateHistory: portalMode && window.location.pathname === "/kundenportal",
+      service: wizardOptions.service || null,
+      skipServiceStep: Boolean(wizardOptions.skipServiceStep)
+    });
     if (mainNav) {
       mainNav.classList.remove("open");
       navToggle?.setAttribute("aria-expanded", "false");
@@ -13645,6 +13745,19 @@ function installUnifiedRequestWizardModalHandler() {
   if (window.__all4youUnifiedRequestWizardModalHandlerInstalled) return;
   window.__all4youUnifiedRequestWizardModalHandlerInstalled = true;
   document.addEventListener("click", event => {
+    const directButton = event.target.closest("[data-open-unified-request]");
+    if (directButton) {
+      event.preventDefault();
+      const portalMode = Boolean(customerPortalCurrentSession && customerPortalAccount);
+      const service = directButton.dataset.unifiedRequestService || null;
+      openCustomerNewRequestModal({
+        source: portalMode ? "customer" : "public",
+        updateHistory: portalMode && window.location.pathname === "/kundenportal",
+        service,
+        skipServiceStep: directButton.dataset.unifiedRequestSkipService === "true"
+      });
+      return;
+    }
     const modal = event.target.closest("#customerPortalNewRequestModal");
     if (!modal) return;
     if (event.defaultPrevented) return;
@@ -14578,7 +14691,7 @@ function initCookieConsent() {
 
 
 document.addEventListener("click", event => {
-  const link = event.target.closest("a[data-link]");
+  const link = event.target.closest("a");
   if (!link) return;
 
   const url = new URL(link.href);

@@ -1,4 +1,3 @@
 /objektportal /objektportal/index.html 200
 /objektportal/ /objektportal/index.html 200
-/objektportal/* /objektportal/:splat 200
 /* /index.html 200

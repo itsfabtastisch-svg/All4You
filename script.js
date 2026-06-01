@@ -2013,23 +2013,32 @@ function setDashboardEmployeesMessage(type, text) {
 function employeeRoleLabel(role) {
   const normalized = String(role || "").toLowerCase();
   const labels = {
-    admin: "Chef / Admin",
-    chef: "Chef / Admin",
-    owner: "Chef / Admin",
-    leitung: "Chef / Admin",
-    mitarbeiter: "Mitarbeiter / Putzkraft",
-    employee: "Mitarbeiter / Putzkraft",
-    staff: "Mitarbeiter / Putzkraft",
-    viewer: "Nur Ansicht"
+    admin: "Admin",
+    chef: "Admin",
+    owner: "Admin",
+    leitung: "Admin",
+    mitarbeiter: "Mitarbeiter",
+    employee: "Mitarbeiter",
+    staff: "Mitarbeiter",
+    viewer: "Mitarbeiter"
   };
-  return labels[normalized] || role || "Mitarbeiter / Putzkraft";
+  return labels[normalized] || role || "Mitarbeiter";
 }
 
 function employeeRoleGroup(role) {
   const normalized = String(role || "").toLowerCase();
   if (["admin", "chef", "owner", "leitung"].includes(normalized)) return "admin";
-  if (["viewer"].includes(normalized)) return "viewer";
   return "mitarbeiter";
+}
+
+function employeeHasObjectPortalAccess(employee) {
+  if (employeeRoleGroup(employee?.role) === "admin") return true;
+  return Boolean(employee?.object_portal_enabled);
+}
+
+function employeeHasQrCheckinAccess(employee) {
+  if (employeeRoleGroup(employee?.role) === "admin") return true;
+  return Boolean(employee?.object_portal_enabled && employee?.can_qr_checkin);
 }
 
 function isDashboardAdminProfile(profile = dashboardCurrentEmployeeProfile) {
@@ -2053,26 +2062,33 @@ function resetDashboardAdminCaches() {
 function applyDashboardRoleMode(profile) {
   const protectedArea = document.querySelector("#dashboardProtectedArea");
   const isAdmin = isDashboardAdminProfile(profile);
+  const hasObjectPortal = employeeHasObjectPortalAccess(profile);
 
   protectedArea?.classList.toggle("dashboard-admin-mode", isAdmin);
   protectedArea?.classList.toggle("dashboard-employee-mode", !isAdmin);
 
   document.querySelectorAll(".dashboard-menu [data-dashboard-view-trigger]").forEach(item => {
     const trigger = item.dataset.dashboardViewTrigger || "";
-    const allowedForEmployee = trigger === "employee-home";
-    item.classList.toggle("is-hidden", !isAdmin && !allowedForEmployee);
+    const isEmployeeHome = trigger === "employee-home";
+    item.classList.toggle("is-hidden", isAdmin ? isEmployeeHome : !isEmployeeHome);
   });
 
   document.querySelectorAll("[data-admin-only]").forEach(item => {
     item.classList.toggle("is-hidden", !isAdmin);
   });
+
+  document.querySelectorAll("[data-objectportal-permission]").forEach(item => {
+    item.classList.toggle("is-hidden", !hasObjectPortal);
+  });
+  document.querySelectorAll("[data-no-objectportal-permission]").forEach(item => {
+    item.classList.toggle("is-hidden", hasObjectPortal);
+  });
 }
 
 function employeeRoleDescription(role) {
   const group = employeeRoleGroup(role);
-  if (group === "admin") return "Verwaltung: Kunden, Objekte, Mitarbeiter, Einsätze und Berichte.";
-  if (group === "viewer") return "Nur Ansicht: keine Durchführung und keine Verwaltung.";
-  return "Durchführung: eigene Einsätze, QR-Check-in, Bilder und später Berichte.";
+  if (group === "admin") return "Vollzugriff: Verwaltung, Kunden, Aufträge, Mitarbeiter, ObjektPortal und Systemeinstellungen.";
+  return "Mitarbeiterkonto: sichtbare Bereiche werden über Berechtigungen gesteuert.";
 }
 
 function buildEmployeeRightsSummary(employee) {
@@ -2081,13 +2097,11 @@ function buildEmployeeRightsSummary(employee) {
   if (group === "admin") {
     rights.push("Vollzugriff");
     rights.push("Verwaltung");
-  } else if (group === "mitarbeiter") {
-    rights.push("Durchführung");
-    rights.push("eigene Einsätze");
   } else {
-    rights.push("Nur Ansicht");
+    rights.push("Mitarbeiter");
   }
-  if (employee?.can_qr_checkin) rights.push("QR-Check-in");
+  if (employeeHasObjectPortalAccess(employee)) rights.push("ObjektPortal");
+  if (employeeHasQrCheckinAccess(employee)) rights.push("QR-Check-in");
   return rights;
 }
 
@@ -2162,8 +2176,8 @@ function renderDashboardEmployeeDetail(employee) {
     <div class="dashboard-employee-rights-grid">
       <div><strong>Rolle</strong><span>${escapeHtml(employeeRoleLabel(employee.role))}</span></div>
       <div><strong>Aufgabe</strong><span>${escapeHtml(employeeRoleDescription(employee.role))}</span></div>
-      <div><strong>QR-Check-in</strong><span>${employee.can_qr_checkin ? "erlaubt" : "nicht erlaubt"}</span></div>
-      <div><strong>Sicht für Kunden</strong><span>${roleGroup === "mitarbeiter" ? "neutraler Einsatzstatus" : "nicht öffentlich"}</span></div>
+      <div><strong>ObjektPortal</strong><span>${employeeHasObjectPortalAccess(employee) ? "sichtbar / nutzbar" : "nicht sichtbar"}</span></div>
+      <div><strong>QR-Check-in</strong><span>${employeeHasQrCheckinAccess(employee) ? "erlaubt" : "nicht erlaubt"}</span></div>
       <div><strong>Interne Zuordnung</strong><span>${escapeHtml(employee.employee_number || "offen")}</span></div>
     </div>
     <div class="dashboard-ticket-action-grid">
@@ -2189,7 +2203,8 @@ function resetDashboardEmployeeWizardForm() {
   form.elements.employee_id.value = "";
   form.elements.mode.value = "create";
   form.elements.role.value = "mitarbeiter";
-  form.elements.can_qr_checkin.checked = true;
+  if (form.elements.object_portal_enabled) form.elements.object_portal_enabled.checked = false;
+  form.elements.can_qr_checkin.checked = false;
 }
 
 function openDashboardEmployeeWizard(mode = "create", employee = null) {
@@ -2213,8 +2228,9 @@ function openDashboardEmployeeWizard(mode = "create", employee = null) {
     form.elements.email.value = employee.email || "";
     form.elements.password.value = "";
     form.elements.password.required = false;
-    form.elements.role.value = employeeRoleGroup(employee.role) === "admin" ? "admin" : (employeeRoleGroup(employee.role) === "viewer" ? "viewer" : "mitarbeiter");
-    form.elements.can_qr_checkin.checked = Boolean(employee.can_qr_checkin);
+    form.elements.role.value = employeeRoleGroup(employee.role) === "admin" ? "admin" : "mitarbeiter";
+    if (form.elements.object_portal_enabled) form.elements.object_portal_enabled.checked = employeeHasObjectPortalAccess(employee);
+    form.elements.can_qr_checkin.checked = employeeHasQrCheckinAccess(employee);
     form.elements.notes.value = employee.notes || "";
     if (title) title.textContent = "Mitarbeiter bearbeiten";
     if (intro) intro.textContent = "Passe Mitarbeiter-ID, Rolle und Rechte an. Das Passwort wird hier nicht verändert.";
@@ -2281,9 +2297,9 @@ function getDashboardEmployeeWizardData() {
   const form = document.querySelector("#dashboardEmployeeWizardForm");
   if (!form) return null;
   const data = new FormData(form);
-  const role = String(data.get("role") || "mitarbeiter").trim().toLowerCase();
+  const role = String(data.get("role") || "mitarbeiter").trim().toLowerCase() === "admin" ? "admin" : "mitarbeiter";
   const isAdminRole = role === "admin";
-  const isViewer = role === "viewer";
+  const objectPortalEnabled = isAdminRole ? true : Boolean(data.get("object_portal_enabled"));
   return {
     mode: String(data.get("mode") || "create"),
     employee_id: String(data.get("employee_id") || "").trim() || null,
@@ -2293,8 +2309,8 @@ function getDashboardEmployeeWizardData() {
     password: String(data.get("password") || ""),
     role,
     is_active: true,
-    object_portal_enabled: !isViewer,
-    can_qr_checkin: isAdminRole ? true : Boolean(data.get("can_qr_checkin")),
+    object_portal_enabled: objectPortalEnabled,
+    can_qr_checkin: isAdminRole ? true : (objectPortalEnabled && Boolean(data.get("can_qr_checkin"))),
     notes: String(data.get("notes") || "").trim()
   };
 }
@@ -2350,6 +2366,33 @@ function updateDashboardEmployeeWizard() {
   if (next) next.hidden = dashboardEmployeeWizardStep >= 4;
   if (submit) submit.hidden = dashboardEmployeeWizardStep < 4;
 
+  const roleField = form.elements.role;
+  const objectPortalField = form.elements.object_portal_enabled;
+  const qrField = form.elements.can_qr_checkin;
+  const isAdminRole = String(roleField?.value || "").toLowerCase() === "admin";
+  if (objectPortalField) {
+    if (isAdminRole) {
+      objectPortalField.checked = true;
+      objectPortalField.disabled = true;
+    } else {
+      objectPortalField.disabled = false;
+    }
+  }
+  if (qrField) {
+    if (isAdminRole) {
+      qrField.checked = true;
+      qrField.disabled = true;
+    } else {
+      qrField.disabled = !objectPortalField?.checked;
+      if (!objectPortalField?.checked) qrField.checked = false;
+    }
+  }
+  form.querySelectorAll(".dashboard-permission-card").forEach(card => {
+    const input = card.querySelector("input");
+    card.classList.toggle("active", Boolean(input?.checked));
+    card.classList.toggle("disabled", Boolean(input?.disabled));
+  });
+
   const payload = getDashboardEmployeeWizardData();
   const summary = form.querySelector("#dashboardEmployeeWizardSummary");
   if (summary && payload) {
@@ -2359,6 +2402,7 @@ function updateDashboardEmployeeWizard() {
       <div><strong>Login</strong><span>${escapeHtml(payload.email || "—")}</span></div>
       <div><strong>Rolle</strong><span>${escapeHtml(employeeRoleLabel(payload.role))}</span></div>
       <div><strong>Rechte</strong><span>${escapeHtml(employeeRoleDescription(payload.role))}</span></div>
+      <div><strong>ObjektPortal</strong><span>${payload.object_portal_enabled ? "sichtbar / nutzbar" : "nicht sichtbar"}</span></div>
       <div><strong>QR-Check-in</strong><span>${payload.can_qr_checkin ? "erlaubt" : "nicht erlaubt"}</span></div>
     `;
   }
@@ -7000,7 +7044,7 @@ function pageDashboard() {
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
             <a href="#dashboard-status" data-dashboard-view-trigger="status">Status / Verlauf</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger</a>
-            <a href="/objektportal/" target="_blank" rel="noopener">ObjektPortal</a>
+            <a href="/objektportal/index.html" target="_blank" rel="noopener" data-admin-only>ObjektPortal</a>
             <a href="#dashboard-management" data-dashboard-view-trigger="management">Verwaltung</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
           </nav>
@@ -7025,11 +7069,16 @@ function pageDashboard() {
               <p class="lead">Dieser Zugang ist für ausführende Mitarbeiter gedacht. Verwaltungsbereiche, Kundendaten, Kommunikation und fremde Aufträge bleiben ausgeblendet.</p>
             </div>
             <div class="dashboard-hub-grid dashboard-employee-action-grid">
-              <a class="dashboard-hub-card" href="/objektportal/" target="_blank" rel="noopener">
+              <a class="dashboard-hub-card" href="/objektportal/index.html" target="_blank" rel="noopener" data-objectportal-permission>
                 <span>ObjektPortal</span>
-                <strong>Web-App öffnen</strong>
+                <strong>ObjektPortal öffnen</strong>
                 <small>Eigene Reinigungseinsätze, QR-Check-in, Bilder und später Abschlussformular.</small>
               </a>
+              <article class="dashboard-hub-card dashboard-hub-card-static" data-no-objectportal-permission>
+                <span>ObjektPortal</span>
+                <strong>Nicht freigeschaltet</strong>
+                <small>Dieses Konto ist nicht für wiederkehrende Reinigungs-/ObjektPortal-Einsätze freigegeben.</small>
+              </article>
               <article class="dashboard-hub-card dashboard-hub-card-static">
                 <span>Zugriff</span>
                 <strong>Nur eigene Aufgaben</strong>
@@ -7094,9 +7143,9 @@ function pageDashboard() {
                 <strong>Konten & Rechte</strong>
                 <small>Kundenkonten, Mitarbeiter und spätere Rollen an einem Ort.</small>
               </button>
-              <a class="dashboard-hub-card" href="/objektportal/" target="_blank" rel="noopener">
+              <a class="dashboard-hub-card" href="/objektportal/index.html" target="_blank" rel="noopener">
                 <span>ObjektPortal</span>
-                <strong>Web-App öffnen</strong>
+                <strong>ObjektPortal öffnen</strong>
                 <small>Objekte, Einsätze, QR-Check-in und Reinigungssystem.</small>
               </a>
               <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="trailer-calendar">
@@ -7335,8 +7384,8 @@ function pageDashboard() {
             </div>
 
             <div class="dashboard-employee-role-info">
-              <div><strong>Chef / Admin</strong><span>Verwaltet Kunden, Objekte, Mitarbeiter, Einsätze, QR-Codes und spätere Berichte.</span></div>
-              <div><strong>Mitarbeiter / Putzkraft</strong><span>Sieht später eigene Einsätze, scannt QR-Codes, lädt Bilder hoch und erstellt Berichte.</span></div>
+              <div><strong>Admin</strong><span>Vollzugriff auf Verwaltung, Kunden, Aufträge, Mitarbeiter, ObjektPortal und Systemeinstellungen.</span></div>
+              <div><strong>Mitarbeiter</strong><span>Normales Mitarbeiterkonto. Sichtbare Bereiche werden über Berechtigungen gesteuert.</span></div>
               <div><strong>Kunde</strong><span>Sieht nur eigene Objekte, Status, Intervalle und freigegebene Nachweise.</span></div>
             </div>
 
@@ -7415,13 +7464,25 @@ function pageDashboard() {
                   <section class="dashboard-employee-wizard-panel" data-employee-wizard-step="3" hidden>
                     <label>Rolle
                       <select name="role">
-                        <option value="mitarbeiter">Mitarbeiter / Putzkraft</option>
-                        <option value="admin">Chef / Admin</option>
-                        <option value="viewer">Nur Ansicht</option>
+                        <option value="mitarbeiter">Mitarbeiter</option>
+                        <option value="admin">Admin</option>
                       </select>
                     </label>
-                    <div class="dashboard-employee-checks dashboard-employee-role-checks">
-                      <label><input type="checkbox" name="can_qr_checkin" checked> QR-Check-in erlauben</label>
+                    <div class="dashboard-employee-permission-grid dashboard-employee-role-checks">
+                      <label class="dashboard-permission-card">
+                        <input type="checkbox" name="object_portal_enabled">
+                        <span>
+                          <strong>ObjektPortal anzeigen</strong>
+                          <small>Nur für wiederkehrende Reinigungs-/ObjektPortal-Einsätze. Ohne Freigabe sieht der Mitarbeiter diesen Bereich nicht.</small>
+                        </span>
+                      </label>
+                      <label class="dashboard-permission-card">
+                        <input type="checkbox" name="can_qr_checkin">
+                        <span>
+                          <strong>QR-Check-in erlauben</strong>
+                          <small>Mitarbeiter darf QR-Codes scannen und Reinigungseinsätze vor Ort starten.</small>
+                        </span>
+                      </label>
                     </div>
                     <label>Interne Notiz
                       <textarea name="notes" rows="3" placeholder="z. B. Einsatzgebiet, Telefon intern oder Hinweise für den Chef"></textarea>
@@ -11808,6 +11869,9 @@ function renderDashboardStatusOverview() {
 
 function setDashboardView(view = "overview", options = {}) {
   let normalized = DASHBOARD_HISTORY_VIEWS.includes(view) ? view : "overview";
+  if (dashboardCurrentEmployeeProfile && isDashboardAdminProfile() && normalized === "employee-home") {
+    normalized = "overview";
+  }
   if (dashboardCurrentEmployeeProfile && !isDashboardAdminProfile() && normalized !== "employee-home") {
     normalized = "employee-home";
   }

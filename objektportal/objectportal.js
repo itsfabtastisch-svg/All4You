@@ -585,6 +585,16 @@ function isManagerProfile(profile = state.employeeProfile) {
   return ["admin", "chef", "owner", "leitung"].includes(role);
 }
 
+function hasObjectPortalPermission(profile = state.employeeProfile) {
+  if (isManagerProfile(profile)) return true;
+  return Boolean(profile?.object_portal_enabled);
+}
+
+function hasQrCheckinPermission(profile = state.employeeProfile) {
+  if (isManagerProfile(profile)) return true;
+  return Boolean(profile?.object_portal_enabled && profile?.can_qr_checkin);
+}
+
 function currentEmployeeNumber() {
   return String(state.employeeProfile?.employee_number || "").trim().toUpperCase();
 }
@@ -856,6 +866,9 @@ async function handleCheckinJob(event) {
   if (!jobId) return;
 
   try {
+    if (!hasQrCheckinPermission(state.employeeProfile)) {
+      throw new Error("Dieses Mitarbeiterkonto darf keine QR-Check-ins durchführen.");
+    }
     setStatus("QR-Check-in wird gespeichert …", "loading");
     const data = await callRpc("admin_checkin_object_portal_job", {
       p_job_id: jobId,
@@ -1105,6 +1118,28 @@ function renderEmployeeJobCard(row) {
         ${getJobPhotos(job).length ? renderJobPhotosSection(job, { compact: true }) : ""}
       `}
     </article>
+  `;
+}
+
+function renderObjectPortalNoAccess() {
+  setPortalMode("employee");
+  const list = $("#opObjectsList");
+  if (!list) return;
+  const name = state.employeeProfile?.display_name || state.employeeProfile?.email || "Mitarbeiter";
+  list.innerHTML = `
+    <section class="op-employee-home">
+      <div class="op-employee-hero">
+        <p class="op-eyebrow">Kein ObjektPortal-Zugriff</p>
+        <h2>Hallo ${escapeHtml(name)}</h2>
+        <p>Dieses Mitarbeiterkonto ist nicht für wiederkehrende Reinigungs-/ObjektPortal-Einsätze freigeschaltet.</p>
+      </div>
+      <div class="op-employee-section">
+        <div class="op-employee-hint-box">
+          <strong>Keine Freigabe für das ObjektPortal.</strong>
+          <span>Wenn du Reinigungseinsätze mit QR-Check-in bearbeiten sollst, muss ein Admin in der Mitarbeiterverwaltung die Berechtigung „ObjektPortal anzeigen“ aktivieren.</span>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -1723,6 +1758,16 @@ async function loadObjectPortal() {
   try {
     setStatus("ObjektPortal wird geladen …", "loading");
     state.employeeProfile = await fetchEmployeeProfile(state.session).catch(() => null);
+    if (state.employeeProfile && !hasObjectPortalPermission(state.employeeProfile)) {
+      state.customers = [];
+      state.objects = [];
+      state.stats = {};
+      renderObjectPortalNoAccess();
+      state.checkinData = { success: false, message: "Dieses Mitarbeiterkonto ist nicht für das ObjektPortal freigeschaltet." };
+      renderCheckinPanel();
+      setStatus("Kein ObjektPortal-Zugriff für dieses Mitarbeiterkonto", "error");
+      return;
+    }
     const data = await callRpc("object_portal_list_for_current_user", {});
     if (data?.success === false) throw new Error(data.message || "ObjektPortal konnte nicht geladen werden.");
 

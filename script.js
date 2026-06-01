@@ -7044,7 +7044,7 @@ function pageDashboard() {
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
             <a href="#dashboard-status" data-dashboard-view-trigger="status">Status / Verlauf</a>
             <a href="#dashboard-trailer-calendar" data-dashboard-view-trigger="trailer-calendar">Anhänger</a>
-            <a href="/objektportal/index.html" target="_blank" rel="noopener" data-admin-only>ObjektPortal</a>
+            <a href="/objektportal/" target="_blank" rel="noopener" data-admin-only>ObjektPortal</a>
             <a href="#dashboard-management" data-dashboard-view-trigger="management">Verwaltung</a>
             <a href="#dashboard-archive" data-dashboard-view-trigger="archive">Archiv</a>
           </nav>
@@ -7069,7 +7069,7 @@ function pageDashboard() {
               <p class="lead">Dieser Zugang ist für ausführende Mitarbeiter gedacht. Verwaltungsbereiche, Kundendaten, Kommunikation und fremde Aufträge bleiben ausgeblendet.</p>
             </div>
             <div class="dashboard-hub-grid dashboard-employee-action-grid">
-              <a class="dashboard-hub-card" href="/objektportal/index.html" target="_blank" rel="noopener" data-objectportal-permission>
+              <a class="dashboard-hub-card" href="/objektportal/" target="_blank" rel="noopener" data-objectportal-permission>
                 <span>ObjektPortal</span>
                 <strong>ObjektPortal öffnen</strong>
                 <small>Eigene Reinigungseinsätze, QR-Check-in, Bilder und später Abschlussformular.</small>
@@ -7143,7 +7143,7 @@ function pageDashboard() {
                 <strong>Konten & Rechte</strong>
                 <small>Kundenkonten, Mitarbeiter und spätere Rollen an einem Ort.</small>
               </button>
-              <a class="dashboard-hub-card" href="/objektportal/index.html" target="_blank" rel="noopener">
+              <a class="dashboard-hub-card" href="/objektportal/" target="_blank" rel="noopener">
                 <span>ObjektPortal</span>
                 <strong>ObjektPortal öffnen</strong>
                 <small>Objekte, Einsätze, QR-Check-in und Reinigungssystem.</small>
@@ -7553,7 +7553,7 @@ function pageDashboard() {
             <div class="dashboard-objectportal-frame-wrap">
               <iframe
                 class="dashboard-objectportal-frame"
-                src="/objektportal/index.html"
+                src="/objektportal/"
                 title="All4You ObjektPortal"
                 loading="lazy"
               ></iframe>

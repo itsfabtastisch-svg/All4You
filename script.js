@@ -3631,23 +3631,60 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
         Interne Notizen bleiben geschützt und sind hier nicht sichtbar.
       </p>
 
-      <form class="customer-reply-form" id="customerReplyForm">
-        <label>Nachricht an All4You senden
-          <textarea name="message" rows="4" placeholder="z. B. Termin passt, bitte zurückrufen, zusätzliche Information zur Anfrage …" required></textarea>
-        </label>
-        <button class="btn primary" type="submit" id="customerReplyButton">Nachricht senden <span>›</span></button>
-        <p class="customer-reply-message" id="customerReplyMessage">
-          Ihre Nachricht wird dem Ticket zugeordnet und im Mitarbeiter-Dashboard sichtbar.
-        </p>
-      </form>
+      <div class="customer-status-actions">
+        <button class="customer-status-action-card" type="button" data-status-modal="message">
+          <span>Nachricht</span>
+          <strong>Nachricht senden</strong>
+          <small>Eine kurze Rückmeldung oder Zusatzinfo zum Ticket schicken.</small>
+        </button>
+        <button class="customer-status-action-card" type="button" data-status-modal="files">
+          <span>Dateien</span>
+          <strong>Dateien hochladen</strong>
+          <small>Fotos, PDFs oder weitere Unterlagen nachreichen.</small>
+        </button>
+      </div>
 
-      <form class="customer-attachment-form" id="customerAttachmentForm">
-        ${buildAttachmentUploadBox("status")}
-        <button class="btn primary" type="submit" id="customerAttachmentButton">Dateien hochladen <span>›</span></button>
-        <p class="customer-attachment-message" id="customerAttachmentMessage">
-          Ihre Dateien werden dem Ticket zugeordnet und sind im Mitarbeiter-Dashboard sichtbar.
-        </p>
-      </form>
+      <div class="customer-status-modal" id="customerStatusMessageModal" hidden>
+        <div class="customer-status-modal-backdrop" data-status-modal-close></div>
+        <section class="customer-status-modal-card" role="dialog" aria-modal="true" aria-label="Nachricht an All4You senden">
+          <button class="customer-status-modal-close" type="button" data-status-modal-close aria-label="Fenster schließen">×</button>
+          <p class="eyebrow">Nachricht senden</p>
+          <h3>Nachricht an All4You</h3>
+          <p class="customer-status-modal-lead">Ihre Nachricht wird direkt diesem Ticket zugeordnet und im Mitarbeiterportal sichtbar.</p>
+          <form class="customer-reply-form" id="customerReplyForm">
+            <label>Ihre Nachricht
+              <textarea name="message" rows="5" placeholder="z. B. Termin passt, bitte zurückrufen, zusätzliche Information zur Anfrage …" required></textarea>
+            </label>
+            <div class="customer-status-modal-actions">
+              <button class="btn ghost" type="button" data-status-modal-close>Abbrechen</button>
+              <button class="btn primary" type="submit" id="customerReplyButton">Nachricht senden <span>›</span></button>
+            </div>
+            <p class="customer-reply-message" id="customerReplyMessage">
+              Bereit zum Senden.
+            </p>
+          </form>
+        </section>
+      </div>
+
+      <div class="customer-status-modal" id="customerStatusFilesModal" hidden>
+        <div class="customer-status-modal-backdrop" data-status-modal-close></div>
+        <section class="customer-status-modal-card" role="dialog" aria-modal="true" aria-label="Dateien zu dieser Anfrage hochladen">
+          <button class="customer-status-modal-close" type="button" data-status-modal-close aria-label="Fenster schließen">×</button>
+          <p class="eyebrow">Dateien hochladen</p>
+          <h3>Dateien zur Anfrage nachreichen</h3>
+          <p class="customer-status-modal-lead">Laden Sie Fotos, PDFs oder Dokumente hoch. Die Dateien werden diesem Ticket zugeordnet.</p>
+          <form class="customer-attachment-form" id="customerAttachmentForm">
+            ${buildAttachmentUploadBox("status")}
+            <div class="customer-status-modal-actions">
+              <button class="btn ghost" type="button" data-status-modal-close>Abbrechen</button>
+              <button class="btn primary" type="submit" id="customerAttachmentButton">Dateien hochladen <span>›</span></button>
+            </div>
+            <p class="customer-attachment-message" id="customerAttachmentMessage">
+              Wählen Sie mindestens eine Datei aus.
+            </p>
+          </form>
+        </section>
+      </div>
     </div>
   `;
 }
@@ -3704,6 +3741,31 @@ function bindCustomerStatusPage() {
 
   if (!form || !result) return;
 
+  function setPublicStatusModalOpen(modalName, isOpen) {
+    const modal = modalName === "files"
+      ? result.querySelector("#customerStatusFilesModal")
+      : result.querySelector("#customerStatusMessageModal");
+
+    if (!modal) return;
+
+    modal.hidden = !isOpen;
+    modal.classList.toggle("is-open", Boolean(isOpen));
+    document.body.classList.toggle("modal-open", Boolean(result.querySelector(".customer-status-modal.is-open")));
+
+    if (isOpen) {
+      const focusTarget = modal.querySelector("textarea, input, button");
+      window.setTimeout(() => focusTarget?.focus?.(), 40);
+    }
+  }
+
+  function closePublicStatusModals() {
+    result.querySelectorAll(".customer-status-modal").forEach(modal => {
+      modal.hidden = true;
+      modal.classList.remove("is-open");
+    });
+    document.body.classList.remove("modal-open");
+  }
+
   form.addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -3734,6 +3796,24 @@ function bindCustomerStatusPage() {
         </div>
       `;
     }
+  });
+
+  result.addEventListener("click", event => {
+    const openButton = event.target.closest("[data-status-modal]");
+    if (openButton) {
+      event.preventDefault();
+      setPublicStatusModalOpen(openButton.dataset.statusModal, true);
+      return;
+    }
+
+    if (event.target.closest("[data-status-modal-close]")) {
+      event.preventDefault();
+      closePublicStatusModals();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closePublicStatusModals();
   });
 
   result.addEventListener("submit", async event => {

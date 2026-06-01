@@ -15400,10 +15400,28 @@ function initCookieConsent() {
 
 document.addEventListener("click", event => {
   const link = event.target.closest("a");
-  if (!link) return;
+  if (!link || event.defaultPrevented) return;
 
-  const url = new URL(link.href);
+  const target = (link.getAttribute("target") || "").toLowerCase();
+  const url = new URL(link.href, window.location.origin);
+
   if (url.origin !== window.location.origin) return;
+
+  const isModifiedClick = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+  const isHardPortalRoute = url.pathname === "/objektportal" || url.pathname.startsWith("/objektportal/");
+
+  // Hard navigation exceptions:
+  // - target="_blank" must open normally in a new tab/window.
+  // - /objektportal/ is a separate web app and must not be swallowed by the homepage router.
+  // - modified clicks should keep browser defaults.
+  if (target && target !== "_self") return;
+  if (link.hasAttribute("download")) return;
+  if (isModifiedClick) return;
+  if (isHardPortalRoute) {
+    event.preventDefault();
+    window.location.assign(url.pathname + url.search + url.hash);
+    return;
+  }
 
   event.preventDefault();
   navigateTo(url.pathname + url.search);

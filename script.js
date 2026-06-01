@@ -688,6 +688,7 @@ function updateDashboardStats(tickets) {
 }
 
 async function loadDashboardRequests(session) {
+  if (dashboardCurrentEmployeeProfile && !isDashboardAdminProfile()) return;
   const list = document.querySelector("#dashboardTicketList");
   const liveStatus = document.querySelector("#dashboardLiveStatus");
 
@@ -1739,6 +1740,7 @@ async function submitDashboardCustomerAccountWizard() {
 }
 
 async function loadDashboardCustomerAccounts(session = dashboardCurrentSession) {
+  if (dashboardCurrentEmployeeProfile && !isDashboardAdminProfile()) return;
   const list = document.querySelector("#dashboardCustomerAccountsList");
   if (list) {
     list.innerHTML = `<div class="dashboard-empty-state"><strong>Kundenkonten werden geladen …</strong><p>Portal-Daten werden aus Supabase abgerufen.</p></div>`;
@@ -2028,6 +2030,42 @@ function employeeRoleGroup(role) {
   if (["admin", "chef", "owner", "leitung"].includes(normalized)) return "admin";
   if (["viewer"].includes(normalized)) return "viewer";
   return "mitarbeiter";
+}
+
+function isDashboardAdminProfile(profile = dashboardCurrentEmployeeProfile) {
+  return employeeRoleGroup(profile?.role) === "admin";
+}
+
+function resetDashboardAdminCaches() {
+  dashboardRequestCache = [];
+  dashboardAllRequestCache = [];
+  dashboardArchiveCache = [];
+  dashboardCustomerAccountsCache = [];
+  dashboardEmployeesCache = [];
+  dashboardSelectedRequestId = null;
+  dashboardSelectedArchiveId = null;
+  dashboardSelectedCustomerAccountId = null;
+  dashboardSelectedEmployeeId = null;
+  dashboardSelectedMessageRequestId = null;
+  clearTicketExtras();
+}
+
+function applyDashboardRoleMode(profile) {
+  const protectedArea = document.querySelector("#dashboardProtectedArea");
+  const isAdmin = isDashboardAdminProfile(profile);
+
+  protectedArea?.classList.toggle("dashboard-admin-mode", isAdmin);
+  protectedArea?.classList.toggle("dashboard-employee-mode", !isAdmin);
+
+  document.querySelectorAll(".dashboard-menu [data-dashboard-view-trigger]").forEach(item => {
+    const trigger = item.dataset.dashboardViewTrigger || "";
+    const allowedForEmployee = trigger === "employee-home";
+    item.classList.toggle("is-hidden", !isAdmin && !allowedForEmployee);
+  });
+
+  document.querySelectorAll("[data-admin-only]").forEach(item => {
+    item.classList.toggle("is-hidden", !isAdmin);
+  });
 }
 
 function employeeRoleDescription(role) {
@@ -2327,6 +2365,7 @@ function updateDashboardEmployeeWizard() {
 }
 
 async function loadDashboardEmployees(session = dashboardCurrentSession) {
+  if (dashboardCurrentEmployeeProfile && !isDashboardAdminProfile()) return;
   const list = document.querySelector("#dashboardEmployeesList");
   if (list) {
     list.innerHTML = `<div class="dashboard-empty-state"><strong>Mitarbeiter werden geladen …</strong><p>Konten, Mitarbeiter-IDs und Rollen werden aus Supabase abgerufen.</p></div>`;
@@ -6955,6 +6994,7 @@ function pageDashboard() {
           </a>
 
           <nav class="dashboard-menu" aria-label="Dashboard Navigation">
+            <a class="is-hidden" href="#dashboard-employee-home" data-dashboard-view-trigger="employee-home">Mein Bereich</a>
             <a class="active" href="#dashboard-overview" data-dashboard-view-trigger="overview">Übersicht</a>
             <a href="#dashboard-tickets" data-dashboard-view-trigger="tickets">Anfragen / Aufträge</a>
             <a href="#dashboard-messages" data-dashboard-view-trigger="messages">Nachrichten</a>
@@ -6978,6 +7018,31 @@ function pageDashboard() {
         </aside>
 
         <main class="dashboard-main">
+          <section class="dashboard-panel dashboard-employee-home is-hidden" id="dashboardEmployeeHome" data-dashboard-view="employee-home">
+            <div class="dashboard-employee-hero">
+              <p class="eyebrow">Mitarbeiterbereich</p>
+              <h1>Deine Einsätze und Aufgaben.</h1>
+              <p class="lead">Dieser Zugang ist für ausführende Mitarbeiter gedacht. Verwaltungsbereiche, Kundendaten, Kommunikation und fremde Aufträge bleiben ausgeblendet.</p>
+            </div>
+            <div class="dashboard-hub-grid dashboard-employee-action-grid">
+              <a class="dashboard-hub-card" href="/objektportal/" target="_blank" rel="noopener">
+                <span>ObjektPortal</span>
+                <strong>Web-App öffnen</strong>
+                <small>Eigene Reinigungseinsätze, QR-Check-in, Bilder und später Abschlussformular.</small>
+              </a>
+              <article class="dashboard-hub-card dashboard-hub-card-static">
+                <span>Zugriff</span>
+                <strong>Nur eigene Aufgaben</strong>
+                <small>Du siehst im ObjektPortal nur Einsätze, die deiner Mitarbeiter-ID zugeordnet sind.</small>
+              </article>
+              <article class="dashboard-hub-card dashboard-hub-card-static">
+                <span>Hinweis</span>
+                <strong>Keine Verwaltung</strong>
+                <small>Aufträge bearbeiten, Nachrichten, Kundenkonten und Mitarbeiterverwaltung sind Chef/Admin vorbehalten.</small>
+              </article>
+            </div>
+          </section>
+
           <section class="dashboard-hero" data-dashboard-view="overview">
             <div>
               <p class="eyebrow">All4You Mitarbeiter-Dashboard</p>
@@ -11539,7 +11604,7 @@ function bindTrailerWizard() {
 
 
 
-const DASHBOARD_HISTORY_VIEWS = ["overview", "tickets", "status", "archive", "management", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
+const DASHBOARD_HISTORY_VIEWS = ["overview", "employee-home", "tickets", "status", "archive", "management", "customers", "employees", "objectportal", "trailer-calendar", "messages"];
 const CUSTOMER_PORTAL_HISTORY_TABS = ["overview", "objects", "requests", "messages", "status"];
 let dashboardHistoryRoutingBound = false;
 let customerPortalHistoryRoutingBound = false;
@@ -11586,6 +11651,10 @@ function writeDashboardHistoryState(view = "overview", extra = {}, options = {})
 
 function applyDashboardHistoryState() {
   const state = readDashboardHistoryState();
+  if (dashboardCurrentEmployeeProfile && !isDashboardAdminProfile()) {
+    setDashboardView("employee-home", { updateHistory: false });
+    return;
+  }
   if (state.ticket) dashboardSelectedRequestId = state.ticket;
   if (state.customer) dashboardSelectedCustomerAccountId = state.customer;
   if (state.employee) dashboardSelectedEmployeeId = state.employee;
@@ -11738,7 +11807,10 @@ function renderDashboardStatusOverview() {
 }
 
 function setDashboardView(view = "overview", options = {}) {
-  const normalized = DASHBOARD_HISTORY_VIEWS.includes(view) ? view : "overview";
+  let normalized = DASHBOARD_HISTORY_VIEWS.includes(view) ? view : "overview";
+  if (dashboardCurrentEmployeeProfile && !isDashboardAdminProfile() && normalized !== "employee-home") {
+    normalized = "employee-home";
+  }
   document.querySelectorAll("[data-dashboard-view]").forEach(section => {
     section.classList.toggle("is-hidden", section.dataset.dashboardView !== normalized);
   });
@@ -12460,8 +12532,19 @@ function bindDashboardAuth() {
     protectedArea.classList.remove("is-hidden");
 
     if (employeeName) employeeName.textContent = profile.display_name || "Mitarbeiter";
-    if (employeeMeta) employeeMeta.textContent = `${profile.email || "angemeldet"} · ${profile.role || "mitarbeiter"}`;
+    if (employeeMeta) employeeMeta.textContent = `${profile.email || "angemeldet"} · ${employeeRoleLabel(profile.role || "mitarbeiter")}${profile.employee_number ? ` · ${profile.employee_number}` : ""}`;
 
+    applyDashboardRoleMode(profile);
+
+    if (!isDashboardAdminProfile(profile)) {
+      resetDashboardAdminCaches();
+      const liveStatus = document.querySelector("#dashboardLiveStatus");
+      if (liveStatus) liveStatus.textContent = "Mitarbeiterzugang";
+      setDashboardView("employee-home", { replace: true });
+      return;
+    }
+
+    setDashboardView(readDashboardHistoryState().view || "overview", { replace: true });
     loadDashboardRequests(session);
     loadDashboardCustomerAccounts(session);
     loadDashboardEmployees(session);
@@ -12526,6 +12609,7 @@ function bindDashboardAuth() {
     dashboardSelectedCustomerAccountId = null;
     dashboardCurrentSession = null;
     dashboardCurrentEmployeeProfile = null;
+    protectedArea?.classList.remove("dashboard-admin-mode", "dashboard-employee-mode");
     clearTicketExtras();
     showLogin();
     setMessage("success", "Abgemeldet", "Die lokale Sitzung wurde beendet.");

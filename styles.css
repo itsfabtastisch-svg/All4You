@@ -11713,3 +11713,65 @@ body.modal-open {
 .dashboard-employee-password-form .dashboard-ticket-action-message {
   margin: 0;
 }
+
+/* ======================================================================
+   ALL4YOU-V6.12.2 · Rollenbasierte Mitarbeiteransicht
+   Normale Mitarbeiter sehen im Mitarbeiterportal nur ihren kompakten
+   Arbeitsbereich und werden für operative Aufgaben ins ObjektPortal geführt.
+   ====================================================================== */
+.dashboard-shell.dashboard-employee-mode .dashboard-sidebar {
+  background: linear-gradient(180deg, rgba(8, 26, 45, 0.98), rgba(6, 41, 55, 0.96));
+}
+
+.dashboard-shell.dashboard-employee-mode .dashboard-security-note strong::after {
+  content: " · Mitarbeiter";
+  color: #4fd1c5;
+}
+
+.dashboard-employee-home {
+  min-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.dashboard-employee-hero {
+  border: 1px solid rgba(12, 169, 155, 0.18);
+  border-radius: 28px;
+  padding: clamp(24px, 4vw, 42px);
+  background:
+    radial-gradient(circle at top right, rgba(12, 169, 155, 0.18), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,0.96), rgba(238, 251, 250, 0.92));
+  box-shadow: 0 22px 55px rgba(10, 36, 58, 0.12);
+}
+
+.dashboard-employee-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  color: #10243b;
+}
+
+.dashboard-employee-hero .lead {
+  max-width: 760px;
+  margin: 0;
+  color: #5f7184;
+}
+
+.dashboard-employee-action-grid .dashboard-hub-card {
+  min-height: 168px;
+}
+
+.dashboard-hub-card-static {
+  cursor: default;
+}
+
+.dashboard-hub-card-static:hover {
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .dashboard-employee-home {
+    min-height: auto;
+  }
+}

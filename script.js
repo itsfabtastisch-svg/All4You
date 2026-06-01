@@ -1291,7 +1291,7 @@ function renderDashboardCustomerAccountDetail(account) {
 
   dashboardSelectedCustomerAccountId = account.id;
   title.textContent = dashboardCustomerDisplayName(account);
-  if (status) status.textContent = account.is_active === false ? "Inaktiv" : "Aktiv";
+  if (status) status.textContent = "Kundenkonto";
   if (linkForm) linkForm.classList.remove("is-hidden");
 
   const requests = Array.isArray(account.requests) ? account.requests : [];
@@ -1303,44 +1303,143 @@ function renderDashboardCustomerAccountDetail(account) {
   }
   if (linkButton) linkButton.disabled = !availableTickets.length;
 
+  const metaItems = [
+    { label: "E-Mail", value: account.email || "Keine E-Mail" },
+    { label: "Telefon", value: account.phone || "Keine Telefonnummer" },
+    { label: "Firma / Objekt", value: account.company || "Nicht hinterlegt" },
+    { label: "Aufträge", value: `${requests.length} zugeordnet` }
+  ];
+
   body.innerHTML = `
-    <div class="dashboard-customer-profile-card">
-      <strong>${escapeHtml(account.display_name || "Kunde")}</strong>
-      <span>${escapeHtml(account.email || "Keine E-Mail")}</span>
-      <span>${escapeHtml(account.phone || "Keine Telefonnummer")}</span>
-      ${account.company ? `<span>${escapeHtml(account.company)}</span>` : ""}
-      ${account.last_invite_sent_at ? `<span>Letzte Einladung: ${escapeHtml(formatDashboardDate(account.last_invite_sent_at))}</span>` : ""}
-      ${account.notes ? `<p>${escapeHtml(account.notes)}</p>` : ""}
-    </div>
-    <div class="summary-wide">
-      <strong>Login-Hinweis</strong>
-      <span>Der Kunde kann sich nach einer Einladung selbst ein Passwort setzen und sich danach im Kundenportal anmelden.</span>
-    </div>
-    <div class="dashboard-customer-invite-box">
-      <div>
-        <strong>${account.auth_user_id ? "Login verbunden" : "Einladung / Passwort einrichten"}</strong>
-        <span>${account.auth_user_id ? "Dieses Kundenkonto ist bereits mit einem Supabase-Login verbunden." : "Sendet dem Kunden einen sicheren Einrichtungslink per E-Mail."}</span>
+    <div class="dashboard-customer-profile-card dashboard-customer-profile-card-clean">
+      <div class="dashboard-customer-profile-main">
+        <strong>${escapeHtml(account.display_name || "Kunde")}</strong>
+        ${account.notes ? `<p>${escapeHtml(account.notes)}</p>` : ""}
       </div>
-      <button class="btn primary" type="button" data-customer-send-invite="${escapeHtml(account.id)}">${account.auth_user_id ? "Passwortlink erneut senden" : "Einladung senden"} <span>›</span></button>
+      <div class="dashboard-customer-profile-grid">
+        ${metaItems.map(item => `
+          <span class="dashboard-customer-info-chip">
+            <small>${escapeHtml(item.label)}</small>
+            <b>${escapeHtml(item.value)}</b>
+          </span>
+        `).join("")}
+      </div>
     </div>
-    <div class="dashboard-linked-request-list">
-      ${requests.length ? requests.map(ticket => `
-        <article class="dashboard-linked-request">
-          <div>
-            <strong>${escapeHtml(ticket.ticket_number || "Ticket")}</strong>
-            <span>${escapeHtml(serviceLabel(ticket.service))} · ${escapeHtml(statusLabel(ticket.status))}</span>
-            <small>${escapeHtml(ticket.summary || ticket.subject || "Kein Kurztext")}</small>
-          </div>
-          <button class="btn ghost" type="button" data-customer-unlink-request="${escapeHtml(ticket.id)}">Zuordnung entfernen</button>
-        </article>
-      `).join("") : `
-        <div class="dashboard-mini-empty">
-          <strong>Noch keine zugeordneten Aufträge</strong>
-          <p>Ordnen Sie rechts einen bestehenden Auftrag zu.</p>
-        </div>
-      `}
+
+    <div class="dashboard-customer-detail-actions">
+      <button class="btn primary" type="button" data-customer-send-invite="${escapeHtml(account.id)}">
+        ${account.auth_user_id ? "Passwortlink erneut senden" : "Einladung senden"} <span>›</span>
+      </button>
+      <button class="btn ghost" type="button" data-customer-view-requests="${escapeHtml(account.id)}">
+        Aufträge ansehen (${requests.length})
+      </button>
     </div>
   `;
+}
+
+
+function ensureDashboardCustomerRequestsModal() {
+  let modal = document.querySelector("#dashboardCustomerRequestsModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "dashboardCustomerRequestsModal";
+  modal.className = "dashboard-modal is-hidden";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="dashboard-modal-backdrop" data-customer-requests-close></div>
+    <article class="dashboard-modal-card dashboard-customer-requests-card" role="dialog" aria-modal="true" aria-labelledby="dashboardCustomerRequestsTitle">
+      <div class="dashboard-modal-head">
+        <div>
+          <p class="eyebrow">Kundenportalzugang</p>
+          <h2 id="dashboardCustomerRequestsTitle">Zugeordnete Aufträge</h2>
+          <p id="dashboardCustomerRequestsSubtitle">Aufträge werden nur bei Bedarf angezeigt.</p>
+        </div>
+        <button class="btn ghost" type="button" data-customer-requests-close>Schließen</button>
+      </div>
+      <div class="dashboard-customer-requests-modal-body" id="dashboardCustomerRequestsModalBody"></div>
+    </article>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", async event => {
+    if (event.target.closest("[data-customer-requests-close]")) {
+      closeDashboardCustomerRequestsModal();
+      return;
+    }
+
+    const unlinkButton = event.target.closest("[data-customer-modal-unlink-request]");
+    if (!unlinkButton) return;
+
+    const accountId = modal.dataset.accountId;
+    const requestId = unlinkButton.dataset.customerModalUnlinkRequest;
+    if (!accountId || !requestId) return;
+    if (!confirm("Diese Auftrag-Zuordnung wirklich entfernen? Der Auftrag wird nicht gelöscht.")) return;
+
+    unlinkButton.disabled = true;
+    setDashboardCustomersMessage("loading", "Zuordnung wird entfernt …");
+    try {
+      await unlinkDashboardCustomerRequest(dashboardCurrentSession, accountId, requestId);
+      await loadDashboardCustomerAccounts(dashboardCurrentSession);
+      setDashboardCustomersMessage("success", "Auftrag-Zuordnung wurde entfernt.");
+      const updated = dashboardCustomerAccountsCache.find(item => String(item.id) === String(accountId));
+      if (updated) openDashboardCustomerRequestsModal(accountId);
+      else closeDashboardCustomerRequestsModal();
+    } catch (error) {
+      setDashboardCustomersMessage("error", error.message || "Zuordnung konnte nicht entfernt werden.");
+      unlinkButton.disabled = false;
+    }
+  });
+
+  return modal;
+}
+
+function closeDashboardCustomerRequestsModal() {
+  const modal = document.querySelector("#dashboardCustomerRequestsModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function openDashboardCustomerRequestsModal(accountId = dashboardSelectedCustomerAccountId) {
+  const account = dashboardCustomerAccountsCache.find(item => String(item.id) === String(accountId));
+  const modal = ensureDashboardCustomerRequestsModal();
+  const title = modal.querySelector("#dashboardCustomerRequestsTitle");
+  const subtitle = modal.querySelector("#dashboardCustomerRequestsSubtitle");
+  const body = modal.querySelector("#dashboardCustomerRequestsModalBody");
+  const requests = Array.isArray(account?.requests) ? account.requests : [];
+
+  modal.dataset.accountId = account?.id || "";
+  if (title) title.textContent = account ? `Aufträge von ${dashboardCustomerDisplayName(account)}` : "Zugeordnete Aufträge";
+  if (subtitle) subtitle.textContent = requests.length ? `${requests.length} Auftrag${requests.length === 1 ? "" : "e"} mit diesem Kundenkonto verbunden.` : "Noch keine Aufträge verbunden.";
+
+  if (!body) return;
+  body.innerHTML = requests.length ? requests.map(ticket => `
+    <article class="dashboard-customer-request-modal-item">
+      <div class="dashboard-customer-request-modal-main">
+        <span class="status-pill">${escapeHtml(statusLabel(ticket.status))}</span>
+        <strong>${escapeHtml(ticket.ticket_number || "Auftrag")}</strong>
+        <small>${escapeHtml(serviceLabel(ticket.service))}</small>
+      </div>
+      <div class="dashboard-customer-request-modal-grid">
+        <span><small>Kunde</small><b>${escapeHtml(ticket.customer_name || account?.display_name || "—")}</b></span>
+        <span><small>Erstellt</small><b>${escapeHtml(formatDashboardDate(ticket.created_at))}</b></span>
+        <span><small>Aktualisiert</small><b>${escapeHtml(formatDashboardDate(ticket.updated_at || ticket.created_at))}</b></span>
+      </div>
+      ${ticket.summary || ticket.subject ? `<p>${escapeHtml(ticket.summary || ticket.subject)}</p>` : ""}
+      <div class="dashboard-customer-request-modal-actions">
+        <button class="btn ghost" type="button" data-customer-modal-unlink-request="${escapeHtml(ticket.id)}">Zuordnung entfernen</button>
+      </div>
+    </article>
+  `).join("") : `
+    <div class="dashboard-empty-state">
+      <strong>Noch keine zugeordneten Aufträge</strong>
+      <p>Nutzen Sie darunter „Bestehenden Auftrag zuordnen“, um Aufträge mit diesem Kundenkonto zu verbinden.</p>
+    </div>
+  `;
+
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
 }
 
 
@@ -1754,15 +1853,21 @@ function bindDashboardCustomerAccounts() {
       return;
     }
 
+    const viewRequestsButton = event.target.closest("[data-customer-view-requests]");
+    if (viewRequestsButton) {
+      openDashboardCustomerRequestsModal(viewRequestsButton.dataset.customerViewRequests || dashboardSelectedCustomerAccountId);
+      return;
+    }
+
     const button = event.target.closest("[data-customer-unlink-request]");
     if (!button || !dashboardSelectedCustomerAccountId) return;
-    if (!confirm("Diese Ticket-Zuordnung wirklich entfernen? Der Auftrag wird nicht gelöscht.")) return;
+    if (!confirm("Diese Auftrag-Zuordnung wirklich entfernen? Der Auftrag wird nicht gelöscht.")) return;
 
     setDashboardCustomersMessage("loading", "Zuordnung wird entfernt …");
     try {
       await unlinkDashboardCustomerRequest(dashboardCurrentSession, dashboardSelectedCustomerAccountId, button.dataset.customerUnlinkRequest);
       await loadDashboardCustomerAccounts(dashboardCurrentSession);
-      setDashboardCustomersMessage("success", "Ticket-Zuordnung wurde entfernt.");
+      setDashboardCustomersMessage("success", "Auftrag-Zuordnung wurde entfernt.");
     } catch (error) {
       setDashboardCustomersMessage("error", error.message || "Zuordnung konnte nicht entfernt werden.");
     }

@@ -11879,3 +11879,94 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===========================================================================
+   ALL4YOU-V6.12.4 · Kundenkonto-Aktionsbuttons UI-Polish
+   - Nur Optik im Kundenkonto-Detailbereich
+   - Kein Logikwechsel, keine ObjektPortal-Anpassung
+   =========================================================================== */
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid {
+  margin-top: 4px;
+  padding: 12px;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-radius: 20px;
+  border: 1px solid rgba(3, 24, 42, .08);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(10, 169, 155, .08), transparent 9rem),
+    rgba(255, 255, 255, .72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82);
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid .btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: .78rem;
+  line-height: 1.12;
+  letter-spacing: -.01em;
+  box-shadow: none;
+  white-space: normal;
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-send-invite] {
+  grid-column: 1 / -1;
+  min-height: 48px;
+  color: #fff;
+  background: linear-gradient(135deg, #079083, #0aa99b);
+  border: 1px solid rgba(10, 169, 155, .34);
+  box-shadow: 0 12px 26px rgba(10, 169, 155, .18);
+  white-space: nowrap;
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-send-invite] span {
+  font-size: 20px;
+  margin-left: 2px;
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-edit],
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-view-requests] {
+  color: #12324a;
+  border: 1px solid rgba(3, 24, 42, .12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, .98), rgba(243, 248, 250, .94));
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-edit]:hover:not(:disabled),
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-view-requests]:hover:not(:disabled) {
+  color: #08283d;
+  border-color: rgba(10, 169, 155, .30);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(229, 248, 246, .88));
+  box-shadow: 0 10px 22px rgba(10, 40, 60, .08);
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid .soft-action {
+  color: #12324a;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .98), rgba(243, 248, 250, .94));
+  box-shadow: none;
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid .danger-action {
+  grid-column: 1 / -1;
+  color: #922626;
+  border: 1px solid rgba(190, 40, 40, .24);
+  background: rgba(255, 255, 255, .82);
+}
+
+.dashboard-ticket-action-grid.dashboard-customer-manage-grid .danger-action:hover:not(:disabled) {
+  color: #fff;
+  border-color: rgba(190, 40, 40, .76);
+  background: linear-gradient(135deg, #b73737, #8a2020);
+  box-shadow: 0 12px 24px rgba(190, 40, 40, .16);
+}
+
+@media (max-width: 760px) {
+  .dashboard-ticket-action-grid.dashboard-customer-manage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-send-invite],
+  .dashboard-ticket-action-grid.dashboard-customer-manage-grid .danger-action {
+    grid-column: auto;
+    white-space: normal;
+  }
+}

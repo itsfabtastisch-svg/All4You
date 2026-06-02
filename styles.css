@@ -11970,3 +11970,197 @@ body.modal-open {
     white-space: normal;
   }
 }
+
+/* ===========================================================================
+   ALL4YOU-V6.12.5 · Kundenkonto-Detailfenster UI-Polish
+   - Ruhigere Detailkarte ohne harte „Rechteck in Rechteck“-Optik
+   - Nur CSS/Optik, keine Logikänderung, ObjektPortal bleibt unberührt
+   =========================================================================== */
+.dashboard-customer-detail-panel {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(10, 169, 155, .16), transparent 210px),
+    linear-gradient(145deg, rgba(255,255,255,.92), rgba(239, 249, 250, .82));
+  box-shadow: 0 24px 58px rgba(7, 35, 56, .10);
+}
+
+.dashboard-customer-detail-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(10,169,155,.88), rgba(14,94,134,.42), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.dashboard-customer-detail-panel .panel-head {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(7, 35, 56, .07);
+}
+
+.dashboard-customer-detail-panel .panel-head h2 {
+  font-size: clamp(25px, 2vw, 36px);
+  letter-spacing: -.045em;
+}
+
+.dashboard-customer-detail-panel .panel-status {
+  border: 0;
+  color: #12324a;
+  background: rgba(255,255,255,.62);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.76);
+}
+
+.dashboard-customer-detail-panel .dashboard-detail-body {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-profile-card-clean {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+  border: 0;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(10,169,155,.14), transparent 190px),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(247, 252, 253, .82));
+  box-shadow:
+    0 18px 42px rgba(7, 35, 56, .08),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-profile-card-clean::after {
+  content: "";
+  position: absolute;
+  right: -38px;
+  top: -44px;
+  width: 130px;
+  height: 130px;
+  border-radius: 999px;
+  background: rgba(10,169,155,.10);
+  filter: blur(.2px);
+  pointer-events: none;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-profile-main {
+  position: relative;
+  z-index: 1;
+  gap: 7px;
+  padding: 0 0 15px;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-profile-main strong {
+  font-size: clamp(1.02rem, 1.25vw, 1.24rem);
+  letter-spacing: .035em;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-profile-main p {
+  max-width: 95%;
+  font-size: .91rem;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-profile-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(7, 35, 56, .07);
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-info-chip {
+  min-height: 58px;
+  padding: 12px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  border-bottom: 1px solid rgba(7, 35, 56, .065);
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-info-chip:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-info-chip small {
+  color: rgba(14, 61, 89, .64);
+  font-size: .68rem;
+  letter-spacing: .095em;
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-info-chip b {
+  color: #10243b;
+  font-size: .95rem;
+  line-height: 1.28;
+}
+
+.dashboard-customer-detail-panel .dashboard-ticket-action-grid.dashboard-customer-manage-grid {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 10px;
+}
+
+.dashboard-customer-detail-panel .dashboard-ticket-action-grid.dashboard-customer-manage-grid .btn {
+  border-radius: 999px;
+}
+
+.dashboard-customer-detail-panel .dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-send-invite] {
+  min-height: 50px;
+  box-shadow: 0 16px 30px rgba(10, 169, 155, .20);
+}
+
+.dashboard-customer-detail-panel .dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-edit],
+.dashboard-customer-detail-panel .dashboard-ticket-action-grid.dashboard-customer-manage-grid [data-customer-view-requests] {
+  border: 0;
+  background: rgba(255,255,255,.72);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.88), 0 10px 22px rgba(7, 35, 56, .055);
+}
+
+.dashboard-customer-detail-panel .dashboard-ticket-action-grid.dashboard-customer-manage-grid .danger-action {
+  border-radius: 16px;
+  background: rgba(255,255,255,.50);
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-link-form {
+  margin-top: 2px;
+  padding: 16px;
+  border: 0;
+  border-radius: 22px;
+  background: rgba(255,255,255,.56);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82);
+}
+
+.dashboard-customer-detail-panel .dashboard-customer-link-form select {
+  border: 0;
+  background: rgba(255,255,255,.86);
+  box-shadow: inset 0 0 0 1px rgba(7, 35, 56, .08);
+}
+
+@media (max-width: 760px) {
+  .dashboard-customer-detail-panel .dashboard-customer-profile-card-clean {
+    padding: 18px;
+  }
+
+  .dashboard-customer-detail-panel .dashboard-customer-profile-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .dashboard-customer-detail-panel .dashboard-customer-info-chip:nth-last-child(-n + 2) {
+    border-bottom: 1px solid rgba(7, 35, 56, .065);
+  }
+
+  .dashboard-customer-detail-panel .dashboard-customer-info-chip:last-child {
+    border-bottom: 0;
+  }
+}

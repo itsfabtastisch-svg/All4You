@@ -12164,3 +12164,23 @@ body.modal-open {
     border-bottom: 0;
   }
 }
+
+
+/* ==========================================================================
+   Reinigungs-Wizard: Räume-Auswahl
+   DBG: ALL4YOU-V6.12.6-CLEANING-WIZARD-ROOMS
+   ========================================================================== */
+
+.cleaning-room-fieldset {
+  margin-top: 16px;
+}
+
+.cleaning-room-grid label {
+  min-height: 46px;
+}
+
+.cleaning-room-grid label:has(input:checked) {
+  border-color: rgba(0, 150, 136, .35);
+  background: rgba(0, 150, 136, .09);
+  color: var(--navy);
+}

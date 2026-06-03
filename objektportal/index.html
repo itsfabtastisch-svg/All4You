@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>All4You ObjektPortal</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="./objectportal.css?v=6.12.3-role-permission-cleanup">
+</head>
+<body>
+  <main class="op-shell">
+    <header class="op-hero">
+      <div>
+        <p class="op-eyebrow">All4You ObjektPortal</p>
+        <h1>Digitales Objekt- & Reinigungsportal</h1>
+        <p>Objekte, Einheiten, Reinigungsintervalle und erste Reinigungseinsätze sauber verwalten. QR-Code-Check-ins, Einsätze und Objektstatus werden schrittweise zur Arbeits-Web-App ausgebaut.</p>
+      </div>
+      <div class="op-hero-actions">
+        <button class="op-btn op-btn-ghost" id="opLogoutButton" type="button">Abmelden</button>
+        <button class="op-btn op-btn-primary" id="opOpenWizard" type="button">+ Objekt hinzufügen</button>
+      </div>
+    </header>
+
+    <section class="op-login-hint is-hidden" id="opLoginHint">
+      <div class="op-login-card">
+        <p class="op-eyebrow">ObjektPortal Login</p>
+        <h2>Mitarbeiter-Login erforderlich</h2>
+        <p>Bitte mit einem freigeschalteten Mitarbeiterkonto anmelden. Das ObjektPortal läuft als eigener Arbeitsbereich und führt nicht zurück ins Mitarbeiterportal.</p>
+        <form class="op-login-form" id="opLoginForm">
+          <label>E-Mail
+            <input type="email" name="email" autocomplete="email" placeholder="mitarbeiter@example.de" required>
+          </label>
+          <label>Passwort
+            <input type="password" name="password" autocomplete="current-password" placeholder="Passwort" required>
+          </label>
+          <button class="op-btn op-btn-primary" type="submit">Einloggen</button>
+        </form>
+        <p class="op-login-message" id="opLoginMessage">Direkter Zugang zum All4You ObjektPortal.</p>
+      </div>
+    </section>
+
+    <section id="opApp" class="op-app is-hidden" aria-live="polite">
+      <section class="op-status-row">
+        <span id="opStatusBadge" class="op-status-badge">Bereit</span>
+        <span id="opBuildBadge" class="op-build">DBG: ALL4YOU-V6.12.3-ROLE-PERMISSION-CLEANUP</span>
+      </section>
+
+      <section class="op-checkin-panel is-hidden" id="opCheckinPanel"></section>
+
+      <section class="op-stats" id="opStats"></section>
+
+      <section class="op-layout">
+        <aside class="op-panel op-side-panel">
+          <div class="op-panel-head">
+            <div>
+              <p class="op-eyebrow">Kunden</p>
+              <h2>Kundenkonten</h2>
+            </div>
+            <button class="op-icon-btn" id="opRefresh" type="button" title="Aktualisieren">↻</button>
+          </div>
+          <div class="op-search-wrap">
+            <input id="opCustomerSearch" type="search" placeholder="Kunde suchen …">
+          </div>
+          <div class="op-customer-list" id="opCustomerList"></div>
+        </aside>
+
+        <section class="op-panel op-main-panel">
+          <div class="op-panel-head">
+            <div>
+              <p class="op-eyebrow">Objekte</p>
+              <h2 id="opObjectTitle">Objektübersicht</h2>
+            </div>
+            <button class="op-btn op-btn-primary" id="opOpenWizardTop" type="button">+ Objekt hinzufügen</button>
+          </div>
+          <div class="op-object-toolbar" aria-label="Objektfilter">
+            <input id="opObjectSearch" type="search" placeholder="Objekt, Adresse, Einheit oder Intervall suchen …">
+            <select id="opStatusFilter" aria-label="Status filtern">
+              <option value="all">Alle Status</option>
+              <option value="active">Aktiv</option>
+              <option value="paused">Pausiert</option>
+              <option value="draft">Entwurf</option>
+            </select>
+            <select id="opPackageFilter" aria-label="Paket filtern">
+              <option value="all">Alle Pakete</option>
+              <option value="basic">Basic</option>
+              <option value="plus">Plus</option>
+              <option value="pro">Pro</option>
+              <option value="custom">Individuell</option>
+            </select>
+          </div>
+          <div class="op-object-list" id="opObjectList"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <dialog class="op-modal" id="opWizardDialog">
+    <form method="dialog" class="op-modal-card" id="opWizardForm">
+      <button class="op-modal-close" id="opCloseWizard" value="cancel" type="button" aria-label="Schließen">×</button>
+      <div class="op-modal-head">
+        <p class="op-eyebrow">Geführte Erstellung</p>
+        <h2>Neues Objekt anlegen</h2>
+        <p id="opWizardStepLabel">Schritt 1 von 5</p>
+      </div>
+
+      <div class="op-steps" aria-hidden="true">
+        <span class="active"></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <section class="op-step active" data-step="0">
+        <h3>Kunde & Paket</h3>
+        <label>Kundenkonto
+          <select id="opWizardCustomer" required></select>
+        </label>
+        <div class="op-grid-2">
+          <label>Paket
+            <select id="opWizardPackage">
+              <option value="basic">Basic</option>
+              <option value="plus">Plus</option>
+              <option value="pro">Pro</option>
+              <option value="custom">Individuell</option>
+            </select>
+          </label>
+          <label>Monatliche Kosten optional
+            <input id="opWizardMonthly" type="number" min="0" step="0.01" placeholder="z. B. 49.00">
+          </label>
+        </div>
+      </section>
+
+      <section class="op-step" data-step="1">
+        <h3>Objekt-Grunddaten</h3>
+        <label>Objektname
+          <input id="opWizardObjectName" type="text" placeholder="z. B. Objektname / Wohnanlage Musterhof" required>
+        </label>
+        <label>Objektart
+          <select id="opWizardObjectType">
+            <option value="wohnanlage">Wohnanlage</option>
+            <option value="treppenhaus">Treppenhaus</option>
+            <option value="gewerbe">Gewerbeobjekt</option>
+            <option value="buero">Büro / Praxis</option>
+            <option value="sonstiges">Sonstiges</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="op-step" data-step="2">
+        <h3>Adresse</h3>
+        <label>Straße / Hausnummer
+          <input id="opWizardStreet" type="text" placeholder="Sachsenstraße 1">
+        </label>
+        <div class="op-grid-2">
+          <label>PLZ
+            <input id="opWizardZip" type="text" placeholder="80331">
+          </label>
+          <label>Ort
+            <input id="opWizardCity" type="text" placeholder="München">
+          </label>
+        </div>
+      </section>
+
+      <section class="op-step" data-step="3">
+        <h3>Erste Einheit / Bereich</h3>
+        <label>Name der Einheit
+          <input id="opWizardUnitName" type="text" placeholder="z. B. Treppenhaus A">
+        </label>
+        <div class="op-grid-2">
+          <label>Bereichsart
+            <select id="opWizardUnitType">
+              <option value="treppenhaus">Treppenhaus</option>
+              <option value="eingang">Eingangsbereich</option>
+              <option value="flur">Flur / Allgemeinfläche</option>
+              <option value="keller">Keller</option>
+              <option value="aussenbereich">Außenbereich</option>
+              <option value="garten">Garten / Grünfläche</option>
+              <option value="garage">Garage</option>
+              <option value="tiefgarage">Tiefgarage / Parkfläche</option>
+              <option value="buero">Büroräume / Praxisräume</option>
+              <option value="sanitaer">Sanitäranlagen</option>
+              <option value="kueche">Küche / Aufenthaltsraum</option>
+              <option value="aufzug">Aufzug</option>
+              <option value="muellraum">Müllraum / Tonnenbereich</option>
+              <option value="waschkueche">Waschküche</option>
+              <option value="lager">Lagerraum</option>
+              <option value="technikraum">Technikraum</option>
+              <option value="fenster">Fenster / Glasflächen</option>
+              <option value="gemeinschaftsraum">Gemeinschaftsraum</option>
+              <option value="raum">Sonstige Räume / Einheit</option>
+              <option value="sonstiges">Sonstiges</option>
+            </select>
+          </label>
+          <label>Reinigungsintervall
+            <select id="opWizardInterval">
+              <option value="woechentlich">Wöchentlich</option>
+              <option value="zweiwoechentlich">Alle 2 Wochen</option>
+              <option value="monatlich">Monatlich</option>
+              <option value="nach_bedarf">Nach Bedarf</option>
+              <option value="individuell">Individuell</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="op-step" data-step="4">
+        <h3>Zusammenfassung</h3>
+        <div class="op-summary" id="opWizardSummary"></div>
+        <div class="op-feature-preview">
+          <p class="op-eyebrow">Paket-Vorschau</p>
+          <div class="op-feature-list" id="opWizardFeaturePreview"></div>
+        </div>
+        <label>Interne Notiz optional
+          <textarea id="opWizardNotes" rows="3" placeholder="z. B. Zugang über Innenhof, Schlüsselregelung später ergänzen …"></textarea>
+        </label>
+      </section>
+
+      <div class="op-modal-actions">
+        <button class="op-btn op-btn-ghost" id="opWizardBack" type="button">Zurück</button>
+        <button class="op-btn op-btn-primary" id="opWizardNext" type="button">Weiter</button>
+        <button class="op-btn op-btn-primary is-hidden" id="opWizardSave" type="button">Objekt speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./objectportal.js?v=6.12.3-role-permission-cleanup"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+/objektportal /objektportal/index.html 200
+/objektportal/ /objektportal/index.html 200
+/objektportal/* /objektportal/index.html 200
+/objectportal /objektportal/index.html 200
+/objectportal/ /objektportal/index.html 200
+/objectportal.html /objektportal/index.html 200
+/* /index.html 200

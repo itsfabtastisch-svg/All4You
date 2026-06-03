@@ -1,382 +1,90 @@
-// =========================================================
-// All4You Service München
-// Supabase Edge Function: notify-new-request
-// Sendet Team-Mail UND Kundenbestätigung bei neuer Anfrage über Resend
-// V5.8.8: Kundenmail mit hartem Formular-Override plus bereinigter Function-Datei
-// =========================================================
+@echo off
+setlocal
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+title All4You Google Maps Edge Functions deployen
 
-const BACKEND_BUILD = "ALL4YOU-BACKEND-V5.8.8-CUSTOMER-MAIL-FORM-FORCE-FIX";
+echo =====================================================
+echo All4You V5.4.0 - Google Places + Routes deploy
+echo DBG: ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
+echo =====================================================
+echo.
 
-function serviceLabel(service: string | null): string {
-  const labels: Record<string, string> = {
-    reinigung: "Reinigung",
-    entruempelung: "Entrümpelung",
-    rollerabholservice: "Motorrad- & Rollertransport",
-    anhaenger: "Anhängervermietung",
-    allgemein: "Allgemein",
-  };
+echo Dieses Script setzt voraus:
+echo - Supabase CLI ist installiert oder via npx nutzbar
+echo - Du bist mit "npx supabase login" angemeldet
+echo - Google Maps Platform ist eingerichtet
+echo - Aktiviert sind mindestens: Places API/Places API New und Routes API
+echo - Die Function-Dateien liegen unter supabase\functions\...
+echo.
+echo Der API-Key wird nur als Supabase Secret gesetzt und nicht in Dateien geschrieben.
+echo WICHTIG: Nutze einen NEUEN Google Maps API-Key, falls der alte sichtbar war.
+echo.
 
-  return labels[service || ""] || service || "Unbekannt";
-}
+set PROJECT_REF=xztzsztsoluzanxdlaov
 
-function publicStatusLabel(status: string | null): string {
-  const labels: Record<string, string> = {
-    neu: "Anfrage eingegangen",
-    in_pruefung: "In Prüfung",
-    rueckfrage_offen: "Rückfrage offen",
-    angebot_vorbereitet: "Angebot wird vorbereitet",
-    angebot_gesendet: "Angebot gesendet",
-    termin_vorgeschlagen: "Termin vorgeschlagen",
-    termin_bestaetigt: "Termin bestätigt",
-    in_bearbeitung: "In Bearbeitung",
-    abgeschlossen: "Abgeschlossen",
-    erledigt: "Erledigt",
-    storniert: "Storniert",
-  };
+if not exist "supabase\functions\places-autocomplete\index.ts" (
+  echo FEHLER: supabase\functions\places-autocomplete\index.ts fehlt.
+  echo Bitte zuerst die Repair-Patch-BAT ausfuehren oder den kompletten V5.4.0 Patch anwenden.
+  pause
+  exit /b 1
+)
 
-  return labels[status || ""] || status || "Unbekannt";
-}
+if not exist "supabase\functions\calculate-route\index.ts" (
+  echo FEHLER: supabase\functions\calculate-route\index.ts fehlt.
+  echo Bitte zuerst die Repair-Patch-BAT ausfuehren oder den kompletten V5.4.0 Patch anwenden.
+  pause
+  exit /b 1
+)
 
-function escapeHtml(value: unknown): string {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+for /f "usebackq delims=" %%A in (`powershell -NoProfile -Command "$p=Read-Host 'Bitte NEUEN Google Maps API Key eingeben' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); try{[Runtime.InteropServices.Marshal]::PtrToStringBSTR($b)} finally{[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b)}"`) do set "GOOGLE_MAPS_API_KEY=%%A"
 
-function normalizeEmail(value: unknown): string {
-  const match = String(value ?? "").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  return match ? match[0].trim().toLowerCase() : "";
-}
+if "%GOOGLE_MAPS_API_KEY%"=="" (
+  echo Kein API Key eingegeben. Abbruch.
+  pause
+  exit /b 1
+)
 
-function getCustomerEmail(ticket: Record<string, unknown>, fallbackEmail: unknown = null): string {
-  const fallback = normalizeEmail(fallbackEmail);
-  if (fallback) return fallback;
+echo.
+echo Supabase Projekt verlinken...
+call npx supabase link --project-ref %PROJECT_REF%
+if errorlevel 1 (
+  echo Supabase Link fehlgeschlagen.
+  pause
+  exit /b 1
+)
 
-  const direct = normalizeEmail(ticket.customer_email);
-  if (direct) return direct;
+echo.
+echo Google Maps Secret setzen...
+call npx supabase secrets set GOOGLE_MAPS_API_KEY="%GOOGLE_MAPS_API_KEY%" --project-ref %PROJECT_REF%
+if errorlevel 1 (
+  echo Secret konnte nicht gesetzt werden.
+  pause
+  exit /b 1
+)
 
-  const details = ticket.details && typeof ticket.details === "object"
-    ? ticket.details as Record<string, unknown>
-    : {};
+set "GOOGLE_MAPS_API_KEY="
 
-  const candidates = [
-    details.email,
-    details.e_mail,
-    details.customer_email,
-    details.kunden_email,
-    details.contact_email,
-    details.contact_mail,
-    details.mail,
-    details.contact,
-    details.kontakt,
-    details.contact_data,
-    ticket.summary,
-    ticket.message,
-  ];
+echo.
+echo Edge Function places-autocomplete deployen...
+call npx supabase functions deploy places-autocomplete --project-ref %PROJECT_REF% --no-verify-jwt
+if errorlevel 1 (
+  echo Deploy places-autocomplete fehlgeschlagen.
+  pause
+  exit /b 1
+)
 
-  for (const candidate of candidates) {
-    const email = normalizeEmail(candidate);
-    if (email) return email;
-  }
+echo.
+echo Edge Function calculate-route deployen...
+call npx supabase functions deploy calculate-route --project-ref %PROJECT_REF% --no-verify-jwt
+if errorlevel 1 (
+  echo Deploy calculate-route fehlgeschlagen.
+  pause
+  exit /b 1
+)
 
-  return "";
-}
-
-function formatDetails(details: Record<string, unknown> | null): string {
-  if (!details || typeof details !== "object") return "";
-
-  return Object.entries(details)
-    .filter(([, value]) => value !== null && value !== undefined && value !== "")
-    .map(([key, value]) => {
-      const label = key.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
-      return `<tr><td style="vertical-align:top;padding:8px;border:1px solid #d8e7ef;"><b>${escapeHtml(label)}</b></td><td style="vertical-align:top;padding:8px;border:1px solid #d8e7ef;">${escapeHtml(typeof value === "object" ? JSON.stringify(value) : value)}</td></tr>`;
-    })
-    .join("");
-}
-
-function buildStatusUrl(siteUrl: string, ticketNumber: string): string {
-  const cleanSiteUrl = siteUrl.replace(/\/+$/, "");
-  return `${cleanSiteUrl}/status?ticket=${encodeURIComponent(ticketNumber)}`;
-}
-
-async function sendResendEmail(
-  resendApiKey: string,
-  fromEmail: string,
-  to: string,
-  subject: string,
-  html: string,
-  text: string,
-) {
-  const emailResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: [to],
-      subject,
-      html,
-      text,
-    }),
-  });
-
-  const emailData = await emailResponse.json().catch(() => null);
-
-  if (!emailResponse.ok) {
-    throw new Error(emailData?.message || "Resend konnte die E-Mail nicht senden.");
-  }
-
-  return emailData;
-}
-
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ success: false, message: "Method not allowed", backend_build: BACKEND_BUILD }), {
-      status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  try {
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const teamEmail = Deno.env.get("TEAM_NOTIFICATION_EMAIL") || "info@all4you-muenchen.de";
-    const fromEmail = Deno.env.get("EMAIL_FROM") || "All4You Service München <info@all4you-muenchen.de>";
-    const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://all4you-muenchen.de";
-
-    // Standard ist jetzt TRUE. Nur wenn das Secret explizit auf false steht, wird sie deaktiviert.
-    const confirmationSetting = (Deno.env.get("SEND_CUSTOMER_CONFIRMATION") || "true").toLowerCase();
-    const sendCustomerConfirmation = confirmationSetting !== "false";
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-
-    if (!resendApiKey) throw new Error("RESEND_API_KEY fehlt.");
-    if (!supabaseUrl || !supabaseAnonKey) throw new Error("SUPABASE_URL oder SUPABASE_ANON_KEY fehlt.");
-
-    const body = await req.json().catch(() => null);
-    const requestId = body?.request_id;
-    const publicStatusToken = body?.public_status_token;
-
-    // V5.8.4: Fallbacks direkt aus dem Formular/Frontend.
-    // Damit die Kundenmail auch dann rausgeht, wenn die bestehende RPC-Funktion
-    // die customer_email aus der DB nicht korrekt zurueckliefert.
-    const customerEmailOverride = body?.customer_email_override || null;
-    const customerPhoneOverride = body?.customer_phone_override || null;
-    const customerNameOverride = body?.customer_name_override || null;
-    const serviceOverride = body?.service_override || null;
-
-    if (!requestId || !publicStatusToken) {
-      throw new Error("request_id oder public_status_token fehlt.");
-    }
-
-    const rpcResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/get_request_for_notification`, {
-      method: "POST",
-      headers: {
-        "apikey": supabaseAnonKey,
-        "Authorization": `Bearer ${supabaseAnonKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        p_request_id: requestId,
-        p_public_status_token: publicStatusToken,
-      }),
-    });
-
-    const rpcData = await rpcResponse.json();
-
-    if (!rpcResponse.ok || !rpcData?.success) {
-      throw new Error(rpcData?.message || "Anfrage konnte nicht geladen werden.");
-    }
-
-    const ticket = rpcData as Record<string, unknown>;
-    const ticketNumber = String(ticket.ticket_number || "");
-    const customerName = String(customerNameOverride || ticket.customer_name || "Kunde");
-    const customerEmail = getCustomerEmail(ticket, customerEmailOverride);
-    const statusUrl = buildStatusUrl(siteUrl, ticketNumber);
-    const serviceValue = String(serviceOverride || ticket.service || "");
-    const subject = `Neue Anfrage ${ticketNumber} – ${serviceLabel(serviceValue)}`;
-
-    const detailsRows = formatDetails(ticket.details as Record<string, unknown> | null);
-    const html = `
-      <div style="font-family:Arial,sans-serif;line-height:1.55;color:#09213f;max-width:760px">
-        <h2 style="margin-bottom:8px">Neue Anfrage über All4You</h2>
-        <p style="margin-top:0;color:#5f7284">Dieses Ticket wurde automatisch über die Webseite erstellt.</p>
-
-        <div style="padding:16px;border-radius:14px;background:#eef8fa;border:1px solid #d8e7ef;margin:18px 0">
-          <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticketNumber)}</p>
-          <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(serviceValue))}</p>
-          <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(String(ticket.status || "")))}</p>
-        </div>
-
-        <div style="padding:16px;border-radius:14px;background:#f7fbfd;border:1px solid #d8e7ef;margin:18px 0">
-          <h3 style="margin-top:0">Statuslink</h3>
-          <p>Der Kunde kann seinen Status später hier prüfen:</p>
-          <p>
-            <a href="${escapeHtml(statusUrl)}" style="display:inline-block;padding:11px 14px;border-radius:999px;background:#0aa99b;color:#fff;text-decoration:none;font-weight:bold">
-              Status prüfen
-            </a>
-          </p>
-          <p style="font-size:13px;color:#5f7284">
-            Zur Sicherheit braucht der Kunde zusätzlich seine E-Mail-Adresse oder Telefonnummer aus der Anfrage.
-          </p>
-          <p style="font-size:13px;word-break:break-all;color:#5f7284">${escapeHtml(statusUrl)}</p>
-        </div>
-
-        <h3>Kunde</h3>
-        <p>
-          <b>Name:</b> ${escapeHtml(customerName)}<br>
-          <b>E-Mail:</b> ${escapeHtml(customerEmail || ticket.customer_email || "—")}<br>
-          <b>Telefon:</b> ${escapeHtml(customerPhoneOverride || ticket.customer_phone || "—")}
-        </p>
-
-        <h3>Zusammenfassung</h3>
-        <p>${escapeHtml(ticket.summary || ticket.subject || "Keine Zusammenfassung")}</p>
-
-        ${ticket.message ? `<h3>Nachricht</h3><p>${escapeHtml(ticket.message)}</p>` : ""}
-        ${detailsRows ? `<h3>Details</h3><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-color:#d8e7ef">${detailsRows}</table>` : ""}
-
-        <hr style="border:none;border-top:1px solid #d8e7ef;margin:22px 0">
-        <p style="font-size:13px;color:#5f7284">Diese E-Mail wurde automatisch vom All4You-System erzeugt.</p>
-      </div>
-    `;
-
-    const text = [
-      "Neue Anfrage über All4You",
-      "",
-      `Ticket: ${ticketNumber}`,
-      `Leistung: ${serviceLabel(serviceValue)}`,
-      `Status: ${publicStatusLabel(String(ticket.status || ""))}`,
-      "",
-      "Statuslink:",
-      statusUrl,
-      "Hinweis: Zur Sicherheit braucht der Kunde zusätzlich seine E-Mail-Adresse oder Telefonnummer aus der Anfrage.",
-      "",
-      "Kunde:",
-      `Name: ${customerName}`,
-      `E-Mail: ${customerEmail || ticket.customer_email || "—"}`,
-      `Telefon: ${customerPhoneOverride || ticket.customer_phone || "—"}`,
-      "",
-      "Zusammenfassung:",
-      String(ticket.summary || ticket.subject || "Keine Zusammenfassung"),
-      "",
-      ticket.message ? `Nachricht:\n${ticket.message}` : "",
-    ].filter(Boolean).join("\n");
-
-    const teamEmailData = await sendResendEmail(
-      resendApiKey,
-      fromEmail,
-      teamEmail,
-      subject,
-      html,
-      text,
-    );
-
-    let customerEmailData = null;
-    let customerConfirmationError = "";
-
-    if (!sendCustomerConfirmation) {
-      customerConfirmationError = "Kundenbestätigung ist per Secret SEND_CUSTOMER_CONFIRMATION=false deaktiviert.";
-    } else if (!customerEmail) {
-      customerConfirmationError = "Keine Kunden-E-Mail im Ticket gefunden.";
-    } else {
-      const customerSubject = `Ihre Anfrage ${ticketNumber} bei All4You`;
-      const customerHtml = `
-        <div style="font-family:Arial,sans-serif;line-height:1.55;color:#09213f;max-width:680px">
-          <h2>Ihre Anfrage ist eingegangen</h2>
-          <p>Hallo ${escapeHtml(customerName)},</p>
-          <p>wir haben Ihre Anfrage erhalten und prüfen diese zeitnah.</p>
-          <div style="padding:16px;border-radius:14px;background:#eef8fa;border:1px solid #d8e7ef;margin:18px 0">
-            <p style="margin:0 0 8px"><b>Ticket:</b> ${escapeHtml(ticketNumber)}</p>
-            <p style="margin:0 0 8px"><b>Leistung:</b> ${escapeHtml(serviceLabel(serviceValue))}</p>
-            <p style="margin:0"><b>Status:</b> ${escapeHtml(publicStatusLabel(String(ticket.status || "")))}</p>
-          </div>
-          <p>Über den folgenden Link können Sie den Status später prüfen:</p>
-          <p>
-            <a href="${escapeHtml(statusUrl)}" style="display:inline-block;padding:11px 14px;border-radius:999px;background:#0aa99b;color:#fff;text-decoration:none;font-weight:bold">
-              Status prüfen
-            </a>
-          </p>
-          <p style="font-size:13px;color:#5f7284">
-            Zur Sicherheit geben Sie dort zusätzlich Ihre E-Mail-Adresse oder Telefonnummer aus der Anfrage ein.
-          </p>
-          <p style="font-size:13px;word-break:break-all;color:#5f7284">${escapeHtml(statusUrl)}</p>
-        </div>
-      `;
-
-      const customerText = [
-        "Ihre Anfrage ist eingegangen",
-        "",
-        `Ticket: ${ticketNumber}`,
-        `Leistung: ${serviceLabel(serviceValue)}`,
-        `Status: ${publicStatusLabel(String(ticket.status || ""))}`,
-        "",
-        "Status prüfen:",
-        statusUrl,
-        "",
-        "Zur Sicherheit geben Sie dort zusätzlich Ihre E-Mail-Adresse oder Telefonnummer aus der Anfrage ein.",
-      ].join("\n");
-
-      try {
-        customerEmailData = await sendResendEmail(
-          resendApiKey,
-          fromEmail,
-          customerEmail,
-          customerSubject,
-          customerHtml,
-          customerText,
-        );
-      } catch (error) {
-        customerConfirmationError = error instanceof Error ? error.message : "Kundenbestätigung konnte nicht gesendet werden.";
-      }
-    }
-
-    console.log(BACKEND_BUILD, "notify-new-request finished", {
-      ticket: ticketNumber,
-      teamEmailSent: Boolean(teamEmailData?.id),
-      customerEmail: customerEmail || null,
-      usedCustomerEmailOverride: Boolean(customerEmailOverride),
-      customerEmailSent: Boolean(customerEmailData?.id),
-      customerConfirmationError: customerConfirmationError || null,
-    });
-
-    return new Response(JSON.stringify({
-      success: true,
-      message: customerEmailData?.id ? "Team- und Kunden-E-Mail wurden gesendet." : "Team-E-Mail wurde gesendet. Kunden-E-Mail wurde nicht gesendet.",
-      ticket_number: ticketNumber,
-      status_url: statusUrl,
-      email_id: teamEmailData?.id || null,
-      customer_email_id: customerEmailData?.id || null,
-      customer_confirmation_error: customerConfirmationError || null,
-      to: teamEmail,
-      customer_to: customerEmail || null,
-      backend_build: BACKEND_BUILD,
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      message: error instanceof Error ? error.message : "Unbekannter Fehler",
-      backend_build: BACKEND_BUILD,
-    }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-});
+echo.
+echo Fertig. Google-Adressvorschlaege und Routenberechnung sind deployed.
+echo Danach Webseite neu deployen/Cloudflare Pages aktualisieren und DBG pruefen:
+echo ALL4YOU-ROUTER-V5.4.1-PLACES-RADIUS-FIX
+echo.
+pause

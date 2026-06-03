@@ -4405,6 +4405,96 @@ function renderPublicStatusMessageList(messages) {
 }
 
 
+const PUBLIC_STATUS_PROGRESS_STEPS = ["neu", "in_bearbeitung", "in_arbeit", "in_pruefung", "abgeschlossen"];
+
+function getPublicStatusProgressIndex(status) {
+  const normalized = normalizeGlobalStatus(status);
+  const index = PUBLIC_STATUS_PROGRESS_STEPS.indexOf(normalized);
+  return index >= 0 ? index : 0;
+}
+
+function publicStatusHistoryDateForStep(history, step, ticket) {
+  const list = Array.isArray(history) ? history : [];
+  const found = list.find(entry => normalizeGlobalStatus(entry?.new_status) === step && entry?.created_at);
+
+  if (found?.created_at) return found.created_at;
+  if (step === "neu" && ticket?.created_at) return ticket.created_at;
+  return "";
+}
+
+function renderPublicStatusTimeline(history, ticket) {
+  const list = Array.isArray(history) ? history : [];
+  const currentIndex = getPublicStatusProgressIndex(ticket?.status);
+
+  const progress = PUBLIC_STATUS_PROGRESS_STEPS.map((step, index) => {
+    const stateClass = index < currentIndex ? "is-done" : index === currentIndex ? "is-current" : "is-open";
+    const date = publicStatusHistoryDateForStep(list, step, ticket);
+
+    return `
+      <article class="customer-status-progress-step ${stateClass}">
+        <span aria-hidden="true">${index + 1}</span>
+        <div>
+          <strong>${escapeHtml(publicStatusStepLabel(step))}</strong>
+          <small>${date ? escapeHtml(formatDashboardDate(date)) : "Noch offen"}</small>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  const visibleHistory = list.slice(-8);
+  const hiddenCount = Math.max(0, list.length - visibleHistory.length);
+
+  const historyMarkup = visibleHistory.length
+    ? `
+      <div class="customer-status-history-list">
+        ${hiddenCount ? `<p class="customer-status-history-note">${hiddenCount} ältere Änderung${hiddenCount === 1 ? "" : "en"} ausgeblendet.</p>` : ""}
+        ${visibleHistory.map(entry => `
+          <article class="customer-status-history-entry">
+            <span aria-hidden="true"></span>
+            <div>
+              <strong>${escapeHtml(publicStatusStepLabel(entry.new_status))}</strong>
+              <p>
+                ${entry.old_status ? `${escapeHtml(publicStatusStepLabel(entry.old_status))} → ` : ""}
+                ${escapeHtml(publicStatusStepLabel(entry.new_status))}
+              </p>
+              <small>${escapeHtml(formatDashboardDate(entry.created_at))}</small>
+              ${entry.note ? `<em>${escapeHtml(entry.note)}</em>` : ""}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    `
+    : `
+      <div class="dashboard-mini-empty">
+        <strong>Noch kein Verlauf</strong>
+        <p>Der Statusverlauf wird angezeigt, sobald Änderungen vorliegen.</p>
+      </div>
+    `;
+
+  return `
+    <div class="customer-status-timeline">
+      <div class="customer-status-timeline-head">
+        <div>
+          <p class="eyebrow">Statusverlauf</p>
+          <h3>Aktueller Fortschritt</h3>
+        </div>
+        <span>${escapeHtml(publicStatusStepLabel(ticket?.status))}</span>
+      </div>
+      <div class="customer-status-progress" aria-label="Aktueller Statusfortschritt">
+        ${progress}
+      </div>
+      <div class="customer-status-history">
+        <div class="customer-status-history-head">
+          <strong>Letzte Änderungen</strong>
+          <span>${list.length} Eintrag${list.length === 1 ? "" : "e"}</span>
+        </div>
+        ${historyMarkup}
+      </div>
+    </div>
+  `;
+}
+
+
 function renderPublicStatusSummaryFacts(summary) {
   const clean = String(summary || "").replace(/\s+/g, " ").trim();
 
@@ -4497,23 +4587,7 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
       </div>
 
 
-      <div class="customer-status-timeline">
-        <p class="eyebrow">Statusverlauf</p>
-        ${
-          history.length
-            ? history.map(entry => `
-              <article>
-                <span></span>
-                <div>
-                  <strong>${escapeHtml(publicStatusStepLabel(entry.new_status))}</strong>
-                  <p>${escapeHtml(formatDashboardDate(entry.created_at))}</p>
-                  ${entry.note ? `<small>${escapeHtml(entry.note)}</small>` : ""}
-                </div>
-              </article>
-            `).join("")
-            : `<div class="dashboard-mini-empty"><strong>Noch kein Verlauf</strong><p>Der Statusverlauf wird angezeigt, sobald Änderungen vorliegen.</p></div>`
-        }
-      </div>
+      ${renderPublicStatusTimeline(history, ticket)}
 
       <div class="customer-public-chat">
         <p class="eyebrow">Nachrichten zum Ticket</p>

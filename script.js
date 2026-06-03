@@ -2994,6 +2994,7 @@ function dashboardFieldLabel(key) {
     address: "Adresse",
     area: "Fläche",
     rooms: "Räume",
+    room_areas: "Räume / Bereiche",
     interval: "Turnus",
     desired_date: "Wunschtermin",
     after_clearance: "Nach Entrümpelung",
@@ -5219,6 +5220,7 @@ function buildCleaningSummaryText(summary) {
     summary.cleaningType,
     summary.objectType,
     summary.area ? `Fläche: ${summary.area}` : "",
+    summary.roomAreas && summary.roomAreas !== "keine Angabe" ? `Bereiche: ${summary.roomAreas}` : "",
     summary.interval ? `Turnus: ${summary.interval}` : "",
     summary.desiredDate ? `Wunschtermin: ${summary.desiredDate}` : ""
   ].filter(Boolean);
@@ -6830,6 +6832,7 @@ function cleaningPage() {
           <li>Reinigung vor Wohnungsübergabe</li>
           <li>Reinigung nach Umzug</li>
           <li>Büroreinigung oder Objektpflege</li>
+          <li>Unterhaltsreinigung nach vereinbartem Turnus</li>
           <li>Treppenhaus- und Gemeinschaftsbereiche nach Absprache</li>
           <li>regelmäßige Reinigung nach Vereinbarung</li>
         </ul>
@@ -6891,11 +6894,12 @@ function cleaningPage() {
               </div>
             </div>
 
-            <div class="wizard-step" data-title="Objekt & Standort">
+            <div class="wizard-step" data-title="Objekt, Räume & Standort">
               <div class="form-grid">
                 <label>Art der Reinigung
                   <select name="cleaningType">
                     <option>Gebäudereinigung</option>
+                    <option>Unterhaltsreinigung</option>
                     <option>Reinigung nach Entrümpelung</option>
                     <option>Wohnungsreinigung</option>
                     <option>Hausreinigung</option>
@@ -6924,10 +6928,26 @@ function cleaningPage() {
                 <label>Ungefähre Fläche
                   <input name="area" placeholder="z. B. 60 m², 3 Zimmer, Treppenhaus...">
                 </label>
-                <label>Anzahl Räume
-                  <input name="rooms" placeholder="z. B. 2 Zimmer, Küche, Bad">
+                <label>Anzahl / freie Ergänzung
+                  <input name="rooms" placeholder="z. B. 2 Zimmer, Küche, Bad oder 3 Etagen">
                 </label>
               </div>
+
+              <fieldset class="option-fieldset cleaning-room-fieldset">
+                <legend>Welche Räume oder Bereiche sollen gereinigt werden?</legend>
+                <div class="checkbox-grid cleaning-room-grid">
+                  <label><input type="checkbox" name="roomAreas" value="Büro / Arbeitsräume"> Büro / Arbeitsräume</label>
+                  <label><input type="checkbox" name="roomAreas" value="Treppenhaus"> Treppenhaus</label>
+                  <label><input type="checkbox" name="roomAreas" value="Flur / Eingangsbereich"> Flur / Eingangsbereich</label>
+                  <label><input type="checkbox" name="roomAreas" value="Küche"> Küche</label>
+                  <label><input type="checkbox" name="roomAreas" value="Bad / Sanitär"> Bad / Sanitär</label>
+                  <label><input type="checkbox" name="roomAreas" value="Aufenthaltsraum"> Aufenthaltsraum</label>
+                  <label><input type="checkbox" name="roomAreas" value="Wohnräume"> Wohnräume</label>
+                  <label><input type="checkbox" name="roomAreas" value="Keller / Lager"> Keller / Lager</label>
+                  <label><input type="checkbox" name="roomAreas" value="Außenbereich nach Absprache"> Außenbereich nach Absprache</label>
+                  <label><input type="checkbox" name="roomAreas" value="Sonstiges / nach Absprache"> Sonstiges / nach Absprache</label>
+                </div>
+              </fieldset>
             </div>
 
             <div class="wizard-step" data-title="Umfang & Termin">
@@ -9288,6 +9308,7 @@ function bindCleaningTool() {
 
     const data = new FormData(cleaningForm);
     const specialAreas = data.getAll("specialAreas");
+    const roomAreas = data.getAll("roomAreas");
     const summary = {
       name: data.get("name") || "",
       email: data.get("email") || "",
@@ -9298,6 +9319,7 @@ function bindCleaningTool() {
       address: data.get("address") || "",
       area: data.get("area") || "",
       rooms: data.get("rooms") || "",
+      roomAreas: roomAreas.length ? roomAreas.join(", ") : "keine Angabe",
       interval: data.get("interval") || "",
       desiredDate: data.get("desiredDate") || "",
       afterClearance: data.get("afterClearance") || "",
@@ -9319,7 +9341,8 @@ function bindCleaningTool() {
         <b>Privat/Gewerblich:</b> ${escapeHtml(summary.customerType)}<br>
         <b>Ort:</b> ${escapeHtml(summary.address)}<br>
         <b>Fläche:</b> ${escapeHtml(summary.area)}<br>
-        <b>Räume:</b> ${escapeHtml(summary.rooms)}<br>
+        <b>Anzahl / Ergänzung:</b> ${escapeHtml(summary.rooms)}<br>
+        <b>Räume / Bereiche:</b> ${escapeHtml(summary.roomAreas)}<br>
         <b>Turnus:</b> ${escapeHtml(summary.interval)}<br>
         <b>Wunschtermin:</b> ${escapeHtml(summary.desiredDate)}<br>
         <b>Nach Räumung:</b> ${escapeHtml(summary.afterClearance)}<br>
@@ -9342,7 +9365,8 @@ function bindCleaningTool() {
       `Privat/Gewerblich: ${summary.customerType}\n` +
       `Adresse / Ort: ${summary.address}\n` +
       `Fläche: ${summary.area}\n` +
-      `Anzahl Räume: ${summary.rooms}\n` +
+      `Anzahl / Ergänzung: ${summary.rooms}\n` +
+      `Räume / Bereiche: ${summary.roomAreas}\n` +
       `Einmalig / regelmäßig: ${summary.interval}\n` +
       `Wunschtermin: ${summary.desiredDate}\n` +
       `Nach Räumung: ${summary.afterClearance}\n` +
@@ -9665,6 +9689,7 @@ function bindCleaningWizard() {
   function collectSummary() {
     const data = new FormData(form);
     const specialAreas = data.getAll("specialAreas");
+    const roomAreas = data.getAll("roomAreas");
     return {
       name: data.get("name") || "",
       email: data.get("email") || "",
@@ -9676,6 +9701,7 @@ function bindCleaningWizard() {
       address: data.get("address") || "",
       area: data.get("area") || "",
       rooms: data.get("rooms") || "",
+      roomAreas: roomAreas.length ? roomAreas.join(", ") : "keine Angabe",
       interval: data.get("interval") || "",
       desiredDate: data.get("desiredDate") || "",
       afterClearance: data.get("afterClearance") || "",
@@ -9707,7 +9733,8 @@ function bindCleaningWizard() {
       <div><strong>Objektart</strong><span>${escapeHtml(summary.objectType || "—")}</span></div>
       <div><strong>Adresse / Ort</strong><span>${escapeHtml(summary.address || "—")}</span></div>
       <div><strong>Fläche</strong><span>${escapeHtml(summary.area || "—")}</span></div>
-      <div><strong>Räume</strong><span>${escapeHtml(summary.rooms || "—")}</span></div>
+      <div><strong>Anzahl / Ergänzung</strong><span>${escapeHtml(summary.rooms || "—")}</span></div>
+      <div class="summary-wide"><strong>Räume / Bereiche</strong><span>${escapeHtml(summary.roomAreas || "—")}</span></div>
       <div><strong>Turnus</strong><span>${escapeHtml(summary.interval || "—")}</span></div>
       <div><strong>Wunschtermin</strong><span>${escapeHtml(summary.desiredDate || "—")}</span></div>
       <div><strong>Nach Entrümpelung</strong><span>${escapeHtml(summary.afterClearance || "—")}</span></div>
@@ -9781,7 +9808,8 @@ function bindCleaningWizard() {
       `Objektart: ${summary.objectType}\n` +
       `Adresse / Ort: ${summary.address}\n` +
       `Fläche: ${summary.area}\n` +
-      `Anzahl Räume: ${summary.rooms}\n` +
+      `Anzahl / Ergänzung: ${summary.rooms}\n` +
+      `Räume / Bereiche: ${summary.roomAreas}\n` +
       `Einmalig / regelmäßig: ${summary.interval}\n` +
       `Wunschtermin: ${summary.desiredDate}\n` +
       `Nach Entrümpelung: ${summary.afterClearance}\n` +
@@ -9818,6 +9846,7 @@ function bindCleaningWizard() {
           address: summary.address,
           area: summary.area,
           rooms: summary.rooms,
+          room_areas: summary.roomAreas,
           interval: summary.interval,
           desired_date: summary.desiredDate,
           after_clearance: summary.afterClearance,

@@ -4283,18 +4283,31 @@ async function tryNotifyTeam(result, response, fallbacks = {}) {
    ========================================================================== */
 
 async function fetchPublicRequestStatus(ticketNumber, verification) {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_public_request_status`, {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      p_ticket_number: String(ticketNumber || "").trim(),
-      p_verification: String(verification || "").trim()
-    })
-  });
+  const timeout = createPublicStatusTimeoutController(15000, "Statusprüfung hat zu lange gedauert.");
+  let response;
+
+  try {
+    response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_public_request_status`, {
+      method: "POST",
+      signal: timeout.signal,
+      headers: {
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        p_ticket_number: String(ticketNumber || "").trim(),
+        p_verification: String(verification || "").trim()
+      })
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Statusprüfung dauert zu lange. Bitte kurz neu laden oder erneut versuchen.");
+    }
+    throw error;
+  } finally {
+    timeout.clear();
+  }
 
   const data = await response.json().catch(() => null);
 
@@ -4320,6 +4333,40 @@ function appendCustomerStatusLink(result, ticketNumber) {
   result.appendChild(link);
 }
 
+function clonePublicStatusTicket(ticket) {
+  if (!ticket || typeof ticket !== "object") return null;
+
+  return {
+    ...ticket,
+    history: Array.isArray(ticket.history) ? [...ticket.history] : [],
+    messages: Array.isArray(ticket.messages) ? [...ticket.messages] : []
+  };
+}
+
+function buildOptimisticCustomerMessage(messageText) {
+  return {
+    id: `optimistic-${Date.now()}`,
+    sender_type: "customer",
+    sender_name: "Kunde",
+    message: String(messageText || "").trim(),
+    is_internal: false,
+    created_at: new Date().toISOString(),
+    __optimistic: true
+  };
+}
+
+function createPublicStatusTimeoutController(timeoutMs, message) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(message || "Zeitüberschreitung"), timeoutMs);
+
+  return {
+    signal: controller.signal,
+    clear() {
+      window.clearTimeout(timer);
+    }
+  };
+}
+
 
 
 function setCustomerAttachmentMessage(type, text) {
@@ -4338,19 +4385,32 @@ async function sendPublicRequestMessage(ticketNumber, verification, message) {
     throw new Error("Bitte eine Nachricht eingeben.");
   }
 
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/send_public_request_message`, {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      p_ticket_number: String(ticketNumber || "").trim(),
-      p_verification: String(verification || "").trim(),
-      p_message: cleanMessage
-    })
-  });
+  const timeout = createPublicStatusTimeoutController(15000, "Nachricht senden hat zu lange gedauert.");
+  let response;
+
+  try {
+    response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/send_public_request_message`, {
+      method: "POST",
+      signal: timeout.signal,
+      headers: {
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        p_ticket_number: String(ticketNumber || "").trim(),
+        p_verification: String(verification || "").trim(),
+        p_message: cleanMessage
+      })
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Nachricht konnte nicht bestätigt werden. Bitte kurz erneut versuchen.");
+    }
+    throw error;
+  } finally {
+    timeout.clear();
+  }
 
   const data = await response.json().catch(() => null);
 
@@ -4369,7 +4429,7 @@ function setCustomerReplyMessage(type, text) {
   const message = document.querySelector("#customerReplyMessage");
   if (!message) return;
 
-  message.classList.remove("success", "error", "loading");
+  message.classList.remove("success", "error", "loading", "warning");
   if (type) message.classList.add(type);
   message.textContent = text || "";
 }
@@ -4569,7 +4629,7 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
         <span class="status-pill">${escapeHtml(publicStatusStepLabel(ticket.status))}</span>
       </div>
 
-      ${options.replyNotice ? `<p class="customer-status-inline-note success">${escapeHtml(options.replyNotice)}</p>` : ""}
+      ${options.replyNotice ? `<p class="customer-status-inline-note ${escapeHtml(options.replyNoticeType || "success")}">${escapeHtml(options.replyNotice)}</p>` : ""}
 
       <div class="customer-status-main">
         <article>
@@ -4716,6 +4776,8 @@ function bindCustomerStatusPage() {
   const result = document.querySelector("#customerStatusResult");
   let currentTicketNumber = "";
   let currentVerification = "";
+  let currentPublicStatusTicket = null;
+  let publicStatusRefreshId = 0;
 
   if (!form || !result) return;
 
@@ -4747,6 +4809,19 @@ function bindCustomerStatusPage() {
     document.body.classList.remove("modal-open");
   }
 
+  async function refreshPublicStatusAfterCustomerAction(options = {}) {
+    if (!currentTicketNumber || !currentVerification) return null;
+
+    const refreshId = ++publicStatusRefreshId;
+    const ticket = await fetchPublicRequestStatus(currentTicketNumber, currentVerification);
+
+    if (refreshId !== publicStatusRefreshId) return null;
+
+    currentPublicStatusTicket = ticket;
+    renderCustomerStatusResult(result, ticket, options);
+    return ticket;
+  }
+
   form.addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -4766,10 +4841,13 @@ function bindCustomerStatusPage() {
       const ticket = await fetchPublicRequestStatus(ticketNumber, verification);
       currentTicketNumber = ticketNumber;
       currentVerification = verification;
+      currentPublicStatusTicket = ticket;
+      publicStatusRefreshId += 1;
       renderCustomerStatusResult(result, ticket);
     } catch (error) {
       currentTicketNumber = "";
       currentVerification = "";
+      currentPublicStatusTicket = null;
       result.innerHTML = `
         <div class="dashboard-mini-empty error">
           <strong>Status konnte nicht geladen werden</strong>
@@ -4823,10 +4901,33 @@ function bindCustomerStatusPage() {
     try {
       await sendPublicRequestMessage(currentTicketNumber, currentVerification, messageText);
       if (textarea) textarea.value = "";
-      const updatedTicket = await fetchPublicRequestStatus(currentTicketNumber, currentVerification);
-      renderCustomerStatusResult(result, updatedTicket, {
-        replyNotice: "Ihre Nachricht wurde gesendet und dem Ticket zugeordnet."
-      });
+
+      const optimisticTicket = clonePublicStatusTicket(currentPublicStatusTicket);
+      if (optimisticTicket) {
+        optimisticTicket.messages.push(buildOptimisticCustomerMessage(messageText));
+        currentPublicStatusTicket = optimisticTicket;
+        closePublicStatusModals();
+        renderCustomerStatusResult(result, optimisticTicket, {
+          replyNotice: "Ihre Nachricht wurde gesendet. Der Verlauf wird aktualisiert …",
+          replyNoticeType: "loading"
+        });
+      }
+
+      try {
+        await refreshPublicStatusAfterCustomerAction({
+          replyNotice: "Ihre Nachricht wurde gesendet und dem Ticket zugeordnet.",
+          replyNoticeType: "success"
+        });
+      } catch (refreshError) {
+        if (optimisticTicket) {
+          renderCustomerStatusResult(result, optimisticTicket, {
+            replyNotice: "Nachricht wurde gesendet. Falls sie hier noch nicht endgültig erscheint, bitte die Seite kurz neu prüfen.",
+            replyNoticeType: "warning"
+          });
+        } else {
+          setCustomerReplyMessage("warning", "Nachricht wurde gesendet. Bitte Status kurz neu prüfen, falls der Verlauf nicht aktualisiert.");
+        }
+      }
     } catch (error) {
       setCustomerReplyMessage("error", error.message || "Nachricht konnte nicht gesendet werden.");
     } finally {

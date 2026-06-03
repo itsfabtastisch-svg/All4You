@@ -12610,3 +12610,20 @@ body.modal-open {
     align-items: center;
   }
 }
+
+/* ========================================================================== 
+   DBG: ALL4YOU-V6.12.12-PUBLIC-STATUS-MESSAGE-STABILITY
+   Öffentliche Statusseite: stabile Rückmeldung nach Kundennachricht
+   ========================================================================== */
+.customer-status-inline-note.loading {
+  border-color: rgba(11, 78, 145, 0.22);
+  background: rgba(11, 78, 145, 0.07);
+  color: var(--blue);
+}
+
+.customer-status-inline-note.warning,
+.customer-reply-message.warning {
+  border-color: rgba(245, 158, 11, 0.32);
+  background: rgba(255, 247, 237, 0.92);
+  color: #92400e;
+}

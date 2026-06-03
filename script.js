@@ -202,6 +202,10 @@ let dashboardEmployeesCache = [];
 let dashboardSelectedEmployeeId = null;
 let dashboardSelectedMessageRequestId = null;
 let dashboardMessagesCenterLoadId = 0;
+const DASHBOARD_MESSAGES_AUTO_REFRESH_MS = 12000;
+let dashboardMessagesAutoRefreshTimer = null;
+let dashboardMessagesAutoRefreshBusy = false;
+let dashboardMessagesLastRefreshAt = null;
 
 
 function serviceAccentClass(service) {
@@ -4002,12 +4006,92 @@ function setDashboardMessagesReplyMessage(type, text) {
   message.textContent = text || "";
 }
 
+function setDashboardMessagesLiveStatus(type = "", text = "") {
+  const status = document.querySelector("#dashboardMessagesLiveStatus");
+  if (!status) return;
+  status.classList.remove("success", "warning", "loading", "error");
+  if (type) status.classList.add(type);
+  status.textContent = text || "Auto-Update bereit";
+}
+
+function isDashboardMessagesCenterVisible() {
+  const panel = document.querySelector("#dashboardMessagesCenter");
+  return Boolean(panel && !panel.classList.contains("is-hidden"));
+}
+
+function isDashboardMessageThreadNearBottom(thread, tolerance = 120) {
+  if (!thread) return true;
+  return (thread.scrollHeight - thread.scrollTop - thread.clientHeight) <= tolerance;
+}
+
+function scrollDashboardMessageThreadToBottom(behavior = "auto") {
+  const thread = document.querySelector("#dashboardMessagesThread");
+  if (!thread) return;
+  requestAnimationFrame(() => {
+    if (typeof thread.scrollTo === "function") {
+      thread.scrollTo({ top: thread.scrollHeight, behavior });
+    } else {
+      thread.scrollTop = thread.scrollHeight;
+    }
+  });
+}
+
+function getSelectedDashboardMessageTicket() {
+  return getDashboardTicketByIdOrNumber(dashboardSelectedMessageRequestId);
+}
+
+async function refreshDashboardMessagesCenterLive(options = {}) {
+  if (!dashboardCurrentSession?.access_token || !isDashboardMessagesCenterVisible()) return;
+  if (dashboardMessagesAutoRefreshBusy && !options.force) return;
+
+  const ticket = getSelectedDashboardMessageTicket();
+  if (!ticket?.id) return;
+
+  dashboardMessagesAutoRefreshBusy = true;
+  if (options.force) setDashboardMessagesLiveStatus("loading", "Aktualisiere …");
+
+  try {
+    const [messages] = await Promise.all([
+      fetchDashboardMessages(dashboardCurrentSession, ticket.id),
+      fetchDashboardActivitySummary(dashboardCurrentSession, dashboardAllRequestCache)
+    ]);
+
+    if (!isDashboardMessagesCenterVisible() || dashboardSelectedMessageRequestId !== ticket.id) return;
+
+    renderDashboardMessageThread(ticket, messages);
+    markDashboardTicketSeen(ticket.id);
+    renderDashboardMessagesCenterList(getDashboardMessagesCenterFilteredTickets());
+    updateDashboardActivityStats(dashboardAllRequestCache);
+    dashboardMessagesLastRefreshAt = new Date();
+    setDashboardMessagesLiveStatus("success", `Aktualisiert ${formatDashboardDate(dashboardMessagesLastRefreshAt.toISOString())}`);
+  } catch (error) {
+    setDashboardMessagesLiveStatus("warning", "Update kurz nicht möglich");
+  } finally {
+    dashboardMessagesAutoRefreshBusy = false;
+  }
+}
+
+function startDashboardMessagesAutoRefresh() {
+  if (dashboardMessagesAutoRefreshTimer) return;
+  dashboardMessagesAutoRefreshTimer = window.setInterval(() => {
+    if (document.hidden) return;
+    refreshDashboardMessagesCenterLive();
+  }, DASHBOARD_MESSAGES_AUTO_REFRESH_MS);
+}
+
+function stopDashboardMessagesAutoRefresh() {
+  if (!dashboardMessagesAutoRefreshTimer) return;
+  window.clearInterval(dashboardMessagesAutoRefreshTimer);
+  dashboardMessagesAutoRefreshTimer = null;
+}
+
 function renderDashboardMessageThread(ticket, messages = []) {
   const head = document.querySelector("#dashboardMessagesThreadHead");
   const contact = document.querySelector("#dashboardMessagesContactStrip");
   const thread = document.querySelector("#dashboardMessagesThread");
   const textInput = document.querySelector("#dashboardMessagesReplyText");
   const button = document.querySelector("#dashboardMessagesReplyButton");
+  const shouldScrollToBottom = isDashboardMessageThreadNearBottom(thread);
 
   if (!ticket?.id) {
     renderDashboardMessageThreadEmpty();
@@ -4067,6 +4151,10 @@ function renderDashboardMessageThread(ticket, messages = []) {
       `;
   }
 
+  if (thread && shouldScrollToBottom) {
+    scrollDashboardMessageThreadToBottom("auto");
+  }
+
   if (textInput) textInput.disabled = false;
   if (button) button.disabled = false;
   setDashboardMessagesReplyMessage("", "Antworten sind für Kunden sichtbar und werden dem Auftrag zugeordnet.");
@@ -4096,6 +4184,8 @@ async function loadDashboardMessagesCenterThread(ticket) {
     markDashboardTicketSeen(ticket.id);
     renderDashboardMessagesCenterList(getDashboardMessagesCenterFilteredTickets());
     updateDashboardActivityStats(dashboardAllRequestCache);
+    dashboardMessagesLastRefreshAt = new Date();
+    setDashboardMessagesLiveStatus("success", `Aktualisiert ${formatDashboardDate(dashboardMessagesLastRefreshAt.toISOString())}`);
   } catch (error) {
     if (loadId !== dashboardMessagesCenterLoadId) return;
     if (thread) {
@@ -4106,6 +4196,7 @@ async function loadDashboardMessagesCenterThread(ticket) {
         </div>
       `;
     }
+    setDashboardMessagesLiveStatus("warning", "Nachrichten konnten nicht geladen werden");
   }
 }
 
@@ -7775,7 +7866,11 @@ function pageDashboard() {
                   Kompakte Kundenkommunikation pro Auftrag. Links Auftrag auswählen, rechts Verlauf lesen und dem Kunden antworten.
                 </p>
               </div>
-              <span class="status-pill" id="dashboardMessagesCenterCount">0 Gespräche</span>
+              <div class="dashboard-messages-live-tools">
+                <span class="status-pill" id="dashboardMessagesCenterCount">0 Gespräche</span>
+                <span class="status-pill dashboard-messages-live-status" id="dashboardMessagesLiveStatus">Auto-Update bereit</span>
+                <button class="btn ghost tiny" type="button" id="dashboardMessagesRefreshButton">Aktualisieren</button>
+              </div>
             </div>
 
             <div class="dashboard-message-workspace">
@@ -12480,6 +12575,7 @@ function setDashboardView(view = "overview", options = {}) {
   }
   if (normalized === "messages") {
     renderDashboardMessagesCenter();
+    startDashboardMessagesAutoRefresh();
   }
   if (normalized === "status") {
     renderDashboardStatusOverview();
@@ -12760,6 +12856,7 @@ function bindDashboardShell() {
   const dashboardMessagesReplyForm = document.querySelector("#dashboardMessagesReplyForm");
   const dashboardMessagesReplyText = document.querySelector("#dashboardMessagesReplyText");
   const dashboardMessagesReplyButton = document.querySelector("#dashboardMessagesReplyButton");
+  const dashboardMessagesRefreshButton = document.querySelector("#dashboardMessagesRefreshButton");
 
   bindDashboardHistoryRouting();
   bindDashboardActionDirectGuard();
@@ -13097,6 +13194,10 @@ function bindDashboardShell() {
   });
 
   dashboardMessagesSearchInput?.addEventListener("input", () => renderDashboardMessagesCenter());
+
+  dashboardMessagesRefreshButton?.addEventListener("click", () => {
+    refreshDashboardMessagesCenterLive({ force: true });
+  });
 
   dashboardMessagesCenterList?.addEventListener("click", event => {
     const button = event.target.closest("[data-message-ticket-id]");

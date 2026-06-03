@@ -12862,3 +12862,50 @@ body.modal-open {
     justify-content: flex-start;
   }
 }
+
+/* ===========================================================================
+   ALL4YOU-V6.12.15 - Mitarbeiterportal Nachrichten Auto-Refresh
+   Ziel: Nachrichten-Zentrale aktualisiert Kundennachrichten automatisch.
+   ========================================================================== */
+
+.dashboard-messages-live-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dashboard-messages-live-status {
+  background: rgba(238,246,250,.86);
+  color: var(--muted);
+  border-color: rgba(19,35,58,.10);
+}
+
+.dashboard-messages-live-status.success {
+  color: #08796f;
+  background: rgba(10,169,155,.12);
+  border-color: rgba(10,169,155,.22);
+}
+
+.dashboard-messages-live-status.warning,
+.dashboard-messages-live-status.loading {
+  color: #9a5b00;
+  background: rgba(255,190,92,.16);
+  border-color: rgba(255,190,92,.28);
+}
+
+.btn.tiny {
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .dashboard-messages-live-tools {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

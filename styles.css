@@ -12627,3 +12627,181 @@ body.modal-open {
   background: rgba(255, 247, 237, 0.92);
   color: #92400e;
 }
+
+/* ========================================================================== 
+   DBG: ALL4YOU-V6.12.13-PUBLIC-STATUS-COMPACT-LIVE-CHAT
+   Öffentliche Statusseite: Nachrichten nicht mehr als Wizard, sondern kompakter Chat
+   ========================================================================== */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.customer-public-chat {
+  padding: 16px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(10,169,155,.10), transparent 13rem),
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(244,250,252,.92));
+}
+
+.customer-public-chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.customer-public-chat-head h3 {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-size: clamp(20px, 2vw, 27px);
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+.customer-public-chat-head > span {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(10,169,155,.20);
+  background: rgba(10,169,155,.08);
+  color: #08786f;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.customer-public-message-list {
+  max-height: min(34vh, 330px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(19,35,58,.08);
+  background: rgba(238,246,250,.58);
+  scrollbar-width: thin;
+}
+
+.customer-public-message-list .dashboard-mini-empty {
+  margin: 0;
+  background: rgba(255,255,255,.82);
+}
+
+.customer-public-message {
+  width: fit-content;
+  max-width: min(82%, 560px);
+  padding: 11px 12px;
+  border-radius: 17px;
+  box-shadow: 0 12px 26px rgba(15,23,42,.06);
+}
+
+.customer-public-message.team {
+  justify-self: start;
+  border-bottom-left-radius: 6px;
+  background: rgba(236,253,245,.94);
+}
+
+.customer-public-message.customer {
+  justify-self: end;
+  border-bottom-right-radius: 6px;
+  background: rgba(239,246,255,.95);
+}
+
+.customer-public-message > div {
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: .76rem;
+}
+
+.customer-public-message p {
+  font-size: .92rem;
+  line-height: 1.45;
+}
+
+.customer-public-reply-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(19,35,58,.10);
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 16px 38px rgba(15,23,42,.07);
+}
+
+.customer-public-reply-form textarea {
+  width: 100%;
+  min-height: 74px;
+  max-height: 150px;
+  resize: vertical;
+  border: 1px solid rgba(19,35,58,.12);
+  border-radius: 16px;
+  padding: 12px 13px;
+  background: rgba(255,255,255,.96);
+  color: var(--navy);
+  font: inherit;
+  font-weight: 760;
+  line-height: 1.42;
+}
+
+.customer-public-reply-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-public-reply-actions .customer-reply-message {
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.customer-public-reply-actions .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .customer-public-chat {
+    padding: 13px;
+    border-radius: 20px;
+  }
+
+  .customer-public-chat-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-public-chat-head > span {
+    width: fit-content;
+  }
+
+  .customer-public-message-list {
+    max-height: 300px;
+    padding: 10px;
+  }
+
+  .customer-public-message {
+    max-width: 94%;
+  }
+
+  .customer-public-reply-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-public-reply-actions .btn {
+    width: 100%;
+  }
+}

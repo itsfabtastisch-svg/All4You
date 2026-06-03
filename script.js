@@ -4650,10 +4650,28 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
       ${renderPublicStatusTimeline(history, ticket)}
 
       <div class="customer-public-chat">
-        <p class="eyebrow">Nachrichten zum Ticket</p>
-        <div class="customer-public-message-list">
+        <div class="customer-public-chat-head">
+          <div>
+            <p class="eyebrow">Live-Nachrichten</p>
+            <h3>Nachrichten zum Ticket</h3>
+          </div>
+          <span>${messages.length} Nachricht${messages.length === 1 ? "" : "en"}</span>
+        </div>
+
+        <div class="customer-public-message-list" id="customerPublicMessageList" aria-live="polite">
           ${renderPublicStatusMessageList(messages)}
         </div>
+
+        <form class="customer-reply-form customer-public-reply-form" id="customerReplyForm">
+          <label class="sr-only" for="customerPublicReplyText">Nachricht an All4You</label>
+          <textarea id="customerPublicReplyText" name="message" rows="3" placeholder="Nachricht schreiben …" required></textarea>
+          <div class="customer-public-reply-actions">
+            <p class="customer-reply-message" id="customerReplyMessage">
+              Bereit zum Senden.
+            </p>
+            <button class="btn primary compact" type="submit" id="customerReplyButton">Senden <span>›</span></button>
+          </div>
+        </form>
       </div>
 
       <p class="customer-status-privacy">
@@ -4668,11 +4686,6 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
             <small>Alle zusammengefassten Daten dieser Anfrage kompakt öffnen.</small>
           </button>
         ` : ""}
-        <button class="customer-status-action-card" type="button" data-status-modal="message">
-          <span>Nachricht</span>
-          <strong>Nachricht senden</strong>
-          <small>Eine kurze Rückmeldung oder Zusatzinfo zum Ticket schicken.</small>
-        </button>
         <button class="customer-status-action-card" type="button" data-status-modal="files">
           <span>Dateien</span>
           <strong>Dateien hochladen</strong>
@@ -4681,28 +4694,6 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
       </div>
 
       ${renderPublicStatusSummaryModal(ticket)}
-
-      <div class="customer-status-modal" id="customerStatusMessageModal" hidden>
-        <div class="customer-status-modal-backdrop" data-status-modal-close></div>
-        <section class="customer-status-modal-card" role="dialog" aria-modal="true" aria-label="Nachricht an All4You senden">
-          <button class="customer-status-modal-close" type="button" data-status-modal-close aria-label="Fenster schließen">×</button>
-          <p class="eyebrow">Nachricht senden</p>
-          <h3>Nachricht an All4You</h3>
-          <p class="customer-status-modal-lead">Ihre Nachricht wird direkt diesem Ticket zugeordnet und im Mitarbeiterportal sichtbar.</p>
-          <form class="customer-reply-form" id="customerReplyForm">
-            <label>Ihre Nachricht
-              <textarea name="message" rows="5" placeholder="z. B. Termin passt, bitte zurückrufen, zusätzliche Information zur Anfrage …" required></textarea>
-            </label>
-            <div class="customer-status-modal-actions">
-              <button class="btn ghost" type="button" data-status-modal-close>Abbrechen</button>
-              <button class="btn primary" type="submit" id="customerReplyButton">Nachricht senden <span>›</span></button>
-            </div>
-            <p class="customer-reply-message" id="customerReplyMessage">
-              Bereit zum Senden.
-            </p>
-          </form>
-        </section>
-      </div>
 
       <div class="customer-status-modal" id="customerStatusFilesModal" hidden>
         <div class="customer-status-modal-backdrop" data-status-modal-close></div>
@@ -4725,6 +4716,11 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
       </div>
     </div>
   `;
+
+  window.setTimeout(() => {
+    const messageList = result.querySelector("#customerPublicMessageList");
+    if (messageList) messageList.scrollTop = messageList.scrollHeight;
+  }, 0);
 }
 
 function pageCustomerStatus() {

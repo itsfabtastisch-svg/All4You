@@ -12805,3 +12805,60 @@ body.modal-open {
     width: 100%;
   }
 }
+
+/* ========================================================================== 
+   ALL4YOU-V6.12.14-PUBLIC-STATUS-CHAT-AUTO-REFRESH
+   Statuslink: Sitzung merken + kompakte Chat-Aktualisierung
+   ========================================================================== */
+.customer-public-chat-tools {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-public-chat-tools > span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(10,169,155,.20);
+  background: rgba(10,169,155,.08);
+  color: #08786f;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.customer-public-refresh-button {
+  border: 1px solid rgba(19,35,58,.10);
+  border-radius: 999px;
+  background: rgba(255,255,255,.82);
+  color: var(--navy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .05em;
+  line-height: 1;
+  padding: 8px 10px;
+  text-transform: uppercase;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.customer-public-refresh-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(10,169,155,.28);
+  background: rgba(255,255,255,.96);
+}
+
+.customer-public-refresh-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .customer-public-chat-tools {
+    justify-content: flex-start;
+  }
+}

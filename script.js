@@ -4333,6 +4333,59 @@ function appendCustomerStatusLink(result, ticketNumber) {
   result.appendChild(link);
 }
 
+const PUBLIC_STATUS_SESSION_KEY = "all4you_public_status_session_v1";
+const PUBLIC_STATUS_AUTO_REFRESH_MS = 12000;
+
+function normalizePublicStatusLookupValue(value) {
+  return String(value || "").trim();
+}
+
+function getStoredPublicStatusSession() {
+  try {
+    const raw = window.sessionStorage?.getItem(PUBLIC_STATUS_SESSION_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    const ticketNumber = normalizePublicStatusLookupValue(parsed?.ticketNumber);
+    const verification = normalizePublicStatusLookupValue(parsed?.verification);
+
+    if (!ticketNumber || !verification) return null;
+
+    return {
+      ticketNumber,
+      verification,
+      savedAt: parsed?.savedAt || null
+    };
+  } catch {
+    return null;
+  }
+}
+
+function storePublicStatusSession(ticketNumber, verification) {
+  const cleanTicket = normalizePublicStatusLookupValue(ticketNumber);
+  const cleanVerification = normalizePublicStatusLookupValue(verification);
+
+  if (!cleanTicket || !cleanVerification) return;
+
+  try {
+    window.sessionStorage?.setItem(PUBLIC_STATUS_SESSION_KEY, JSON.stringify({
+      ticketNumber: cleanTicket,
+      verification: cleanVerification,
+      savedAt: new Date().toISOString()
+    }));
+  } catch {
+    // Session-Speicherung ist Komfort, aber nicht kritisch.
+  }
+}
+
+function clearPublicStatusSession() {
+  try {
+    window.sessionStorage?.removeItem(PUBLIC_STATUS_SESSION_KEY);
+  } catch {
+    // Ignorieren: Bei gesperrtem Storage soll die Statusseite weiter funktionieren.
+  }
+}
+
 function clonePublicStatusTicket(ticket) {
   if (!ticket || typeof ticket !== "object") return null;
 
@@ -4451,7 +4504,8 @@ function renderPublicStatusMessageList(messages) {
   }
 
   return list.map(message => {
-    const isTeam = message.sender_type === "team";
+    const senderType = String(message.sender_type || "").toLowerCase();
+    const isTeam = senderType === "team" || senderType === "system" || senderType === "admin" || senderType === "mitarbeiter";
     return `
       <article class="customer-public-message ${isTeam ? "team" : "customer"}">
         <div>
@@ -4655,7 +4709,12 @@ function renderCustomerStatusResult(result, ticket, options = {}) {
             <p class="eyebrow">Live-Nachrichten</p>
             <h3>Nachrichten zum Ticket</h3>
           </div>
-          <span>${messages.length} Nachricht${messages.length === 1 ? "" : "en"}</span>
+          <div class="customer-public-chat-tools">
+            <span>${messages.length} Nachricht${messages.length === 1 ? "" : "en"}</span>
+            <button class="customer-public-refresh-button" type="button" data-public-chat-refresh>
+              Aktualisieren
+            </button>
+          </div>
         </div>
 
         <div class="customer-public-message-list" id="customerPublicMessageList" aria-live="polite">
@@ -4727,6 +4786,10 @@ function pageCustomerStatus() {
   document.title = "Anfragestatus prüfen | All4You Service München";
   const params = new URLSearchParams(window.location.search);
   const ticket = params.get("ticket") || "";
+  const storedSession = getStoredPublicStatusSession();
+  const storedMatchesTicket = storedSession?.ticketNumber && (!ticket || storedSession.ticketNumber.toLowerCase() === String(ticket).trim().toLowerCase());
+  const initialTicket = ticket || (storedMatchesTicket ? storedSession.ticketNumber : "");
+  const initialVerification = storedMatchesTicket ? storedSession.verification : "";
 
   return `
     <section class="page customer-status-page section-pad">
@@ -4742,11 +4805,11 @@ function pageCustomerStatus() {
       <div class="customer-status-layout">
         <form class="customer-status-form" id="customerStatusForm">
           <label>Ticketnummer
-            <input type="text" name="ticket" value="${escapeHtml(ticket)}" placeholder="z. B. A4Y-2026-0006" required>
+            <input type="text" name="ticket" value="${escapeHtml(initialTicket)}" placeholder="z. B. A4Y-2026-0006" required>
           </label>
 
           <label>E-Mail oder Telefonnummer
-            <input type="text" name="verification" placeholder="E-Mail oder Telefon aus der Anfrage" required>
+            <input type="text" name="verification" value="${escapeHtml(initialVerification)}" placeholder="E-Mail oder Telefon aus der Anfrage" required>
           </label>
 
           <button class="btn primary" type="submit">Status prüfen <span>›</span></button>
@@ -4774,6 +4837,12 @@ function bindCustomerStatusPage() {
   let currentVerification = "";
   let currentPublicStatusTicket = null;
   let publicStatusRefreshId = 0;
+  let publicStatusAutoRefreshTimer = null;
+
+  if (window.__all4youPublicStatusAutoRefreshTimer) {
+    window.clearInterval(window.__all4youPublicStatusAutoRefreshTimer);
+    window.__all4youPublicStatusAutoRefreshTimer = null;
+  }
 
   if (!form || !result) return;
 
@@ -4818,32 +4887,84 @@ function bindCustomerStatusPage() {
     return ticket;
   }
 
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
+  function stopPublicStatusAutoRefresh() {
+    if (publicStatusAutoRefreshTimer) {
+      window.clearInterval(publicStatusAutoRefreshTimer);
+      publicStatusAutoRefreshTimer = null;
+    }
 
-    const data = new FormData(form);
-    const ticketNumber = String(data.get("ticket") || "").trim();
-    const verification = String(data.get("verification") || "").trim();
+    if (window.__all4youPublicStatusAutoRefreshTimer) {
+      window.clearInterval(window.__all4youPublicStatusAutoRefreshTimer);
+      window.__all4youPublicStatusAutoRefreshTimer = null;
+    }
+  }
+
+  async function runPublicStatusSilentRefresh(options = {}) {
+    if (!currentTicketNumber || !currentVerification) return;
+    if (!document.querySelector("#customerStatusResult")) {
+      stopPublicStatusAutoRefresh();
+      return;
+    }
+
+    const replyTextarea = result.querySelector("#customerPublicReplyText");
+    const hasDraft = Boolean(String(replyTextarea?.value || "").trim());
+    const isTyping = document.activeElement === replyTextarea;
+    const hasOpenModal = Boolean(result.querySelector(".customer-status-modal.is-open"));
+
+    if (!options.manual && (hasDraft || isTyping || hasOpenModal)) return;
+
+    try {
+      await refreshPublicStatusAfterCustomerAction(options.manual ? {
+        replyNotice: "Nachrichten wurden aktualisiert.",
+        replyNoticeType: "success"
+      } : {});
+    } catch (error) {
+      if (options.manual) {
+        setCustomerReplyMessage("error", error.message || "Nachrichten konnten nicht aktualisiert werden.");
+      }
+    }
+  }
+
+  function startPublicStatusAutoRefresh() {
+    stopPublicStatusAutoRefresh();
+    publicStatusAutoRefreshTimer = window.setInterval(() => {
+      runPublicStatusSilentRefresh({ manual: false });
+    }, PUBLIC_STATUS_AUTO_REFRESH_MS);
+    window.__all4youPublicStatusAutoRefreshTimer = publicStatusAutoRefreshTimer;
+  }
+
+  async function loadPublicStatusLookup(ticketNumber, verification, options = {}) {
+    const cleanTicket = String(ticketNumber || "").trim();
+    const cleanVerification = String(verification || "").trim();
+
+    if (!cleanTicket || !cleanVerification) return;
 
     result.classList.add("show");
     result.innerHTML = `
       <div class="dashboard-mini-empty">
-        <strong>Status wird geprüft …</strong>
+        <strong>${options.auto ? "Status wird automatisch geladen …" : "Status wird geprüft …"}</strong>
         <p>Die Anfrage wird sicher abgeglichen.</p>
       </div>
     `;
 
     try {
-      const ticket = await fetchPublicRequestStatus(ticketNumber, verification);
-      currentTicketNumber = ticketNumber;
-      currentVerification = verification;
+      const ticket = await fetchPublicRequestStatus(cleanTicket, cleanVerification);
+      currentTicketNumber = cleanTicket;
+      currentVerification = cleanVerification;
       currentPublicStatusTicket = ticket;
       publicStatusRefreshId += 1;
-      renderCustomerStatusResult(result, ticket);
+      storePublicStatusSession(cleanTicket, cleanVerification);
+      renderCustomerStatusResult(result, ticket, options.auto ? {
+        replyNotice: "Sitzung wiederhergestellt. Nachrichten aktualisieren sich automatisch.",
+        replyNoticeType: "success"
+      } : {});
+      startPublicStatusAutoRefresh();
     } catch (error) {
       currentTicketNumber = "";
       currentVerification = "";
       currentPublicStatusTicket = null;
+      stopPublicStatusAutoRefresh();
+      if (!options.auto) clearPublicStatusSession();
       result.innerHTML = `
         <div class="dashboard-mini-empty error">
           <strong>Status konnte nicht geladen werden</strong>
@@ -4851,6 +4972,16 @@ function bindCustomerStatusPage() {
         </div>
       `;
     }
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const data = new FormData(form);
+    const ticketNumber = String(data.get("ticket") || "").trim();
+    const verification = String(data.get("verification") || "").trim();
+
+    await loadPublicStatusLookup(ticketNumber, verification);
   });
 
   result.addEventListener("click", event => {
@@ -4858,6 +4989,12 @@ function bindCustomerStatusPage() {
     if (openButton) {
       event.preventDefault();
       setPublicStatusModalOpen(openButton.dataset.statusModal, true);
+      return;
+    }
+
+    if (event.target.closest("[data-public-chat-refresh]")) {
+      event.preventDefault();
+      runPublicStatusSilentRefresh({ manual: true });
       return;
     }
 
@@ -4930,6 +5067,17 @@ function bindCustomerStatusPage() {
       if (replyButton) replyButton.disabled = false;
     }
   });
+
+  const prefilledTicket = String(form.elements?.ticket?.value || "").trim();
+  const prefilledVerification = String(form.elements?.verification?.value || "").trim();
+
+  if (prefilledTicket && prefilledVerification) {
+    window.setTimeout(() => {
+      if (document.querySelector("#customerStatusForm") === form) {
+        loadPublicStatusLookup(prefilledTicket, prefilledVerification, { auto: true });
+      }
+    }, 80);
+  }
 
   result.addEventListener("submit", async event => {
     const attachmentForm = event.target.closest("#customerAttachmentForm");

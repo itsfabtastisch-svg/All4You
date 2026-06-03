@@ -14180,6 +14180,7 @@ function customerPortalServiceFieldsTemplate(serviceKey = customerPortalNewReque
           <label>Reinigungsart
             <select name="cleaning_type" required>
               <option value="">Bitte wählen</option>
+              <option>Unterhaltsreinigung</option>
               <option>Treppenhausreinigung</option>
               <option>Büroreinigung</option>
               <option>Grundreinigung</option>
@@ -14200,8 +14201,24 @@ function customerPortalServiceFieldsTemplate(serviceKey = customerPortalNewReque
           <label>Wunschtermin
             <input type="date" name="desired_date">
           </label>
+          <fieldset class="customer-new-request-wide customer-new-request-fieldset customer-new-request-room-fieldset">
+            <legend>Räume / Bereiche</legend>
+            <p>Wähle aus, welche Bereiche gereinigt werden sollen.</p>
+            <div class="customer-new-request-checkbox-grid">
+              <label><input type="checkbox" name="room_areas" value="Büro / Arbeitsräume"> Büro / Arbeitsräume</label>
+              <label><input type="checkbox" name="room_areas" value="Treppenhaus"> Treppenhaus</label>
+              <label><input type="checkbox" name="room_areas" value="Flur / Eingangsbereich"> Flur / Eingangsbereich</label>
+              <label><input type="checkbox" name="room_areas" value="Küche"> Küche</label>
+              <label><input type="checkbox" name="room_areas" value="Bad / Sanitär"> Bad / Sanitär</label>
+              <label><input type="checkbox" name="room_areas" value="Aufenthaltsraum"> Aufenthaltsraum</label>
+              <label><input type="checkbox" name="room_areas" value="Wohnräume"> Wohnräume</label>
+              <label><input type="checkbox" name="room_areas" value="Keller / Lager"> Keller / Lager</label>
+              <label><input type="checkbox" name="room_areas" value="Außenbereich nach Absprache"> Außenbereich</label>
+              <label><input type="checkbox" name="room_areas" value="Sonstiges / nach Absprache"> Sonstiges</label>
+            </div>
+          </fieldset>
           <label class="customer-new-request-wide">Nachricht / Hinweise
-            <textarea name="message" rows="4" placeholder="Welche Bereiche sollen gereinigt werden? Gibt es Besonderheiten?"></textarea>
+            <textarea name="message" rows="4" placeholder="Gibt es Besonderheiten, Zugangshinweise oder gewünschte Zeiten?"></textarea>
           </label>
         </div>
       `;
@@ -14261,7 +14278,13 @@ function collectCustomerNewRequestData() {
   const details = {};
   for (const [key, value] of data.entries()) {
     if (["name", "email", "phone", "company"].includes(key)) continue;
-    details[key] = String(value || "").trim();
+    const cleanValue = String(value || "").trim();
+    if (!cleanValue) continue;
+    if (details[key]) {
+      details[key] = `${details[key]} · ${cleanValue}`;
+    } else {
+      details[key] = cleanValue;
+    }
   }
   Object.assign(details, getCustomerNewRequestSelectedAddresses());
   return { contact, details, serviceKey: customerPortalNewRequestService };
@@ -14283,6 +14306,7 @@ function customerNewRequestDetailPairs(details = {}, serviceKey = customerPortal
     desired_date: "Wunschtermin",
     cleaning_type: "Reinigungsart",
     interval: "Intervall",
+    room_areas: "Räume / Bereiche",
     message: "Nachricht"
   };
   return Object.entries(details)

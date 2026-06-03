@@ -201,10 +201,14 @@ button, input, select, textarea { font: inherit; }
   border-radius: 16px;
   padding: 12px;
 }
-.op-job-card.job-in_bearbeitung,
+.op-job-card.job-in_arbeit,
 .op-job-card.job-in_progress {
-  border-color: rgba(10,169,155,.42);
-  background: linear-gradient(135deg, #eefcf9, #fff);
+  border-color: rgba(10,169,155,.50);
+  background: linear-gradient(135deg, #e8fbf7, #fff);
+}
+.op-job-card.job-in_bearbeitung {
+  border-color: rgba(83,173,255,.32);
+  background: linear-gradient(135deg, #f3f9fc, #fff);
 }
 .op-job-card.job-abgeschlossen,
 .op-job-card.job-completed {
@@ -254,7 +258,8 @@ button, input, select, textarea { font: inherit; }
   box-shadow: 0 0 0 4px rgba(10,169,155,.11);
 }
 .op-job-status.job-neu, .op-job-status.job-planned { background: #eef7fa; color: #30546d; }
-.op-job-status.job-in_bearbeitung, .op-job-status.job-assigned, .op-job-status.job-in_progress { background: #e7fbf6; color: #087d73; }
+.op-job-status.job-in_arbeit, .op-job-status.job-in_progress { background: #dff9f3; color: #056e66; }
+.op-job-status.job-in_bearbeitung, .op-job-status.job-assigned { background: #eef7fa; color: #30546d; }
 .op-job-status.job-in_pruefung, .op-job-status.job-paused { background: #fff3d8; color: #856200; }
 .op-job-status.job-abgeschlossen, .op-job-status.job-completed { background: #edf9ef; color: #25743a; }
 .op-job-status.job-cancelled { background: #fff0f0; color: #8c1d1d; }

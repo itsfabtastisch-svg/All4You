@@ -1,14 +1,15 @@
 /* =========================================================
    All4You ObjektPortal
-   V6.10.0 Einheitliche 4-Status-Logik
+   V6.12.10 Einheitliche 5-Status-Logik
 
    Änderungsgrenze:
    - Nur ObjektPortal-eigene Dateien.
    - Keine Ticket-/Nachrichten-/Kundenportal-/Dashboard-Übersicht-Logik.
    - Macht den QR-Check-in zum geführten Mitarbeiter-Wizard.
    - Vorher-Zustand muss vor dem eigentlichen Check-in dokumentiert werden.
+   - Bereitet IN ARBEIT als echten ObjektPortal-/QR-Status vor.
 
-   DBG: ALL4YOU-V6.10.0-OBJECTPORTAL-STATUS-LOGIC
+   DBG: ALL4YOU-V6.12.10-STATUS-COMPATIBILITY
    ========================================================= */
 
 const SUPABASE_URL = "https://xztzsztsoluzanxdlaov.supabase.co";
@@ -73,11 +74,16 @@ function normalizeObjectPortalStatus(value) {
     planned: "neu",
     draft: "neu",
     assigned: "in_bearbeitung",
-    in_progress: "in_bearbeitung",
-    active: "in_bearbeitung",
-    running: "in_bearbeitung",
     paused: "in_bearbeitung",
     in_bearbeitung: "in_bearbeitung",
+    in_arbeit: "in_arbeit",
+    in_progress: "in_arbeit",
+    active: "in_arbeit",
+    running: "in_arbeit",
+    checked_in: "in_arbeit",
+    onsite: "in_arbeit",
+    vor_ort: "in_arbeit",
+    working: "in_arbeit",
     review: "in_pruefung",
     report_submitted: "in_pruefung",
     submitted: "in_pruefung",
@@ -99,6 +105,7 @@ function formatUnifiedStatus(value) {
   const map = {
     neu: "NEU",
     in_bearbeitung: "IN BEARBEITUNG",
+    in_arbeit: "IN ARBEIT",
     in_pruefung: "IN PRÜFUNG",
     abgeschlossen: "ABGESCHLOSSEN",
     archived: "Archiviert",
@@ -130,7 +137,7 @@ function isArchivedStatus(value) {
 }
 
 function isOpenJobStatus(value) {
-  return ["neu", "in_bearbeitung"].includes(normalizeObjectPortalStatus(value));
+  return ["neu", "in_bearbeitung", "in_arbeit"].includes(normalizeObjectPortalStatus(value));
 }
 
 function renderJobStatusOptions(currentStatus) {
@@ -138,6 +145,7 @@ function renderJobStatusOptions(currentStatus) {
   const statuses = [
     ["neu", "NEU"],
     ["in_bearbeitung", "IN BEARBEITUNG"],
+    ["in_arbeit", "IN ARBEIT"],
     ["in_pruefung", "IN PRÜFUNG"],
     ["abgeschlossen", "ABGESCHLOSSEN"],
   ];
@@ -569,7 +577,8 @@ function findJobById(jobId) {
 
 function getObjectJobSummary(object = {}) {
   const jobs = getObjectJobs(object);
-  const current = jobs.find((job) => isJobStatus(job.status, "in_bearbeitung"));
+  const current = jobs.find((job) => isJobStatus(job.status, "in_arbeit"))
+    || jobs.find((job) => isJobStatus(job.status, "in_bearbeitung"));
   const next = jobs.find((job) => ["neu", "in_bearbeitung"].includes(normalizeObjectPortalStatus(job.status)));
   const last = jobs.slice().reverse().find((job) => isJobStatus(job.status, "abgeschlossen"));
   return { jobs, current, next, last };
@@ -627,7 +636,7 @@ function getEmployeeJobRows() {
   });
 
   return rows.sort((a, b) => {
-    const statusOrder = { in_bearbeitung: 0, in_pruefung: 1, neu: 2, abgeschlossen: 8, archived: 10 };
+    const statusOrder = { in_arbeit: 0, in_bearbeitung: 1, in_pruefung: 2, neu: 3, abgeschlossen: 8, archived: 10 };
     const aStatus = statusOrder[normalizeObjectPortalStatus(a.job.status)] ?? 5;
     const bStatus = statusOrder[normalizeObjectPortalStatus(b.job.status)] ?? 5;
     if (aStatus !== bStatus) return aStatus - bStatus;
@@ -651,7 +660,7 @@ function setPortalMode(mode) {
   $("#opOpenWizard")?.classList.toggle("is-hidden", isEmployee);
   $("#opOpenWizardTop")?.classList.toggle("is-hidden", isEmployee);
   const build = $("#opBuildBadge");
-  if (build) build.textContent = "DBG: ALL4YOU-V6.10.0-OBJECTPORTAL-STATUS-LOGIC";
+  if (build) build.textContent = "DBG: ALL4YOU-V6.12.10-STATUS-COMPATIBILITY";
 }
 
 function getUnitLabel(object = {}, unitId) {
@@ -793,7 +802,7 @@ function renderCheckinPanel() {
   const customer = state.checkinData.customer || {};
   const currentEmployee = state.checkinData.current_employee || state.employeeProfile || {};
   const job = state.checkinData.job || null;
-  const isInProgress = isJobStatus(job?.status, "in_bearbeitung");
+  const isInProgress = isJobStatus(job?.status, "in_arbeit");
 
   panel.innerHTML = `
     <div class="op-checkin-card">
@@ -824,7 +833,7 @@ function renderCheckinPanel() {
         <div>
           <p class="op-eyebrow">Einsatz läuft</p>
           <h2>Du bist eingecheckt</h2>
-          <p>Der Einsatz steht auf „IN BEARBEITUNG“. Weitere Bilder können im Einsatzbereich ergänzt werden.</p>
+          <p>Der Einsatz steht auf „IN ARBEIT“. Weitere Bilder können im Einsatzbereich ergänzt werden.</p>
         </div>
       </div>
     ` : renderCheckinWizard(job)) : ""}
@@ -875,6 +884,15 @@ async function handleCheckinJob(event) {
     });
 
     if (data?.success === false) throw new Error(data.message || "Check-in konnte nicht gespeichert werden.");
+
+    const statusData = await callRpc("admin_update_object_portal_job_status", {
+      p_job_id: jobId,
+      p_status: "in_arbeit",
+    });
+    if (statusData?.success === false) {
+      throw new Error(statusData.message || "Check-in gespeichert, aber Status konnte nicht auf IN ARBEIT gesetzt werden. Bitte SQL-Patch V6.12.10 prüfen.");
+    }
+
     await loadObjectPortal();
     await loadCheckinFromUrl();
     setStatus(data?.message || "Mitarbeiter ist eingecheckt. Einsatz läuft.", "success");
@@ -903,14 +921,16 @@ function renderEmployeeStats() {
   const rows = getEmployeeJobRows();
   const today = rows.filter((row) => isToday(row.job.planned_date)).length;
   const planned = rows.filter((row) => isJobStatus(row.job.status, "neu")).length;
-  const active = rows.filter((row) => isJobStatus(row.job.status, "in_bearbeitung")).length;
+  const prepared = rows.filter((row) => isJobStatus(row.job.status, "in_bearbeitung")).length;
+  const active = rows.filter((row) => isJobStatus(row.job.status, "in_arbeit")).length;
   const inReview = rows.filter((row) => isJobStatus(row.job.status, "in_pruefung")).length;
   const completed = rows.filter((row) => isJobStatus(row.job.status, "abgeschlossen")).length;
 
   wrap.innerHTML = `
     <article class="op-stat"><strong>${today}</strong><span>Heute</span></article>
     <article class="op-stat"><strong>${planned}</strong><span>NEU</span></article>
-    <article class="op-stat"><strong>${active}</strong><span>IN BEARBEITUNG</span></article>
+    <article class="op-stat"><strong>${prepared}</strong><span>IN BEARBEITUNG</span></article>
+    <article class="op-stat"><strong>${active}</strong><span>IN ARBEIT</span></article>
     <article class="op-stat"><strong>${inReview}</strong><span>IN PRÜFUNG</span></article>
     <article class="op-stat"><strong>${completed}</strong><span>ABGESCHLOSSEN</span></article>
   `;
@@ -943,12 +963,12 @@ function renderPhotoGrid(job = {}) {
 
 function renderPhotoUploadForm(job = {}, compact = false) {
   const status = normalizeObjectPortalStatus(job.status);
-  const canUpload = isManagerProfile() || status === "in_bearbeitung";
+  const canUpload = isManagerProfile() || status === "in_arbeit";
   if (!canUpload) {
     return `
       <div class="op-photo-upload-note op-photo-action-note">
         <strong>Bilddokumentation nach Check-in</strong>
-        <span>Fotos können hochgeladen werden, sobald der Einsatz auf „IN BEARBEITUNG“ steht.</span>
+        <span>Fotos können hochgeladen werden, sobald der Einsatz auf „IN ARBEIT“ steht.</span>
       </div>
     `;
   }
@@ -1023,7 +1043,7 @@ function renderPhotoDialog() {
   }
   const { object, unit, job } = found;
   const status = normalizeObjectPortalStatus(job.status);
-  const canUpload = isManagerProfile() || status === "in_bearbeitung";
+  const canUpload = isManagerProfile() || status === "in_arbeit";
   body.innerHTML = `
     <div class="op-modal-head">
       <p class="op-eyebrow">Bild-Wizard</p>
@@ -1086,7 +1106,7 @@ function attachPhotoDialogOpenHandlers(scope = document) {
 function renderEmployeeJobCard(row) {
   const { object, job, unit, customer } = row;
   const status = normalizeObjectPortalStatus(job.status);
-  const isActive = status === "in_bearbeitung";
+  const isActive = status === "in_arbeit";
   return `
     <article class="op-employee-job-card ${isActive ? "active" : ""}">
       <div class="op-employee-job-head">
@@ -1155,7 +1175,8 @@ function renderEmployeeWorkspace() {
 
   const rows = getEmployeeJobRows();
   const name = state.employeeProfile?.display_name || state.employeeProfile?.employee_number || "Mitarbeiter";
-  const activeRows = rows.filter((row) => isJobStatus(row.job.status, "in_bearbeitung"));
+  const activeRows = rows.filter((row) => isJobStatus(row.job.status, "in_arbeit"));
+  const preparedRows = rows.filter((row) => isJobStatus(row.job.status, "in_bearbeitung"));
   const upcomingRows = rows.filter((row) => isJobStatus(row.job.status, "neu"));
   const reviewRows = rows.filter((row) => isJobStatus(row.job.status, "in_pruefung"));
   const doneRows = rows.filter((row) => isJobStatus(row.job.status, "abgeschlossen")).slice(0, 6);
@@ -1190,8 +1211,13 @@ function renderEmployeeWorkspace() {
       </div>
 
       <div class="op-employee-section">
-        <div class="op-section-title"><div><p class="op-eyebrow">IN BEARBEITUNG</p><h3>Gerade aktiv</h3></div></div>
+        <div class="op-section-title"><div><p class="op-eyebrow">IN ARBEIT</p><h3>Gerade aktiv</h3></div></div>
         ${activeRows.length ? activeRows.map(renderEmployeeJobCard).join("") : `<div class="op-empty">Kein aktiver Einsatz. Zum Start bitte QR-Code am Objekt scannen.</div>`}
+      </div>
+
+      <div class="op-employee-section">
+        <div class="op-section-title"><div><p class="op-eyebrow">IN BEARBEITUNG</p><h3>Vorbereitet / zugewiesen</h3></div></div>
+        ${preparedRows.length ? preparedRows.map(renderEmployeeJobCard).join("") : `<div class="op-empty">Keine vorbereiteten Einsätze für deine Mitarbeiter-ID.</div>`}
       </div>
 
       <div class="op-employee-section">
@@ -1230,13 +1256,15 @@ function renderStats() {
   const units = getAllUnits();
   const jobs = getAllJobs();
   const activePackages = state.customers.filter((customer) => customer.object_portal_active || Number(customer.object_count || 0) > 0).length;
-  const activeJobs = jobs.filter((job) => isJobStatus(job.status, "in_bearbeitung")).length;
+  const preparedJobs = jobs.filter((job) => isJobStatus(job.status, "in_bearbeitung")).length;
+  const activeJobs = jobs.filter((job) => isJobStatus(job.status, "in_arbeit")).length;
 
   wrap.innerHTML = `
     <article class="op-stat"><strong>${Number(stats.objects || state.objects.length || 0)}</strong><span>Objekte</span></article>
     <article class="op-stat"><strong>${Number(stats.units || units.length || 0)}</strong><span>Einheiten / Bereiche</span></article>
     <article class="op-stat"><strong>${jobs.length}</strong><span>Einsätze</span></article>
-    <article class="op-stat"><strong>${activeJobs}</strong><span>IN BEARBEITUNG</span></article>
+    <article class="op-stat"><strong>${preparedJobs}</strong><span>IN BEARBEITUNG</span></article>
+    <article class="op-stat"><strong>${activeJobs}</strong><span>IN ARBEIT</span></article>
   `;
 }
 

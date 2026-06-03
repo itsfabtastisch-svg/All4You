@@ -7455,6 +7455,11 @@ button.calendar-day {
   background: rgba(255,183,77,.22);
 }
 
+.customer-status-badge.status-in_arbeit {
+  color: #075e58;
+  background: rgba(10,169,155,.22);
+}
+
 .customer-status-badge.status-in_bearbeitung {
   color: #075e58;
   background: rgba(10,169,155,.16);
@@ -9535,10 +9540,15 @@ body.modal-open {
   gap: 5px;
 }
 
-.object-status-in_bearbeitung,
+.object-status-in_arbeit,
 .object-status-in_progress {
   color: #075e58;
-  background: rgba(10,169,155,.18);
+  background: rgba(10,169,155,.22);
+}
+
+.object-status-in_bearbeitung {
+  color: #30546d;
+  background: rgba(83,173,255,.14);
 }
 
 .object-status-neu,

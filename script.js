@@ -234,7 +234,13 @@ function normalizeGlobalStatus(status) {
     draft: "neu",
     in_bearbeitung: "in_bearbeitung",
     assigned: "in_bearbeitung",
-    in_progress: "in_bearbeitung",
+    in_arbeit: "in_arbeit",
+    checked_in: "in_arbeit",
+    onsite: "in_arbeit",
+    vor_ort: "in_arbeit",
+    working: "in_arbeit",
+    active_work: "in_arbeit",
+    in_progress: "in_arbeit",
     angebot_vorbereitet: "in_bearbeitung",
     angebot_gesendet: "in_bearbeitung",
     termin_vorgeschlagen: "in_bearbeitung",
@@ -262,6 +268,7 @@ function statusLabel(status) {
   const labels = {
     neu: "NEU",
     in_bearbeitung: "IN BEARBEITUNG",
+    in_arbeit: "IN ARBEIT",
     in_pruefung: "IN PRÜFUNG",
     abgeschlossen: "ABGESCHLOSSEN",
     archived: "Archiviert",
@@ -273,24 +280,24 @@ function statusLabel(status) {
 /* ========================================================================== 
    Dashboard Statusmodell
    --------------------------------------------------------------------------
-   Kundenwunsch V5.9.6: Im Mitarbeiterportal werden nur noch vier aktive
-   Statuswerte angeboten. Alte/feinere Statuswerte bleiben lesbar und werden
-   für Filter/Anzeige sauber auf diese vier Gruppen gemappt.
+   Kundenwunsch V6.12.10: Im Mitarbeiterportal werden fünf aktive
+   Statuswerte geführt. Alte/feinere Statuswerte bleiben lesbar und werden
+   für Filter/Anzeige sauber auf diese fünf Gruppen gemappt.
    ========================================================================== */
 
-const DASHBOARD_PRIMARY_STATUSES = ["neu", "in_bearbeitung", "in_pruefung", "erledigt"];
+const DASHBOARD_PRIMARY_STATUSES = ["neu", "in_bearbeitung", "in_arbeit", "in_pruefung", "erledigt"];
 
 const DASHBOARD_STATUS_GROUPS = {
   neu: ["neu", "planned", "draft"],
   in_bearbeitung: [
     "in_bearbeitung",
     "assigned",
-    "in_progress",
     "angebot_vorbereitet",
     "angebot_gesendet",
     "termin_vorgeschlagen",
     "termin_bestaetigt"
   ],
+  in_arbeit: ["in_arbeit", "checked_in", "onsite", "vor_ort", "working", "active_work", "in_progress"],
   in_pruefung: ["in_pruefung", "rueckfrage_offen", "rueckfrage", "rueckfragen", "review", "report_submitted", "submitted", "waiting_for_admin"],
   erledigt: ["erledigt", "abgeschlossen", "completed", "approved", "storniert", "cancelled"]
 };
@@ -669,6 +676,7 @@ function updateDashboardStats(tickets) {
   const list = tickets || [];
   const totalNew = list.filter(ticket => dashboardStatusMatches(ticket.status, "neu")).length;
   const inReview = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_bearbeitung")).length;
+  const inWork = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_arbeit")).length;
   const openQuestions = list.filter(ticket => dashboardStatusMatches(ticket.status, "in_pruefung")).length;
   const done = list.filter(ticket => dashboardStatusMatches(ticket.status, "erledigt")).length;
   const archived = dashboardArchiveCache.length;
@@ -676,6 +684,7 @@ function updateDashboardStats(tickets) {
   const stats = {
     dashboardStatNew: totalNew,
     dashboardStatReview: inReview,
+    dashboardStatInWork: inWork,
     dashboardStatQuestions: openQuestions,
     dashboardStatDone: done,
     dashboardStatArchive: archived
@@ -7348,7 +7357,8 @@ function pageDashboard() {
 
           <section class="dashboard-stats dashboard-stats-clean" data-dashboard-view="overview">
             <article><span>NEU</span><strong id="dashboardStatNew">0</strong><small>frische Anfragen</small></article>
-            <article><span>IN BEARBEITUNG</span><strong id="dashboardStatReview">0</strong><small>aktive Vorgänge</small></article>
+            <article><span>IN BEARBEITUNG</span><strong id="dashboardStatReview">0</strong><small>geplant / vorbereitet</small></article>
+            <article><span>IN ARBEIT</span><strong id="dashboardStatInWork">0</strong><small>aktiv vor Ort</small></article>
             <article><span>IN PRÜFUNG</span><strong id="dashboardStatQuestions">0</strong><small>warten auf Kontrolle</small></article>
             <article><span>ABGESCHLOSSEN</span><strong id="dashboardStatDone">0</strong><small>fertig im System</small></article>
             <article><span>Neue Aktivität</span><strong id="dashboardStatActivity">0</strong><small>Nachrichten / Anhänge</small></article>
@@ -7376,7 +7386,7 @@ function pageDashboard() {
               <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="status">
                 <span>Status / Verlauf</span>
                 <strong>Statusgruppen prüfen</strong>
-                <small>NEU, IN BEARBEITUNG, IN PRÜFUNG und ABGESCHLOSSEN.</small>
+                <small>NEU, IN BEARBEITUNG, IN ARBEIT, IN PRÜFUNG und ABGESCHLOSSEN.</small>
               </button>
               <button class="dashboard-hub-card" type="button" data-dashboard-view-trigger="management">
                 <span>Verwaltung</span>
@@ -7401,7 +7411,7 @@ function pageDashboard() {
               <div>
                 <p class="eyebrow">Status / Verlauf</p>
                 <h2>Statusgruppen im Überblick</h2>
-                <p class="dashboard-calendar-intro">Alle Vorgänge werden in den vier Hauptstatus geführt. Details öffnest du über den Bereich Anfragen / Aufträge.</p>
+                <p class="dashboard-calendar-intro">Alle Vorgänge werden in fünf Hauptstatus geführt. Details öffnest du über den Bereich Anfragen / Aufträge.</p>
               </div>
               <button class="btn ghost" type="button" data-dashboard-view-trigger="tickets">Anfragen öffnen</button>
             </div>
@@ -7892,6 +7902,7 @@ function pageDashboard() {
                     <button class="active" type="button" data-filter="all">Alle</button>
                     <button type="button" data-filter="neu">Neu</button>
                     <button type="button" data-filter="in_bearbeitung">In Bearbeitung</button>
+                    <button type="button" data-filter="in_arbeit">In Arbeit</button>
                     <button type="button" data-filter="in_pruefung">In Prüfung</button>
                     <button type="button" data-filter="erledigt">Abgeschlossen</button>
                   </div>
@@ -7906,6 +7917,7 @@ function pageDashboard() {
                     <option value="all">Alle Status</option>
                     <option value="neu">Neu</option>
                     <option value="in_bearbeitung">In Bearbeitung</option>
+                    <option value="in_arbeit">In Arbeit</option>
                     <option value="in_pruefung">In Prüfung</option>
                     <option value="erledigt">Abgeschlossen</option>
                   </select>
@@ -8924,7 +8936,7 @@ function pageCustomerPortal() {
                 <p class="eyebrow">Status</p>
                 <h2>Status & Verlauf</h2>
               </div>
-              <span class="status-pill">4 Status</span>
+              <span class="status-pill">5 Status</span>
             </div>
             <div class="customer-portal-status-grid" id="customerPortalStatusGrid">
               <div class="dashboard-mini-empty">
@@ -12066,7 +12078,8 @@ function getDashboardStatusRows() {
   const tickets = dashboardAllRequestCache || [];
   const groups = [
     { key: "neu", label: "NEU", text: "Neue Anfragen oder noch nicht gestartete Vorgänge." },
-    { key: "in_bearbeitung", label: "IN BEARBEITUNG", text: "Geplante, zugewiesene oder aktiv bearbeitete Vorgänge." },
+    { key: "in_bearbeitung", label: "IN BEARBEITUNG", text: "Geplante oder zugewiesene Vorgänge." },
+    { key: "in_arbeit", label: "IN ARBEIT", text: "Aktive Vorgänge, z. B. Mitarbeiter vor Ort / QR-Check-in." },
     { key: "in_pruefung", label: "IN PRÜFUNG", text: "Warten auf Prüfung durch Chef/Admin." },
     { key: "erledigt", label: "ABGESCHLOSSEN", text: "Final abgeschlossene Vorgänge." },
   ];
@@ -13557,13 +13570,23 @@ function getCustomerPortalLastJob(jobs = []) {
 
 function getCustomerPortalObjectState(object = {}) {
   const jobs = getCustomerPortalObjectJobs(object);
-  const active = jobs.find(job => normalizeGlobalStatus(job.status) === "in_bearbeitung");
+  const active = jobs.find(job => normalizeGlobalStatus(job.status) === "in_arbeit");
   if (active) {
+    return {
+      key: "in_arbeit",
+      label: "IN ARBEIT",
+      hint: active.latest_checkin_at || active.checked_in_at ? `Mitarbeiter vor Ort seit ${formatDashboardDate(active.latest_checkin_at || active.checked_in_at)}` : "Einsatz läuft aktuell",
+      job: active
+    };
+  }
+
+  const prepared = jobs.find(job => normalizeGlobalStatus(job.status) === "in_bearbeitung");
+  if (prepared) {
     return {
       key: "in_bearbeitung",
       label: "IN BEARBEITUNG",
-      hint: active.latest_checkin_at ? `Mitarbeiter vor Ort seit ${formatDashboardDate(active.latest_checkin_at)}` : "Einsatz ist aktiv oder vorbereitet",
-      job: active
+      hint: "Einsatz wurde vorbereitet oder zugewiesen.",
+      job: prepared
     };
   }
 
@@ -13592,7 +13615,8 @@ function getCustomerPortalObjectStats(objects = customerPortalObjects) {
     objects: rows.length,
     units: rows.reduce((sum, object) => sum + getCustomerPortalObjectUnits(object).length, 0),
     neu: jobs.filter(job => normalizeGlobalStatus(job.status) === "neu").length,
-    active: jobs.filter(job => normalizeGlobalStatus(job.status) === "in_bearbeitung").length,
+    inProgress: jobs.filter(job => normalizeGlobalStatus(job.status) === "in_bearbeitung").length,
+    active: jobs.filter(job => normalizeGlobalStatus(job.status) === "in_arbeit").length,
     inReview: jobs.filter(job => normalizeGlobalStatus(job.status) === "in_pruefung").length,
     completed: jobs.filter(job => normalizeGlobalStatus(job.status) === "abgeschlossen").length,
   };

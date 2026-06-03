@@ -1181,6 +1181,41 @@ async function unlinkDashboardCustomerRequest(session, accountId, requestId) {
   return data;
 }
 
+async function updateDashboardCustomerAccount(session, accountId, payload = {}) {
+  if (!accountId) {
+    throw new Error("Bitte zuerst ein Kundenkonto auswählen.");
+  }
+
+  const data = await callDashboardRequestAdminRpc(session, "admin_update_customer_account", {
+    p_account_id: accountId,
+    p_email: payload.p_email,
+    p_display_name: payload.p_display_name,
+    p_phone: payload.p_phone,
+    p_company: payload.p_company,
+    p_notes: payload.p_notes
+  });
+
+  if (!data?.account) throw new Error(data?.message || "Kundenkonto konnte nicht aktualisiert werden.");
+  return data.account;
+}
+
+async function deleteDashboardCustomerAccount(session, accountId) {
+  if (!accountId) {
+    throw new Error("Bitte zuerst ein Kundenkonto auswählen.");
+  }
+
+  const data = await callDashboardRequestAdminRpc(session, "admin_delete_customer_account", {
+    p_account_id: accountId
+  });
+
+  if (!data?.success) throw new Error(data?.message || "Kundenkonto konnte nicht gelöscht werden.");
+  return data;
+}
+
+function getDashboardCustomerAccountById(id) {
+  return dashboardCustomerAccountsCache.find(item => String(item.id) === String(id)) || null;
+}
+
 async function inviteDashboardCustomerAccount(session, accountId) {
   if (!session?.access_token) {
     throw new Error("Keine aktive Mitarbeitersitzung vorhanden.");
@@ -1327,15 +1362,171 @@ function renderDashboardCustomerAccountDetail(account) {
       </div>
     </div>
 
-    <div class="dashboard-customer-detail-actions">
+    <div class="dashboard-ticket-action-grid dashboard-customer-manage-grid">
       <button class="btn primary" type="button" data-customer-send-invite="${escapeHtml(account.id)}">
         ${account.auth_user_id ? "Passwortlink erneut senden" : "Einladung senden"} <span>›</span>
+      </button>
+      <button class="btn ghost soft-action" type="button" data-customer-edit="${escapeHtml(account.id)}">
+        Kundenkonto bearbeiten
       </button>
       <button class="btn ghost" type="button" data-customer-view-requests="${escapeHtml(account.id)}">
         Aufträge ansehen (${requests.length})
       </button>
+      <button class="btn ghost danger-action" type="button" data-customer-delete="${escapeHtml(account.id)}">
+        Kundenkonto löschen
+      </button>
     </div>
   `;
+}
+
+
+function ensureDashboardCustomerEditModal() {
+  let modal = document.querySelector("#dashboardCustomerEditModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "dashboardCustomerEditModal";
+  modal.className = "dashboard-modal is-hidden";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="dashboard-modal-backdrop" data-customer-edit-close></div>
+    <article class="dashboard-modal-card dashboard-customer-edit-card" role="dialog" aria-modal="true" aria-labelledby="dashboardCustomerEditTitle">
+      <div class="dashboard-modal-head">
+        <div>
+          <p class="eyebrow">Kundenportalzugang</p>
+          <h2 id="dashboardCustomerEditTitle">Kundenkonto bearbeiten</h2>
+          <p id="dashboardCustomerEditSubtitle">Stammdaten ändern, ohne Aufträge oder ObjektPortal-Bereiche anzufassen.</p>
+        </div>
+        <button class="modal-close" type="button" aria-label="Schließen" data-customer-edit-close>×</button>
+      </div>
+      <form class="dashboard-customer-edit-form" id="dashboardCustomerEditForm">
+        <input type="hidden" name="account_id">
+        <div class="form-grid">
+          <label>Name / Anzeige
+            <input type="text" name="display_name" placeholder="z. B. Herr Müller / Firma Muster" required>
+          </label>
+          <label>E-Mail für Login
+            <input type="email" name="email" placeholder="kunde@example.de" required>
+          </label>
+          <label>Telefon
+            <input type="tel" name="phone" placeholder="optional">
+          </label>
+          <label>Firma / Objekt
+            <input type="text" name="company" placeholder="optional">
+          </label>
+        </div>
+        <label>Interne Notiz
+          <textarea name="notes" rows="4" placeholder="z. B. Bestandskunde, Rücksprache, Besonderheiten …"></textarea>
+        </label>
+        <div class="summary-wide warning-soft" id="dashboardCustomerEditEmailHint">
+          <strong>Hinweis</strong>
+          <span>Wenn die Login-E-Mail geändert wird, sollte danach ein neuer Passwortlink gesendet werden.</span>
+        </div>
+        <p class="dashboard-ticket-action-message" id="dashboardCustomerEditMessage">Bereit.</p>
+        <div class="dashboard-customer-wizard-actions">
+          <button class="btn ghost" type="button" data-customer-edit-close>Abbrechen</button>
+          <button class="btn primary" type="submit">Änderungen speichern <span>›</span></button>
+        </div>
+      </form>
+    </article>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", event => {
+    if (event.target.closest("[data-customer-edit-close]")) closeDashboardCustomerEditModal();
+  });
+
+  modal.querySelector("#dashboardCustomerEditForm")?.addEventListener("submit", submitDashboardCustomerEditForm);
+  return modal;
+}
+
+function setDashboardCustomerEditMessage(type, text) {
+  const message = document.querySelector("#dashboardCustomerEditMessage");
+  if (!message) return;
+  message.classList.remove("success", "error", "loading");
+  if (type) message.classList.add(type);
+  message.textContent = text || "";
+}
+
+function openDashboardCustomerEditModal(accountOrId = dashboardSelectedCustomerAccountId) {
+  const account = typeof accountOrId === "string" ? getDashboardCustomerAccountById(accountOrId) : accountOrId;
+  if (!account?.id) {
+    setDashboardCustomersMessage("error", "Kundenkonto wurde nicht gefunden.");
+    return;
+  }
+
+  const modal = ensureDashboardCustomerEditModal();
+  const form = modal.querySelector("#dashboardCustomerEditForm");
+  if (!form) return;
+
+  form.reset();
+  form.elements.account_id.value = account.id || "";
+  form.elements.display_name.value = account.display_name || "";
+  form.elements.email.value = String(account.email || "").trim().toLowerCase();
+  form.elements.phone.value = account.phone || "";
+  form.elements.company.value = account.company || "";
+  form.elements.notes.value = account.notes || "";
+  modal.dataset.originalEmail = String(account.email || "").trim().toLowerCase();
+
+  setDashboardCustomerEditMessage("", "Bereit.");
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeDashboardCustomerEditModal() {
+  const modal = document.querySelector("#dashboardCustomerEditModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+async function submitDashboardCustomerEditForm(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector("button[type='submit']");
+  const session = dashboardCurrentSession || getStoredEmployeeSession();
+  const accountId = String(form.elements.account_id.value || "").trim();
+  const email = String(form.elements.email.value || "").trim().toLowerCase();
+  const displayName = String(form.elements.display_name.value || "").trim();
+
+  if (!session?.access_token) {
+    setDashboardCustomerEditMessage("error", "Keine aktive Mitarbeitersitzung vorhanden.");
+    return;
+  }
+  if (!accountId) {
+    setDashboardCustomerEditMessage("error", "Kundenkonto wurde nicht gefunden.");
+    return;
+  }
+  if (!displayName) {
+    setDashboardCustomerEditMessage("error", "Bitte einen Namen oder Anzeigenamen eintragen.");
+    return;
+  }
+  if (!email || !email.includes("@")) {
+    setDashboardCustomerEditMessage("error", "Bitte eine gültige E-Mail für den Login eintragen.");
+    return;
+  }
+
+  if (button) button.disabled = true;
+  setDashboardCustomerEditMessage("loading", "Kundenkonto wird gespeichert …");
+
+  try {
+    const account = await updateDashboardCustomerAccount(session, accountId, {
+      p_email: email,
+      p_display_name: displayName || email,
+      p_phone: String(form.elements.phone.value || "").trim(),
+      p_company: String(form.elements.company.value || "").trim(),
+      p_notes: String(form.elements.notes.value || "").trim()
+    });
+
+    dashboardSelectedCustomerAccountId = account.id;
+    await loadDashboardCustomerAccounts(session);
+    setDashboardCustomersMessage("success", "Kundenkonto wurde aktualisiert.");
+    closeDashboardCustomerEditModal();
+  } catch (error) {
+    setDashboardCustomerEditMessage("error", error.message || "Kundenkonto konnte nicht gespeichert werden.");
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
 
@@ -1855,9 +2046,38 @@ function bindDashboardCustomerAccounts() {
       return;
     }
 
+    const editButton = event.target.closest("[data-customer-edit]");
+    if (editButton) {
+      openDashboardCustomerEditModal(editButton.dataset.customerEdit || dashboardSelectedCustomerAccountId);
+      return;
+    }
+
     const viewRequestsButton = event.target.closest("[data-customer-view-requests]");
     if (viewRequestsButton) {
       openDashboardCustomerRequestsModal(viewRequestsButton.dataset.customerViewRequests || dashboardSelectedCustomerAccountId);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-customer-delete]");
+    if (deleteButton) {
+      const accountId = deleteButton.dataset.customerDelete || dashboardSelectedCustomerAccountId;
+      const account = getDashboardCustomerAccountById(accountId);
+      const accountName = dashboardCustomerDisplayName(account);
+      if (!accountId) return;
+      if (!confirm(`Kundenkonto „${accountName}” wirklich löschen? Zugeordnete Aufträge bleiben bestehen, der Kundenportalzugang wird deaktiviert.`)) return;
+
+      deleteButton.disabled = true;
+      setDashboardCustomersMessage("loading", "Kundenkonto wird gelöscht …");
+      try {
+        await deleteDashboardCustomerAccount(dashboardCurrentSession, accountId);
+        dashboardSelectedCustomerAccountId = null;
+        closeDashboardCustomerRequestsModal();
+        await loadDashboardCustomerAccounts(dashboardCurrentSession);
+        setDashboardCustomersMessage("success", "Kundenkonto wurde gelöscht. Die Aufträge bleiben im System erhalten.");
+      } catch (error) {
+        setDashboardCustomersMessage("error", error.message || "Kundenkonto konnte nicht gelöscht werden.");
+        deleteButton.disabled = false;
+      }
       return;
     }
 

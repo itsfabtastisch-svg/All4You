@@ -11846,3 +11846,36 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===========================================================================
+   ALL4YOU-V6.12.2 · Kundenkonto bearbeiten/löschen
+   - Kleine, abgegrenzte Verwaltungserweiterung für Kundenportalzugänge
+   - ObjektPortal bleibt unberührt
+   =========================================================================== */
+.dashboard-customer-manage-grid {
+  margin-top: 2px;
+}
+
+.dashboard-customer-manage-grid .btn {
+  min-height: 46px;
+}
+
+.dashboard-customer-edit-card {
+  width: min(720px, 100%);
+}
+
+.dashboard-customer-edit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.warning-soft {
+  background: linear-gradient(135deg, rgba(245, 158, 11, .12), rgba(255, 255, 255, .84));
+  border-color: rgba(245, 158, 11, .24);
+}
+
+@media (max-width: 760px) {
+  .dashboard-customer-manage-grid {
+    grid-template-columns: 1fr;
+  }
+}
